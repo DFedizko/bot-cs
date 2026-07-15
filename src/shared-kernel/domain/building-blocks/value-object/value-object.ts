@@ -14,6 +14,6 @@ export abstract class ValueObject<Props extends ValueObjectProps> {
   equals(vo: ValueObject<Props>): boolean {
     if (vo === undefined) return false
     if (vo.props === undefined || vo.props === null) return false
-    return shallowEqual(vo, this)
+    return shallowEqual(vo.props, this.props)
   }
 }
