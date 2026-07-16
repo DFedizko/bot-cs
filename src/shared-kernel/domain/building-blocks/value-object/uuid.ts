@@ -16,7 +16,7 @@ export class UUID extends ValueObject<{ value: string }> {
   static restore(value: string): UUID {
     if (!UUID.isValid(value)) {
       throw new DomainError({
-        message: `The uuid ${value} is invalid`,
+        message: `The uuid "${value}" is invalid`,
         code: 'INVALID_UUID',
       })
     }
