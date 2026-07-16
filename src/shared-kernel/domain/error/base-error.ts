@@ -1,4 +1,4 @@
-export interface BaseErrorProps {
+interface BaseErrorProps {
   message?: string
   status?: number
   code?: string

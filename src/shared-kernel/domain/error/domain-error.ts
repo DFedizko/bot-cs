@@ -1,10 +1,11 @@
-import { BaseError, type BaseErrorProps } from './base-error'
+import { BaseError } from './base-error'
+import type { CustomErrorProps } from './custom-error-props'
 
 export class DomainError extends BaseError {
   constructor({
     message = 'Domain error',
     code = 'DOMAIN_ERROR',
-  }: BaseErrorProps) {
+  }: CustomErrorProps) {
     super({ message, status: 422, code })
   }
 }
