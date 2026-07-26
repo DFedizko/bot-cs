@@ -1,61 +1,83 @@
+import { Decimal } from 'decimal.js'
 import { DomainError } from '@/shared-kernel/domain/error/domain-error'
 import { ValueObject } from '@/shared-kernel/domain/building-blocks/value-object/value-object'
 
 export type RoundingMode = 'HALF_EVEN' | 'HALF_AWAY_FROM_ZERO'
 
+const DECIMAL_ROUNDING = {
+  HALF_EVEN: Decimal.ROUND_HALF_EVEN,
+  HALF_AWAY_FROM_ZERO: Decimal.ROUND_HALF_UP,
+} as const
+
 enum ERROR_CODE {
   INVALID_PERCENTAGE = 'INVALID_PERCENTAGE',
+  INVALID_VALUE = 'INVALID_VALUE',
 }
 
-type PercentageProps = {
-  scaledFraction: bigint
-}
+const PERCENT_PER_UNIT = 100
 
-export class Percentage extends ValueObject<PercentageProps> {
-  private static readonly DECIMAL_PATTERN_REGEX = /^-?\d+(\.\d+)?$/
-  private static readonly FRACTION_DECIMALS = 8
-  private static readonly PERCENT_DECIMALS = Percentage.FRACTION_DECIMALS - 2
-  private static readonly PERCENT_PER_UNIT = 100n
-  public static readonly SCALE = 10n ** BigInt(Percentage.FRACTION_DECIMALS)
-
-  private constructor(protected readonly props: PercentageProps) {
-    super(props)
+export class Percentage extends ValueObject<Decimal> {
+  private constructor(protected readonly fraction: Decimal) {
+    super(fraction)
   }
 
   static fromPercent(percent: string): Percentage {
-    const scaledPercent = Percentage.parseDecimalToScaled(
-      percent,
-      Percentage.FRACTION_DECIMALS,
+    return new Percentage(
+      Percentage.parseDecimal(percent).div(PERCENT_PER_UNIT),
     )
-    return new Percentage({
-      scaledFraction: scaledPercent / Percentage.PERCENT_PER_UNIT,
-    })
   }
 
-  static fromFraction(fraction: string) {
-    return new Percentage({
-      scaledFraction: Percentage.parseDecimalToScaled(
-        fraction,
-        Percentage.FRACTION_DECIMALS,
-      ),
-    })
+  static fromFraction(fraction: string): Percentage {
+    return new Percentage(Percentage.parseDecimal(fraction))
   }
 
-  private static parseDecimalToScaled(value: string, decimals: number): bigint {
-    const trimmed = value.trim()
-    if (!this.DECIMAL_PATTERN_REGEX.test(trimmed)) {
+  of(amount: bigint, rounding: RoundingMode = 'HALF_EVEN'): bigint {
+    const portion = new Decimal(amount.toString())
+      .times(this.fraction)
+      .toDecimalPlaces(0, DECIMAL_ROUNDING[rounding])
+    return BigInt(portion.toFixed(0))
+  }
+
+  isPositive(): boolean {
+    return this.fraction.greaterThan(0n)
+  }
+
+  isNegative(): boolean {
+    return this.fraction.lessThan(0n)
+  }
+
+  isZero(): boolean {
+    return this.fraction.isZero()
+  }
+
+  override equals(vo: Percentage): boolean {
+    return this.fraction.equals(vo.fraction)
+  }
+
+  toFractionString(): string {
+    return this.fraction.toString()
+  }
+
+  negate(): Percentage {
+    return new Percentage(this.fraction.negated())
+  }
+
+  toPercentString(): string {
+    return this.fraction.times(PERCENT_PER_UNIT).toString()
+  }
+
+  toString(): string {
+    return `${this.toPercentString()}%`
+  }
+
+  private static parseDecimal(value: string): Decimal {
+    try {
+      return new Decimal(value.trim())
+    } catch {
       throw new DomainError({
+        code: ERROR_CODE.INVALID_VALUE,
         message: `Invalid percentage/fraction: "${value}"`,
-        code: ERROR_CODE.INVALID_PERCENTAGE,
       })
     }
-
-    const isNegative = trimmed.startsWith('-')
-    const unsigned = isNegative ? trimmed.slice(1) : trimmed
-    const [intPart, fracPart = ''] = unsigned.split('.')
-
-    const normalizedFraction = fracPart.padEnd(decimals, '0').slice(0, decimals)
-    const scaled = BigInt(intPart + normalizedFraction)
-    return isNegative ? -scaled : scaled
   }
 }
