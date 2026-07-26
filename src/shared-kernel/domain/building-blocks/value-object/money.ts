@@ -1,9 +1,11 @@
 import { DomainError } from '@/shared-kernel/domain/error/domain-error'
 import { ValueObject } from '@/shared-kernel/domain/building-blocks/value-object/value-object'
+import { Percentage, RoundingMode } from './percentage'
 
 export const CURRENCY_REGISTRY = {
-  USD: { decimals: 2, locale: 'en-US' },
-  COIN: { decimals: 2, locale: 'en-US' }, // mudar os decimais e locale no futuro
+  BRL: { decimals: 2, locale: 'pt-BR', iso: true },
+  USD: { decimals: 2, locale: 'en-US', iso: true },
+  COIN: { decimals: 2, locale: 'en-US', iso: true },
 } as const
 
 export type Currency = keyof typeof CURRENCY_REGISTRY
@@ -70,20 +72,6 @@ export class Money extends ValueObject<MoneyProps> {
     return new Money({ amount: isNegative ? -minor : minor, currency })
   }
 
-  toCents(): bigint {
-    return this.props.amount
-  }
-
-  toDecimalString(): string {
-    const { decimals } = CURRENCY_REGISTRY[this.props.currency]
-    const abs = this.isNegative() ? -this.props.amount : this.props.amount
-
-    const digits = abs.toString().padStart(decimals + 1, '0')
-    const intPart = digits.slice(0, digits.length - decimals)
-    const fracPart = digits.slice(digits.length - decimals)
-    return `${this.isNegative() ? '-' : ''}${intPart}.${fracPart}`
-  }
-
   add(other: Money): Money {
     this.assertSameCurrency(other)
     return new Money({
@@ -100,21 +88,57 @@ export class Money extends ValueObject<MoneyProps> {
     })
   }
 
-  applyPercentage(percentage: number): Money {
-    const amountInDecimal = Number(this.toDecimalString())
-    const resultInDecimalString = (amountInDecimal * percentage).toString()
-    return Money.fromDecimal({
-      amount: resultInDecimalString,
+  multiply(factor: bigint | number): Money {
+    if (typeof factor === 'number' && !Number.isInteger(factor)) {
+      throw new DomainError({
+        message: `The amount ${factor} is invalid; use an integer value for multiplication, or "applyPercentage" for percentages.`,
+        code: ERROR_CODE.INVALID_AMOUNT,
+      })
+    }
+    return new Money({
+      amount: this.getAmount() * BigInt(factor),
       currency: this.getCurrency(),
     })
   }
 
-  format(): string {
-    const { locale } = CURRENCY_REGISTRY[this.getCurrency()]
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
+  applyPercentage(
+    percentage: Percentage,
+    rounding: RoundingMode = 'HALF_EVEN',
+  ): Money {
+    const portion = percentage.of(this.getAmount(), rounding)
+    return new Money({
+      amount: this.getAmount() + portion,
       currency: this.getCurrency(),
-    }).format(Number(this.toDecimalString()))
+    })
+  }
+
+  percentageOf(
+    percentage: Percentage,
+    rounding: RoundingMode = 'HALF_EVEN',
+  ): Money {
+    return new Money({
+      amount: percentage.of(this.getAmount(), rounding),
+      currency: this.getCurrency(),
+    })
+  }
+
+  comparteTo(other: Money): -1 | 0 | 1 {
+    this.assertSameCurrency(other)
+    if (this.getAmount() < other.getAmount()) return -1
+    if (this.getAmount() > other.getAmount()) return 1
+    return 0
+  }
+
+  isGreaterThan(other: Money): boolean {
+    return this.comparteTo(other) === 1
+  }
+
+  isLessThan(other: Money): boolean {
+    return this.comparteTo(other) === -1
+  }
+
+  isZero(): boolean {
+    return this.props.amount === 0n
   }
 
   isNegative(): boolean {
@@ -125,16 +149,38 @@ export class Money extends ValueObject<MoneyProps> {
     return this.props.amount > 0n
   }
 
-  isZero(): boolean {
-    return this.props.amount === 0n
+  getAmount(): bigint {
+    return this.props.amount
   }
 
   getCurrency(): Currency {
     return this.props.currency
   }
 
-  getAmount(): bigint {
+  toCents(): bigint {
     return this.props.amount
+  }
+
+  toDecimalString(): string {
+    const { decimals } = CURRENCY_REGISTRY[this.props.currency]
+    const abs = this.isNegative() ? -this.props.amount : this.props.amount
+
+    const digits = abs.toString().padStart(decimals + 1, '0')
+    const intPart = digits.slice(0, digits.length - decimals)
+    const fracPart = digits.slice(digits.length - decimals)
+    return `${this.isNegative() ? '-' : ''}${intPart}.${fracPart}`
+  }
+
+  format(): string {
+    const { locale } = CURRENCY_REGISTRY[this.getCurrency()]
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: this.getCurrency(),
+    }).format(Number(this.toDecimalString()))
+  }
+
+  toString(): string {
+    return `${this.getCurrency()} ${this.toDecimalString()}`
   }
 
   private static assertCurrency(currency: Currency): void {
