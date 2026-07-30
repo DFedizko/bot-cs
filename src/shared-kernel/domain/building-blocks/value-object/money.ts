@@ -177,15 +177,6 @@ export class Money extends ValueObject<MoneyProps> {
     return `${this.getCurrency().getCode()} ${this.toDecimalString()}`
   }
 
-  // private static assertCurrency(currency: Currency): void {
-  //   if (!(currency in CURRENCY_REGISTRY)) {
-  //     throw new DomainError({
-  //       message: `Currency not supported: "${currency}"`,
-  //       code: ERROR_CODE.INVALID_CURRENCY,
-  //     })
-  //   }
-  // }
-
   private assertSameCurrency(other: Money) {
     if (this.props.currency !== other.getCurrency()) {
       throw new DomainError({
