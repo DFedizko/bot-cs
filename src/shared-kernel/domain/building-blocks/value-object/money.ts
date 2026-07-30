@@ -1,14 +1,7 @@
 import { DomainError } from '@/shared-kernel/domain/error/domain-error'
 import { ValueObject } from '@/shared-kernel/domain/building-blocks/value-object/value-object'
 import { Percentage, RoundingMode } from './percentage'
-
-export const CURRENCY_REGISTRY = {
-  BRL: { decimals: 2, locale: 'pt-BR', iso: true },
-  USD: { decimals: 2, locale: 'en-US', iso: true },
-  COIN: { decimals: 2, locale: 'en-US', iso: true },
-} as const
-
-export type Currency = keyof typeof CURRENCY_REGISTRY
+import { Currency } from './currency'
 
 enum ERROR_CODE {
   INVALID_AMOUNT = 'INVALID_AMOUNT',
@@ -34,7 +27,6 @@ export class Money extends ValueObject<MoneyProps> {
     amount: number | bigint
     currency: Currency
   }): Money {
-    Money.assertCurrency(currency)
     if (typeof amount === 'number' && !Number.isInteger(amount)) {
       throw new DomainError({
         message: `The amount of "${amount}" is not a integer`,
@@ -51,8 +43,6 @@ export class Money extends ValueObject<MoneyProps> {
     amount: string
     currency: Currency
   }): Money {
-    Money.assertCurrency(currency)
-    const { decimals } = CURRENCY_REGISTRY[currency]
     const trimmed = amount.trim()
     if (!Money.DECIMAL_REGEX.test(trimmed)) {
       throw new DomainError({
@@ -65,7 +55,9 @@ export class Money extends ValueObject<MoneyProps> {
     const unsigned = isNegative ? trimmed.slice(1) : trimmed
 
     const [intPart, fracPart = ''] = unsigned.split('.')
-    const fracAdjusted = fracPart.padEnd(decimals, '0').slice(0, decimals)
+    const fracAdjusted = fracPart
+      .padEnd(currency.getDecimals(), '0')
+      .slice(0, currency.getDecimals())
 
     const minor = BigInt(intPart + fracAdjusted)
 
@@ -162,35 +154,37 @@ export class Money extends ValueObject<MoneyProps> {
   }
 
   toDecimalString(): string {
-    const { decimals } = CURRENCY_REGISTRY[this.props.currency]
     const abs = this.isNegative() ? -this.props.amount : this.props.amount
 
-    const digits = abs.toString().padStart(decimals + 1, '0')
-    const intPart = digits.slice(0, digits.length - decimals)
-    const fracPart = digits.slice(digits.length - decimals)
+    const digits = abs
+      .toString()
+      .padStart(this.props.currency.getDecimals() + 1, '0')
+    const intPart = digits.slice(
+      0,
+      digits.length - this.props.currency.getDecimals(),
+    )
+    const fracPart = digits.slice(
+      digits.length - this.props.currency.getDecimals(),
+    )
     return `${this.isNegative() ? '-' : ''}${intPart}.${fracPart}`
   }
 
   format(): string {
-    const { locale } = CURRENCY_REGISTRY[this.getCurrency()]
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: this.getCurrency(),
-    }).format(Number(this.toDecimalString()))
+    return this.props.currency.format(Number(this.toDecimalString()))
   }
 
   toString(): string {
-    return `${this.getCurrency()} ${this.toDecimalString()}`
+    return `${this.getCurrency().getCode()} ${this.toDecimalString()}`
   }
 
-  private static assertCurrency(currency: Currency): void {
-    if (!(currency in CURRENCY_REGISTRY)) {
-      throw new DomainError({
-        message: `Currency not supported: "${currency}"`,
-        code: ERROR_CODE.INVALID_CURRENCY,
-      })
-    }
-  }
+  // private static assertCurrency(currency: Currency): void {
+  //   if (!(currency in CURRENCY_REGISTRY)) {
+  //     throw new DomainError({
+  //       message: `Currency not supported: "${currency}"`,
+  //       code: ERROR_CODE.INVALID_CURRENCY,
+  //     })
+  //   }
+  // }
 
   private assertSameCurrency(other: Money) {
     if (this.props.currency !== other.getCurrency()) {
