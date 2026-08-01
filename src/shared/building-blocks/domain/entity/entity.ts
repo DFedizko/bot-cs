@@ -1,4 +1,4 @@
-import { UUID } from '@/shared-kernel/domain/building-blocks/value-object/uuid'
+import { UUID } from '@/shared/building-blocks/domain/value-object/uuid'
 
 export abstract class Entity<Props, Id = string> {
   readonly id: Id

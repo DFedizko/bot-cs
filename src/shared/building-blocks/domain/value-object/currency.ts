@@ -1,4 +1,4 @@
-import { DomainError } from '@/shared-kernel/domain/error/domain-error'
+import { DomainError } from '@/shared/building-blocks/error/domain-error'
 import { ValueObject } from './value-object'
 
 type CurrencyProps = {

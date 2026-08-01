@@ -1,5 +1,5 @@
-import { Currency } from '@/shared-kernel/domain/building-blocks/value-object/currency'
-import { DomainError } from '@/shared-kernel/domain/error/domain-error'
+import { Currency } from '@/shared/building-blocks/domain/value-object/currency'
+import { DomainError } from '@/shared/building-blocks/error/domain-error'
 
 describe('Currency', () => {
   it('Should create a currency object', () => {

@@ -1,7 +1,7 @@
-import { Currency } from '@/shared-kernel/domain/building-blocks/value-object/currency'
-import { Money } from '@/shared-kernel/domain/building-blocks/value-object/money'
-import { Percentage } from '@/shared-kernel/domain/building-blocks/value-object/percentage'
-import { DomainError } from '@/shared-kernel/domain/error/domain-error'
+import { Currency } from '@/shared/building-blocks/domain/value-object/currency'
+import { Money } from '@/shared/building-blocks/domain/value-object/money'
+import { Percentage } from '@/shared/building-blocks/domain/value-object/percentage'
+import { DomainError } from '@/shared/building-blocks/error/domain-error'
 
 describe('Money', () => {
   const USD = Currency.create({
