@@ -1,5 +1,5 @@
 import { DomainError } from '@/shared/building-blocks/error/domain-error'
-import { ValueObject } from '@/shared/building-blocks/domain/value-object/value-object'
+import { ValueObject } from '@/shared/building-blocks/domain/value-object'
 import { Percentage, RoundingMode } from './percentage'
 import { Currency } from './currency'
 

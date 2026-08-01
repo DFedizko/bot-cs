@@ -1,6 +1,5 @@
-import { Percentage } from '@/shared/building-blocks/domain/value-object/percentage'
 import { DomainError } from '@/shared/building-blocks/error/domain-error'
-import { describe } from 'node:test'
+import { Percentage } from '@/shared/domain-primitives/percentage'
 
 describe('Percentage', () => {
   describe('Creations', () => {

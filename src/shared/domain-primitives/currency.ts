@@ -1,5 +1,5 @@
 import { DomainError } from '@/shared/building-blocks/error/domain-error'
-import { ValueObject } from './value-object'
+import { ValueObject } from '../building-blocks/domain/value-object'
 
 type CurrencyProps = {
   code: string

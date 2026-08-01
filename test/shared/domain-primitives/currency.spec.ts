@@ -1,4 +1,4 @@
-import { Currency } from '@/shared/building-blocks/domain/value-object/currency'
+import { Currency } from '@/shared/domain-primitives/currency'
 import { DomainError } from '@/shared/building-blocks/error/domain-error'
 
 describe('Currency', () => {
