@@ -1,4 +1,4 @@
-import { DomainError } from '@/shared/building-blocks/error/domain-error'
+import { DomainError } from '@/shared/error/domain-error'
 import { Percentage } from '@/shared/domain-primitives/percentage'
 
 describe('Percentage', () => {
@@ -35,7 +35,7 @@ describe('Percentage', () => {
         Percentage.fromPercent('50'),
       )
     })
-    it('Should support fractional and above-100 percentage', () => {
+    it('Should support fractional and above -100 percentage', () => {
       expect(Percentage.fromPercent('12.5').toFractionString()).toBe('0.125')
       expect(Percentage.fromPercent('150').toFractionString()).toBe('1.5')
     })
