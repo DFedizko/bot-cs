@@ -1,6 +1,6 @@
 import { Decimal } from 'decimal.js'
-import { DomainError } from '@/shared/building-blocks/error/domain-error'
-import { ValueObject } from '@/shared/building-blocks/domain/value-object'
+import { DomainError } from '@/shared/error/domain-error'
+import { ValueObject } from '@/shared/building-blocks/value-object'
 
 export type RoundingMode = 'HALF_EVEN' | 'HALF_AWAY_FROM_ZERO'
 

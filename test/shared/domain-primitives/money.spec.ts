@@ -1,5 +1,5 @@
 import { Currency } from '@/shared/domain-primitives/currency'
-import { DomainError } from '@/shared/building-blocks/error/domain-error'
+import { DomainError } from '@/shared/error/domain-error'
 import { Money } from '@/shared/domain-primitives/money'
 import { Percentage } from '@/shared/domain-primitives/percentage'
 

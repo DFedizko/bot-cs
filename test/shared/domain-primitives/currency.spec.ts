@@ -1,5 +1,5 @@
 import { Currency } from '@/shared/domain-primitives/currency'
-import { DomainError } from '@/shared/building-blocks/error/domain-error'
+import { DomainError } from '@/shared/error/domain-error'
 
 describe('Currency', () => {
   it('Should create a currency object', () => {

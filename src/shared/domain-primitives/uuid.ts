@@ -1,5 +1,5 @@
-import { DomainError } from '@/shared/building-blocks/error/domain-error'
-import { ValueObject } from '@/shared/building-blocks/domain/value-object'
+import { DomainError } from '@/shared/error/domain-error'
+import { ValueObject } from '@/shared/building-blocks/value-object'
 
 export class UUID extends ValueObject<{ value: string }> {
   private static readonly REGEX: RegExp =
