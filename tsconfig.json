@@ -1,26 +1,21 @@
 {
-  "$schema": "https://www.schemastore.org/tsconfig",
-  "_version": "24.0.0",
+    "$schema": "https://www.schemastore.org/tsconfig",
+    "_version": "24.0.0",
 
-  "compilerOptions": {
-    "lib": [
-      "es2024",
-      "ESNext.Array",
-      "ESNext.Collection",
-      "ESNext.Error",
-      "ESNext.Iterator",
-      "ESNext.Promise",
-    ],
-    "module": "preserve",
-    "target": "es2024",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
+    "compilerOptions": {
+        "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Error", "ESNext.Iterator", "ESNext.Promise"],
+        "module": "preserve",
+        "target": "es2024",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
 
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*", "../test/*"],
+        "baseUrl": "./src",
+        "paths": {
+            "@/*": ["./*", "../test/*"],
+            "@value-object": ["./shared/building-blocks/value-object.ts"],
+            "@entity": ["./shared/building-blocks/entity.ts"],
+        },
     },
-  },
 }
