@@ -1,4 +1,4 @@
 export type ErrorProps = {
-  message?: string
-  code?: string
-}
+    message?: string;
+    code?: string;
+};

@@ -1,188 +1,161 @@
-import { DomainError } from '@/shared/error/domain-error'
-import { ValueObject } from '@/shared/building-blocks/value-object'
-import { Percentage, RoundingMode } from './percentage'
-import { Currency } from './currency'
+import { DomainError } from '@/shared/error/domain-error';
+import { ValueObject } from '@/shared/building-blocks/value-object';
+import { Percentage, RoundingMode } from './percentage';
+import { Currency } from './currency';
 
 enum ERROR_CODE {
-  INVALID_AMOUNT = 'INVALID_AMOUNT',
-  INVALID_CURRENCY = 'INVALID_CURRENCY',
+    INVALID_AMOUNT = 'INVALID_AMOUNT',
+    INVALID_CURRENCY = 'INVALID_CURRENCY',
 }
 
 type MoneyProps = {
-  amount: bigint
-  currency: Currency
-}
+    amount: bigint;
+    currency: Currency;
+};
 
 export class Money extends ValueObject<MoneyProps> {
-  private static readonly DECIMAL_REGEX: RegExp = /^-?\d+(\.\d+)?$/
+    private static readonly DECIMAL_REGEX: RegExp = /^-?\d+(\.\d+)?$/;
 
-  private constructor(protected readonly props: MoneyProps) {
-    super(props)
-  }
-
-  static fromCents({
-    amount = 0,
-    currency,
-  }: {
-    amount: number | bigint
-    currency: Currency
-  }): Money {
-    if (typeof amount === 'number' && !Number.isInteger(amount)) {
-      throw new DomainError({
-        message: `The amount of "${amount}" is not a integer`,
-        code: ERROR_CODE.INVALID_AMOUNT,
-      })
-    }
-    return new Money({ amount: BigInt(amount), currency })
-  }
-
-  static fromDecimal({
-    amount,
-    currency,
-  }: {
-    amount: string
-    currency: Currency
-  }): Money {
-    const trimmed = amount.trim()
-    if (!Money.DECIMAL_REGEX.test(trimmed)) {
-      throw new DomainError({
-        message: `Invalid decimal value "${amount}"`,
-        code: ERROR_CODE.INVALID_AMOUNT,
-      })
+    private constructor(protected readonly props: MoneyProps) {
+        super(props);
     }
 
-    const isNegative = trimmed.startsWith('-')
-    const unsigned = isNegative ? trimmed.slice(1) : trimmed
-
-    const [intPart, fracPart = ''] = unsigned.split('.')
-    const fracAdjusted = fracPart
-      .padEnd(currency.getDecimals(), '0')
-      .slice(0, currency.getDecimals())
-
-    const minor = BigInt(intPart + fracAdjusted)
-
-    return new Money({ amount: isNegative ? -minor : minor, currency })
-  }
-
-  add(other: Money): Money {
-    this.assertSameCurrency(other)
-    return new Money({
-      amount: this.props.amount + other.getAmount(),
-      currency: this.props.currency,
-    })
-  }
-
-  substract(other: Money): Money {
-    this.assertSameCurrency(other)
-    return new Money({
-      amount: this.props.amount - other.props.amount,
-      currency: this.props.currency,
-    })
-  }
-
-  multiply(factor: bigint | number): Money {
-    if (typeof factor === 'number' && !Number.isInteger(factor)) {
-      throw new DomainError({
-        message: `The amount ${factor} is invalid; use an integer value for multiplication, or "applyPercentage" for percentages.`,
-        code: ERROR_CODE.INVALID_AMOUNT,
-      })
+    static fromCents({ amount = 0, currency }: { amount: number | bigint; currency: Currency }): Money {
+        if (typeof amount === 'number' && !Number.isInteger(amount)) {
+            throw new DomainError({
+                message: `The amount of "${amount}" is not a integer`,
+                code: ERROR_CODE.INVALID_AMOUNT,
+            });
+        }
+        return new Money({ amount: BigInt(amount), currency });
     }
-    return new Money({
-      amount: this.getAmount() * BigInt(factor),
-      currency: this.getCurrency(),
-    })
-  }
 
-  applyPercentage(
-    percentage: Percentage,
-    rounding: RoundingMode = 'HALF_EVEN',
-  ): Money {
-    const portion = percentage.of(this.getAmount(), rounding)
-    return new Money({
-      amount: this.getAmount() + portion,
-      currency: this.getCurrency(),
-    })
-  }
+    static fromDecimal({ amount, currency }: { amount: string; currency: Currency }): Money {
+        const trimmed = amount.trim();
+        if (!Money.DECIMAL_REGEX.test(trimmed)) {
+            throw new DomainError({
+                message: `Invalid decimal value "${amount}"`,
+                code: ERROR_CODE.INVALID_AMOUNT,
+            });
+        }
 
-  percentageOf(
-    percentage: Percentage,
-    rounding: RoundingMode = 'HALF_EVEN',
-  ): Money {
-    return new Money({
-      amount: percentage.of(this.getAmount(), rounding),
-      currency: this.getCurrency(),
-    })
-  }
+        const isNegative = trimmed.startsWith('-');
+        const unsigned = isNegative ? trimmed.slice(1) : trimmed;
 
-  comparteTo(other: Money): -1 | 0 | 1 {
-    this.assertSameCurrency(other)
-    if (this.getAmount() < other.getAmount()) return -1
-    if (this.getAmount() > other.getAmount()) return 1
-    return 0
-  }
+        const [intPart, fracPart = ''] = unsigned.split('.');
+        const fracAdjusted = fracPart.padEnd(currency.getDecimals(), '0').slice(0, currency.getDecimals());
 
-  isGreaterThan(other: Money): boolean {
-    return this.comparteTo(other) === 1
-  }
+        const minor = BigInt(intPart + fracAdjusted);
 
-  isLessThan(other: Money): boolean {
-    return this.comparteTo(other) === -1
-  }
-
-  isZero(): boolean {
-    return this.props.amount === 0n
-  }
-
-  isNegative(): boolean {
-    return this.props.amount < 0n
-  }
-
-  isPositive(): boolean {
-    return this.props.amount > 0n
-  }
-
-  getAmount(): bigint {
-    return this.props.amount
-  }
-
-  getCurrency(): Currency {
-    return this.props.currency
-  }
-
-  toCents(): bigint {
-    return this.props.amount
-  }
-
-  toDecimalString(): string {
-    const abs = this.isNegative() ? -this.props.amount : this.props.amount
-
-    const digits = abs
-      .toString()
-      .padStart(this.props.currency.getDecimals() + 1, '0')
-    const intPart = digits.slice(
-      0,
-      digits.length - this.props.currency.getDecimals(),
-    )
-    const fracPart = digits.slice(
-      digits.length - this.props.currency.getDecimals(),
-    )
-    return `${this.isNegative() ? '-' : ''}${intPart}.${fracPart}`
-  }
-
-  format(): string {
-    return this.props.currency.format(Number(this.toDecimalString()))
-  }
-
-  toString(): string {
-    return `${this.getCurrency().getCode()} ${this.toDecimalString()}`
-  }
-
-  private assertSameCurrency(other: Money) {
-    if (this.props.currency !== other.getCurrency()) {
-      throw new DomainError({
-        message: `Currency "${other.getCurrency()}" must be the same as "${this.props.currency}"`,
-        code: ERROR_CODE.INVALID_CURRENCY,
-      })
+        return new Money({ amount: isNegative ? -minor : minor, currency });
     }
-  }
+
+    add(other: Money): Money {
+        this.assertSameCurrency(other);
+        return new Money({
+            amount: this.props.amount + other.getAmount(),
+            currency: this.props.currency,
+        });
+    }
+
+    substract(other: Money): Money {
+        this.assertSameCurrency(other);
+        return new Money({
+            amount: this.props.amount - other.props.amount,
+            currency: this.props.currency,
+        });
+    }
+
+    multiply(factor: bigint | number): Money {
+        if (typeof factor === 'number' && !Number.isInteger(factor)) {
+            throw new DomainError({
+                message: `The amount ${factor} is invalid; use an integer value for multiplication, or "applyPercentage" for percentages.`,
+                code: ERROR_CODE.INVALID_AMOUNT,
+            });
+        }
+        return new Money({
+            amount: this.getAmount() * BigInt(factor),
+            currency: this.getCurrency(),
+        });
+    }
+
+    applyPercentage(percentage: Percentage, rounding: RoundingMode = 'HALF_EVEN'): Money {
+        const portion = percentage.of(this.getAmount(), rounding);
+        return new Money({
+            amount: this.getAmount() + portion,
+            currency: this.getCurrency(),
+        });
+    }
+
+    percentageOf(percentage: Percentage, rounding: RoundingMode = 'HALF_EVEN'): Money {
+        return new Money({
+            amount: percentage.of(this.getAmount(), rounding),
+            currency: this.getCurrency(),
+        });
+    }
+
+    comparteTo(other: Money): -1 | 0 | 1 {
+        this.assertSameCurrency(other);
+        if (this.getAmount() < other.getAmount()) return -1;
+        if (this.getAmount() > other.getAmount()) return 1;
+        return 0;
+    }
+
+    isGreaterThan(other: Money): boolean {
+        return this.comparteTo(other) === 1;
+    }
+
+    isLessThan(other: Money): boolean {
+        return this.comparteTo(other) === -1;
+    }
+
+    isZero(): boolean {
+        return this.props.amount === 0n;
+    }
+
+    isNegative(): boolean {
+        return this.props.amount < 0n;
+    }
+
+    isPositive(): boolean {
+        return this.props.amount > 0n;
+    }
+
+    getAmount(): bigint {
+        return this.props.amount;
+    }
+
+    getCurrency(): Currency {
+        return this.props.currency;
+    }
+
+    toCents(): bigint {
+        return this.props.amount;
+    }
+
+    toDecimalString(): string {
+        const abs = this.isNegative() ? -this.props.amount : this.props.amount;
+
+        const digits = abs.toString().padStart(this.props.currency.getDecimals() + 1, '0');
+        const intPart = digits.slice(0, digits.length - this.props.currency.getDecimals());
+        const fracPart = digits.slice(digits.length - this.props.currency.getDecimals());
+        return `${this.isNegative() ? '-' : ''}${intPart}.${fracPart}`;
+    }
+
+    format(): string {
+        return this.props.currency.format(Number(this.toDecimalString()));
+    }
+
+    toString(): string {
+        return `${this.getCurrency().getCode()} ${this.toDecimalString()}`;
+    }
+
+    private assertSameCurrency(other: Money) {
+        if (this.props.currency !== other.getCurrency()) {
+            throw new DomainError({
+                message: `Currency "${other.getCurrency()}" must be the same as "${this.props.currency}"`,
+                code: ERROR_CODE.INVALID_CURRENCY,
+            });
+        }
+    }
 }

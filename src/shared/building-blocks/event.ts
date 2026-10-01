@@ -1,3 +1,3 @@
 export interface Event {
-  name: string
+    name: string;
 }
