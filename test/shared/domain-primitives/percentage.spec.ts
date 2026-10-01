@@ -90,7 +90,7 @@ describe('Percentage', () => {
       expect(Percentage.fromFraction('0.10').of(25n)).toBe(2n) // tie -> even
     })
   })
-  describe('Rounding regression (known values', () => {
+  describe('Rounding regression (known values)', () => {
     it('HALF_EVEN markup should match reference values', () => {
       const fivePercent = Percentage.fromPercent('5')
       expect(10001n + fivePercent.of(10001n, 'HALF_EVEN')).toBe(10501n)
