@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { shallowEqual } from 'shallow-equal';
+import { shallowEqual } from "shallow-equal";
 
 interface ValueObjectProps {
     [index: string]: any;
