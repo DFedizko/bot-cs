@@ -6,21 +6,21 @@ import { StickerSlot } from "./sticker-slot";
 
 type CreateStickerProps = {
     name: string;
-    percentageWear: string;
+    percentageWear?: string;
     type: StickerType;
     slot: number;
 };
 
 export class Sticker extends ValueObject<{
     name: ItemName;
-    percentageWear: PercentageWear;
+    percentageWear?: PercentageWear;
     type: StickerType;
     slot: StickerSlot;
 }> {
     private constructor(props: CreateStickerProps) {
         super({
             name: ItemName.create(props.name),
-            percentageWear: PercentageWear.fromFraction(props.percentageWear),
+            ...(props.percentageWear && { percentageWear: PercentageWear.fromFraction(props.percentageWear) }),
             type: props.type,
             slot: new StickerSlot(props.slot),
         });
@@ -34,8 +34,8 @@ export class Sticker extends ValueObject<{
         return this.props.name.getValue();
     }
 
-    getWear(): string {
-        return this.props.percentageWear.getFraction();
+    getWear(): string | undefined {
+        return this.props.percentageWear?.getFraction();
     }
 
     getType(): StickerType {
