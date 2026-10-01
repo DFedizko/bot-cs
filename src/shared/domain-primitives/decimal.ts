@@ -11,4 +11,14 @@ export class Decimal extends ValueObject<{ value: number }> {
     getValue(): number {
         return this.props.value;
     }
+
+    getDecimalPlacesNumber(): number {
+        const decimalPlaces = this.toString().split(".")[1];
+        const decimalPlacesNumber = decimalPlaces.length;
+        return decimalPlacesNumber;
+    }
+
+    private toString(): string {
+        return this.props.value.toString();
+    }
 }
