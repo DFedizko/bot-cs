@@ -8,7 +8,7 @@ describe("ItemName", () => {
     it("Should normalize a name with spaces at the beginning and the end", () => {
         expect(ItemName.create(" AWP | Asiimov (Field-Tested) ").getValue()).toBe("AWP | Asiimov (Field-Tested)");
     });
-    it("Should throw an error when the name has more then 50 characters or less then 3 characters", () => {
+    it(`Should throw an error when the name has more then ${ItemName.MAX_CHAR} characters or less then ${ItemName.MIN_CHAR} characters`, () => {
         expect(() => ItemName.create("AA")).toThrow(DomainError);
         expect(() => ItemName.create("AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZ")).toThrow(DomainError);
     });
