@@ -2,8 +2,8 @@ import { TrimmedString } from "@/shared/domain-primitives/trimmed-string";
 import { DomainError } from "@/shared/error/domain-error";
 
 export class ItemName extends TrimmedString {
-    private static readonly MAX_CHAR = 50;
-    private static readonly MIN_CHAR = 3;
+    static readonly MAX_CHAR = 50;
+    static readonly MIN_CHAR = 3;
 
     private constructor(name: string) {
         super(name);
