@@ -37,7 +37,7 @@ describe("Float", () => {
         expect(factoryNew.getWear()).toBe(WearName.FACTORY_NEW);
         expect(factoryNew.getWearAcronym()).toBe(WearNameAcronym.FN);
     });
-    it('Should reject a float bigger or equal than 1 and less or equal than 0', () => {
+    it("Should reject a float bigger or equal than 1 and less or equal than 0", () => {
         expect(() => new Float(1)).toThrow(DomainError);
         expect(() => new Float(-1)).toThrow(DomainError);
         expect(() => new Float(0)).toThrow(DomainError);
