@@ -18,10 +18,12 @@ export class Decimal extends ValueObject<{ value: number }> {
     }
 
     getDecimalPlaces(): string {
-        return this.toString().split(".")[1];
+        const some = this.toString().split(".")[1];
+        return some;
     }
 
     private toString(): string {
-        return this.props.value.toString();
+        const formatter = new Intl.NumberFormat("en-US", { notation: "standard", maximumFractionDigits: 20 });
+        return formatter.format(this.props.value);
     }
 }
