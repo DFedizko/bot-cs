@@ -1,10 +1,10 @@
-import { DomainError } from '@/shared/error/domain-error';
-import { ValueObject } from '@/shared/building-blocks/value-object';
+import { DomainError } from "@/shared/error/domain-error";
+import { ValueObject } from "@/shared/building-blocks/value-object";
 
 export class UUID extends ValueObject<{ value: string }> {
     private static readonly REGEX: RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-    private constructor(private readonly _value: string) {
+    protected constructor(private readonly _value: string) {
         super({ value: _value });
     }
 
@@ -16,7 +16,7 @@ export class UUID extends ValueObject<{ value: string }> {
         if (!UUID.isValid(value)) {
             throw new DomainError({
                 message: `The uuid "${value}" is invalid`,
-                code: 'INVALID_UUID',
+                code: "INVALID_UUID",
             });
         }
 
