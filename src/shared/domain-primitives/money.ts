@@ -1,11 +1,11 @@
-import { DomainError } from '@/shared/error/domain-error';
-import { ValueObject } from '@/shared/building-blocks/value-object';
-import { Percentage, RoundingMode } from './percentage';
-import { Currency } from './currency';
+import { DomainError } from "@/shared/error/domain-error";
+import { ValueObject } from "@/shared/building-blocks/value-object";
+import { Percentage, RoundingMode } from "./percentage";
+import { Currency } from "./currency";
 
 enum ERROR_CODE {
-    INVALID_AMOUNT = 'INVALID_AMOUNT',
-    INVALID_CURRENCY = 'INVALID_CURRENCY',
+    INVALID_AMOUNT = "INVALID_AMOUNT",
+    INVALID_CURRENCY = "INVALID_CURRENCY",
 }
 
 type MoneyProps = {
@@ -16,12 +16,12 @@ type MoneyProps = {
 export class Money extends ValueObject<MoneyProps> {
     private static readonly DECIMAL_REGEX: RegExp = /^-?\d+(\.\d+)?$/;
 
-    private constructor(protected readonly props: MoneyProps) {
+    protected constructor(protected readonly props: MoneyProps) {
         super(props);
     }
 
     static fromCents({ amount = 0, currency }: { amount: number | bigint; currency: Currency }): Money {
-        if (typeof amount === 'number' && !Number.isInteger(amount)) {
+        if (typeof amount === "number" && !Number.isInteger(amount)) {
             throw new DomainError({
                 message: `The amount of "${amount}" is not a integer`,
                 code: ERROR_CODE.INVALID_AMOUNT,
@@ -39,11 +39,11 @@ export class Money extends ValueObject<MoneyProps> {
             });
         }
 
-        const isNegative = trimmed.startsWith('-');
+        const isNegative = trimmed.startsWith("-");
         const unsigned = isNegative ? trimmed.slice(1) : trimmed;
 
-        const [intPart, fracPart = ''] = unsigned.split('.');
-        const fracAdjusted = fracPart.padEnd(currency.getDecimals(), '0').slice(0, currency.getDecimals());
+        const [intPart, fracPart = ""] = unsigned.split(".");
+        const fracAdjusted = fracPart.padEnd(currency.getDecimals(), "0").slice(0, currency.getDecimals());
 
         const minor = BigInt(intPart + fracAdjusted);
 
@@ -67,7 +67,7 @@ export class Money extends ValueObject<MoneyProps> {
     }
 
     multiply(factor: bigint | number): Money {
-        if (typeof factor === 'number' && !Number.isInteger(factor)) {
+        if (typeof factor === "number" && !Number.isInteger(factor)) {
             throw new DomainError({
                 message: `The amount ${factor} is invalid; use an integer value for multiplication, or "applyPercentage" for percentages.`,
                 code: ERROR_CODE.INVALID_AMOUNT,
@@ -79,7 +79,7 @@ export class Money extends ValueObject<MoneyProps> {
         });
     }
 
-    applyPercentage(percentage: Percentage, rounding: RoundingMode = 'HALF_EVEN'): Money {
+    applyPercentage(percentage: Percentage, rounding: RoundingMode = "HALF_EVEN"): Money {
         const portion = percentage.of(this.getAmount(), rounding);
         return new Money({
             amount: this.getAmount() + portion,
@@ -87,7 +87,7 @@ export class Money extends ValueObject<MoneyProps> {
         });
     }
 
-    percentageOf(percentage: Percentage, rounding: RoundingMode = 'HALF_EVEN'): Money {
+    percentageOf(percentage: Percentage, rounding: RoundingMode = "HALF_EVEN"): Money {
         return new Money({
             amount: percentage.of(this.getAmount(), rounding),
             currency: this.getCurrency(),
@@ -136,10 +136,10 @@ export class Money extends ValueObject<MoneyProps> {
     toDecimalString(): string {
         const abs = this.isNegative() ? -this.props.amount : this.props.amount;
 
-        const digits = abs.toString().padStart(this.props.currency.getDecimals() + 1, '0');
+        const digits = abs.toString().padStart(this.props.currency.getDecimals() + 1, "0");
         const intPart = digits.slice(0, digits.length - this.props.currency.getDecimals());
         const fracPart = digits.slice(digits.length - this.props.currency.getDecimals());
-        return `${this.isNegative() ? '-' : ''}${intPart}.${fracPart}`;
+        return `${this.isNegative() ? "-" : ""}${intPart}.${fracPart}`;
     }
 
     format(): string {
