@@ -4,8 +4,8 @@ import { ValueObject } from "@/shared/building-blocks/value-object";
 export class UUID extends ValueObject<{ value: string }> {
     private static readonly REGEX: RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-    protected constructor(private readonly _value: string) {
-        super({ value: _value });
+    protected constructor(private readonly value: string) {
+        super({ value });
     }
 
     static create(): UUID {
@@ -23,8 +23,8 @@ export class UUID extends ValueObject<{ value: string }> {
         return new UUID(value);
     }
 
-    get value(): string {
-        return this._value;
+    getValue(): string {
+        return this.value;
     }
 
     static isValid(value: string): boolean {
