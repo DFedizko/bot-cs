@@ -4,7 +4,7 @@ import { ValueObject } from "@value-object";
 
 export class PercentageWear extends ValueObject<{ percentage: Percentage }> {
     private static readonly MAX_FRACTION = 1;
-    private static readonly MAX_PERCENT = 100;
+    // private static readonly MAX_PERCENT = 100;
 
     private constructor(percentage: Percentage) {
         super({ percentage });
