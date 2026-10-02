@@ -1,5 +1,6 @@
 import { DomainError } from "@/shared/error/domain-error";
 import { ValueObject } from "@/shared/building-blocks/value-object";
+import { randomUUIDv7 } from "bun";
 
 export class UUID extends ValueObject<{ value: string }> {
     private static readonly REGEX: RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -9,7 +10,7 @@ export class UUID extends ValueObject<{ value: string }> {
     }
 
     static create(): UUID {
-        return new UUID(crypto.randomUUID());
+        return new UUID(randomUUIDv7());
     }
 
     static restore(value: string): UUID {
