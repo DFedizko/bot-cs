@@ -23,7 +23,7 @@ export class Decimal extends ValueObject<{ value: number }> {
     }
 
     private toString(): string {
-        const formatter = new Intl.NumberFormat("en-US", { notation: "standard", maximumFractionDigits: 20 });
+        const formatter = new Intl.NumberFormat("en-US", { notation: "standard", maximumFractionDigits: 25 });
         return formatter.format(this.props.value);
     }
 }
