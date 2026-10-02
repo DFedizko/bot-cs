@@ -1,16 +1,15 @@
-import { COIN } from '@/shared-kernel/domain/coin';
-import { Money } from '@/shared/domain-primitives/money';
-import { Percentage } from '@/shared/domain-primitives/percentage';
+import { Price } from "@/contexts/trading/bidding/domain/value-objects/price";
 
-describe('Price', () => {
-    it('Should create a price object', () => {
+describe("Price", () => {
+    it("Should create a price object", () => {
         const price = Price.create({
-            marketPrice: Money.fromCents({ amount: 100, currency: COIN }),
-            suggestedPrice: Money.fromCents({ amount: 110, currency: COIN }),
-            aboveRecommendedPercentage: Percentage.fromPercent('0'),
+            marketPriceInCents: 100,
+            suggestedPriceInCents: 110,
+            aboveRecommendedFractionPercentage: "0",
         });
-        expect(price.getMarketPrice().comparteTo(Money.fromCents({ amount: 100, currency: COIN }))).toBe(0);
-        expect(price.getSuggestedPrice().comparteTo(Money.fromCents({ amount: 110, currency: COIN }))).toBe(0);
-        expect(price.getAboveRecommendedPercentage().equals(Percentage.fromPercent('0'))).toBe(true);
+        expect(price.getMarketPrice()).toBe(100n);
+        expect(price.getSuggestedPrice()).toBe(110n);
+        expect(price.getAboveRecommendedPercentage()).toBe("0");
+        expect(price.getCurrency()).toBe("COIN");
     });
 });
