@@ -7,5 +7,7 @@ test("Should vo properties must immutable", () => {
     // @ts-expect-error Expected error to test
     expect(() => (fooVo.props.value = "")).toThrow(Error);
 });
+test("Should comparte two vo's", () =>
+    expect(new FooValueObject("test").equals(new FooValueObject("test"))).toBe(true));
 test("Should create a subclassed value object and ensure it has the same behavior", () =>
     expect(InheritedValueObject.create().getValue()).toBeTypeOf("string"));
