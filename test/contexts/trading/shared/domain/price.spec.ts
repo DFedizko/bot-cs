@@ -1,4 +1,4 @@
-import { Price } from "@/contexts/trading/bidding/domain/value-objects/price";
+import { Price } from "@/contexts/trading/shared/domain/price";
 
 describe("Price", () => {
     it("Should create a price object", () => {
