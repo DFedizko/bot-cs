@@ -16,6 +16,8 @@
             "@/*": ["./*", "../test/*"],
             "@value-object": ["./shared/building-blocks/value-object.ts"],
             "@entity": ["./shared/building-blocks/entity.ts"],
+            "@aggregate-root": ["./shared/building-blocks/aggregate-root.ts"],
+            "@domain-event": ["./shared/building-blocks/domain-event.ts"],
         },
     },
 }
