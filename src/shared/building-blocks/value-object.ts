@@ -1,3 +1,5 @@
+export type Primitive<T> = T extends ValueObject<infer U> ? Primitive<U> : T;
+
 export abstract class ValueObject<T> {
     constructor(protected readonly value: T) {
         this.value = value;
@@ -12,7 +14,7 @@ export abstract class ValueObject<T> {
         );
     }
 
-    getValue<TValue = undefined>(): TValue extends undefined ? T : TValue {
-        return this.value as TValue extends undefined ? T : TValue;
+    getValue(): Primitive<T> {
+        return this.value instanceof ValueObject ? this.value.getValue() : (this.value as Primitive<T>);
     }
 }
