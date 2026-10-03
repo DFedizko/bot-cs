@@ -13,21 +13,21 @@ type DomainEventProps<AggregateId, TPayload> = {
 
 export abstract class DomainEvent<AggregateId extends ValueObject<any>, TPayload = undefined> {
     static readonly EVENT_NAME: string;
-    readonly aggregateId: Primitive<AggregateId>;
     readonly eventId: string;
+    readonly aggregateId: Primitive<AggregateId>;
     readonly name: string;
     readonly payload: Payload<TPayload>;
     readonly ocurredAt: Date;
 
     constructor(props: {
-        aggregateId: AggregateId;
         eventId?: string;
+        aggregateId: AggregateId;
         name: string;
         payload?: Payload<TPayload>;
         ocurredAt?: Date;
     }) {
-        this.aggregateId = props.aggregateId.getValue();
         this.eventId = props?.eventId ?? UUID.create().getValue();
+        this.aggregateId = props.aggregateId.getValue();
         this.name = props.name;
         this.payload = props?.payload as Payload<TPayload>;
         this.ocurredAt = props?.ocurredAt ?? new Date();

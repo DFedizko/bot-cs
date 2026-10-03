@@ -14,8 +14,8 @@ test("Should create an  root", () => {
     expect(fooAggregateRoot.getAge()).toBe(21);
     expect(events).toHaveLength(1);
     expect(event).toBeInstanceOf(FooCreatedDomainEvent);
-    expect(event.aggregateId).toBe(fooAggregateRoot.getId());
     expect(event.eventId).toBeTypeOf("string");
+    expect(event.aggregateId).toBe(fooAggregateRoot.getId());
     expect(event.name).toBe("foo_created");
     expect(event.payload).toMatchObject({ name: "John Doe", email: "john.doe@email.com", age: 21 });
     expect(event.ocurredAt).toEqual(new Date());
