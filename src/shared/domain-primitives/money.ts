@@ -8,46 +8,55 @@ enum ERROR_CODE {
     INVALID_CURRENCY = "INVALID_CURRENCY",
 }
 
-type MoneyProps = {
+export type MoneyProps = {
     amount: bigint;
     currency: Currency;
 };
 
 export class Money extends ValueObject<MoneyProps> {
-    private static readonly DECIMAL_REGEX: RegExp = /^-?\d+(\.\d+)?$/;
+    protected static readonly DECIMAL_REGEX: RegExp = /^-?\d+(\.\d+)?$/;
 
     protected constructor(value: MoneyProps) {
         super(value);
     }
 
     static fromCents({ amount = 0, currency }: { amount: number | bigint; currency: Currency }): Money {
+        Money.validateInteger(amount);
+        return new Money({ amount: BigInt(amount), currency });
+    }
+
+    protected static validateInteger(amount: number | bigint): void {
         if (typeof amount === "number" && !Number.isInteger(amount)) {
             throw new DomainError({
                 message: `The amount of "${amount}" is not a integer`,
                 code: ERROR_CODE.INVALID_AMOUNT,
             });
         }
-        return new Money({ amount: BigInt(amount), currency });
     }
 
     static fromDecimal({ amount, currency }: { amount: string; currency: Currency }): Money {
+        const minorUnits = Money.transformInMinorUnits({ amount, currency });
+        return new Money({ amount: minorUnits, currency });
+    }
+
+    protected static transformInMinorUnits({ amount, currency }: { amount: string; currency: Currency }): bigint {
         const trimmed = amount.trim();
-        if (!Money.DECIMAL_REGEX.test(trimmed)) {
+        Money.validateDecimal(trimmed);
+        const isNegative = trimmed.startsWith("-");
+        const unsigned = isNegative ? trimmed.slice(1) : trimmed;
+        const [intPart, fracPart = ""] = unsigned.split(".");
+        const fracAdjusted = fracPart.padEnd(currency.getDecimals(), "0").slice(0, currency.getDecimals());
+        const minor = BigInt(intPart + fracAdjusted);
+        return isNegative ? -minor : minor;
+    }
+
+    protected static validateDecimal(decimalString: string): void {
+        if (!Money.DECIMAL_REGEX.test(decimalString)) {
             throw new DomainError({
-                message: `Invalid decimal value "${amount}"`,
+                message: `Invalid decimal value "${decimalString}"`,
                 code: ERROR_CODE.INVALID_AMOUNT,
             });
         }
-
-        const isNegative = trimmed.startsWith("-");
-        const unsigned = isNegative ? trimmed.slice(1) : trimmed;
-
-        const [intPart, fracPart = ""] = unsigned.split(".");
-        const fracAdjusted = fracPart.padEnd(currency.getDecimals(), "0").slice(0, currency.getDecimals());
-
-        const minor = BigInt(intPart + fracAdjusted);
-
-        return new Money({ amount: isNegative ? -minor : minor, currency });
     }
 
     add(other: Money): Money {
