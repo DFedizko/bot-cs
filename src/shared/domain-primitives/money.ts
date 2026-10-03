@@ -16,8 +16,8 @@ type MoneyProps = {
 export class Money extends ValueObject<MoneyProps> {
     private static readonly DECIMAL_REGEX: RegExp = /^-?\d+(\.\d+)?$/;
 
-    protected constructor(protected readonly props: MoneyProps) {
-        super(props);
+    protected constructor(value: MoneyProps) {
+        super(value);
     }
 
     static fromCents({ amount = 0, currency }: { amount: number | bigint; currency: Currency }): Money {
@@ -53,16 +53,16 @@ export class Money extends ValueObject<MoneyProps> {
     add(other: Money): Money {
         this.assertSameCurrency(other);
         return new Money({
-            amount: this.props.amount + other.getAmount(),
-            currency: this.props.currency,
+            amount: this.value.amount + other.getAmount(),
+            currency: this.value.currency,
         });
     }
 
     substract(other: Money): Money {
         this.assertSameCurrency(other);
         return new Money({
-            amount: this.props.amount - other.props.amount,
-            currency: this.props.currency,
+            amount: this.value.amount - other.value.amount,
+            currency: this.value.currency,
         });
     }
 
@@ -110,40 +110,39 @@ export class Money extends ValueObject<MoneyProps> {
     }
 
     isZero(): boolean {
-        return this.props.amount === 0n;
+        return this.value.amount === 0n;
     }
 
     isNegative(): boolean {
-        return this.props.amount < 0n;
+        return this.value.amount < 0n;
     }
 
     isPositive(): boolean {
-        return this.props.amount > 0n;
+        return this.value.amount > 0n;
     }
 
     getAmount(): bigint {
-        return this.props.amount;
+        return this.value.amount;
     }
 
     getCurrency(): Currency {
-        return this.props.currency;
+        return this.value.currency;
     }
 
     toCents(): bigint {
-        return this.props.amount;
+        return this.value.amount;
     }
 
     toDecimalString(): string {
-        const abs = this.isNegative() ? -this.props.amount : this.props.amount;
-
-        const digits = abs.toString().padStart(this.props.currency.getDecimals() + 1, "0");
-        const intPart = digits.slice(0, digits.length - this.props.currency.getDecimals());
-        const fracPart = digits.slice(digits.length - this.props.currency.getDecimals());
+        const abs = this.isNegative() ? -this.value.amount : this.value.amount;
+        const digits = abs.toString().padStart(this.value.currency.getDecimals() + 1, "0");
+        const intPart = digits.slice(0, digits.length - this.value.currency.getDecimals());
+        const fracPart = digits.slice(digits.length - this.value.currency.getDecimals());
         return `${this.isNegative() ? "-" : ""}${intPart}.${fracPart}`;
     }
 
     format(): string {
-        return this.props.currency.format(Number(this.toDecimalString()));
+        return this.value.currency.format(Number(this.toDecimalString()));
     }
 
     toString(): string {
@@ -151,9 +150,9 @@ export class Money extends ValueObject<MoneyProps> {
     }
 
     private assertSameCurrency(other: Money) {
-        if (this.props.currency !== other.getCurrency()) {
+        if (this.value.currency !== other.getCurrency()) {
             throw new DomainError({
-                message: `Currency "${other.getCurrency()}" must be the same as "${this.props.currency}"`,
+                message: `Currency "${other.getCurrency()}" must be the same as "${this.value.currency}"`,
                 code: ERROR_CODE.INVALID_CURRENCY,
             });
         }

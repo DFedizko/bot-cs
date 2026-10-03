@@ -1,15 +1,11 @@
 import { ValueObject } from "../building-blocks/value-object";
 import { DomainError } from "../error/domain-error";
 
-export class Decimal extends ValueObject<{ value: number }> {
+export class Decimal extends ValueObject<number> {
     constructor(value: number) {
         if (Number.isInteger(value))
             throw new DomainError({ message: `The number provided: "${value}" must be decimal` });
-        super({ value });
-    }
-
-    getValue(): number {
-        return this.props.value;
+        super(value);
     }
 
     getDecimalPlacesNumber(): number {
@@ -24,6 +20,6 @@ export class Decimal extends ValueObject<{ value: number }> {
 
     private toString(): string {
         const formatter = new Intl.NumberFormat("en-US", { notation: "standard", maximumFractionDigits: 25 });
-        return formatter.format(this.props.value);
+        return formatter.format(this.value);
     }
 }

@@ -20,7 +20,7 @@ export class Price extends ValueObject<{
 }> {
     private constructor(props: CreatePriceProps) {
         const currency = props?.currency ?? COIN;
-        super({
+        super({ 
             aboveRecommendedPercentage: AboveRecommendedPercentage.fromFraction(
                 props.aboveRecommendedFractionPercentage,
             ),
@@ -40,18 +40,18 @@ export class Price extends ValueObject<{
     }
 
     getMarketPrice(): bigint {
-        return this.props.marketPrice.getAmount();
+        return this.value.marketPrice.getAmount();
     }
 
     getSuggestedPrice(): bigint {
-        return this.props.suggestedPrice.getAmount();
+        return this.value.suggestedPrice.getAmount();
     }
 
     getAboveRecommendedPercentage(): string {
-        return this.props.aboveRecommendedPercentage.toFractionString();
+        return this.value.aboveRecommendedPercentage.toFractionString();
     }
 
     getCurrency(): string {
-        return this.props.currency.getCode();
+        return this.value.currency.getCode();
     }
 }

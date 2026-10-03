@@ -14,7 +14,7 @@ const FLOAT_BREAKDOWN: Record<number, [WearName, WearNameAcronym]> = {
     0: [WearName.FACTORY_NEW, WearNameAcronym.FN],
 };
 
-export class Float extends ValueObject<{ value: Decimal }> {
+export class Float extends ValueObject<Decimal> {
     static readonly MAX_DECIMAL_CASES = 20;
 
     constructor(value: number) {
@@ -25,21 +25,21 @@ export class Float extends ValueObject<{ value: Decimal }> {
             throw new DomainError({
                 message: `The float provided: "${value}" must less than ${Float.MAX_DECIMAL_CASES}`,
             });
-        super({ value: decimal });
-    }
-
-    getValue(): number {
-        return this.props.value.getValue();
+        super(decimal);
     }
 
     isExact(): boolean {
-        const decimalPlaces = this.props.value.getDecimalPlacesNumber();
+        const decimalPlaces = this.value.getDecimalPlacesNumber();
         return decimalPlaces >= EXACT_FLOAT_DECIMAL_PLACES;
     }
 
     isApproximate(): boolean {
-        const decimalPlaces = this.props.value.getDecimalPlacesNumber();
+        const decimalPlaces = this.value.getDecimalPlacesNumber();
         return decimalPlaces < EXACT_FLOAT_DECIMAL_PLACES;
+    }
+
+    getValue(): number {
+        return this.value.getValue();
     }
 
     getWear(): WearName {
@@ -56,7 +56,7 @@ export class Float extends ValueObject<{ value: Decimal }> {
     }
 
     private extractFirstTwoDecimalPlaces(): number {
-        const firstTwoDecimalsInString = this.props.value.getDecimalPlaces().slice(0, 2);
+        const firstTwoDecimalsInString = this.value.getDecimalPlaces().slice(0, 2);
         const inDecimal = Number(`0.${firstTwoDecimalsInString}`);
         return inDecimal;
     }

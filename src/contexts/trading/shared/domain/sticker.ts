@@ -31,18 +31,18 @@ export class Sticker extends ValueObject<{
     }
 
     getName(): string {
-        return this.props.name.getValue();
+        return this.value.name.getValue();
     }
 
     getWear(): string | undefined {
-        return this.props.percentageWear?.getFraction();
+        return this.value.percentageWear?.getFraction();
     }
 
     getType(): StickerType {
-        return this.props.type;
+        return this.value.type;
     }
 
     getSlot(): number {
-        return this.props.slot.getValue();
+        return this.value.slot.getValue();
     }
 }

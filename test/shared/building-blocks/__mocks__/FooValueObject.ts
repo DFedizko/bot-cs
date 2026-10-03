@@ -1,11 +1,7 @@
 import { ValueObject } from "@value-object";
 
-export class FooValueObject extends ValueObject<{ value: string }> {
+export class FooValueObject extends ValueObject<string> {
     constructor(value: string) {
-        super({ value });
-    }
-
-    getValue(): string {
-        return this.props.value;
+        super(value);
     }
 }

@@ -17,8 +17,8 @@ enum ERROR_CODE {
 const PERCENT_PER_UNIT = 100;
 
 export class Percentage extends ValueObject<Decimal> {
-    protected constructor(protected readonly fraction: Decimal) {
-        super(fraction);
+    protected constructor(value: Decimal) {
+        super(value);
     }
 
     static fromPercent(percent: string): Percentage {
@@ -30,38 +30,36 @@ export class Percentage extends ValueObject<Decimal> {
     }
 
     of(amount: bigint, rounding: RoundingMode = "HALF_EVEN"): bigint {
-        const portion = new Decimal(amount.toString())
-            .times(this.fraction)
-            .toDecimalPlaces(0, DECIMAL_ROUNDING[rounding]);
+        const portion = new Decimal(amount.toString()).times(this.value).toDecimalPlaces(0, DECIMAL_ROUNDING[rounding]);
         return BigInt(portion.toFixed(0));
     }
 
     isPositive(): boolean {
-        return this.fraction.greaterThan(0n);
+        return this.value.greaterThan(0n);
     }
 
     isNegative(): boolean {
-        return this.fraction.lessThan(0n);
+        return this.value.lessThan(0n);
     }
 
     isZero(): boolean {
-        return this.fraction.isZero();
+        return this.value.isZero();
     }
 
     override equals(vo: Percentage): boolean {
-        return this.fraction.equals(vo.fraction);
+        return this.value.equals(vo.value);
     }
 
     toFractionString(): string {
-        return this.fraction.toString();
+        return this.value.toString();
     }
 
     negate(): Percentage {
-        return new Percentage(this.fraction.negated());
+        return new Percentage(this.value.negated());
     }
 
     toPercentString(): string {
-        return this.fraction.times(PERCENT_PER_UNIT).toString();
+        return this.value.times(PERCENT_PER_UNIT).toString();
     }
 
     toString(): string {

@@ -1,5 +1,5 @@
-import { DomainError } from '@/shared/error/domain-error';
-import { ValueObject } from '../building-blocks/value-object';
+import { DomainError } from "@/shared/error/domain-error";
+import { ValueObject } from "../building-blocks/value-object";
 
 type CurrencyProps = {
     code: string;
@@ -15,19 +15,19 @@ type CreateCurrencyProps = {
 };
 
 enum ERROR_CODE {
-    INVALID_DECIMAL = 'INVALID_DECIMAL',
-    INVALID_CODE = 'INVALID_CODE',
+    INVALID_DECIMAL = "INVALID_DECIMAL",
+    INVALID_CODE = "INVALID_CODE",
 }
 
 export class Currency extends ValueObject<CurrencyProps> {
     private static readonly MAX_DECIMALS = 10;
     private static readonly MAX_CODE_CHARACTERS = 10;
 
-    private constructor(protected readonly props: CurrencyProps) {
-        super(props);
+    private constructor(value: CurrencyProps) {
+        super(value);
     }
 
-    static create({ code, decimals, locale = 'en-US' }: CreateCurrencyProps): Currency {
+    static create({ code, decimals, locale = "en-US" }: CreateCurrencyProps): Currency {
         const cleannedCode = code.trim().toLocaleUpperCase();
         Currency.validateCode(cleannedCode);
         Currency.validateDecimals(decimals);
@@ -40,30 +40,30 @@ export class Currency extends ValueObject<CurrencyProps> {
     }
 
     format(decimalAmount: number): string {
-        if (this.props.isOfficial) {
-            return new Intl.NumberFormat(this.props.locale, {
-                style: 'currency',
-                currency: this.props.code,
-                minimumFractionDigits: this.props.decimals,
+        if (this.value.isOfficial) {
+            return new Intl.NumberFormat(this.value.locale, {
+                style: "currency",
+                currency: this.value.code,
+                minimumFractionDigits: this.value.decimals,
             }).format(decimalAmount);
         }
-        const formattedNumber = new Intl.NumberFormat(this.props.locale, {
-            style: 'decimal',
-            minimumFractionDigits: this.props.decimals,
+        const formattedNumber = new Intl.NumberFormat(this.value.locale, {
+            style: "decimal",
+            minimumFractionDigits: this.value.decimals,
         }).format(decimalAmount);
-        return `${formattedNumber} ${this.props.code}`;
+        return `${formattedNumber} ${this.value.code}`;
     }
 
     getCode(): string {
-        return this.props.code;
+        return this.value.code;
     }
 
     getDecimals(): number {
-        return this.props.decimals;
+        return this.value.decimals;
     }
 
     getLocale(): Intl.LocalesArgument {
-        return this.props.locale;
+        return this.value.locale;
     }
 
     private static validateCode(code: string): void {
@@ -104,8 +104,8 @@ export class Currency extends ValueObject<CurrencyProps> {
 
     private static isOfficialCode(code: string): boolean {
         try {
-            new Intl.NumberFormat('en-US', {
-                style: 'currency',
+            new Intl.NumberFormat("en-US", {
+                style: "currency",
                 currency: code,
             });
             return true;

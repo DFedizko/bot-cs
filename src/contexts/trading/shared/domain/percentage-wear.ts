@@ -2,12 +2,12 @@ import { Percentage } from "@/shared/domain-primitives/percentage";
 import { DomainError } from "@/shared/error/domain-error";
 import { ValueObject } from "@value-object";
 
-export class PercentageWear extends ValueObject<{ percentage: Percentage }> {
+export class PercentageWear extends ValueObject<Percentage> {
     private static readonly MAX_FRACTION = 1;
     // private static readonly MAX_PERCENT = 100;
 
     private constructor(percentage: Percentage) {
-        super({ percentage });
+        super(percentage);
     }
 
     // static fromPercent(percent: string): PercentageWear {
@@ -31,15 +31,15 @@ export class PercentageWear extends ValueObject<{ percentage: Percentage }> {
     }
 
     getPercentage(): string {
-        return this.props.percentage.toPercentString();
+        return this.value.toPercentString();
     }
 
     getPercentageString(): string {
-        return this.props.percentage.toString();
+        return this.value.toString();
     }
 
     getFraction(): string {
-        return this.props.percentage.toFractionString();
+        return this.value.toFractionString();
     }
 
     private static validatePositive(percentString: string) {
