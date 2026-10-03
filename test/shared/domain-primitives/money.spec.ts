@@ -2,18 +2,9 @@ import { Currency } from "@/shared/domain-primitives/currency";
 import { DomainError } from "@/shared/error/domain-error";
 import { Money } from "@/shared/domain-primitives/money";
 import { Percentage } from "@/shared/domain-primitives/percentage";
+import { BRL, USD } from "@/shared-kernel/domain/currencies";
 
 describe("Money", () => {
-    const USD = Currency.create({
-        code: "USD",
-        decimals: 2,
-        locale: "en-US",
-    });
-    const BRL = Currency.create({
-        code: "BRL",
-        decimals: 2,
-        locale: "pt-BR",
-    });
     describe("Creations", () => {
         it("Should create a Money object from cents in number and in bigint", () => {
             expect(Money.fromCents({ amount: 150n, currency: USD }).getCurrency().getCode()).toBe("USD");

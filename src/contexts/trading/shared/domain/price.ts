@@ -1,7 +1,7 @@
 import { AboveRecommendedPercentage } from "@/contexts/trading/shared/domain/above-recommended-percentage";
 import { MarketPrice } from "@/contexts/trading/shared/domain/market-price";
 import { SuggestedPrice } from "@/contexts/trading/shared/domain/suggested-price";
-import { COIN } from "@/shared-kernel/domain/coin";
+import { COIN } from "@/shared-kernel/domain/currencies";
 import { ValueObject } from "@/shared/building-blocks/value-object";
 import { Currency } from "@/shared/domain-primitives/currency";
 
