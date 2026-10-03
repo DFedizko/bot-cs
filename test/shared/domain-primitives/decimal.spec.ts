@@ -2,6 +2,7 @@ import { Decimal } from "@/shared/domain-primitives/decimal";
 import { DomainError } from "@/shared/error/domain-error";
 
 test("Should create a decimal number", () => expect(new Decimal(0.9).getValue()).toBe(0.9));
+test("Should create a negative decimal number", () => expect(new Decimal(-0.9).getValue()).toBe(-0.9));
 test("Should return the decimal places", () =>
     expect(new Decimal(0.0000000001043112345637834).getDecimalPlaces()).toBe("0000000001043112345637834"));
 test("Should return the quantity of decimal places", () =>
