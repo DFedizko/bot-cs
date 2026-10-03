@@ -1,115 +1,115 @@
-import { Currency } from '@/shared/domain-primitives/currency';
-import { DomainError } from '@/shared/error/domain-error';
-import { Money } from '@/shared/domain-primitives/money';
-import { Percentage } from '@/shared/domain-primitives/percentage';
+import { Currency } from "@/shared/domain-primitives/currency";
+import { DomainError } from "@/shared/error/domain-error";
+import { Money } from "@/shared/domain-primitives/money";
+import { Percentage } from "@/shared/domain-primitives/percentage";
 
-describe('Money', () => {
+describe("Money", () => {
     const USD = Currency.create({
-        code: 'USD',
+        code: "USD",
         decimals: 2,
-        locale: 'en-US',
+        locale: "en-US",
     });
     const BRL = Currency.create({
-        code: 'BRL',
+        code: "BRL",
         decimals: 2,
-        locale: 'pt-BR',
+        locale: "pt-BR",
     });
-    describe('Creations', () => {
-        it('Should create a Money object from cents in number and in bigint', () => {
-            expect(Money.fromCents({ amount: 150n, currency: USD }).getCurrency().getCode()).toBe('USD');
+    describe("Creations", () => {
+        it("Should create a Money object from cents in number and in bigint", () => {
+            expect(Money.fromCents({ amount: 150n, currency: USD }).getCurrency().getCode()).toBe("USD");
             expect(Money.fromCents({ amount: 150, currency: USD }).getAmount()).toBe(150n);
         });
-        it('Should create a Money object from decimal', () => {
+        it("Should create a Money object from decimal", () => {
             const money = Money.fromDecimal({
-                amount: '1.55',
+                amount: "1.55",
                 currency: USD,
             });
 
-            expect(money.getCurrency().getCode()).toBe('USD');
+            expect(money.getCurrency().getCode()).toBe("USD");
             expect(money.getAmount()).toBe(155n);
         });
-        it('Should create a Money object from negative cents', () => {
+        it("Should create a Money object from negative cents", () => {
             const money = Money.fromCents({ amount: -150n, currency: USD });
 
-            expect(money.getCurrency().getCode()).toBe('USD');
+            expect(money.getCurrency().getCode()).toBe("USD");
             expect(money.getAmount()).toBe(-150n);
         });
-        it('Should create a Money object from negative decimal', () => {
+        it("Should create a Money object from negative decimal", () => {
             const money = Money.fromDecimal({
-                amount: '-1.55',
+                amount: "-1.55",
                 currency: USD,
             });
 
-            expect(money.getCurrency().getCode()).toBe('USD');
+            expect(money.getCurrency().getCode()).toBe("USD");
             expect(money.getAmount()).toBe(-155n);
         });
-        it('Should pad missing decimals', () => {
-            expect(Money.fromDecimal({ amount: '10.5', currency: BRL }).getAmount()).toBe(1050n);
-            expect(Money.fromDecimal({ amount: '10', currency: BRL }).getAmount()).toBe(1000n);
+        it("Should pad missing decimals", () => {
+            expect(Money.fromDecimal({ amount: "10.5", currency: BRL }).getAmount()).toBe(1050n);
+            expect(Money.fromDecimal({ amount: "10", currency: BRL }).getAmount()).toBe(1000n);
         });
-        it('Should truncate extra decimals', () => {
-            expect(Money.fromDecimal({ amount: '10.509', currency: BRL }).getAmount()).toBe(1050n);
+        it("Should truncate extra decimals", () => {
+            expect(Money.fromDecimal({ amount: "10.509", currency: BRL }).getAmount()).toBe(1050n);
         });
-        describe('Errors', () => {
-            it('Should throw an error when create a Money object with a invalid amount', () => {
-                expect(() => Money.fromDecimal({ amount: 'abc', currency: BRL })).toThrow(DomainError);
+        describe("Errors", () => {
+            it("Should throw an error when create a Money object with a invalid amount", () => {
+                expect(() => Money.fromDecimal({ amount: "abc", currency: BRL })).toThrow(DomainError);
             });
-            it('Should throw an error when create a Money object with a non-integer number', () => {
+            it("Should throw an error when create a Money object with a non-integer number", () => {
                 expect(() => Money.fromCents({ amount: 10.5, currency: BRL })).toThrow(DomainError);
             });
         });
     });
-    describe('Accessors', () => {
-        it('Should getAmount / getCurrency expose the canonical state', () => {
+    describe("Accessors", () => {
+        it("Should getAmount / getCurrency expose the canonical state", () => {
             const money = Money.fromCents({ amount: 1990, currency: USD });
             expect(money.getAmount()).toBe(1990n);
-            expect(money.getCurrency().getCode()).toBe('USD');
+            expect(money.getCurrency().getCode()).toBe("USD");
         });
-        it('Should get money in cents', () => {
-            expect(Money.fromDecimal({ amount: '1.50', currency: USD }).toCents()).toBe(150n);
+        it("Should get money in cents", () => {
+            expect(Money.fromDecimal({ amount: "1.50", currency: USD }).toCents()).toBe(150n);
         });
-        it('Should get money in decimal string', () => {
+        it("Should get money in decimal string", () => {
             expect(
                 Money.fromCents({
                     amount: 5,
                     currency: USD,
                 }).toDecimalString(),
-            ).toBe('0.05');
+            ).toBe("0.05");
             expect(
                 Money.fromCents({
                     amount: 150,
                     currency: USD,
                 }).toDecimalString(),
-            ).toBe('1.50');
+            ).toBe("1.50");
             expect(
                 Money.fromCents({
                     amount: -150,
                     currency: USD,
                 }).toDecimalString(),
-            ).toBe('-1.50');
+            ).toBe("-1.50");
         });
-        it('Should get money amount and currency in string', () => {
+        it("Should get money amount and currency in string", () => {
             expect(
                 Money.fromCents({
                     amount: 150,
                     currency: USD,
                 }).toString(),
-            ).toBe('USD 1.50');
+            ).toBe("USD 1.50");
         });
-        it('Should format money in localized currency string', () => {
+        it("Should format money in localized currency string", () => {
             const money = Money.fromDecimal({
-                amount: '1.00',
+                amount: "1.00",
                 currency: USD,
             });
-            const formatted = money.format().replace(/ /g, ' ');
-            expect(money.format()).toBe('$1.00');
-            expect(formatted).toContain('1.00');
-            expect(formatted).toContain('$');
+            const formatted = money.format().replace(/ /g, " ");
+            expect(money.format()).toBe("$1.00");
+            expect(formatted).toContain("1.00");
+            expect(formatted).toContain("$");
         });
     });
-    describe('Operations', () => {
-        it('Must add up to a certain amount', () => {
-            const money = Money.fromDecimal({ amount: '100.00', currency: USD });
+    describe("Operations", () => {
+        it("Must add up to a certain amount", () => {
+            const money = Money.fromDecimal({ amount: "100.00", currency: USD });
             const moneyToSum = Money.fromCents({ amount: 10000, currency: USD });
             const negativeMoney = Money.fromCents({
                 amount: -2000,
@@ -126,14 +126,14 @@ describe('Money', () => {
             expect(moneyCombined).toBe(20000n);
             expect(negativeMoneyCombined).toBe(-4000n);
         });
-        it('Must subtract a specific amount', () => {
+        it("Must subtract a specific amount", () => {
             const money = Money.fromCents({ amount: 2000, currency: USD });
             const moneyToSubstract = Money.fromDecimal({
-                amount: '20',
+                amount: "20",
                 currency: USD,
             });
             const negativeMoney = Money.fromDecimal({
-                amount: '-20.53',
+                amount: "-20.53",
                 currency: USD,
             });
             const negativeMoneyToSubstract = Money.fromCents({
@@ -147,73 +147,73 @@ describe('Money', () => {
             expect(stolenMoney).toBe(0n);
             expect(negativeMoneyCombined).toBe(0n);
         });
-        it('Should not operate across different currencies', () => {
+        it("Should not operate across different currencies", () => {
             const brl = Money.fromCents({ amount: 100, currency: BRL });
             const usd = Money.fromCents({ amount: 100, currency: USD });
             expect(() => brl.add(usd)).toThrow(DomainError);
             expect(() => brl.substract(usd)).toThrow(DomainError);
         });
-        it('Should multiply scales by an integer factor', () => {
+        it("Should multiply scales by an integer factor", () => {
             const money = Money.fromCents({ amount: 1990, currency: USD });
             expect(money.multiply(3).getAmount()).toBe(5970n);
         });
-        it('Shuld throw an error when multiply non-integer factor', () => {
+        it("Shuld throw an error when multiply non-integer factor", () => {
             const money = Money.fromCents({ amount: 1990, currency: BRL });
             expect(() => money.multiply(1.5)).toThrow(DomainError);
         });
-        it('Should operations return a new instance (immutability)', () => {
+        it("Should operations return a new instance (immutability)", () => {
             const money = Money.fromCents({ amount: 1000, currency: BRL });
             const result = money.add(Money.fromCents({ amount: 1000, currency: BRL }));
             expect(money.getAmount()).toBe(1000n);
             expect(result).not.toBe(money);
         });
     });
-    describe('Verifications', () => {
-        it('Should verify a negative number', () => {
-            const money = Money.fromDecimal({ amount: '-1.50', currency: USD });
+    describe("Verifications", () => {
+        it("Should verify a negative number", () => {
+            const money = Money.fromDecimal({ amount: "-1.50", currency: USD });
             expect(money.isNegative()).toBe(true);
             expect(money.isPositive()).toBe(false);
         });
-        it('Should verify a positive number', () => {
-            const money = Money.fromDecimal({ amount: '1.50', currency: USD });
+        it("Should verify a positive number", () => {
+            const money = Money.fromDecimal({ amount: "1.50", currency: USD });
             expect(money.isPositive()).toBe(true);
             expect(money.isNegative()).toBe(false);
         });
-        it('Should verify is zero', () => {
-            const money = Money.fromDecimal({ amount: '0', currency: USD });
+        it("Should verify is zero", () => {
+            const money = Money.fromDecimal({ amount: "0", currency: USD });
             expect(money.isZero()).toBe(true);
         });
     });
-    describe('Percentages', () => {
-        it('Should money increase with a positive percentage', () => {
+    describe("Percentages", () => {
+        it("Should money increase with a positive percentage", () => {
             const money = Money.fromCents({ amount: 10000, currency: BRL });
-            const result = money.applyPercentage(Percentage.fromPercent('50'));
+            const result = money.applyPercentage(Percentage.fromPercent("50"));
             expect(result.getAmount()).toBe(15000n);
         });
-        it('Should money discount with a negative percentage', () => {
+        it("Should money discount with a negative percentage", () => {
             const money = Money.fromCents({ amount: 10000, currency: BRL });
-            const result = money.applyPercentage(Percentage.fromPercent('-50'));
+            const result = money.applyPercentage(Percentage.fromPercent("-50"));
             expect(result.getAmount()).toBe(5000n);
         });
-        it('Should percentage honours the rounding mode', () => {
+        it("Should percentage honours the rounding mode", () => {
             const money = Money.fromCents({ amount: 50, currency: BRL });
-            expect(money.applyPercentage(Percentage.fromPercent('1'), 'HALF_AWAY_FROM_ZERO').getAmount()).toBe(51n);
-            expect(money.applyPercentage(Percentage.fromPercent('1'), 'HALF_EVEN').getAmount()).toBe(50n);
+            expect(money.applyPercentage(Percentage.fromPercent("1"), "HALF_AWAY_FROM_ZERO").getAmount()).toBe(51n);
+            expect(money.applyPercentage(Percentage.fromPercent("1"), "HALF_EVEN").getAmount()).toBe(50n);
         });
-        it('Should return the money portion of percentage', () => {
+        it("Should return the money portion of percentage", () => {
             const money = Money.fromCents({ amount: 10000, currency: BRL });
-            expect(money.percentageOf(Percentage.fromPercent('50')).getAmount()).toBe(5000n);
+            expect(money.percentageOf(Percentage.fromPercent("50")).getAmount()).toBe(5000n);
         });
     });
-    describe('Comparisons', () => {
-        it('Should comparte equality', () => {
+    describe("Comparisons", () => {
+        it("Should comparte equality", () => {
             const moneyA = Money.fromCents({ amount: 100, currency: USD });
-            const moneyB = Money.fromDecimal({ amount: '1.00', currency: USD });
-            const moneyC = Money.fromDecimal({ amount: '1.00', currency: BRL });
+            const moneyB = Money.fromDecimal({ amount: "1.00", currency: USD });
+            const moneyC = Money.fromDecimal({ amount: "1.00", currency: BRL });
             expect(moneyA.equals(moneyB)).toBe(true);
             expect(moneyA.equals(moneyC)).toBe(false);
         });
-        it('compareTo / isGreaterThan / isLessThan', () => {
+        it("compareTo / isGreaterThan / isLessThan", () => {
             const small = Money.fromCents({ amount: 500, currency: USD });
             const big = Money.fromCents({ amount: 1000, currency: USD });
             expect(small.comparteTo(big)).toBe(-1);
@@ -222,12 +222,12 @@ describe('Money', () => {
             expect(big.isGreaterThan(small)).toBe(true);
             expect(small.isLessThan(big)).toBe(true);
         });
-        it('isZero / isPositive / isNegative', () => {
-            expect(Money.fromDecimal({ amount: '0', currency: USD }).isZero()).toBe(true);
-            expect(Money.fromDecimal({ amount: '1', currency: USD }).isPositive()).toBe(true);
-            expect(Money.fromDecimal({ amount: '-1', currency: USD }).isNegative()).toBe(true);
+        it("isZero / isPositive / isNegative", () => {
+            expect(Money.fromDecimal({ amount: "0", currency: USD }).isZero()).toBe(true);
+            expect(Money.fromDecimal({ amount: "1", currency: USD }).isPositive()).toBe(true);
+            expect(Money.fromDecimal({ amount: "-1", currency: USD }).isNegative()).toBe(true);
         });
-        it('Should not compare different currencies', () => {
+        it("Should not compare different currencies", () => {
             const brl = Money.fromCents({ amount: 100, currency: BRL });
             const usd = Money.fromCents({ amount: 100, currency: USD });
             expect(() => brl.comparteTo(usd)).toThrow(DomainError);

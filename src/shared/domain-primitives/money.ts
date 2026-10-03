@@ -149,6 +149,13 @@ export class Money extends ValueObject<MoneyProps> {
         return `${this.getCurrency().getCode()} ${this.toDecimalString()}`;
     }
 
+    override equals(other: ValueObject<MoneyProps>): boolean {
+        return (
+            this.value.amount === other.getValue().amount &&
+            this.value.currency.getCode() === other.getValue().currency.getCode()
+        );
+    }
+
     private assertSameCurrency(other: Money) {
         if (this.value.currency !== other.getCurrency()) {
             throw new DomainError({
