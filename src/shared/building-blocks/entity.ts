@@ -1,16 +1,9 @@
-import { UUID } from "@/shared/domain-primitives/uuid";
+import { ValueObject } from "./value-object";
 
-export abstract class Entity<Props, Id = string> {
-    readonly id: Id;
+export abstract class Entity<Id extends ValueObject<{ value: unknown }>> {
+    constructor(protected readonly id?: Id) {}
 
-    constructor(
-        protected readonly props: Props,
-        id?: Id,
-    ) {
-        this.id = id ?? (UUID.create() as Id);
-    }
-
-    equals(entity: Entity<Props, Id>): boolean {
+    equals(entity: Entity<Id>): boolean {
         if (entity === undefined || entity === null) return false;
         return entity.id === this.id;
     }
