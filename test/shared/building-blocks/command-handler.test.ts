@@ -6,7 +6,7 @@ const handler = new FooCommandHandler(fooRepository);
 const command = new FooCommand();
 test("Should hanlde a command", async () => {
     await handler.handle(command);
-    expect(handler.subscribedTo()).toEqual(command);
+    expect(handler.subscribedTo()).toEqual(command.name);
     expect(fooRepository.save).toHaveBeenCalledTimes(1);
     expect(fooRepository.save).toHaveBeenCalled();
 });
