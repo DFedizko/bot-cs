@@ -1,5 +1,5 @@
 import { Command } from "@/shared/building-blocks/command";
 
-export class FooCommand implements Command {
-    public readonly name = "foo_command";
+export class FooCommand extends Command {
+    public static readonly COMMAND_NAME: "foo_command";
 }

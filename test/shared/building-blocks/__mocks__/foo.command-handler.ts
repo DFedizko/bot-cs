@@ -5,8 +5,8 @@ import { FooRepository } from "./foo.repository";
 export class FooCommandHandler implements CommandHandler<FooCommand> {
     constructor(private readonly fooRepository: FooRepository) {}
 
-    subscribedTo(): FooCommand {
-        return new FooCommand();
+    subscribedTo(): string {
+        return FooCommand.COMMAND_NAME;
     }
 
     async handle(command: FooCommand): Promise<void> {
