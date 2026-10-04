@@ -63,6 +63,25 @@ export class Auction extends AggregateRoot<AuctionId> {
         return auction;
     }
 
+    placeBid(): void {
+        const ONE_BID_UNIT = 1;
+        const nextBid = this.getNextBid();
+        this.highestBid = HighestBid.fromCents({ amount: nextBid, currency: Auction.AUCTION_CURRENCY });
+        this.numberOfBids = new NumberOfBids(this.numberOfBids.getValue() + ONE_BID_UNIT);
+        this.record(new BidPlacedDomainEvent(this.id));
+    }
+
+    private calculateNextBid(): bigint {
+        const ONE_UNIT = 1n;
+        const highestBidOnePercent = this.highestBid!.percentageOf(Percentage.fromPercent("1"), "HALF_AWAY_FROM_ZERO");
+        if (this.highestBid!.getAmount() < 50n) {
+            return this.highestBid!.add(
+                Money.fromCents({ amount: ONE_UNIT, currency: Auction.AUCTION_CURRENCY }),
+            ).getAmount();
+        }
+        return this.highestBid!.add(highestBidOnePercent).getAmount();
+    }
+
     getId(): string {
         return this.id.getValue();
     }
@@ -101,25 +120,5 @@ export class Auction extends AggregateRoot<AuctionId> {
 
     private hasBid(): boolean {
         return this.numberOfBids.getValue() > 0;
-    }
-
-    private calculateNextBid(): bigint {
-        if (!this.highestBid) throw new Error();
-        const ONE_UNIT = 1n;
-        const highestBidOnePercent = this.highestBid.percentageOf(Percentage.fromPercent("1"), "HALF_AWAY_FROM_ZERO");
-        if (this.highestBid.getAmount() < 50n) {
-            return this.highestBid
-                .add(Money.fromCents({ amount: ONE_UNIT, currency: Auction.AUCTION_CURRENCY }))
-                .getAmount();
-        }
-        return this.highestBid.add(highestBidOnePercent).getAmount();
-    }
-
-    placeBid(): void {
-        const ONE_BID_UNIT = 1;
-        const nextBid = this.getNextBid();
-        this.highestBid = HighestBid.fromCents({ amount: nextBid, currency: Auction.AUCTION_CURRENCY });
-        this.numberOfBids = new NumberOfBids(this.numberOfBids.getValue() + ONE_BID_UNIT);
-        this.record(new BidPlacedDomainEvent(this.id));
     }
 }

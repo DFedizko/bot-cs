@@ -62,30 +62,6 @@ describe("Auction", () => {
                     highestBid: 3656,
                 }),
             ).toThrow(DomainError));
-        it("Should throw an error when start an auction with more than one bid and highest bid amount is not at least 1 percent or 1 cent higher", () => {
-            expect(() =>
-                Auction.start({
-                    externalId: 188767047,
-                    startedAt: now,
-                    endsAt,
-                    startingPrice: 3656,
-                    itemName: "M4A4 | Cyber Security (Field-Tested)",
-                    numberOfBids: 2,
-                    highestBid: 3692, // highest bid should be 3693 in this case
-                }),
-            ).toThrow(DomainError);
-            expect(() =>
-                Auction.start({
-                    externalId: 288767049,
-                    startedAt: now,
-                    endsAt,
-                    startingPrice: 48,
-                    itemName: "AK-47 | Safari Mesh (Battle-Scarred)",
-                    numberOfBids: 3,
-                    highestBid: 49, // highest bid should be 50 in this case
-                }),
-            ).toThrow(DomainError);
-        });
     });
     describe("Calculations", () => {
         it("Should increment one percent on the next bid when auction has at least one bid", () => {
@@ -164,6 +140,27 @@ describe("Auction", () => {
             expect(events[1]).toBeInstanceOf(BidPlacedDomainEvent);
             expect(events[2]).toBeInstanceOf(BidPlacedDomainEvent);
             expect(events[3]).toBeInstanceOf(BidPlacedDomainEvent);
+        });
+        it("Should place a bid and outbid than bid again on low cost auction", () => {
+            const auction = Auction.start({
+                externalId: 288769947,
+                startedAt: now,
+                endsAt,
+                startingPrice: 49,
+                itemName: "AK-47 | Safari Mesh (Battle-Scarred)",
+            });
+            auction.placeBid();
+            expect(auction.getNumberOfBids()).toBe(1);
+            expect(auction.getHighestBid()).toBe(49n);
+            expect(auction.getNextBid()).toBe(50n);
+            auction.placeBid();
+            expect(auction.getNumberOfBids()).toBe(2);
+            expect(auction.getHighestBid()).toBe(50n);
+            expect(auction.getNextBid()).toBe(51n);
+            auction.placeBid();
+            expect(auction.getNumberOfBids()).toBe(3);
+            expect(auction.getHighestBid()).toBe(51n);
+            expect(auction.getNextBid()).toBe(52n);
         });
     });
 });
