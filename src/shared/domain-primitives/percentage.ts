@@ -29,9 +29,9 @@ export class Percentage extends ValueObject<Decimal> {
         return new Percentage(Percentage.parseDecimal(fraction));
     }
 
-    of(amount: bigint, rounding: RoundingMode = "HALF_EVEN"): bigint {
+    of(amount: number, rounding: RoundingMode = "HALF_EVEN"): number {
         const portion = new Decimal(amount.toString()).times(this.value).toDecimalPlaces(0, DECIMAL_ROUNDING[rounding]);
-        return BigInt(portion.toFixed(0));
+        return Number(portion.toFixed(0));
     }
 
     isPositive(): boolean {

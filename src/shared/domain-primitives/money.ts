@@ -9,7 +9,7 @@ enum ERROR_CODE {
 }
 
 export type MoneyProps = {
-    amount: bigint;
+    amount: number;
     currency: Currency;
 };
 
@@ -20,12 +20,12 @@ export class Money extends ValueObject<MoneyProps> {
         super(value);
     }
 
-    static fromCents({ amount = 0, currency }: { amount: number | bigint; currency: Currency }): Money {
+    static fromCents({ amount = 0, currency }: { amount: number; currency: Currency }): Money {
         Money.validateInteger(amount);
-        return new Money({ amount: BigInt(amount), currency });
+        return new Money({ amount, currency });
     }
 
-    protected static validateInteger(amount: number | bigint): void {
+    protected static validateInteger(amount: number): void {
         if (typeof amount === "number" && !Number.isInteger(amount)) {
             throw new DomainError({
                 message: `The amount of "${amount}" is not a integer`,
@@ -39,14 +39,14 @@ export class Money extends ValueObject<MoneyProps> {
         return new Money({ amount: minorUnits, currency });
     }
 
-    protected static transformInMinorUnits({ amount, currency }: { amount: string; currency: Currency }): bigint {
+    protected static transformInMinorUnits({ amount, currency }: { amount: string; currency: Currency }): number {
         const trimmed = amount.trim();
         Money.validateDecimal(trimmed);
         const isNegative = trimmed.startsWith("-");
         const unsigned = isNegative ? trimmed.slice(1) : trimmed;
         const [intPart, fracPart = ""] = unsigned.split(".");
         const fracAdjusted = fracPart.padEnd(currency.getDecimals(), "0").slice(0, currency.getDecimals());
-        const minor = BigInt(intPart + fracAdjusted);
+        const minor = Number(intPart + fracAdjusted);
         return isNegative ? -minor : minor;
     }
 
@@ -75,7 +75,7 @@ export class Money extends ValueObject<MoneyProps> {
         });
     }
 
-    multiply(factor: bigint | number): Money {
+    multiply(factor: number): Money {
         if (typeof factor === "number" && !Number.isInteger(factor)) {
             throw new DomainError({
                 message: `The amount ${factor} is invalid; use an integer value for multiplication, or "applyPercentage" for percentages.`,
@@ -83,7 +83,7 @@ export class Money extends ValueObject<MoneyProps> {
             });
         }
         return new Money({
-            amount: this.getAmount() * BigInt(factor),
+            amount: this.getAmount() * factor,
             currency: this.getCurrency(),
         });
     }
@@ -119,7 +119,7 @@ export class Money extends ValueObject<MoneyProps> {
     }
 
     isZero(): boolean {
-        return this.value.amount === 0n;
+        return this.value.amount === 0;
     }
 
     isNegative(): boolean {
@@ -130,7 +130,7 @@ export class Money extends ValueObject<MoneyProps> {
         return this.value.amount > 0n;
     }
 
-    getAmount(): bigint {
+    getAmount(): number {
         return this.value.amount;
     }
 
@@ -138,7 +138,7 @@ export class Money extends ValueObject<MoneyProps> {
         return this.value.currency;
     }
 
-    toCents(): bigint {
+    toCents(): number {
         return this.value.amount;
     }
 
