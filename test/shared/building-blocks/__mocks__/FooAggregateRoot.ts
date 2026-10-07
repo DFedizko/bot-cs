@@ -1,6 +1,6 @@
 import { AggregateRoot } from "@aggregate-root";
 import { FooId } from "./FooId";
-import { FooCreatedDomainEvent } from "./FooCreatedDomainEvent";
+import { FooCreatedDomainEvent } from "./events/FooCreatedDomainEvent";
 
 export class FooAggregateRoot extends AggregateRoot<FooId> {
     constructor(

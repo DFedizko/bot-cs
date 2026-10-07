@@ -1,5 +1,5 @@
 import { DomainEvent } from "@domain-event";
-import type { FooId } from "./FooId";
+import type { FooId } from "../FooId";
 
 type Payload = { name: string; email: string; age: number };
 

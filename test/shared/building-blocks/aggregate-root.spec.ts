@@ -1,5 +1,5 @@
 import { FooAggregateRoot } from "./__mocks__/FooAggregateRoot";
-import { FooCreatedDomainEvent } from "./__mocks__/FooCreatedDomainEvent";
+import { FooCreatedDomainEvent } from "./__mocks__/events/FooCreatedDomainEvent";
 
 beforeEach(() => jest.setSystemTime(new Date()));
 afterEach(() => jest.setSystemTime());
