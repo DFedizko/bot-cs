@@ -1,4 +1,4 @@
-import { HttpStatus } from "../http/http-status";
+import { HttpStatus } from "../../http/http-status";
 import type { Socket, WsServer } from "./ws-server";
 
 export class WsServerBunAdapter implements WsServer {
