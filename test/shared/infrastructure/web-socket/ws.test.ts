@@ -1,5 +1,10 @@
-import { WsClientBunAdapter } from "@/shared/infrastructure/web-socket/ws-client.bun-adapter";
-import { WsServerBunAdapter } from "@/shared/infrastructure/web-socket/ws-server.bun-adapter";
+import type { WsClient } from "@/shared/infrastructure/web-socket/client/ws-client";
+import { WsClientBunAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.bun-adapter";
+import { WsClientSocketIoAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.socket-io-adapter";
+import { WsServer } from "@/shared/infrastructure/web-socket/server/ws-server";
+import { WsServerBunAdapter } from "@/shared/infrastructure/web-socket/server/ws-server.bun-adapter";
+import { WsServerSocketIoAdapter } from "@/shared/infrastructure/web-socket/server/ws-server.socket-io-adapter";
+import { createServer } from "node:http";
 
 type FooData = {
     name: string;
@@ -7,12 +12,13 @@ type FooData = {
 
 const FOO_MESSAGE = "foo_message";
 let SERVER_URL: string;
-let server: WsServerBunAdapter;
-
-let clients: WsClientBunAdapter[] = [];
+let server: WsServer;
+let clients: WsClient[] = [];
 
 beforeEach(() => {
-    server = new WsServerBunAdapter(0);
+    const http = createServer();
+    server = new WsServerSocketIoAdapter(http);
+    http.listen(9999);
     SERVER_URL = `ws://localhost:${server.port}`;
 });
 
@@ -23,7 +29,7 @@ afterEach(async () => {
 });
 
 const connect = () => {
-    const connection = new WsClientBunAdapter(SERVER_URL);
+    const connection = new WsClientSocketIoAdapter(SERVER_URL);
     clients.push(connection);
     return connection;
 };
@@ -52,7 +58,7 @@ describe("WsServerBunAdapter", () => {
         connect();
         connect();
         let counter = 0;
-        clients.forEach((client, index) => {
+        clients.forEach((client) => {
             client.on(FOO_MESSAGE, (data: FooData) => {
                 expect(data.name).toBe("John Doe");
                 if (++counter === clients.length) done();

@@ -23,7 +23,7 @@ export class WsServerBunAdapter implements WsServer {
         });
     }
 
-    on(_event: "connection", callback: (socket: Socket) => void): void {
+    on(_event: "connection" | string, callback: (socket: Socket) => void): void {
         this.connectionCallbacks.push(callback);
     }
 
