@@ -38,7 +38,7 @@ describe("WsServerBunAdapter", () => {
     it("Should initialize a ws server", () => expect(server.port).toBeTypeOf("number"));
     it("Should notify on connection", (done) => {
         server.on("connection", (socket) => {
-            expect(socket.send).toBeTypeOf("function");
+            expect(socket.emit).toBeTypeOf("function");
             done();
         });
         connect();
@@ -50,7 +50,7 @@ describe("WsServerBunAdapter", () => {
             done();
         });
         server.on("connection", (socket) => {
-            socket.send<FooData>(FOO_MESSAGE, { name: "John Doe" });
+            socket.emit<FooData>(FOO_MESSAGE, { name: "John Doe" });
         });
     });
     it("Should broadcast an event to all connected clients", (done) => {
@@ -65,7 +65,17 @@ describe("WsServerBunAdapter", () => {
             });
         });
         server.on("connection", (socket) => {
-            socket.send<FooData>(FOO_MESSAGE, { name: "John Doe" });
+            socket.emit<FooData>(FOO_MESSAGE, { name: "John Doe" });
         });
+    });
+    it("Should send a message from client to server", (done) => {
+        const client = connect();
+        server.on("connection", (socket) => {
+            socket.on(FOO_MESSAGE, (data: FooData) => {
+                expect(data.name).toBe("John Doe");
+                done();
+            });
+        });
+        client.emit<FooData>(FOO_MESSAGE, { name: "John Doe" });
     });
 });

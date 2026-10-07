@@ -12,7 +12,10 @@ export class WsServerSocketIoAdapter implements WsServer {
 
     on(_event: "connection" | string, callback: (socket: Socket) => void): void {
         this.server.on("connection", (socket) => {
-            callback({ send: (event, data) => socket.emit(event, data) });
+            callback({
+                emit: (event, data) => socket.emit(event, data),
+                on: (event, callback) => socket.on(event, callback),
+            });
         });
     }
 

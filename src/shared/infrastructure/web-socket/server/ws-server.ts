@@ -1,5 +1,6 @@
 export type Socket = {
-    send<T = unknown>(event: string, data: T): void;
+    on(event: string, callback: (data: any) => void): void;
+    emit<T = unknown>(event: string, data: T): void;
 };
 
 export interface WsServer {
