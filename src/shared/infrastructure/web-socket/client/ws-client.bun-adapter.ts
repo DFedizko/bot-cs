@@ -1,4 +1,4 @@
-import type { WsClient } from "./ws-client";
+import type { WsClient, WsClientOptions } from "./ws-client";
 
 type Callback = (data: any) => void;
 
@@ -7,8 +7,8 @@ export class WsClientBunAdapter implements WsClient {
     private readonly callbacks = new Map<string, Callback[]>();
     private readonly queue: string[] = [];
 
-    constructor(url: string) {
-        this.ws = new WebSocket(url);
+    constructor(url: string, options?: WsClientOptions) {
+        this.ws = new WebSocket(url, options);
         this.ws.addEventListener("open", () => {
             this.flush();
             this.trigger("connect");

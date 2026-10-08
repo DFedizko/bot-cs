@@ -1,5 +1,5 @@
 import { HttpStatus } from "@/shared/infrastructure/http/http-status";
-import type { WsClient } from "@/shared/infrastructure/web-socket/client/ws-client";
+import type { WsClient, WsClientOptions } from "@/shared/infrastructure/web-socket/client/ws-client";
 import { WsClientBunAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.bun-adapter";
 import { WsClientSocketIoAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.socket-io-adapter";
 import { WsServer } from "@/shared/infrastructure/web-socket/server/ws-server";
@@ -16,6 +16,7 @@ const FOO_MESSAGE = "foo_message";
 let server: WsServer;
 let SERVER_URL: string;
 let clients: WsClient[] = [];
+let headers: Record<string, string>;
 let stop: () => Promise<void> | void;
 
 const setupBun = () => {
@@ -23,6 +24,7 @@ const setupBun = () => {
     const bun = Bun.serve({
         port: 0,
         fetch: (req, server) => {
+            headers = Object.fromEntries(req.headers);
             if (server.upgrade(req)) return;
             return new Response("Upgrade failed", { status: HttpStatus.INTERNAL_SERVER_ERROR });
         },
@@ -36,6 +38,9 @@ const setupBun = () => {
 
 const setupSocketIo = async () => {
     const http = createServer();
+    http.on("upgrade", (req) => {
+        headers = req.headers as Record<string, string>;
+    });
     server = new WsServerSocketIoAdapter(http);
     await new Promise<void>((res) => http.listen(0, res));
     SERVER_URL = `ws://localhost:${(http.address() as AddressInfo).port}`;
@@ -47,8 +52,8 @@ const setupSocketIo = async () => {
 };
 
 describe.each([
-    ["Bun", setupBun, (url: string) => new WsClientBunAdapter(url)],
-    ["Socket.IO", setupSocketIo, (url: string) => new WsClientSocketIoAdapter(url)],
+    ["Bun", setupBun, (url: string, options?: WsClientOptions) => new WsClientBunAdapter(url, options)],
+    ["Socket.IO", setupSocketIo, (url: string, options?: WsClientOptions) => new WsClientSocketIoAdapter(url, options)],
 ] as const)("WsServer (%s)", (_name, setup, createClient) => {
     beforeEach(async () => {
         await setup();
@@ -60,8 +65,8 @@ describe.each([
         await stop();
     });
 
-    const connect = () => {
-        const connection: WsClient = createClient(SERVER_URL);
+    const connect = (options?: WsClientOptions) => {
+        const connection: WsClient = createClient(SERVER_URL, options);
         clients.push(connection);
         return connection;
     };
@@ -107,5 +112,12 @@ describe.each([
             });
         });
         client.emit<FooData>(FOO_MESSAGE, { name: "John Doe" });
+    });
+    it("Should receive headers from client", (done) => {
+        server.on("connection", () => {
+            expect(headers["x-api-key"]).toBe("1");
+            done();
+        });
+        const client = connect({ headers: { "x-api-key": "1" } });
     });
 });

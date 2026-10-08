@@ -1,11 +1,11 @@
 import { io, type Socket } from "socket.io-client";
-import type { WsClient } from "./ws-client";
+import type { WsClient, WsClientOptions } from "./ws-client";
 
 export class WsClientSocketIoAdapter implements WsClient {
     private readonly socket: Socket;
 
-    constructor(url: string) {
-        this.socket = io(url);
+    constructor(url: string, options?: WsClientOptions) {
+        this.socket = io(url, { transports: ["websocket"], extraHeaders: options?.headers });
     }
 
     emit<T = unknown>(event: string, data: T): void {
