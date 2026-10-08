@@ -6,7 +6,7 @@ export class InternalServerError extends HttpError {
         super({
             message: "Internal server error",
             code: "INTERNAL_SERVER_ERROR",
-            httpStatus: HttpStatus.INTERNAL_SERVER_ERROR,
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
         });
     }
 }
