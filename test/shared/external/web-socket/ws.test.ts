@@ -1,71 +1,55 @@
-import { HttpStatus } from "@/shared/infrastructure/http/http-status";
 import type { WsClient, WsClientOptions } from "@/shared/infrastructure/web-socket/ws-client";
 import { WsClientBunAdapter } from "@/shared/external/web-socket/client/ws-client.bun-adapter";
 import { WsClientSocketIoAdapter } from "@/shared/external/web-socket/client/ws-client.socket-io-adapter";
-import { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
+import type { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
 import { WsServerBunAdapter } from "@/shared/external/web-socket/server/ws-server.bun-adapter";
 import { WsServerSocketIoAdapter } from "@/shared/external/web-socket/server/ws-server.socket-io-adapter";
-import { createServer } from "node:http";
-import { AddressInfo } from "node:net";
+import { HttpServerBunAdapter } from "@/shared/external/http/server/http-server.bun-adapter";
+import { HttpServerExpressAdapter } from "@/shared/external/http/server/http-server.express-adapter";
+import type { HttpServer } from "@/shared/infrastructure/http/http-server";
 
 type FooData = {
     name: string;
 };
 const FOO_MESSAGE = "foo_message";
+const PORT = 8000;
+const SERVER_URL = `ws://localhost:${PORT}`;
 
+let httpServer: HttpServer;
 let server: WsServer;
-let SERVER_URL: string;
 let clients: WsClient[] = [];
-let headers: Record<string, string>;
-let stop: () => Promise<void> | void;
-
-const setupBun = () => {
-    const ws = new WsServerBunAdapter();
-    const bun = Bun.serve({
-        port: 0,
-        fetch: (req, server) => {
-            headers = Object.fromEntries(req.headers);
-            if (server.upgrade(req)) return;
-            return new Response("Upgrade failed", { status: HttpStatus.INTERNAL_SERVER_ERROR });
-        },
-        websocket: ws.websocket,
-    });
-    ws.attatch(bun);
-    server = ws;
-    SERVER_URL = `ws://localhost:${bun.port}`;
-    stop = () => bun.stop(true);
-};
-
-const setupSocketIo = async () => {
-    const http = createServer();
-    http.on("upgrade", (req) => {
-        headers = req.headers as Record<string, string>;
-    });
-    server = new WsServerSocketIoAdapter(http);
-    await new Promise<void>((res) => http.listen(0, res));
-    SERVER_URL = `ws://localhost:${(http.address() as AddressInfo).port}`;
-    stop = () =>
-        new Promise<void>((res) => {
-            http.closeAllConnections();
-            http.close(() => res());
-        });
-};
 
 describe.each([
-    ["Bun", setupBun, (url: string, options?: WsClientOptions) => new WsClientBunAdapter(url, options)],
-    ["Socket.IO", setupSocketIo, (url: string, options?: WsClientOptions) => new WsClientSocketIoAdapter(url, options)],
-] as const)("WsServer (%s)", (_name, setup, createClient) => {
-    beforeEach(async () => {
-        await setup();
+    [
+        "Bun",
+        (ws: WsServerBunAdapter) => new HttpServerBunAdapter(ws),
+        (url: string, options?: WsClientOptions) => new WsClientBunAdapter(url, options),
+    ],
+    [
+        "Socket.IO",
+        () => new HttpServerExpressAdapter(),
+        (url: string, options?: WsClientOptions) => new WsClientSocketIoAdapter(url, options),
+    ],
+] as const)("WsServer (%s)", (name, createHttpServer, createClient) => {
+    beforeEach(() => {
+        if (name === "Bun") {
+            server = new WsServerBunAdapter();
+            httpServer = createHttpServer(server as WsServerBunAdapter);
+            httpServer.listen(PORT);
+            return;
+        }
+        httpServer = createHttpServer();
+        server = new WsServerSocketIoAdapter((httpServer as HttpServerExpressAdapter).http);
+        httpServer.listen(PORT);
     });
 
     afterEach(async () => {
         clients.forEach((connection) => connection.close());
         clients = [];
-        await stop();
+        await httpServer.close();
     });
 
-    const connect = (options?: WsClientOptions) => {
+    const connect = (options?: WsClientOptions): WsClient => {
         const connection: WsClient = createClient(SERVER_URL, options);
         clients.push(connection);
         return connection;
@@ -114,8 +98,8 @@ describe.each([
         client.emit<FooData>(FOO_MESSAGE, { name: "John Doe" });
     });
     it("Should receive headers from client", (done) => {
-        server.on("connection", () => {
-            expect(headers["x-api-key"]).toBe("1");
+        server.on("connection", (socket) => {
+            expect(socket.headers["x-api-key"]).toBe("1");
             done();
         });
         connect({ headers: { "x-api-key": "1" } });
