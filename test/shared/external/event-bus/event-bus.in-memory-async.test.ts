@@ -2,7 +2,7 @@ import { EventBus } from "@/shared/application/event-bus";
 import { FooCreatedDomainEvent } from "@/shared/building-blocks/__mocks__/events/FooCreatedDomainEvent";
 import { FooId } from "@/shared/building-blocks/__mocks__/FooId";
 import type { EventListener } from "@/shared/application/event-listener";
-import { EventBusInMemoryAsync } from "@/shared/infrastructure/event-bus/event-bus.in-memory-async";
+import { EventBusInMemoryAsync } from "@/shared/external/event-bus/event-bus.in-memory-async";
 import { OnFooCreatedEventListener } from "@/shared/application/__stubs__/on-foo-created.event-listener";
 import type { FooRepository } from "@/shared/building-blocks/__mocks__/foo.repository";
 import { FooUpdatedDomainEvent } from "@/shared/building-blocks/__mocks__/events/FooUpdatedDomainEvent";

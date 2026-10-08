@@ -1,7 +1,6 @@
-import { CommandHandler } from "@/shared/building-blocks/command-handler";
-import { CommandBus } from "./command-bus";
-import { CommandHandlers } from "./command-handlers";
-import { Command } from "@/shared/building-blocks/command";
+import type { CommandBus } from "../../infrastructure/command-bus/command-bus";
+import type { CommandHandlers } from "../../infrastructure/command-bus/command-handlers";
+import type { Command } from "@/shared/building-blocks/command";
 
 export class CommandBusInMemory implements CommandBus {
     constructor(private readonly commandHandlers: CommandHandlers) {}

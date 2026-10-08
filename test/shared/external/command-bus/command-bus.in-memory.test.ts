@@ -3,7 +3,7 @@ import { FooRepository } from "@/shared/building-blocks/__mocks__/foo.repository
 import { Command } from "@/shared/building-blocks/command";
 import type { CommandHandler } from "@/shared/building-blocks/command-handler";
 import { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
-import { CommandBusInMemory } from "@/shared/infrastructure/command-bus/command-bus.in-memory";
+import { CommandBusInMemory } from "@/shared/external/command-bus/command-bus.in-memory";
 import { CommandHandlers } from "@/shared/infrastructure/command-bus/command-handlers";
 
 let fooRepository: FooRepository;
