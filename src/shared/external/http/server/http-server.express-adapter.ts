@@ -1,5 +1,5 @@
 import express, { type Express, type Request as ExpressRequest, type Response as ExpressResponse } from "express";
-import type { Callback, HttpRequest, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
+import type { Callback, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
 import { HttpStatus } from "../../../infrastructure/http/http-status";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
 import { createServer, type Server } from "node:http";
