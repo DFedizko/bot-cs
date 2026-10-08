@@ -9,7 +9,7 @@ export type HttpOptions<TBody = unknown, THeaders = HttpHeaders> = {
 export interface HttpClient {
     get<TResult, THeaders extends HttpHeaders = HttpHeaders>(
         path: string,
-        options?: HttpOptions<undefined, THeaders>,
+        options?: Omit<HttpOptions<undefined, THeaders>, "body">,
     ): Promise<TResult>;
     post<TResult, TBody = unknown, THeaders extends HttpHeaders = HttpHeaders>(
         path: string,

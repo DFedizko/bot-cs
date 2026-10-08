@@ -1,9 +1,9 @@
-import { AxiosHttpClient } from "@/shared/infrastructure/http/axios.http-client";
+import { HttpClientAxiosAdapter } from "@/shared/infrastructure/http/http-client.axios-adapter";
 import { HttpClient } from "@/shared/infrastructure/http/http-client";
 
 let httpClient: HttpClient;
 
-beforeEach(() => (httpClient = new AxiosHttpClient("https://jsonplaceholder.typicode.com")));
+beforeEach(() => (httpClient = new HttpClientAxiosAdapter("https://jsonplaceholder.typicode.com")));
 
 describe("HttpClient", () => {
     it("GET", async () => {
