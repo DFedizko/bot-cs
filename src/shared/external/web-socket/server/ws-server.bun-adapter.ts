@@ -1,4 +1,4 @@
-import type { Socket, WsServer } from "./ws-server";
+import type { Socket, WsServer } from "../../../infrastructure/web-socket/ws-server";
 
 type Callback = (data: any) => void;
 

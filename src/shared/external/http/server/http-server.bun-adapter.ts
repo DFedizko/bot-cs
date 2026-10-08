@@ -1,4 +1,4 @@
-import { WsServerBunAdapter } from "../../../infrastructure/web-socket/server/ws-server.bun-adapter";
+import { WsServerBunAdapter } from "../../web-socket/server/ws-server.bun-adapter";
 import type { Callback, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
 import { HttpStatus } from "../../../infrastructure/http/http-status";
 

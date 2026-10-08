@@ -1,4 +1,4 @@
-import type { Socket, WsServer } from "./ws-server";
+import type { Socket, WsServer } from "../../../infrastructure/web-socket/ws-server";
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
 

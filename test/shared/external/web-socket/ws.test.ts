@@ -1,10 +1,10 @@
 import { HttpStatus } from "@/shared/infrastructure/http/http-status";
-import type { WsClient, WsClientOptions } from "@/shared/infrastructure/web-socket/client/ws-client";
-import { WsClientBunAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.bun-adapter";
-import { WsClientSocketIoAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.socket-io-adapter";
-import { WsServer } from "@/shared/infrastructure/web-socket/server/ws-server";
-import { WsServerBunAdapter } from "@/shared/infrastructure/web-socket/server/ws-server.bun-adapter";
-import { WsServerSocketIoAdapter } from "@/shared/infrastructure/web-socket/server/ws-server.socket-io-adapter";
+import type { WsClient, WsClientOptions } from "@/shared/infrastructure/web-socket/ws-client";
+import { WsClientBunAdapter } from "@/shared/external/web-socket/client/ws-client.bun-adapter";
+import { WsClientSocketIoAdapter } from "@/shared/external/web-socket/client/ws-client.socket-io-adapter";
+import { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
+import { WsServerBunAdapter } from "@/shared/external/web-socket/server/ws-server.bun-adapter";
+import { WsServerSocketIoAdapter } from "@/shared/external/web-socket/server/ws-server.socket-io-adapter";
 import { createServer } from "node:http";
 import { AddressInfo } from "node:net";
 

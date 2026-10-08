@@ -1,4 +1,4 @@
-import type { WsClient, WsClientOptions } from "./ws-client";
+import type { WsClient, WsClientOptions } from "../../../infrastructure/web-socket/ws-client";
 
 type Callback = (data: any) => void;
 

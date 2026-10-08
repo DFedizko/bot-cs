@@ -1,5 +1,5 @@
 import { io, type Socket } from "socket.io-client";
-import type { WsClient, WsClientOptions } from "./ws-client";
+import type { WsClient, WsClientOptions } from "../../../infrastructure/web-socket/ws-client";
 
 export class WsClientSocketIoAdapter implements WsClient {
     private readonly socket: Socket;
