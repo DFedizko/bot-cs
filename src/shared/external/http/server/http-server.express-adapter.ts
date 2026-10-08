@@ -4,12 +4,13 @@ import { HttpStatus } from "../../../infrastructure/http/http-status";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
 import { createServer, type Server } from "node:http";
 import cookieParser from "cookie-parser";
+import type { HttpHeaders } from "@/shared/infrastructure/http/http-headers";
 
 const ONE_SECOND_IN_MS = 1000;
 
 export class HttpServerExpressAdapter implements HttpServer {
     private readonly app: Express;
-    private http: Server;
+    readonly http: Server;
 
     constructor() {
         this.app = express();
@@ -54,7 +55,7 @@ export class HttpServerExpressAdapter implements HttpServer {
         this.app[httpMethod]!(path, async (expressRequest: ExpressRequest, expressResponse: ExpressResponse) => {
             const response = await callback({
                 body: expressRequest.body,
-                headers: expressRequest.headers as Record<string, string>,
+                headers: expressRequest.headers as HttpHeaders,
                 params: expressRequest.params as Record<string, string>,
                 searchParams: expressRequest.query as Record<string, string>,
                 cookies: expressRequest.cookies ?? {},

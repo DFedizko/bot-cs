@@ -1,3 +1,4 @@
+import type { HttpHeaders } from "./http-headers";
 import { HttpStatus } from "./http-status";
 
 export type Cookie = {
@@ -12,7 +13,7 @@ export type Cookie = {
 export type HttpRequest = {
     params: Record<string, string>;
     searchParams: Record<string, string>;
-    headers: Record<string, string>;
+    headers: HttpHeaders;
     cookies: Record<string, string>;
     body: unknown;
 };
@@ -20,7 +21,7 @@ export type HttpRequest = {
 export type HttpResponse = {
     status?: HttpStatus;
     body?: unknown;
-    headers?: Record<string, string>;
+    headers?: HttpHeaders;
 	cookies?: Record<string, Cookie>;
 	clearCookies?: string[];
 };

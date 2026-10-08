@@ -1,4 +1,4 @@
-export type HttpHeaders = Readonly<Record<string, string>>;
+import type { HttpHeaders } from "./http-headers";
 
 export type HttpOptions<TBody = unknown, THeaders = HttpHeaders> = {
     body?: TBody;

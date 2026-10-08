@@ -39,7 +39,7 @@ export class HttpServerBunAdapter implements HttpServer {
             },
             websocket: this.ws?.websocket ?? { message() {} },
         });
-        this.ws?.attatch(this.server);
+		this.ws?.attatch(this.server);
     }
 
     async close(): Promise<void> {
