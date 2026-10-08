@@ -6,7 +6,7 @@ type BunCallback = (req: Bun.BunRequest) => Promise<Response>;
 
 export class HttpServerBunAdapter implements HttpServer {
     private routes: Record<string, Partial<Record<Bun.Serve.HTTPMethod, BunCallback>>> = {};
-    private server?: Bun.Server<undefined>;
+    private server?: Bun.Server<unknown>;
 
     constructor(private readonly ws?: WsServerBunAdapter) {}
 
@@ -31,15 +31,18 @@ export class HttpServerBunAdapter implements HttpServer {
             port,
             routes: {
                 ...this.routes,
-                "/*": () => new Response("Not found", { status: HttpStatus.NOT_FOUND }),
             },
             fetch: (req, server) => {
-                if (this.ws && server.upgrade(req)) return;
-                return new Response("Upgrade failed", { status: HttpStatus.INTERNAL_SERVER_ERROR });
+                const isWebsocket = req.headers.get("upgrade")?.toLocaleLowerCase() === "websocket";
+                if (isWebsocket) {
+                    if (this.ws && server.upgrade(req, { data: { headers: req.headers } })) return;
+                    return new Response("Upgrade failed", { status: HttpStatus.INTERNAL_SERVER_ERROR });
+                }
+                return new Response("Not found", { status: HttpStatus.NOT_FOUND });
             },
             websocket: this.ws?.websocket ?? { message() {} },
         });
-		this.ws?.attatch(this.server);
+        this.ws?.attatch(this.server);
     }
 
     async close(): Promise<void> {

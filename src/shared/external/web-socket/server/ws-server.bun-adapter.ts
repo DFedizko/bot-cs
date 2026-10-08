@@ -1,13 +1,14 @@
 import type { Socket, WsServer } from "../../../infrastructure/web-socket/ws-server";
 
-type Callback = (data: any) => void;
+type Callback = (data: unknown) => void;
+type WebsocketData = { headers: Bun.__internal.BunHeadersOverride };
 
 export class WsServerBunAdapter implements WsServer {
-    private server?: Bun.Server<undefined>;
+    private server?: Bun.Server<WebsocketData>;
     private connectionCallbacks: ((socket: Socket) => void)[] = [];
-    private sockets = new WeakMap<Bun.ServerWebSocket<undefined>, Map<string, Callback[]>>();
+    private sockets = new WeakMap<Bun.ServerWebSocket<WebsocketData>, Map<string, Callback[]>>();
 
-    readonly websocket: Bun.WebSocketHandler<undefined> = {
+    readonly websocket: Bun.WebSocketHandler<WebsocketData> = {
         open: (ws) => {
             ws.subscribe("all");
             const handlers = new Map<string, Callback[]>();
@@ -15,6 +16,7 @@ export class WsServerBunAdapter implements WsServer {
             const socket: Socket = {
                 emit: (event, data) => ws.send(JSON.stringify({ event, data })),
                 on: (event, callback) => handlers.set(event, [...(handlers.get(event) ?? []), callback]),
+                headers: Object.fromEntries(ws.data.headers),
             };
             this.connectionCallbacks.forEach((callback) => callback(socket));
         },
@@ -27,12 +29,16 @@ export class WsServerBunAdapter implements WsServer {
         },
     };
 
-    attatch(server: Bun.Server<undefined>): void {
+    attatch(server: Bun.Server<WebsocketData>): void {
         this.server = server;
     }
 
-    upgrade(req: Request, server: Bun.Server<undefined>): boolean {
-        return server.upgrade(req);
+    upgrade(req: Request, server: Bun.Server<WebsocketData>): boolean {
+        return server.upgrade(req, {
+            data: {
+                headers: req.headers,
+            },
+        });
     }
 
     on(_event: "connection" | string, callback: (socket: Socket) => void): void {

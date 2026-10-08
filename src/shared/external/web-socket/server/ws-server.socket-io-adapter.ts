@@ -1,6 +1,7 @@
 import type { Socket, WsServer } from "../../../infrastructure/web-socket/ws-server";
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
+import type { HttpHeaders } from "@/shared/infrastructure/http/http-headers";
 
 export class WsServerSocketIoAdapter implements WsServer {
     private readonly server: Server;
@@ -14,6 +15,7 @@ export class WsServerSocketIoAdapter implements WsServer {
             callback({
                 emit: (event, data) => socket.emit(event, data),
                 on: (event, callback) => socket.on(event, callback),
+                headers: socket.handshake.headers as HttpHeaders,
             });
         });
     }
