@@ -1,7 +1,6 @@
 import type { Socket, WsServer } from "./ws-server";
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
-import type { AddressInfo } from "node:net";
 
 export class WsServerSocketIoAdapter implements WsServer {
     private readonly server: Server;
@@ -21,13 +20,5 @@ export class WsServerSocketIoAdapter implements WsServer {
 
     emit<T = unknown>(event: string, data: T): void {
         this.server.emit(event, data);
-    }
-
-    async close(): Promise<void> {
-        await this.server.close();
-    }
-
-    get port(): number {
-        return (this.httpServer.address() as AddressInfo).port;
     }
 }

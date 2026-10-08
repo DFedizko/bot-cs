@@ -1,3 +1,4 @@
+import { HttpStatus } from "@/shared/infrastructure/http/http-status";
 import type { WsClient } from "@/shared/infrastructure/web-socket/client/ws-client";
 import { WsClientBunAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.bun-adapter";
 import { WsClientSocketIoAdapter } from "@/shared/infrastructure/web-socket/client/ws-client.socket-io-adapter";
@@ -5,37 +6,66 @@ import { WsServer } from "@/shared/infrastructure/web-socket/server/ws-server";
 import { WsServerBunAdapter } from "@/shared/infrastructure/web-socket/server/ws-server.bun-adapter";
 import { WsServerSocketIoAdapter } from "@/shared/infrastructure/web-socket/server/ws-server.socket-io-adapter";
 import { createServer } from "node:http";
+import { AddressInfo } from "node:net";
 
 type FooData = {
     name: string;
 };
-
 const FOO_MESSAGE = "foo_message";
-let SERVER_URL: string;
+
 let server: WsServer;
+let SERVER_URL: string;
 let clients: WsClient[] = [];
+let stop: () => Promise<void> | void;
 
-beforeEach(() => {
-    const http = createServer();
-    server = new WsServerSocketIoAdapter(http);
-    http.listen(9999);
-    SERVER_URL = `ws://localhost:${server.port}`;
-});
-
-afterEach(async () => {
-    clients.forEach((client) => client.close());
-    clients = [];
-    await server.close();
-});
-
-const connect = () => {
-    const connection = new WsClientSocketIoAdapter(SERVER_URL);
-    clients.push(connection);
-    return connection;
+const setupBun = () => {
+    const ws = new WsServerBunAdapter();
+    const bun = Bun.serve({
+        port: 0,
+        fetch: (req, server) => {
+            if (server.upgrade(req)) return;
+            return new Response("Upgrade failed", { status: HttpStatus.INTERNAL_SERVER_ERROR });
+        },
+        websocket: ws.websocket,
+    });
+    ws.attatch(bun);
+    server = ws;
+    SERVER_URL = `ws://localhost:${bun.port}`;
+    stop = () => bun.stop(true);
 };
 
-describe("WsServerBunAdapter", () => {
-    it("Should initialize a ws server", () => expect(server.port).toBeTypeOf("number"));
+const setupSocketIo = async () => {
+    const http = createServer();
+    server = new WsServerSocketIoAdapter(http);
+    await new Promise<void>((res) => http.listen(0, res));
+    SERVER_URL = `ws://localhost:${(http.address() as AddressInfo).port}`;
+    stop = () =>
+        new Promise<void>((res) => {
+            http.closeAllConnections();
+            http.close(() => res());
+        });
+};
+
+describe.each([
+    ["Bun", setupBun, (url: string) => new WsClientBunAdapter(url)],
+    ["Socket.IO", setupSocketIo, (url: string) => new WsClientSocketIoAdapter(url)],
+] as const)("WsServer (%s)", (_name, setup, createClient) => {
+    beforeEach(async () => {
+        await setup();
+    });
+
+    afterEach(async () => {
+        clients.forEach((connection) => connection.close());
+        clients = [];
+        await stop();
+    });
+
+    const connect = () => {
+        const connection: WsClient = createClient(SERVER_URL);
+        clients.push(connection);
+        return connection;
+    };
+
     it("Should notify on connection", (done) => {
         server.on("connection", (socket) => {
             expect(socket.emit).toBeTypeOf("function");

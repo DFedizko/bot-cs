@@ -1,26 +1,38 @@
-import { HttpStatus } from "../../http/http-status";
 import type { Socket, WsServer } from "./ws-server";
 
-export class WsServerBunAdapter implements WsServer {
-    public readonly server: Bun.Server<undefined>;
-    private connectionCallbacks: ((socket: Socket) => void)[] = [];
+type Callback = (data: any) => void;
 
-    constructor(port: number) {
-        this.server = Bun.serve({
-            fetch(req, server) {
-                if (server.upgrade(req)) return;
-                return new Response("Upgrade failed", { status: HttpStatus.INTERNAL_SERVER_ERROR });
-            },
-            port,
-            websocket: {
-                open: (ws) => {
-                    ws.subscribe("all");
-                    const socket: Socket = { send: (event, data) => ws.send(JSON.stringify({ event, data })) };
-                    this.connectionCallbacks.forEach((callbackfn) => callbackfn(socket));
-                },
-                message() {},
-            },
-        });
+export class WsServerBunAdapter implements WsServer {
+    private server?: Bun.Server<undefined>;
+    private connectionCallbacks: ((socket: Socket) => void)[] = [];
+    private sockets = new WeakMap<Bun.ServerWebSocket<undefined>, Map<string, Callback[]>>();
+
+    readonly websocket: Bun.WebSocketHandler<undefined> = {
+        open: (ws) => {
+            ws.subscribe("all");
+            const handlers = new Map<string, Callback[]>();
+            this.sockets.set(ws, handlers);
+            const socket: Socket = {
+                emit: (event, data) => ws.send(JSON.stringify({ event, data })),
+                on: (event, callback) => handlers.set(event, [...(handlers.get(event) ?? []), callback]),
+            };
+            this.connectionCallbacks.forEach((callback) => callback(socket));
+        },
+        message: (ws, message) => {
+            const { event, data } = JSON.parse(String(message));
+            this.sockets
+                .get(ws)
+                ?.get(event)
+                ?.forEach((callback) => callback(data));
+        },
+    };
+
+    attatch(server: Bun.Server<undefined>): void {
+        this.server = server;
+    }
+
+    upgrade(req: Request, server: Bun.Server<undefined>): boolean {
+        return server.upgrade(req);
     }
 
     on(_event: "connection" | string, callback: (socket: Socket) => void): void {
@@ -28,14 +40,6 @@ export class WsServerBunAdapter implements WsServer {
     }
 
     emit<T = unknown>(event: string, data: T): void {
-        this.server.publish("all", JSON.stringify({ event, data }));
-    }
-
-    async close(): Promise<void> {
-        await this.server.stop(true);
-    }
-
-    get port(): number {
-        return this.server.port!;
+        this.server?.publish("all", JSON.stringify({ event, data }));
     }
 }
