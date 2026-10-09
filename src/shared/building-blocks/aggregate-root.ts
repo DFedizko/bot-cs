@@ -2,14 +2,16 @@ import { DomainEvent } from "./domain-event";
 import { Entity } from "./entity";
 import { ValueObject } from "./value-object";
 
-export abstract class AggregateRoot<AggregateId extends ValueObject<any>> extends Entity<AggregateId> {
-    private domainEvents: DomainEvent<AggregateId, unknown>[] = [];
+export type AggregateId = ValueObject<unknown>;
 
-    record(domainEvent: DomainEvent<AggregateId, unknown>): void {
+export abstract class AggregateRoot<TId extends AggregateId> extends Entity<TId> {
+    private domainEvents: DomainEvent[] = [];
+
+    record(domainEvent: DomainEvent): void {
         this.domainEvents.push(domainEvent);
     }
 
-    pullDomainEvents(): DomainEvent<AggregateId, unknown>[] {
+    pullDomainEvents(): DomainEvent[] {
         const domainEvents = this.domainEvents;
         this.domainEvents = [];
         return domainEvents;

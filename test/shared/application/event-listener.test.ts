@@ -5,7 +5,7 @@ import { FooCreatedDomainEvent } from "../building-blocks/__mocks__/events/FooCr
 import { FooId } from "../building-blocks/__mocks__/FooId";
 
 let repo: FooRepository;
-let eventListener: EventListener<FooCreatedDomainEvent>;
+let eventListener: EventListener;
 
 beforeEach(() => {
     repo = { save: jest.fn(async () => {}) };

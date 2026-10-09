@@ -24,7 +24,7 @@ describe("EventBusInMemoryAsync", () => {
             age: 18,
             email: "john-doe@email.com",
             name: "John Doe",
-        });
+		});
         eventBus.addSubscribers([eventListener]);
         eventBus.publish([domainEvent]);
         expect(eventListener.on).toHaveBeenCalledTimes(1);

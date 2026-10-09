@@ -1,7 +1,6 @@
-import { DomainEvent } from "../building-blocks/domain-event";
-import { ValueObject } from "../building-blocks/value-object";
+import type { Event } from "../building-blocks/event";
 
-export interface EventListener<T extends DomainEvent<ValueObject<any>, unknown>> {
+export interface EventListener<TEvent extends Event<unknown> = Event<unknown>> {
     subscribedTo(): string;
-    on(domainEvents: T): Promise<void>;
+    on(event: TEvent): Promise<void>;
 }

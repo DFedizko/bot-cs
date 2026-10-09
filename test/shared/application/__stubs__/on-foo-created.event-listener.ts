@@ -9,7 +9,7 @@ export class OnFooCreatedEventListener implements EventListener<FooCreatedDomain
         return FooCreatedDomainEvent.EVENT_NAME;
     }
 
-    async on(_domainEvent: FooCreatedDomainEvent): Promise<void> {
+    async on(_event: FooCreatedDomainEvent): Promise<void> {
         await this.repo.save();
     }
 }
