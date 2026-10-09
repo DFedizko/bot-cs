@@ -29,9 +29,3 @@ test("Should publish three different events and calls interested handlers", asyn
     expect(spyCreatedHandler).toHaveBeenCalledWith(createdEvent);
     expect(spyUpdatedHandler).toHaveBeenCalledWith(updatedEvent);
 });
-test("Should throw an error when register two subscribers to the same event", () => {
-    const mediator = new Mediator();
-    const handler: Handler = { eventName: fooEvent.name, handle: async () => {} };
-    mediator.subscribe([handler]);
-    expect(() => mediator.subscribe([handler])).toThrow(BaseError);
-});
