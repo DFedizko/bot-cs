@@ -15,10 +15,10 @@ export class Mediator {
         });
     }
 
-    publish(events: Event[]): void {
-        events.forEach(async (event) => {
+    async publish(events: Event[]): Promise<void> {
+        for (const event of events) {
             const handler = this.handlers.get(event.name);
             if (handler) await handler.handle(event);
-        });
+        }
     }
 }

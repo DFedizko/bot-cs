@@ -7,15 +7,15 @@ import { BaseError } from "@/shared/building-blocks/base-error";
 const fooEvent = new FooEvent();
 const createdEvent = new CreatedEvent();
 const updatedEvent = new UpdatedEvent();
-test("Should publish an event and calls interested handlers", () => {
+test("Should publish an event and calls interested handlers", async () => {
     const mediator = new Mediator();
     const handler: Handler = { eventName: fooEvent.name, handle: async () => {} };
     const spyHandler = jest.spyOn(handler, "handle");
     mediator.subscribe([handler]);
-    mediator.publish([fooEvent]);
+    await mediator.publish([fooEvent]);
     expect(spyHandler).toHaveBeenCalledWith(fooEvent);
 });
-test("Should publish three different events and calls interested handlers", () => {
+test("Should publish three different events and calls interested handlers", async () => {
     const mediator = new Mediator();
     const fooHandler: Handler = { eventName: fooEvent.name, handle: async () => {} };
     const createdHandler: Handler = { eventName: createdEvent.name, handle: async () => {} };
@@ -24,7 +24,7 @@ test("Should publish three different events and calls interested handlers", () =
     const spyCreatedHandler = jest.spyOn(createdHandler, "handle");
     const spyUpdatedHandler = jest.spyOn(updatedHandler, "handle");
     mediator.subscribe([fooHandler, createdHandler, updatedHandler]);
-    mediator.publish([fooEvent, createdEvent, updatedEvent]);
+    await mediator.publish([fooEvent, createdEvent, updatedEvent]);
     expect(spyFooHandler).toHaveBeenCalledWith(fooEvent);
     expect(spyCreatedHandler).toHaveBeenCalledWith(createdEvent);
     expect(spyUpdatedHandler).toHaveBeenCalledWith(updatedEvent);
