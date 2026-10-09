@@ -6,7 +6,7 @@ import { HttpServerBunAdapter } from "@/shared/external/http/server/http-server.
 import { WsServerBunAdapter } from "@/shared/external/web-socket/server/ws-server.bun-adapter";
 import { WsClientBunAdapter } from "@/shared/external/web-socket/client/ws-client.bun-adapter";
 import type { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
-import { OnNewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/on-new-item.ws-controller";
+import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import type { HttpServer } from "@/shared/infrastructure/http/http-server";
 import type { Mock } from "bun:test";
 
@@ -23,7 +23,7 @@ beforeEach(async () => {
     eventBus = new EventBusInMemoryAsync();
     publishSpy = jest.spyOn(eventBus, "publish");
     httpServer = new HttpServerBunAdapter(wsServer as WsServerBunAdapter);
-    new OnNewItemWsController(wsClient, eventBus);
+    new NewItemWsController(wsClient, eventBus);
     httpServer.listen(PORT);
     wsServer.on("connection", (socket) => {
         socket.emit("new_item", newItem);
