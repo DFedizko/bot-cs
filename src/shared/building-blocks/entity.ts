@@ -1,6 +1,6 @@
 import { ValueObject } from "./value-object";
 
-export abstract class Entity<Id extends ValueObject<any>> {
+export abstract class Entity<Id extends ValueObject<unknown>> {
     constructor(protected readonly id: Id) {}
 
     equals(entity: Entity<Id>): boolean {
