@@ -11,15 +11,14 @@
         "skipLibCheck": true,
         "moduleResolution": "bundler",
 
-        "baseUrl": "./src",
         "paths": {
-            "@/*": ["./*", "../test/*"],
-            "@value-object": ["./shared/building-blocks/value-object.ts"],
-            "@entity": ["./shared/building-blocks/entity.ts"],
-            "@aggregate-root": ["./shared/building-blocks/aggregate-root.ts"],
-            "@domain-event": ["./shared/building-blocks/domain-event.ts"],
+            "@/*": ["./src/*", "./test/*"],
+            "@value-object": ["./src/shared/building-blocks/value-object.ts"],
+            "@entity": ["./src/shared/building-blocks/entity.ts"],
+            "@aggregate-root": ["./src/shared/building-blocks/aggregate-root.ts"],
+            "@domain-event": ["./src/shared/building-blocks/domain-event.ts"],
 
-            "@primitives/*": ["./shared/domain-primitives/*"],
+            "@primitives/*": ["./src/shared/domain-primitives/*"],
         },
     },
 }
