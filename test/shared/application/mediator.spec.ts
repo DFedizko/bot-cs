@@ -2,7 +2,6 @@ import { FooEvent } from "./__mocks__/foo.event";
 import { UpdatedEvent } from "./__mocks__/updated.event";
 import { CreatedEvent } from "./__mocks__/created.event";
 import { Mediator, type Handler } from "@/shared/application/mediator";
-import { BaseError } from "@/shared/building-blocks/base-error";
 
 const fooEvent = new FooEvent();
 const createdEvent = new CreatedEvent();
