@@ -10,7 +10,7 @@ export class EventBusInMemoryAsync extends EventEmitter implements EventBus {
         });
     }
 
-    publish(events: Event[]): void {
+    async publish(events: Event[]): Promise<void> {
         events.forEach((event) => {
             this.emit(event.name, event);
         });

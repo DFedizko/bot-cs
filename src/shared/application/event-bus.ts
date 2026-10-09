@@ -3,5 +3,5 @@ import type { Event } from "../building-blocks/event";
 
 export interface EventBus {
     addSubscribers(subscribers: EventListener[]): void;
-    publish(domainEvents: Event<unknown>[]): void;
+    publish(events: Event<unknown>[]): Promise<void>;
 }
