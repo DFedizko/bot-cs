@@ -1,0 +1,78 @@
+import type { GetActiveAuctions } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/get-active-auctions";
+
+export const auctions = {
+    success: true,
+    active_auctions: [
+        {
+            auction_ends_at: 1666083221,
+            auction_highest_bid: 227,
+            auction_highest_bidder: 303119,
+            auction_number_of_bids: 1,
+            custom_price_percentage: 0,
+            icon_url:
+                "-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXX7gNTPcUmqBwTTR7SQb37g5vWCwlxdFEC5uyncgZi0vGQJWwQudm0xtTexaD2ZOmClyVB5sL8h7mCHA",
+            is_commodity: true,
+            market_name: "Name Tag",
+            market_value: 227,
+            name_color: "D2D2D2",
+            preview_id: null,
+            price_is_unreliable: true,
+            stickers: [],
+            wear: null,
+            published_at: "2022-10-18T08:51:02.803761Z",
+            id: 11204,
+            depositor_stats: {
+                delivery_rate_recent: 0.6,
+                delivery_rate_long: 0.7567567567567568,
+                delivery_time_minutes_recent: 7,
+                delivery_time_minutes_long: 7,
+                steam_level_min_range: 5,
+                steam_level_max_range: 10,
+                user_has_trade_notifications_enabled: false,
+                user_is_online: null,
+            },
+            above_recommended_price: -5,
+        },
+        {
+            auction_ends_at: 1666083582,
+            auction_highest_bid: 16480,
+            auction_highest_bidder: 412887,
+            auction_number_of_bids: 4,
+            custom_price_percentage: 3,
+            icon_url:
+                "-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXX7gNTPcUmqBzRU7XdDO6KHceEHDF7r1YuXrJsJvB0V_Pq",
+            is_commodity: false,
+            market_name: "AWP | Asiimov (Well-Worn)",
+            market_value: 16300,
+            name_color: "D2D2D2",
+            preview_id: "8f3c2a91d7e4",
+            price_is_unreliable: false,
+            stickers: [
+                {
+                    wear: null,
+                    name: "Natus Vincere (Holo) | Katowice 2019",
+                    image: "https://steamcdn-a.akamaihd.net/apps/730/icons/econ/stickers/katowice2019/navi_holo.png",
+                },
+                {
+                    wear: 0.42,
+                    name: "s1mple (Foil) | Stockholm 2021",
+                    image: "https://steamcdn-a.akamaihd.net/apps/730/icons/econ/stickers/stockh2021/sig_s1mple_foil.png",
+                },
+            ],
+            wear: 0.4012,
+            published_at: "2022-10-18T08:57:12.114502Z",
+            id: 11231,
+            depositor_stats: {
+                delivery_rate_recent: 1,
+                delivery_rate_long: 0.9811,
+                delivery_time_minutes_recent: 3,
+                delivery_time_minutes_long: 4,
+                steam_level_min_range: 20,
+                steam_level_max_range: 50,
+                user_has_trade_notifications_enabled: true,
+                user_is_online: true,
+            },
+            above_recommended_price: 1,
+        },
+    ],
+} satisfies GetActiveAuctions.Response;
