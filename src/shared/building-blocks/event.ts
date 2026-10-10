@@ -15,7 +15,7 @@ export type CreateEventProps<TPayload = undefined> = [TPayload] extends [undefin
     : SubsetRequired<Partial<EventProps<TPayload>>, "name" | "payload">;
 
 export abstract class Event<TPayload = undefined> {
-    protected static readonly EVENT_NAME: string;
+    static readonly EVENT_NAME: string;
     readonly eventId: string;
     readonly name: string;
     readonly payload: Payload<TPayload>;

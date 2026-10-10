@@ -10,7 +10,7 @@ type Payload = {
 };
 
 export class ItemListedEvent extends ApplicationEvent<Payload> {
-    protected static EVENT_NAME = "item_listed";
+    static readonly EVENT_NAME = "item_listed";
 
     constructor(payload: Payload) {
         super({ name: ItemListedEvent.EVENT_NAME, payload });
