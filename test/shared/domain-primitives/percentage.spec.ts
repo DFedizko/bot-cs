@@ -97,7 +97,7 @@ describe("Percentage", () => {
             expect(50 + onePercent.of(50, "HALF_AWAY_FROM_ZERO")).toBe(51); // 50.5 -> 51
         });
     });
-    describe("Verifications", () => {
+    describe("Verifications & Comparisons", () => {
         it("negate / isPositive / isNegative / isZero", () => {
             expect(Percentage.fromPercent("50").negate().toPercentString()).toBe("-50");
             expect(Percentage.fromPercent("-1").isNegative()).toBe(true);
@@ -110,6 +110,18 @@ describe("Percentage", () => {
             expect(Percentage.fromFraction("0.5").equals(Percentage.fromFraction("0.50"))).toBe(true);
             expect(Percentage.fromPercent("50").equals(Percentage.fromPercent("25"))).toBe(false);
             expect(Percentage.fromPercent("50").equals(Percentage.fromPercent("-50"))).toBe(false);
+        });
+        it("Should verify isLessThan/isGreaterThan", () => {
+            expect(Percentage.fromPercent("0").isLessThan(Percentage.fromPercent("1"))).toBe(true);
+            expect(Percentage.fromPercent("2").isLessThan(Percentage.fromPercent("1"))).toBe(false);
+            expect(Percentage.fromPercent("-1").isLessThan(Percentage.fromPercent("0"))).toBe(true);
+            expect(Percentage.fromPercent("-1.01").isLessThan(Percentage.fromPercent("-1.02"))).toBe(false);
+            expect(Percentage.fromFraction("-0.02").isLessThan(Percentage.fromPercent("-0.01"))).toBe(true);
+            expect(Percentage.fromPercent("0").isGreaterThan(Percentage.fromPercent("1"))).toBe(false);
+            expect(Percentage.fromPercent("2").isGreaterThan(Percentage.fromPercent("1"))).toBe(true);
+            expect(Percentage.fromPercent("-1").isGreaterThan(Percentage.fromPercent("0"))).toBe(false);
+            expect(Percentage.fromPercent("-1.01").isGreaterThan(Percentage.fromPercent("-1.02"))).toBe(true);
+            expect(Percentage.fromFraction("-0.02").isGreaterThan(Percentage.fromPercent("-0.01"))).toBe(false);
         });
     });
     describe("Precision (no float)", () => {
