@@ -32,11 +32,11 @@ export class AuctionGatewayCsgoempireAdapter implements AuctionGateway {
     ): AuctionDTO[] {
         return activeAuctions.map((auction) => ({
             id: auction.id,
+            bidderId: auction.auction_highest_bidder,
             aboveRecommendedPercentage: String(auction.above_recommended_price),
             endsAt: new Date(auction.auction_ends_at),
             highestBid: auction.auction_highest_bid,
             numberOfBids: auction.auction_number_of_bids,
-            highestBidderId: auction.auction_highest_bidder,
         }));
     }
 }

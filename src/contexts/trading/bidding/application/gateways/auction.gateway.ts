@@ -6,7 +6,7 @@ export interface AuctionGateway {
 export type AuctionDTO = {
     id: number;
     highestBid: number;
-    highestBidderId: number;
+    bidderId: number;
     numberOfBids: number;
     aboveRecommendedPercentage: string;
     endsAt: Date;
