@@ -1,5 +1,5 @@
 import { HttpStatus } from "../http-status";
-import { HttpError } from "./http-error";
+import { HttpError } from "./http.error";
 
 export class InternalServerError extends HttpError {
     constructor() {
