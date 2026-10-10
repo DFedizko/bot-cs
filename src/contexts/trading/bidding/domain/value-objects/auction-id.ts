@@ -1,3 +1,3 @@
-import { UUID } from "@/shared/domain-primitives/uuid";
+import { PositiveInteger } from "@/shared/domain-primitives/positive-integer";
 
-export class AuctionId extends UUID {}
+export class AuctionId extends PositiveInteger {}
