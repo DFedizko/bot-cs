@@ -10,8 +10,8 @@ export class NewItemWsController implements NewItemController {
             const events = data.map(
                 (item) =>
                     new ItemListedEvent({
-                        itemId: item.id,
-                        itemName: item.market_name,
+                        id: item.id,
+                        name: item.market_name,
                         price: item.purchase_price,
                         referencePrice: item.suggested_price,
                         numberOfBids: item.auction_number_of_bids,

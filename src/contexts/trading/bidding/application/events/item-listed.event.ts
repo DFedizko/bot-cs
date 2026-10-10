@@ -1,12 +1,12 @@
 import { ApplicationEvent } from "@/shared/building-blocks/application-event";
 
 type Payload = {
-    itemId: number;
-    itemName: string;
-    numberOfBids: number;
+    id: number;
+    name: string;
     price: number;
-    referencePrice: number;
     aboveRecommendedPercentage: string;
+    referencePrice: number;
+    numberOfBids: number;
 };
 
 export class ItemListedEvent extends ApplicationEvent<Payload> {
