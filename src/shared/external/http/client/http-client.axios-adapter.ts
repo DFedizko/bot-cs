@@ -1,9 +1,10 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
-import { HttpClient, type HttpHeaders, type HttpOptions } from "../../../infrastructure/http/http-client";
+import { HttpClient, type HttpOptions } from "../../../infrastructure/http/http-client";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
-import { HttpError } from "../../../infrastructure/http/errors/http-error";
+import { HttpError } from "../../../infrastructure/http/errors/http.error";
 import { InternalServerError } from "../../../infrastructure/http/errors/internal-server.error";
 import http from "node:http";
+import type { HttpHeaders } from "@/shared/infrastructure/http/http-headers";
 
 export class HttpClientAxiosAdapter extends HttpClient {
     private readonly http: AxiosInstance;
