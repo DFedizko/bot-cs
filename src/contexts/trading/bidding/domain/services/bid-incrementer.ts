@@ -10,12 +10,12 @@ const below50CentSpecification = new Below50CentSpecification();
 export class BidIncrementer {
     private static CURRENCY = COIN;
 
-    static nextFor({ amount, numberOfBids }: { amount: number; numberOfBids: number }): number {
-        if (atLeastOneBidSpecification.not().isSatisfiedBy(numberOfBids)) return amount;
+    static nextFor({ value, numberOfBids }: { value: number; numberOfBids: number }): number {
+        if (atLeastOneBidSpecification.not().isSatisfiedBy(numberOfBids)) return value;
         const ONE_UNIT = 1;
-        const amountInCents = Money.fromCents({ amount, currency: BidIncrementer.CURRENCY });
+        const amountInCents = Money.fromCents({ amount: value, currency: BidIncrementer.CURRENCY });
         const onePercentOfAmount = amountInCents.percentageOf(Percentage.fromPercent("1"), "HALF_AWAY_FROM_ZERO");
-        if (below50CentSpecification.isSatisfiedBy(amount)) {
+        if (below50CentSpecification.isSatisfiedBy(value)) {
             const oneCent = Money.fromCents({ amount: ONE_UNIT, currency: BidIncrementer.CURRENCY });
             return amountInCents.add(oneCent).getAmount();
         }
