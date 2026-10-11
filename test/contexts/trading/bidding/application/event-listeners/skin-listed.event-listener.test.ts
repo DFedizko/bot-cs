@@ -9,27 +9,27 @@ import { skinListedEvent } from "./__mocks__/skin-listed.event.mock";
 import type { Mock } from "bun:test";
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/specifications/max-above-recommended-percentage";
 import type {
-    DesiredItem,
-    DesiredItemRepository,
-} from "@/contexts/trading/bidding/application/repositories/desired-item.repository";
+    DesiredSkin,
+    DesiredSkinRepository,
+} from "@/contexts/trading/bidding/application/repositories/desired-skin.repository";
 import { CommandHandler } from "@/shared/building-blocks/command-handler";
 import type { Logger } from "@/shared/application/logger";
 
 let commandHandler: CommandHandler<PlaceBidCommand>;
 let commandHandlers: CommandHandlers;
-let desiredItemsRepo: DesiredItemRepository;
+let desiredItemsRepo: DesiredSkinRepository;
 let logger: Logger;
 let loggerSpy: Mock<Logger["log"]>;
 let commandBus: CommandBus;
 let dispatchCommandSpy: Mock<CommandBus["dispatch"]>;
 let skinListed: EventListener<SkinListedEvent>;
-const fakeDesiredItems: DesiredItem[] = [];
+const fakeDesiredItems: DesiredSkin[] = [];
 describe("ItemListedEventListener", () => {
     beforeEach(() => {
         commandHandler = { handle: async () => {}, subscribedTo: () => PlaceBidCommand.COMMAND_NAME };
         commandHandlers = new CommandHandlers([commandHandler]);
         desiredItemsRepo = {
-            save: async (desiredItem: DesiredItem) => {
+            save: async (desiredItem: DesiredSkin) => {
                 fakeDesiredItems.push(desiredItem);
             },
             findByName: async (name) => fakeDesiredItems.find((desired) => desired.name === name),
