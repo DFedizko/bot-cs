@@ -1,6 +1,6 @@
-import { ItemListedEvent } from "@/contexts/trading/bidding/application/events/item-listed.event";
+import { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
 
-export const itemListedEvent = new ItemListedEvent({
+export const skinListedEvent = new SkinListedEvent({
     id: 288767047,
     name: "M4A4 | Cyber Security (Field-Tested)",
     price: 3656,

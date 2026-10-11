@@ -1,12 +1,12 @@
 import type { EventListener } from "@/shared/application/event-listener";
-import { ItemListedEvent } from "../events/item-listed.event";
+import { SkinListedEvent } from "../events/skin-listed.event";
 import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
 import type { DesiredItemRepository } from "../repositories/desired-item.repository";
 import { PlaceBidCommand } from "../commands/place-bid.command";
 import { BidIncrementer } from "../../domain/services/bid-incrementer";
 import type { Logger } from "@/shared/application/logger";
 
-export class ItemListedEventListener implements EventListener {
+export class SkinListedEventListener implements EventListener {
     constructor(
         private readonly desiredItemRepository: DesiredItemRepository,
         private readonly logger: Logger,
@@ -14,10 +14,10 @@ export class ItemListedEventListener implements EventListener {
     ) {}
 
     subscribedTo(): string {
-        return ItemListedEvent.EVENT_NAME;
+        return SkinListedEvent.EVENT_NAME;
     }
 
-    async on(event: ItemListedEvent): Promise<void> {
+    async on(event: SkinListedEvent): Promise<void> {
         const { id, name, aboveRecommendedPercentage, price, numberOfBids } = event.payload;
         const desiredItem = await this.desiredItemRepository.findByName(name);
         if (!desiredItem) return;

@@ -2,14 +2,14 @@ import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
 import type { NewItemController } from "./new-item.controller";
 import type { EventBus } from "@/shared/application/event-bus";
 import type { NewItem } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/new-item";
-import { ItemListedEvent } from "../../application/events/item-listed.event";
+import { SkinListedEvent } from "../../application/events/skin-listed.event";
 
 export class NewItemWsController implements NewItemController {
     constructor(wsClient: WsClient, eventBus: EventBus) {
         wsClient.on("new_item", (data: NewItem[]) => {
             const events = data.map(
                 (item) =>
-                    new ItemListedEvent({
+                    new SkinListedEvent({
                         id: item.id,
                         name: item.market_name,
                         price: item.purchase_price,

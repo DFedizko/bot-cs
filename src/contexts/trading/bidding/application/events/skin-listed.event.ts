@@ -9,10 +9,10 @@ type Payload = {
     numberOfBids: number;
 };
 
-export class ItemListedEvent extends ApplicationEvent<Payload> {
-    static readonly EVENT_NAME = "item_listed";
+export class SkinListedEvent extends ApplicationEvent<Payload> {
+    static readonly EVENT_NAME = "skin_listed";
 
     constructor(payload: Payload) {
-        super({ name: ItemListedEvent.EVENT_NAME, payload });
+        super({ name: SkinListedEvent.EVENT_NAME, payload });
     }
 }

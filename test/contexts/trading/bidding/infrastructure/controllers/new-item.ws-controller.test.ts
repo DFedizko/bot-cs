@@ -9,7 +9,7 @@ import type { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
 import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import type { HttpServer } from "@/shared/infrastructure/http/http-server";
 import type { Mock } from "bun:test";
-import { ItemListedEvent } from "@/contexts/trading/bidding/application/events/item-listed.event";
+import { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
 
 const PORT = 8888;
 
@@ -39,7 +39,7 @@ afterEach(async () => {
 describe("WsOnNewItemController", () => {
     it("Should receive a new item and publish ", (done) => {
         wsClient.on("new_item", () => {
-            const [events] = publishSpy.mock.calls[0] as ItemListedEvent[][];
+            const [events] = publishSpy.mock.calls[0] as SkinListedEvent[][];
             expect(publishSpy).toHaveBeenCalled();
             expect(events.map((event) => event.payload)).toEqual(
                 newItem.map((item) => ({

@@ -1,11 +1,11 @@
-import { ItemListedEventListener } from "@/contexts/trading/bidding/application/event-listeners/item-listed.event-listener";
+import { SkinListedEventListener } from "@/contexts/trading/bidding/application/event-listeners/skin-listed.event-listener";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/commands/place-bid.command";
-import type { ItemListedEvent } from "@/contexts/trading/bidding/application/events/item-listed.event";
+import type { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
 import type { EventListener } from "@/shared/application/event-listener";
 import { CommandBusInMemory } from "@/shared/external/command-bus/command-bus.in-memory";
 import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
 import { CommandHandlers } from "@/shared/infrastructure/command-bus/command-handlers";
-import { itemListedEvent } from "./__mocks__/item-listed.event.mock";
+import { skinListedEvent } from "./__mocks__/skin-listed.event.mock";
 import type { Mock } from "bun:test";
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/specifications/max-above-recommended-percentage";
 import type {
@@ -22,7 +22,7 @@ let logger: Logger;
 let loggerSpy: Mock<Logger["log"]>;
 let commandBus: CommandBus;
 let dispatchCommandSpy: Mock<CommandBus["dispatch"]>;
-let itemListed: EventListener<ItemListedEvent>;
+let skinListed: EventListener<SkinListedEvent>;
 const fakeDesiredItems: DesiredItem[] = [];
 describe("ItemListedEventListener", () => {
     beforeEach(() => {
@@ -38,7 +38,7 @@ describe("ItemListedEventListener", () => {
         loggerSpy = jest.spyOn(logger, "log");
         commandBus = new CommandBusInMemory(commandHandlers);
         dispatchCommandSpy = jest.spyOn(commandBus, "dispatch");
-        itemListed = new ItemListedEventListener(desiredItemsRepo, logger, commandBus);
+        skinListed = new SkinListedEventListener(desiredItemsRepo, logger, commandBus);
     });
 
     afterEach(() => (fakeDesiredItems.length = 0));
@@ -48,7 +48,7 @@ describe("ItemListedEventListener", () => {
             name: "M4A4 | Cyber Security (Field-Tested)",
             criterias: [new MaxAboveRecommendedPercentage("-4.05")],
         });
-        await itemListed.on(itemListedEvent);
+        await skinListed.on(skinListedEvent);
         const [commandUsed] = dispatchCommandSpy.mock.calls[0];
         expect(dispatchCommandSpy).toHaveBeenCalledTimes(1);
         expect(commandUsed.name).toBe(PlaceBidCommand.COMMAND_NAME);
@@ -58,7 +58,7 @@ describe("ItemListedEventListener", () => {
             name: "M4A4 | Cyber Security (Field-Tested)",
             criterias: [new MaxAboveRecommendedPercentage("-4.06")],
         });
-        await itemListed.on(itemListedEvent);
+        await skinListed.on(skinListedEvent);
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(
             `The item "M4A4 | Cyber Security (Field-Tested)" did not meet criterion "IsEqualAboveRecommendedSpecification"`,
