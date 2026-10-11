@@ -6,7 +6,7 @@ import { PlaceBidCommand } from "../commands/place-bid.command";
 import { BidIncrementer } from "../../domain/services/bid-incrementer";
 import type { Logger } from "@/shared/application/logger";
 
-export class SkinListedEventListener implements EventListener {
+export class SkinListedEventListener implements EventListener<SkinListedEvent> {
     constructor(
         private readonly desiredSkinRepository: DesiredSkinRepository,
         private readonly logger: Logger,
