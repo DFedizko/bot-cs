@@ -1,18 +1,18 @@
 import { Specification } from "@/shared/building-blocks/specification";
-import { Percentage } from "@/shared/domain-primitives/percentage";
+import { AboveRecommendedPercentage } from "../value-objects/above-recommended-percentage";
 
 export class MaxAboveRecommendedPercentage extends Specification<string> {
-    readonly maxPercentage: Percentage;
+    readonly maxPercentage: AboveRecommendedPercentage;
 
     constructor(maxPercentage: string) {
         super();
-        this.maxPercentage = Percentage.fromPercent(maxPercentage);
+        this.maxPercentage = AboveRecommendedPercentage.fromPercent(maxPercentage);
     }
 
     isSatisfiedBy(candidate: string): boolean {
         return (
-            Percentage.fromPercent(candidate).isLessThan(this.maxPercentage) ||
-            Percentage.fromPercent(candidate).equals(this.maxPercentage)
+            AboveRecommendedPercentage.fromPercent(candidate).isLessThan(this.maxPercentage) ||
+            AboveRecommendedPercentage.fromPercent(candidate).equals(this.maxPercentage)
         );
     }
 }
