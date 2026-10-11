@@ -1,4 +1,4 @@
-import { AtLeastOneBid } from "@/contexts/trading/bidding/domain/specifications/at-least-one-bid";
+import { AtLeastOneBid } from "@/contexts/trading/bidding/domain/auction/at-least-one-bid";
 
 const atLeastOneBid = new AtLeastOneBid();
 test("Should verify at least one bid", () => {

@@ -3,7 +3,7 @@ import { SkinListedEvent } from "../events/skin-listed.event";
 import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
 import type { DesiredSkinRepository } from "../repositories/desired-skin.repository";
 import { PlaceBidCommand } from "../commands/place-bid.command";
-import { BidIncrementer } from "../../domain/services/bid-incrementer";
+import { BidIncrementer } from "../../domain/auction/bid-incrementer";
 import type { Logger } from "@/shared/application/logger";
 
 export class SkinListedEventListener implements EventListener<SkinListedEvent> {

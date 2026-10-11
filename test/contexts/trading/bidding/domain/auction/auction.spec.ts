@@ -1,4 +1,4 @@
-import { Auction } from "@/contexts/trading/bidding/domain/aggregates/auction";
+import { Auction } from "@/contexts/trading/bidding/domain/auction/auction";
 import { AuctionStartedDomainEvent } from "@/contexts/trading/bidding/domain/events/auction-started.domain-event";
 import { BidPlacedDomainEvent } from "@/contexts/trading/bidding/domain/events/bid-placed.domain-event";
 import { DomainError } from "@/shared/error/domain-error";

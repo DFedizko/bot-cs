@@ -7,7 +7,7 @@ import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus
 import { CommandHandlers } from "@/shared/infrastructure/command-bus/command-handlers";
 import { skinListedEvent } from "./__mocks__/skin-listed.event.mock";
 import type { Mock } from "bun:test";
-import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/specifications/max-above-recommended-percentage";
+import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
 import type {
     DesiredSkin,
     DesiredSkinRepository,

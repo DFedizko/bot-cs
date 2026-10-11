@@ -1,4 +1,4 @@
-import { BidIncrementer } from "@/contexts/trading/bidding/domain/services/bid-incrementer";
+import { BidIncrementer } from "@/contexts/trading/bidding/domain/auction/bid-incrementer";
 
 describe("Bid Incrementer", () => {
     it("Should increment one percent on the next bid when auction has at least one bid and the price is bigger than 49 coincents", () =>

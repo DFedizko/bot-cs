@@ -1,8 +1,8 @@
 import { COIN } from "@/shared-kernel/domain/currencies";
 import { Money } from "@/shared/domain-primitives/money";
 import { Percentage } from "@/shared/domain-primitives/percentage";
-import { AtLeastOneBid } from "../specifications/at-least-one-bid";
-import { Below50Cent } from "../specifications/below-50-cent";
+import { AtLeastOneBid } from "./at-least-one-bid";
+import { Below50Cent } from "./below-50-cent";
 
 const atLeastOneBid = new AtLeastOneBid();
 const below50Cent = new Below50Cent();

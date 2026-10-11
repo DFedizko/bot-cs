@@ -1,4 +1,4 @@
-import { Below50Cent } from "@/contexts/trading/bidding/domain/specifications/below-50-cent";
+import { Below50Cent } from "@/contexts/trading/bidding/domain/auction/below-50-cent";
 
 const below50Cents = new Below50Cent();
 test("Should verify amount below 50 cents", () => {
