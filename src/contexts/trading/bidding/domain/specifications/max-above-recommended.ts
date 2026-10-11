@@ -1,7 +1,7 @@
 import { Specification } from "@/shared/building-blocks/specification";
 import { Percentage } from "@/shared/domain-primitives/percentage";
 
-export class MaxAboveRecommendedSpecification extends Specification<string> {
+export class MaxAboveRecommended extends Specification<string> {
     readonly maxPercentage: Percentage;
 
     constructor(maxPercentage: string) {

@@ -1,21 +1,21 @@
 import { COIN } from "@/shared-kernel/domain/currencies";
 import { Money } from "@/shared/domain-primitives/money";
 import { Percentage } from "@/shared/domain-primitives/percentage";
-import { AtLeastOneBidSpecification } from "../specifications/at-least-one-bid.specification";
-import { Below50CentSpecification } from "../specifications/below-50-cent.specification";
+import { AtLeastOneBid } from "../specifications/at-least-one-bid";
+import { Below50Cent } from "../specifications/below-50-cent";
 
-const atLeastOneBidSpecification = new AtLeastOneBidSpecification();
-const below50CentSpecification = new Below50CentSpecification();
+const atLeastOneBid = new AtLeastOneBid();
+const below50Cent = new Below50Cent();
 
 export class BidIncrementer {
     private static CURRENCY = COIN;
 
     static nextFor({ value, numberOfBids }: { value: number; numberOfBids: number }): number {
-        if (atLeastOneBidSpecification.not().isSatisfiedBy(numberOfBids)) return value;
+        if (atLeastOneBid.not().isSatisfiedBy(numberOfBids)) return value;
         const ONE_UNIT = 1;
         const amountInCents = Money.fromCents({ amount: value, currency: BidIncrementer.CURRENCY });
         const onePercentOfAmount = amountInCents.percentageOf(Percentage.fromPercent("1"), "HALF_AWAY_FROM_ZERO");
-        if (below50CentSpecification.isSatisfiedBy(value)) {
+        if (below50Cent.isSatisfiedBy(value)) {
             const oneCent = Money.fromCents({ amount: ONE_UNIT, currency: BidIncrementer.CURRENCY });
             return amountInCents.add(oneCent).getAmount();
         }
