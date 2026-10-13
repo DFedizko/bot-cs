@@ -18,8 +18,8 @@ export class MaxAboveRecommendedPercentage extends Specification<BidCandidate> i
 
     isSatisfiedBy(candidate: BidCandidate): boolean {
         return (
-            candidate.aboveRecommendedPercentage.isLessThan(this.maxPercentage) ||
-            candidate.aboveRecommendedPercentage.equals(this.maxPercentage)
+            candidate.getAboveRecommendedPercentage().isLessThan(this.maxPercentage) ||
+            candidate.getAboveRecommendedPercentage().equals(this.maxPercentage)
         );
     }
 }

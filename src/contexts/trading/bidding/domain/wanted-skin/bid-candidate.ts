@@ -18,4 +18,12 @@ export class BidCandidate extends ValueObject<{
             aboveRecommendedPercentage: AboveRecommendedPercentage.fromPercent(props.aboveRecommendedPercentage),
         });
     }
+
+    getAboveRecommendedPercentage(): AboveRecommendedPercentage {
+        return this.value.aboveRecommendedPercentage;
+    }
+
+    getBidValue(): BidValue {
+        return this.value.value;
+    }
 }
