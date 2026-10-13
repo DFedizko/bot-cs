@@ -1,4 +1,4 @@
-interface ISpecification<T> {
+export interface ISpecification<T> {
     isSatisfiedBy(candidate: T): boolean;
     and(other: ISpecification<T>): ISpecification<T>;
     or(other: ISpecification<T>): ISpecification<T>;
