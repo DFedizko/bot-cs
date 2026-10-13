@@ -17,7 +17,7 @@ describe("Wanted Skin", () => {
             name: "AWP | Asiimov (Field-Tested)",
             criteria: [new MaxAboveRecommendedPercentage("-3")],
         });
-        expect(wantedSkin.evaluate(candidate)).toMatchObject({ decision: "approved", failures: [] });
+        expect(wantedSkin.evaluate(candidate)).toMatchObject({ approved: true, failures: [] });
     });
     it("Should evaluate a bid and reject", () => {
         const candidate = bidCandidate({ value: 20000, aboveRecommendedPercentage: "-2.99" });
@@ -26,7 +26,7 @@ describe("Wanted Skin", () => {
             criteria: [new MaxAboveRecommendedPercentage("-3")],
         });
         expect(wantedSkin.evaluate(candidate)).toMatchObject({
-            decision: "rejected",
+            approved: false,
             failures: ["MaxAboveRecommendedPercentage(-3%)"],
         });
     });

@@ -21,9 +21,8 @@ export class SkinListedEventListener implements EventListener<SkinListedEvent> {
         const { id, name, aboveRecommendedPercentage, price, numberOfBids } = event.payload;
         const desiredSkin = await this.desiredSkinRepository.findByName(name);
         if (!desiredSkin) return;
-        const shouldBuy = desiredSkin.criterias.some((criteria) => criteria.isSatisfiedBy(aboveRecommendedPercentage));
-        if (!shouldBuy)
-            return this.logger.log(`The item "${name}" did not meet criterion "IsEqualAboveRecommendedSpecification"`);
+        const decision = desiredSkin.evaluate({ value: price, aboveRecommendedPercentage });
+        if (!decision.approved) return this.logger.log(decision.failures.join("; "));
         const nextBid = BidIncrementer.nextFor({ value: price, numberOfBids });
         await this.commandBus.dispatch(
             new PlaceBidCommand({

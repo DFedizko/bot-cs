@@ -1,11 +1,7 @@
 import type { Specification } from "@/shared/building-blocks/specification";
-
-export type DesiredSkin = {
-    name: string;
-    criterias: Specification<unknown>[];
-};
+import type { WantedSkin } from "../../domain/wanted-skin/wanted-skin";
 
 export interface DesiredSkinRepository {
-    findByName(name: string): Promise<DesiredSkin | undefined>;
-    save(desiredSkin: DesiredSkin): Promise<void>;
+    findByName(name: string): Promise<WantedSkin | undefined>;
+    save(desiredSkin: WantedSkin): Promise<void>;
 }

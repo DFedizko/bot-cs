@@ -1,6 +1,6 @@
 import { AggregateRoot } from "@/shared/building-blocks/aggregate-root";
 import { SkinName } from "../value-objects/skin-name";
-import type { BidCandidate } from "./bid-candidate";
+import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
 import type { SkinCriterion } from "./skin-criterion";
 
 type CreateWantedSkinProps = {
@@ -9,7 +9,7 @@ type CreateWantedSkinProps = {
 };
 
 type BidDecision = {
-    decision: "approved" | "rejected";
+    approved: boolean;
     failures: string[];
 };
 
@@ -25,12 +25,13 @@ export class WantedSkin extends AggregateRoot<SkinName> {
         return new WantedSkin(new SkinName(props.name), props.criteria);
     }
 
-    evaluate(candidate: BidCandidate): BidDecision {
+    evaluate(candidateProps: CandidatePrimitives): BidDecision {
+        const candidate = new BidCandidate(candidateProps);
         const failures: string[] = [];
         this.criteria.forEach(
             (criterion) => criterion.not().isSatisfiedBy(candidate) && failures.push(criterion.describe()),
         );
-        return { decision: failures.length ? "rejected" : "approved", failures };
+        return { approved: !!failures.length, failures };
     }
 
     getId(): string {

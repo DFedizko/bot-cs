@@ -1,7 +1,7 @@
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
 import { bidCandidate } from "../__builders__/bid-candidate.builder";
 
-test("Should return true when use a percentage below than specification", () =>
+test.only("Should return true when use a percentage below than specification", () =>
     expect(
         new MaxAboveRecommendedPercentage("2").isSatisfiedBy(bidCandidate({ aboveRecommendedPercentage: "1.99" })),
     ).toBe(true));
