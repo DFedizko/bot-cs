@@ -1,6 +1,5 @@
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
 import { WantedSkin } from "@/contexts/trading/bidding/domain/wanted-skin/wanted-skin";
-import { bidCandidate } from "./__builders__/bid-candidate.builder";
 
 describe("Wanted Skin", () => {
     it("Should create a wanted skin", () => {
