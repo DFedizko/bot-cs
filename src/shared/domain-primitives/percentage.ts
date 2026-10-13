@@ -54,6 +54,14 @@ export class Percentage extends ValueObject<Decimal> {
         return this.value.greaterThan(vo.getValue());
     }
 
+    isLessOrEqualThan(vo: Percentage): boolean {
+        return this.isLessThan(vo) || this.equals(vo);
+    }
+
+    isGreaterOrEqualThan(vo: Percentage): boolean {
+        return this.isGreaterThan(vo) || this.equals(vo);
+    }
+
     override equals(vo: Percentage): boolean {
         return this.value.equals(vo.value);
     }

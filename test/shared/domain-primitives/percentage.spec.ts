@@ -123,6 +123,16 @@ describe("Percentage", () => {
             expect(Percentage.fromPercent("-1.01").isGreaterThan(Percentage.fromPercent("-1.02"))).toBe(true);
             expect(Percentage.fromFraction("-0.02").isGreaterThan(Percentage.fromPercent("-0.01"))).toBe(false);
         });
+        it("Should verify isLessOrEqualThan/isGreaterOrEqualThan", () => {
+            expect(Percentage.fromPercent("0").isLessOrEqualThan(Percentage.fromPercent("0"))).toBe(true);
+            expect(Percentage.fromPercent("0.01").isLessOrEqualThan(Percentage.fromPercent("0.02"))).toBe(true);
+            expect(Percentage.fromPercent("-0.01").isLessOrEqualThan(Percentage.fromPercent("-0.02"))).toBe(false);
+            expect(Percentage.fromFraction("0").isLessOrEqualThan(Percentage.fromFraction("0"))).toBe(true);
+            expect(Percentage.fromFraction("0.0001").isLessOrEqualThan(Percentage.fromFraction("0.0002"))).toBe(true);
+            expect(Percentage.fromFraction("-0.0001").isLessOrEqualThan(Percentage.fromFraction("-0.0002"))).toBe(
+                false,
+            );
+        });
     });
     describe("Precision (no float)", () => {
         it("Should stay exact where float would drift", () => {
