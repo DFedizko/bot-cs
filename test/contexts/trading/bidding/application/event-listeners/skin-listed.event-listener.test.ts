@@ -54,17 +54,16 @@ describe("ItemListedEventListener", () => {
         expect(commandUsed.name).toBe(PlaceBidCommand.COMMAND_NAME);
     });
     it("Should evaluate and decide not to place a bid on an item when certain criteria aren't met", async () => {
+        const criterion = new MaxAboveRecommendedPercentage("-4.06");
         await wantedSkinRepo.save(
             WantedSkin.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                criteria: [new MaxAboveRecommendedPercentage("-4.06")],
+                criteria: [criterion],
             }),
         );
         await skinListed.on(skinListedEvent);
         expect(loggerSpy).toHaveBeenCalledTimes(1);
-        expect(loggerSpy).toHaveBeenCalledWith(
-            `The item "M4A4 | Cyber Security (Field-Tested)" did not meet criterion "IsEqualAboveRecommendedSpecification"`,
-        );
+        expect(loggerSpy).toHaveBeenCalledWith(criterion.describe());
         expect(dispatchCommandSpy).not.toHaveBeenCalled();
     });
 });

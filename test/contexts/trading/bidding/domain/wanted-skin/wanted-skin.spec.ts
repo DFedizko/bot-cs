@@ -12,20 +12,21 @@ describe("Wanted Skin", () => {
         expect(wantedSkin.getCriteria()).toEqual(["MaxAboveRecommendedPercentage"]);
     });
     it("Should evaluate a bid and approve", () => {
-        const candidate = bidCandidate({ value: 20000, aboveRecommendedPercentage: "-3.01" });
         const wantedSkin = WantedSkin.create({
             name: "AWP | Asiimov (Field-Tested)",
             criteria: [new MaxAboveRecommendedPercentage("-3")],
         });
-        expect(wantedSkin.evaluate(candidate)).toMatchObject({ approved: true, failures: [] });
+        expect(wantedSkin.evaluate({ value: 20000, aboveRecommendedPercentage: "-3.01" })).toMatchObject({
+            approved: true,
+            failures: [],
+        });
     });
     it("Should evaluate a bid and reject", () => {
-        const candidate = bidCandidate({ value: 20000, aboveRecommendedPercentage: "-2.99" });
         const wantedSkin = WantedSkin.create({
             name: "AWP | Asiimov (Field-Tested)",
             criteria: [new MaxAboveRecommendedPercentage("-3")],
         });
-        expect(wantedSkin.evaluate(candidate)).toMatchObject({
+        expect(wantedSkin.evaluate({ value: 20000, aboveRecommendedPercentage: "-2.99" })).toMatchObject({
             approved: false,
             failures: ["MaxAboveRecommendedPercentage(-3%)"],
         });

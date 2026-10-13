@@ -31,7 +31,7 @@ export class WantedSkin extends AggregateRoot<SkinName> {
         this.criteria.forEach(
             (criterion) => criterion.not().isSatisfiedBy(candidate) && failures.push(criterion.describe()),
         );
-        return { approved: !!failures.length, failures };
+        return { approved: !failures.length, failures };
     }
 
     getId(): string {
