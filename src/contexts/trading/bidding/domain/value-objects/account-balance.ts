@@ -8,7 +8,7 @@ export class AccountBalance extends ValueObject<{ total: Money; reserved: Money;
     }
 
     covers(value: number): boolean {
-        return this.value.available.isGreaterThan(CoinCent(value)) || this.value.available.equals(CoinCent(value));
+        return this.value.available.isGreaterOrEqualThan(CoinCent(value));
     }
 
     getTotal(): number {
