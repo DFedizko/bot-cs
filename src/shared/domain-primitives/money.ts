@@ -118,6 +118,14 @@ export class Money extends ValueObject<MoneyProps> {
         return this.comparteTo(other) === -1;
     }
 
+    isGreaterOrEqualThan(other: Money): boolean {
+        return this.isGreaterThan(other) || this.equals(other);
+    }
+
+    isLessOrEqualThan(other: Money): boolean {
+        return this.isLessThan(other) || this.equals(other);
+    }
+
     isZero(): boolean {
         return this.value.amount === 0;
     }

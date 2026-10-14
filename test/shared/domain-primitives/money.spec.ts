@@ -214,6 +214,16 @@ describe("Money", () => {
             expect(big.isGreaterThan(small)).toBe(true);
             expect(small.isLessThan(big)).toBe(true);
         });
+        it("isGreaterOrEqualThan / isLessOrEqualThan", () => {
+            const small = Money.fromCents({ amount: 500, currency: USD });
+            const big = Money.fromCents({ amount: 1000, currency: USD });
+            expect(big.isGreaterOrEqualThan(small)).toBe(true);
+            expect(small.isGreaterOrEqualThan(big)).toBe(false);
+            expect(small.isGreaterOrEqualThan(small)).toBe(true);
+            expect(big.isLessOrEqualThan(small)).toBe(false);
+            expect(small.isLessOrEqualThan(big)).toBe(true);
+            expect(big.isLessOrEqualThan(big)).toBe(true);
+        });
         it("isZero / isPositive / isNegative", () => {
             expect(Money.fromDecimal({ amount: "0", currency: USD }).isZero()).toBe(true);
             expect(Money.fromDecimal({ amount: "1", currency: USD }).isPositive()).toBe(true);
