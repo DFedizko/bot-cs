@@ -2,14 +2,14 @@ import type { EventBus } from "@/shared/application/event-bus";
 import { EventBusInMemoryAsync } from "@/shared/external/event-bus/event-bus.in-memory-async";
 import { newItem } from "./__mocks__/new-item.mock";
 import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
-import { HttpServerBunAdapter } from "@/shared/external/http/server/http-server.bun-adapter";
-import { WsServerBunAdapter } from "@/shared/external/web-socket/server/ws-server.bun-adapter";
 import { WsClientBunAdapter } from "@/shared/external/web-socket/client/ws-client.bun-adapter";
 import type { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
 import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import type { HttpServer } from "@/shared/infrastructure/http/http-server";
 import type { Mock } from "bun:test";
 import { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
+import { WsServerSocketIoAdapter } from "@/shared/external/web-socket/server/ws-server.socket-io-adapter";
+import { HttpServerExpressAdapter } from "@/shared/external/http/server/http-server.express-adapter";
 
 const PORT = 8888;
 
@@ -19,11 +19,11 @@ let wsClient: WsClient;
 let eventBus: EventBus;
 let publishSpy: Mock<EventBus["publish"]>;
 beforeEach(async () => {
-    wsServer = new WsServerBunAdapter();
+    httpServer = new HttpServerExpressAdapter();
+    wsServer = new WsServerSocketIoAdapter((httpServer as HttpServerExpressAdapter).http);
     wsClient = new WsClientBunAdapter(`ws://localhost:${PORT}`);
     eventBus = new EventBusInMemoryAsync();
     publishSpy = jest.spyOn(eventBus, "publish");
-    httpServer = new HttpServerBunAdapter(wsServer as WsServerBunAdapter);
     new NewItemWsController(wsClient, eventBus);
     httpServer.listen(PORT);
     wsServer.on("connection", (socket) => {
