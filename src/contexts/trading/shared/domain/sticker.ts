@@ -1,6 +1,6 @@
 import { ValueObject } from "@value-object";
 import { PercentageWear } from "./percentage-wear";
-import { StickerType } from "@/shared-kernel/domain/sticker-type";
+import type { StickerType } from "@/shared-kernel/domain/sticker-type";
 import { StickerSlot } from "./sticker-slot";
 import { SkinName } from "../../bidding/domain/value-objects/skin-name";
 
