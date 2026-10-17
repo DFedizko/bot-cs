@@ -26,7 +26,7 @@ export class HttpServerBunAdapter implements HttpServer {
         this.register("DELETE", path, callback);
     }
 
-    listen(port: number): void {
+    listen(port: number, callback?: () => void): void {
         this.server = Bun.serve({
             port,
             routes: {
@@ -43,6 +43,7 @@ export class HttpServerBunAdapter implements HttpServer {
             websocket: this.ws?.websocket ?? { message() {} },
         });
         this.ws?.attatch(this.server);
+        callback?.();
     }
 
     async close(): Promise<void> {

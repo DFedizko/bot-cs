@@ -40,8 +40,8 @@ export class HttpServerExpressAdapter implements HttpServer {
         this.register(HttpMethod.DELETE, path, callback);
     }
 
-    listen(port: number): void {
-        this.http.listen(port);
+    listen(port: number, callback?: () => void): void {
+        this.http.listen(port, callback);
     }
 
     async close(): Promise<void> {

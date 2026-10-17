@@ -22,8 +22,8 @@ export type HttpResponse = {
     status?: HttpStatus;
     body?: unknown;
     headers?: HttpHeaders;
-	cookies?: Record<string, Cookie>;
-	clearCookies?: string[];
+    cookies?: Record<string, Cookie>;
+    clearCookies?: string[];
 };
 
 export type Callback = (req: HttpRequest) => HttpResponse | Promise<HttpResponse>;
@@ -34,6 +34,6 @@ export interface HttpServer {
     patch(path: string, callback: Callback): void;
     put(path: string, callback: Callback): void;
     delete(path: string, callback: Callback): void;
-	listen(port: number): void;
-	close(): Promise<void>;
+    listen(port: number, callback?: () => void): void;
+    close(): Promise<void>;
 }
