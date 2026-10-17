@@ -1,4 +1,4 @@
-import { AndSpecification, Specification } from "@/shared/building-blocks/specification";
+import { Specification } from "@/shared/building-blocks/specification";
 
 type Person = { age: number; gender: "male" | "female" };
 const adultMalePerson: Person = { age: 18, gender: "male" };
