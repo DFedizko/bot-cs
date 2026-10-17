@@ -1,4 +1,4 @@
-import type { WsClient, WsClientOptions } from "@/shared/infrastructure/web-socket/ws-client";
+import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
 import { WsClientBunAdapter } from "@/shared/external/web-socket/client/ws-client.bun-adapter";
 import { WsClientSocketIoAdapter } from "@/shared/external/web-socket/client/ws-client.socket-io-adapter";
 import type { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
@@ -23,12 +23,12 @@ describe.each([
     [
         "Bun",
         (ws: WsServerBunAdapter) => new HttpServerBunAdapter(ws),
-        (url: string, options?: WsClientOptions) => new WsClientBunAdapter(url, options),
+        (url: string) => new WsClientBunAdapter(url, { headers: { "x-api-key": "1" } }),
     ],
     [
         "Socket.IO",
         () => new HttpServerExpressAdapter(),
-        (url: string, options?: WsClientOptions) => new WsClientSocketIoAdapter(url, options),
+        (url: string) => new WsClientSocketIoAdapter(url, { extraHeaders: { "x-api-key": "1" } }),
     ],
 ] as const)("WsServer (%s)", (name, createHttpServer, createClient) => {
     beforeEach(() => {
@@ -49,8 +49,8 @@ describe.each([
         await httpServer.close();
     });
 
-    const connect = (options?: WsClientOptions): WsClient => {
-        const connection: WsClient = createClient(SERVER_URL, options);
+    const connect = (): WsClient => {
+        const connection: WsClient = createClient(SERVER_URL);
         clients.push(connection);
         return connection;
     };
@@ -102,6 +102,6 @@ describe.each([
             expect(socket.headers["x-api-key"]).toBe("1");
             done();
         });
-        connect({ headers: { "x-api-key": "1" } });
+        connect();
     });
 });
