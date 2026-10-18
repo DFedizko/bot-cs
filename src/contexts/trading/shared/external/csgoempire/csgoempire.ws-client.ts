@@ -2,6 +2,11 @@ import { WsClientSocketIoAdapter } from "@/shared/external/web-socket/client/ws-
 
 const SOCKET_ENDPOINT = "wss://trade.csgoempire.com/trade";
 
+type CsgoempireUserData = {
+    id: number;
+    socketToken: string;
+};
+
 export class CsgoempireWsClient extends WsClientSocketIoAdapter {
     constructor(csgoempireUserData: CsgoempireUserData) {
         super(SOCKET_ENDPOINT, {
