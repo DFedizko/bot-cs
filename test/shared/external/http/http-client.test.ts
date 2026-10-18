@@ -14,7 +14,7 @@ let httpServer: HttpServer;
 describe.each([["Fetch"], ["Axios"]])("Http Client %s Adapter", (name) => {
     beforeEach(() => {
         httpServer = new HttpServerBunAdapter();
-        httpClient = new HttpClientFactoryAdapter(name.toLocaleLowerCase() as HttpClientProvider).create(
+        httpClient = new HttpClientFactoryAdapter(name.toLowerCase() as HttpClientProvider).create(
             `http://localhost:${PORT}`,
             {
                 keepAlive: false,
