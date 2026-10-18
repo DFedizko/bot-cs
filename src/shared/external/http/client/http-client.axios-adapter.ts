@@ -10,10 +10,13 @@ export class HttpClientAxiosAdapter extends HttpClient {
     private readonly http: AxiosInstance;
     constructor(
         private readonly baseUrl: string,
-        options?: { keepAlive?: boolean },
+        options?: { keepAlive?: boolean; defaultHeaders?: HttpHeaders },
     ) {
         super();
         this.http = axios.create({ httpAgent: new http.Agent({ keepAlive: options?.keepAlive ?? true }) });
+        if (options?.defaultHeaders) {
+            this.http.defaults.headers.common = options.defaultHeaders;
+        }
     }
 
     async get<TResult, THeaders extends HttpHeaders = HttpHeaders>(

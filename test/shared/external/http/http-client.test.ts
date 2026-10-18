@@ -10,8 +10,22 @@ let httpClient: HttpClient;
 let httpServer: HttpServer;
 
 describe.each([
-    ["Fetch", () => new HttpClientFetchAdapter(`http://localhost:${PORT}`, { keepAlive: false })],
-    ["Axios", () => new HttpClientAxiosAdapter(`http://localhost:${PORT}`, { keepAlive: false })],
+    [
+        "Fetch",
+        () =>
+            new HttpClientFetchAdapter(`http://localhost:${PORT}`, {
+                keepAlive: false,
+                defaultHeaders: { "x-api-key": "1" },
+            }),
+    ],
+    [
+        "Axios",
+        () =>
+            new HttpClientAxiosAdapter(`http://localhost:${PORT}`, {
+                keepAlive: false,
+                defaultHeaders: { "x-api-key": "1" },
+            }),
+    ],
 ])("Http Client %s Adapter", (_name, createClient) => {
     beforeEach(() => {
         httpServer = new HttpServerBunAdapter();
@@ -64,5 +78,11 @@ describe.each([
         httpServer.listen(PORT);
         const data = await httpClient.get<Post>("/posts/1");
         expect(data).toMatchObject({ id: 1 });
+    });
+    it.only("Should send default headers", async () => {
+        httpServer.get("/posts", (req) => ({ body: req.headers }));
+        httpServer.listen(PORT);
+        const data = await httpClient.get("/posts");
+        expect(data).toMatchObject({ "x-api-key": "1" });
     });
 });

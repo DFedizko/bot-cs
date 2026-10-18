@@ -7,7 +7,7 @@ import type { HttpHeaders } from "@/shared/infrastructure/http/http-headers";
 export class HttpClientFetchAdapter extends HttpClient {
     constructor(
         private readonly baseUrl: string,
-        private readonly options?: { keepAlive?: boolean },
+        private readonly options?: { keepAlive?: boolean; defaultHeaders?: HttpHeaders },
     ) {
         super();
     }
@@ -58,6 +58,7 @@ export class HttpClientFetchAdapter extends HttpClient {
                 method: method.toUpperCase(),
                 ...(options?.body && { body: JSON.stringify(options.body) }),
                 headers: {
+                    ...this.options?.defaultHeaders,
                     ...options?.headers,
                     ...(options?.body && { "Content-Type": "application/json" }),
                     ...(cookie && { cookie }),
