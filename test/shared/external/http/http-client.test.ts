@@ -1,35 +1,26 @@
-import { HttpClientAxiosAdapter } from "@/shared/external/http/client/http-client.axios-adapter";
 import type { HttpClient } from "@/shared/infrastructure/http/http-client";
-import { HttpClientFetchAdapter } from "@/shared/external/http/client/http-client.fetch-adapter";
 import type { HttpServer } from "@/shared/infrastructure/http/http-server";
 import { HttpServerBunAdapter } from "@/shared/external/http/server/http-server.bun-adapter";
 import { type Post, post } from "./__mocks__/data";
+import {
+    HttpClientFactoryAdapter,
+    type HttpClientProvider,
+} from "@/shared/external/http/client/http-client.factory.adapter";
 
 const PORT = 8888;
 let httpClient: HttpClient;
 let httpServer: HttpServer;
 
-describe.each([
-    [
-        "Fetch",
-        () =>
-            new HttpClientFetchAdapter(`http://localhost:${PORT}`, {
-                keepAlive: false,
-                defaultHeaders: { "x-api-key": "1" },
-            }),
-    ],
-    [
-        "Axios",
-        () =>
-            new HttpClientAxiosAdapter(`http://localhost:${PORT}`, {
-                keepAlive: false,
-                defaultHeaders: { "x-api-key": "1" },
-            }),
-    ],
-])("Http Client %s Adapter", (_name, createClient) => {
+describe.each([["Fetch"], ["Axios"]])("Http Client %s Adapter", (name) => {
     beforeEach(() => {
         httpServer = new HttpServerBunAdapter();
-        httpClient = createClient();
+        httpClient = new HttpClientFactoryAdapter(name.toLocaleLowerCase() as HttpClientProvider).create(
+            `http://localhost:${PORT}`,
+            {
+                keepAlive: false,
+                defaultHeaders: { "x-api-key": "1" },
+            },
+        );
     });
 
     afterEach(async () => await httpServer.close());
