@@ -1,5 +1,10 @@
 import type { HttpHeaders } from "./http-headers";
 
+export type HttpClientOptions = {
+    keepAlive?: boolean;
+    defaultHeaders?: HttpHeaders;
+};
+
 export type HttpOptions<TBody = unknown, THeaders = HttpHeaders> = {
     body?: TBody;
     headers?: THeaders;

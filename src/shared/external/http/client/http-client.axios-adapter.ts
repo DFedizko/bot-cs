@@ -1,5 +1,5 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
-import { HttpClient, type HttpOptions } from "../../../infrastructure/http/http-client";
+import { HttpClient, type HttpClientOptions, type HttpOptions } from "../../../infrastructure/http/http-client";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
 import { HttpError } from "../../../infrastructure/http/errors/http.error";
 import { InternalServerError } from "../../../infrastructure/http/errors/internal-server.error";
@@ -10,7 +10,7 @@ export class HttpClientAxiosAdapter extends HttpClient {
     private readonly http: AxiosInstance;
     constructor(
         private readonly baseUrl: string,
-        options?: { keepAlive?: boolean; defaultHeaders?: HttpHeaders },
+        options?: HttpClientOptions,
     ) {
         super();
         this.http = axios.create({ httpAgent: new http.Agent({ keepAlive: options?.keepAlive ?? true }) });

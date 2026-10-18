@@ -1,4 +1,4 @@
-import { HttpClient, type HttpOptions } from "../../../infrastructure/http/http-client";
+import { HttpClient, type HttpClientOptions, type HttpOptions } from "../../../infrastructure/http/http-client";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
 import { HttpError } from "../../../infrastructure/http/errors/http.error";
 import { InternalServerError } from "../../../infrastructure/http/errors/internal-server.error";
@@ -7,7 +7,7 @@ import type { HttpHeaders } from "@/shared/infrastructure/http/http-headers";
 export class HttpClientFetchAdapter extends HttpClient {
     constructor(
         private readonly baseUrl: string,
-        private readonly options?: { keepAlive?: boolean; defaultHeaders?: HttpHeaders },
+        private readonly options?: HttpClientOptions,
     ) {
         super();
     }
