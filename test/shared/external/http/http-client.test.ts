@@ -79,7 +79,7 @@ describe.each([
         const data = await httpClient.get<Post>("/posts/1");
         expect(data).toMatchObject({ id: 1 });
     });
-    it.only("Should send default headers", async () => {
+    it("Should send default headers", async () => {
         httpServer.get("/posts", (req) => ({ body: req.headers }));
         httpServer.listen(PORT);
         const data = await httpClient.get("/posts");
