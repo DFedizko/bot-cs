@@ -2,11 +2,11 @@ import type { GetSocketMetadataIO, SocketMetadata } from "../../../infrastructur
 
 export class SocketMetadataFake implements SocketMetadata {
     async getSocketMetadata(): Promise<GetSocketMetadataIO.Response> {
-        return getSocketMetadata;
+        return getSktMetafakeResponse;
     }
 }
 
-const getSocketMetadata: GetSocketMetadataIO.Response = {
+export const getSktMetafakeResponse: GetSocketMetadataIO.Response = {
     user: {
         id: 12345678,
         username: null,
