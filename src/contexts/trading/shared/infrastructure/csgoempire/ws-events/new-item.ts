@@ -12,21 +12,17 @@ export interface NewItem {
     above_recommended_price: number;
     price_is_unreliable: boolean;
     is_commodity: boolean;
-
     icon_url: string;
     name_color: string;
     wear_name: string;
     published_at: string;
-
     auction_ends_at: number | null;
     auction_highest_bid: number | null;
     auction_highest_bidder: number | null;
     auction_number_of_bids: number;
-
     marketplace_privacy_protection_level: MarketplacePrivacyProtectionLevel;
     item_search: ItemSearch;
     depositor_stats: DepositorStats;
-
     wear?: number | null;
     preview_id?: string | null;
     stickers?: ItemSticker[];
