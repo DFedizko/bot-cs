@@ -1,9 +1,10 @@
 declare global {
+	interface AppEnv {	
+        NODE_ENV: "test" | "development" | "production";
+		CSGOEMPIRE_API_KEY: string;
+	}
     namespace NodeJS {
-        interface ProcessEnv {
-            NODE_ENV: "development" | "production";
-            CSGOEMPIRE_API_KEY: string;
-        }
+		interface ProcessEnv extends AppEnv {}
     }
 }
 
