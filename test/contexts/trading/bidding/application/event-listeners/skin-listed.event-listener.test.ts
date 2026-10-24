@@ -16,6 +16,7 @@ import { WantedSkinRepository } from "@/contexts/trading/bidding/application/rep
 let commandHandler: CommandHandler<PlaceBidCommand>;
 let commandHandlers: CommandHandlers;
 let wantedSkinRepo: WantedSkinRepository;
+let wantedSkinRepoSpy: Mock<WantedSkinRepository["findByName"]>;
 let logger: Logger;
 let loggerSpy: Mock<Logger["log"]>;
 let commandBus: CommandBus;
@@ -32,6 +33,7 @@ describe("ItemListedEventListener", () => {
             },
             findByName: async (name) => fakeWantedSkins.find((wanted) => wanted.getName() === name),
         };
+        wantedSkinRepoSpy = jest.spyOn(wantedSkinRepo, "findByName");
         logger = { log: () => {} };
         loggerSpy = jest.spyOn(logger, "log");
         commandBus = new CommandBusInMemory(commandHandlers);
@@ -48,7 +50,7 @@ describe("ItemListedEventListener", () => {
                 criteria: [new MaxAboveRecommendedPercentage("-4.05")],
             }),
         );
-        await skinListed.on(skinListedEvent);
+        await skinListed.on(skinListedEvent());
         const [commandUsed] = dispatchCommandSpy.mock.calls[0];
         expect(dispatchCommandSpy).toHaveBeenCalledTimes(1);
         expect(commandUsed.name).toBe(PlaceBidCommand.COMMAND_NAME);
@@ -61,9 +63,14 @@ describe("ItemListedEventListener", () => {
                 criteria: [criterion],
             }),
         );
-        await skinListed.on(skinListedEvent);
+        await skinListed.on(skinListedEvent());
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(criterion.describe());
         expect(dispatchCommandSpy).not.toHaveBeenCalled();
+    });
+    it("Should don't make anything when skin isn't in auction", async () => {
+        await skinListed.on(skinListedEvent(false));
+        expect(loggerSpy).toHaveBeenCalledTimes(0);
+        expect(wantedSkinRepoSpy).not.toHaveBeenCalled();
     });
 });

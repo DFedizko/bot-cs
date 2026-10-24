@@ -1,10 +1,12 @@
 import { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
 
-export const skinListedEvent = new SkinListedEvent({
-    id: 288767047,
-    name: "M4A4 | Cyber Security (Field-Tested)",
-    price: 3656,
-    referencePrice: 3801,
-    numberOfBids: 0,
-    aboveRecommendedPercentage: "-4.05",
-});
+export const skinListedEvent = (inAuction = true) =>
+    new SkinListedEvent({
+        id: 288767047,
+        name: "M4A4 | Cyber Security (Field-Tested)",
+        price: 3656,
+        referencePrice: 3801,
+        numberOfBids: 0,
+        aboveRecommendedPercentage: "-4.05",
+        inAuction,
+    });

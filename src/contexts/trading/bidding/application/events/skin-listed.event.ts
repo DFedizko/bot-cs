@@ -7,6 +7,7 @@ type Payload = {
     aboveRecommendedPercentage: string;
     referencePrice: number;
     numberOfBids: number;
+    inAuction: boolean;
 };
 
 export class SkinListedEvent extends ApplicationEvent<Payload> {

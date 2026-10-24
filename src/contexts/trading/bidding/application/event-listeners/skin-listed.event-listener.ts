@@ -18,7 +18,8 @@ export class SkinListedEventListener implements EventListener<SkinListedEvent> {
     }
 
     async on(event: SkinListedEvent): Promise<void> {
-        const { id, name, aboveRecommendedPercentage, price, numberOfBids } = event.payload;
+        const { id, name, aboveRecommendedPercentage, price, numberOfBids, inAuction } = event.payload;
+        if (!inAuction) return;
         const wantedSkin = await this.wantedSkinRepository.findByName(name);
         if (!wantedSkin) return;
         const decision = wantedSkin.evaluate({ value: price, aboveRecommendedPercentage });
