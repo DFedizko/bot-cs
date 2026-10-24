@@ -30,4 +30,4 @@ export interface NewItem {
     fade_percentage?: number | null;
 }
 
-export type NewItemEvent = ["new_item", NewItem[]];
+export type NewItemSocket = ["new_item", NewItem[]];
