@@ -49,6 +49,7 @@ describe("OnNewItemWsController", () => {
                     price: item.purchase_price,
                     referencePrice: item.suggested_price,
                     aboveRecommendedPercentage: item.above_recommended_price.toString(),
+                    inAuction: !!item.auction_ends_at,
                 })),
             );
             done();
