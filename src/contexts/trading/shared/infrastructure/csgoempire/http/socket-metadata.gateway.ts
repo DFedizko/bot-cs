@@ -1,4 +1,4 @@
-export interface SocketMetadata {
+export interface SocketMetadataGateway {
     getSocketMetadata(): Promise<GetSocketMetadataIO.Response>;
 }
 
