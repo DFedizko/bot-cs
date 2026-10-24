@@ -3,7 +3,7 @@ import type { ItemSearch } from "../types/item-search";
 import type { ItemSticker } from "../types/item-sticker";
 import type { MarketplacePrivacyProtectionLevel } from "../types/marketplace-privacy-protection-level";
 
-export interface NewItem {
+export type NewItem = {
     id: number;
     market_name: string;
     market_value: number;
@@ -28,6 +28,6 @@ export interface NewItem {
     stickers?: ItemSticker[];
     blue_percentage?: number | null;
     fade_percentage?: number | null;
-}
+}[];
 
-export type NewItemSocket = ["new_item", NewItem[]];
+export type NewItemSocket = ["new_item", NewItem];

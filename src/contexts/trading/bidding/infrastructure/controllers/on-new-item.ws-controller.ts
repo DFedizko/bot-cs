@@ -6,7 +6,7 @@ import { SkinListedEvent } from "../../application/events/skin-listed.event";
 
 export class OnNewItemWsController implements OnNewItemController {
     constructor(wsClient: WsClient, eventBus: EventBus) {
-        wsClient.on("new_item", (data: NewItem[]) => {
+        wsClient.on("new_item", (data: NewItem) => {
             const events = data.map(
                 (item) =>
                     new SkinListedEvent({
@@ -16,6 +16,7 @@ export class OnNewItemWsController implements OnNewItemController {
                         referencePrice: item.suggested_price,
                         numberOfBids: item.auction_number_of_bids,
                         aboveRecommendedPercentage: item.above_recommended_price.toString(),
+                        inAuction: !!item.auction_ends_at,
                     }),
             );
             eventBus.publish(events);

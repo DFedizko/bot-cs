@@ -1,6 +1,6 @@
 import type { NewItem } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/new-item";
 
-export const newItem: NewItem[] = [
+export const newItem: NewItem = [
     {
         auction_ends_at: 1738080016,
         auction_highest_bid: null,
