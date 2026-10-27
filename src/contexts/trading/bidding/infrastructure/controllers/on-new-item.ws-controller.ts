@@ -1,10 +1,9 @@
-import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
-import type { OnNewItemController } from "./on-new-item.controller";
-import type { EventBus } from "@/shared/application/event-bus";
+import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
+import type { EventBus } from "@/packages/application/event-bus";
 import type { NewItem } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/new-item";
 import { SkinListedEvent } from "../../application/events/skin-listed.event";
 
-export class OnNewItemWsController implements OnNewItemController {
+export class OnNewItemWsController {
     constructor(wsClient: WsClient, eventBus: EventBus) {
         wsClient.on("new_item", (data: NewItem) => {
             const events = data.map(

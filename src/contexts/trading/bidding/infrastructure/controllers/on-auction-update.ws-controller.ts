@@ -1,10 +1,9 @@
-import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
-import type { OnAuctionUpdateController } from "./on-auction-update.controller";
-import type { EventBus } from "@/shared/application/event-bus";
+import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
+import type { EventBus } from "@/packages/application/event-bus";
 import type { AuctionUpdate } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/auction-update";
 import { OutbidEvent } from "../../application/events/outbid.event";
 
-export class OnAuctionUpdateWsController implements OnAuctionUpdateController {
+export class OnAuctionUpdateWsController {
     constructor(wsClient: WsClient, eventBus: EventBus) {
         wsClient.on("auction_update", (data: AuctionUpdate) => {
             const events = data.map(
