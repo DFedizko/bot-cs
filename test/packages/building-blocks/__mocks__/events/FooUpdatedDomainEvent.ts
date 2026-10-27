@@ -1,0 +1,10 @@
+import { DomainEvent } from "@/packages/building-blocks/domain-event";
+import { FooId } from "../FooId";
+
+export class FooUpdatedDomainEvent extends DomainEvent {
+    static readonly EVENT_NAME = "foo_updated";
+
+    constructor(aggregateId: FooId) {
+        super({ aggregateId, name: FooUpdatedDomainEvent.EVENT_NAME });
+    }
+}

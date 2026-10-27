@@ -10,15 +10,16 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "moduleResolution": "bundler",
+        "outDir": "./dist",
 
         "paths": {
             "@/*": ["./src/*", "./test/*"],
-            "@value-object": ["./src/shared/building-blocks/value-object.ts"],
-            "@entity": ["./src/shared/building-blocks/entity.ts"],
-            "@aggregate-root": ["./src/shared/building-blocks/aggregate-root.ts"],
-            "@domain-event": ["./src/shared/building-blocks/domain-event.ts"],
+            "@value-object": ["./src/packages/building-blocks/value-object.ts"],
+            "@entity": ["./src/packages/building-blocks/entity.ts"],
+            "@aggregate-root": ["./src/packages/building-blocks/aggregate-root.ts"],
+            "@domain-event": ["./src/packages/building-blocks/domain-event.ts"],
 
-            "@primitives/*": ["./src/shared/domain-primitives/*"],
+            "@primitives/*": ["./src/packages/domain-primitives/*"],
         },
     },
 }

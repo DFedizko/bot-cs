@@ -1,7 +1,7 @@
 import { BidValue } from "../value-objects/bid-value";
 import { AboveRecommendedPercentage } from "../value-objects/above-recommended-percentage";
-import { ValueObject } from "@/shared/building-blocks/value-object";
-import { COIN } from "@/shared-kernel/domain/currencies";
+import { ValueObject } from "@/packages/building-blocks/value-object";
+import { COIN } from "@/contexts/shared-kernel/domain/currencies";
 
 export type CandidatePrimitives = {
     value: number;

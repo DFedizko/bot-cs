@@ -4,12 +4,12 @@ import { CsgoempireWsClient } from "./contexts/trading/shared/external/csgoempir
 import { CsgoempireHttpClientFactory } from "./contexts/trading/shared/external/csgoempire/http/csgoempire.http-client";
 import { SocketMetadataHttp } from "./contexts/trading/shared/external/csgoempire/http/socket-metadata.gateway.http";
 import { InitCsgSessionWsController } from "./contexts/trading/shared/infrastructure/controllers/init-csg-session.ws-controller";
-import { CommandBusInMemory } from "./shared/external/command-bus/command-bus.in-memory";
-import { EnvZodAdapter } from "./shared/external/environment/env.zod-adapter";
-import { EventBusInMemoryAsync } from "./shared/external/event-bus/event-bus.in-memory-async";
-import { HttpClientFactoryAdapter } from "./shared/external/http/client/http-client.factory.adapter";
-import { CommandHandlers } from "./shared/infrastructure/command-bus/command-handlers";
-import { LoggerConsoleAdapter } from "./shared/infrastructure/logger/logger.console-adapter";
+import { CommandBusInMemory } from "./packages/external/command-bus/command-bus.in-memory";
+import { EnvZodAdapter } from "./packages/external/environment/env.zod-adapter";
+import { EventBusInMemoryAsync } from "./packages/external/event-bus/event-bus.in-memory-async";
+import { HttpClientFactoryAdapter } from "./packages/external/http/client/http-client.factory.adapter";
+import { CommandHandlers } from "./packages/infrastructure/command-bus/command-handlers";
+import { LoggerConsoleAdapter } from "./packages/infrastructure/logger/logger.console-adapter";
 
 const env = new EnvZodAdapter().parse(Bun.env);
 const httpClientFactory = new HttpClientFactoryAdapter("axios");

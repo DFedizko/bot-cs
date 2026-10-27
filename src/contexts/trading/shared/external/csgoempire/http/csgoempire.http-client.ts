@@ -1,5 +1,5 @@
-import type { HttpClientFactory } from "@/shared/external/http/client/http-client.factory";
-import type { HttpClient } from "@/shared/infrastructure/http/http-client";
+import type { HttpClientFactory } from "@/packages/external/http/client/http-client.factory";
+import type { HttpClient } from "@/packages/infrastructure/http/http-client";
 
 const CSGOEMPIRE_BASE_URL = "https://csgoempire.com/api/v2";
 

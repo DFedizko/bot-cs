@@ -1,4 +1,4 @@
-import type { HttpClient } from "@/shared/infrastructure/http/http-client";
+import type { HttpClient } from "@/packages/infrastructure/http/http-client";
 import type { GetSocketMetadataIO, SocketMetadataGateway } from "../../../infrastructure/csgoempire/http/socket-metadata.gateway";
 
 export class SocketMetadataHttp implements SocketMetadataGateway {

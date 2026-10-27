@@ -1,0 +1,12 @@
+import { DomainEvent } from "@/packages/building-blocks/domain-event";
+import type { FooId } from "../FooId";
+
+type Payload = { name: string; email: string; age: number };
+
+export class FooCreatedDomainEvent extends DomainEvent<Payload> {
+    static readonly EVENT_NAME = "foo_created";
+
+    constructor(id: FooId, payload: Payload) {
+        super({ aggregateId: id, name: FooCreatedDomainEvent.EVENT_NAME, payload });
+    }
+}

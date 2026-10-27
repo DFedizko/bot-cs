@@ -1,3 +1,3 @@
-import { Money } from "@/shared/domain-primitives/money";
+import { Money } from "@/packages/domain-primitives/money";
 
 export class MarketPrice extends Money {}

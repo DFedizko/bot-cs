@@ -1,5 +1,5 @@
 import type { PlaceBid, PlaceBidInvoice } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/place-bid";
-import { CS_APP_ID } from "@/shared-kernel/domain/cs-app-id";
+import { CS_APP_ID } from "@/contexts/shared-kernel/domain/cs-app-id";
 
 export const placeBidRequest = {
     deposit_id: "28396506",

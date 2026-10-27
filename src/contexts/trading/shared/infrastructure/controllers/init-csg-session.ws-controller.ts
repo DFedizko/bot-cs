@@ -1,9 +1,9 @@
-import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
+import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
 import type { InitCsgSessionController } from "./init-csg-session.controller";
 import type { InitEvent } from "../csgoempire/ws-events/init";
 import type { GetSocketMetadataIO, SocketMetadataGateway } from "../csgoempire/http/socket-metadata.gateway";
-import { BaseError } from "@/shared/building-blocks/base-error";
-import type { Logger } from "@/shared/application/logger";
+import { BaseError } from "@/packages/building-blocks/base-error";
+import type { Logger } from "@/packages/application/logger";
 
 const MS_IN_SECONDS = 1000;
 const FIFTEEN_SECONDS = 15;

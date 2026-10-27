@@ -1,6 +1,6 @@
-import { Percentage } from "@/shared/domain-primitives/percentage";
-import { DomainError } from "@/shared/error/domain-error";
-import { ValueObject } from "@value-object";
+import { Percentage } from "@/packages/domain-primitives/percentage";
+import { DomainError } from "@/packages/error/domain-error";
+import { ValueObject } from "@/packages/building-blocks/value-object";
 
 export class PercentageWear extends ValueObject<Percentage> {
     private static readonly MAX_FRACTION = 1;

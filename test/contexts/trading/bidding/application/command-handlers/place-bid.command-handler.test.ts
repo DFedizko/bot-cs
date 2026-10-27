@@ -7,9 +7,9 @@ import { CsgoempireAuctionHttpFakeAdapter } from "@/contexts/trading/bidding/ext
 import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
 import type { CsgoempireAuctionHttp } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/csgoempire-auction.http";
 import { AccountBalanceStoreInMemory } from "@/contexts/trading/bidding/infrastructure/stores/account-balance.store.in-memory";
-import type { EventBus } from "@/shared/application/event-bus";
-import type { CommandHandler } from "@/shared/building-blocks/command-handler";
-import { EventBusInMemoryAsync } from "@/shared/external/event-bus/event-bus.in-memory-async";
+import type { EventBus } from "@/packages/application/event-bus";
+import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { Mock } from "bun:test";
 
 let accountBalance: AccountBalanceStore;

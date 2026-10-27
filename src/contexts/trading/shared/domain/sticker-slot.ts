@@ -1,5 +1,5 @@
-import { Integer } from "@/shared/domain-primitives/integer";
-import { DomainError } from "@/shared/error/domain-error";
+import { Integer } from "@/packages/domain-primitives/integer";
+import { DomainError } from "@/packages/error/domain-error";
 
 const MAX_POSITION = 5;
 const MIN_POSITION = 1;

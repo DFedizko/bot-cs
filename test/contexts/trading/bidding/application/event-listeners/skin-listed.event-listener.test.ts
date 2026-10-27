@@ -1,15 +1,15 @@
 import { SkinListedEventListener } from "@/contexts/trading/bidding/application/event-listeners/skin-listed.event-listener";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/commands/place-bid.command";
 import type { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
-import type { EventListener } from "@/shared/application/event-listener";
-import { CommandBusInMemory } from "@/shared/external/command-bus/command-bus.in-memory";
-import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
-import { CommandHandlers } from "@/shared/infrastructure/command-bus/command-handlers";
+import type { EventListener } from "@/packages/application/event-listener";
+import { CommandBusInMemory } from "@/packages/external/command-bus/command-bus.in-memory";
+import type { CommandBus } from "@/packages/infrastructure/command-bus/command-bus";
+import { CommandHandlers } from "@/packages/infrastructure/command-bus/command-handlers";
 import { skinListedEvent } from "./__mocks__/skin-listed.event.mock";
 import type { Mock } from "bun:test";
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
-import { CommandHandler } from "@/shared/building-blocks/command-handler";
-import type { Logger } from "@/shared/application/logger";
+import { CommandHandler } from "@/packages/building-blocks/command-handler";
+import type { Logger } from "@/packages/application/logger";
 import { WantedSkin } from "@/contexts/trading/bidding/domain/wanted-skin/wanted-skin";
 import { WantedSkinRepository } from "@/contexts/trading/bidding/application/repositories/wanted-skin.repository";
 

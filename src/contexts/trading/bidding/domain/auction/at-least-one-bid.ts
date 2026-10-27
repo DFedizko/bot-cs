@@ -1,4 +1,4 @@
-import { Specification } from "@/shared/building-blocks/specification";
+import { Specification } from "@/packages/building-blocks/specification";
 
 export class AtLeastOneBid extends Specification<number> {
     isSatisfiedBy(candidate: number): boolean {

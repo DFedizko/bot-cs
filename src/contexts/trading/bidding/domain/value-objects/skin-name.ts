@@ -1,4 +1,4 @@
-import { BoundedString } from "@/shared/domain-primitives/bounded-string";
+import { BoundedString } from "@/packages/domain-primitives/bounded-string";
 
 export class SkinName extends BoundedString {
     constructor(value: string) {

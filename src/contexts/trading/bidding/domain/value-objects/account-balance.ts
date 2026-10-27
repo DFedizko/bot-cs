@@ -1,6 +1,6 @@
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
-import { ValueObject } from "@/shared/building-blocks/value-object";
-import { Money } from "@/shared/domain-primitives/money";
+import { ValueObject } from "@/packages/building-blocks/value-object";
+import { Money } from "@/packages/domain-primitives/money";
 
 export class AccountBalance extends ValueObject<{ total: Money; reserved: Money; available: Money }> {
     constructor({ total, reserved, available }: { total: number; reserved: number; available: number }) {

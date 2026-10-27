@@ -1,4 +1,4 @@
-import { WsClientSocketIoAdapter } from "@/shared/external/web-socket/client/ws-client.socket-io-adapter";
+import { WsClientSocketIoAdapter } from "@/packages/external/web-socket/client/ws-client.socket-io-adapter";
 
 const SOCKET_ENDPOINT = "wss://trade.csgoempire.com/trade";
 

@@ -1,4 +1,4 @@
-import { Specification } from "@/shared/building-blocks/specification";
+import { Specification } from "@/packages/building-blocks/specification";
 import { AboveRecommendedPercentage } from "../../value-objects/above-recommended-percentage";
 import type { BidCandidate } from "../bid-candidate";
 import type { SkinCriterion } from "../skin-criterion";

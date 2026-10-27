@@ -1,4 +1,4 @@
-import { AggregateRoot } from "@/shared/building-blocks/aggregate-root";
+import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
 import { SkinName } from "../value-objects/skin-name";
 import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
 import type { SkinCriterion } from "./skin-criterion";

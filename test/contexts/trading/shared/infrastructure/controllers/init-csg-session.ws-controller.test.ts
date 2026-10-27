@@ -1,9 +1,9 @@
-import { HttpServerExpressAdapter } from "@/shared/external/http/server/http-server.express-adapter";
-import { WsClientSocketIoAdapter } from "@/shared/external/web-socket/client/ws-client.socket-io-adapter";
-import { WsServerSocketIoAdapter } from "@/shared/external/web-socket/server/ws-server.socket-io-adapter";
-import type { HttpServer } from "@/shared/infrastructure/http/http-server";
-import type { WsClient } from "@/shared/infrastructure/web-socket/ws-client";
-import type { WsServer } from "@/shared/infrastructure/web-socket/ws-server";
+import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-server.express-adapter";
+import { WsClientSocketIoAdapter } from "@/packages/external/web-socket/client/ws-client.socket-io-adapter";
+import { WsServerSocketIoAdapter } from "@/packages/external/web-socket/server/ws-server.socket-io-adapter";
+import type { HttpServer } from "@/packages/infrastructure/http/http-server";
+import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
+import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
 import type { Mock } from "bun:test";
 import { initAuthenticatedFake, initGuestFake } from "./__mocks__/init.mock";
 import type { SocketMetadataGateway } from "@/contexts/trading/shared/infrastructure/csgoempire/http/socket-metadata.gateway";
@@ -12,8 +12,8 @@ import {
     getSktMetafakeResponse,
     SocketMetadataGatewayFake,
 } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.gateway.fake";
-import type { Logger } from "@/shared/application/logger";
-import { BaseError } from "@/shared/building-blocks/base-error";
+import type { Logger } from "@/packages/application/logger";
+import { BaseError } from "@/packages/building-blocks/base-error";
 
 const PORT = 8888;
 

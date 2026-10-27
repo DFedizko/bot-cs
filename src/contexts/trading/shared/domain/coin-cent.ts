@@ -1,4 +1,4 @@
-import { COIN } from "@/shared-kernel/domain/currencies";
-import { Money } from "@/shared/domain-primitives/money";
+import { COIN } from "@/contexts/shared-kernel/domain/currencies";
+import { Money } from "@/packages/domain-primitives/money";
 
 export const CoinCent = (cents: number): Money => Money.fromCents({ amount: cents, currency: COIN });

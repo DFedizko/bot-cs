@@ -1,6 +1,6 @@
-import { COIN } from "@/shared-kernel/domain/currencies";
-import { Money } from "@/shared/domain-primitives/money";
-import { Percentage } from "@/shared/domain-primitives/percentage";
+import { COIN } from "@/contexts/shared-kernel/domain/currencies";
+import { Money } from "@/packages/domain-primitives/money";
+import { Percentage } from "@/packages/domain-primitives/percentage";
 import { AtLeastOneBid } from "./at-least-one-bid";
 import { Below50Cent } from "./below-50-cent";
 

@@ -1,6 +1,6 @@
 import { PercentageWear } from "@/contexts/trading/shared/domain/percentage-wear";
 // import { Percentage } from "@/shared/domain-primitives/percentage";
-import { DomainError } from "@/shared/error/domain-error";
+import { DomainError } from "@/packages/error/domain-error";
 
 describe("PercentageWear", () => {
     // it("Should create a percentage wear object from percentage string", () => {

@@ -1,9 +1,9 @@
-import type { EventListener } from "@/shared/application/event-listener";
+import type { EventListener } from "@/packages/application/event-listener";
 import { SkinListedEvent } from "../events/skin-listed.event";
-import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
+import type { CommandBus } from "@/packages/infrastructure/command-bus/command-bus";
 import { PlaceBidCommand } from "../commands/place-bid.command";
 import { BidIncrementer } from "../../domain/auction/bid-incrementer";
-import type { Logger } from "@/shared/application/logger";
+import type { Logger } from "@/packages/application/logger";
 import type { WantedSkinRepository } from "../repositories/wanted-skin.repository";
 
 export class SkinListedEventListener implements EventListener<SkinListedEvent> {

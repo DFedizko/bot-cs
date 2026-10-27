@@ -1,4 +1,4 @@
-import { ApplicationEvent } from "@/shared/building-blocks/application-event";
+import { ApplicationEvent } from "@/packages/building-blocks/application-event";
 
 type Payload = {
     id: number;

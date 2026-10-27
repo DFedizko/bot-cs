@@ -1,4 +1,4 @@
-import { ApplicationEvent } from "@/shared/building-blocks/application-event";
+import { ApplicationEvent } from "@/packages/building-blocks/application-event";
 
 type BidPlacedPayload = { auctionId: number; bidValue: number; bidderId: number };
 

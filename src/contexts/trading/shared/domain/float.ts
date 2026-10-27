@@ -1,8 +1,8 @@
-import { WearName } from "@/shared-kernel/domain/wear-name";
-import { WearNameAcronym } from "@/shared-kernel/domain/wear-name-acronym";
-import { ValueObject } from "@/shared/building-blocks/value-object";
-import { Decimal } from "@/shared/domain-primitives/decimal";
-import { DomainError } from "@/shared/error/domain-error";
+import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
+import { WearNameAcronym } from "@/contexts/shared-kernel/domain/wear-name-acronym";
+import { ValueObject } from "@/packages/building-blocks/value-object";
+import { Decimal } from "@/packages/domain-primitives/decimal";
+import { DomainError } from "@/packages/error/domain-error";
 
 const EXACT_FLOAT_DECIMAL_PLACES = 14;
 

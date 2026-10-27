@@ -1,5 +1,5 @@
 import { StickerSlot } from "@/contexts/trading/shared/domain/sticker-slot";
-import { DomainError } from "@/shared/error/domain-error";
+import { DomainError } from "@/packages/error/domain-error";
 
 test("Should create a sticker position object", () => expect(new StickerSlot(5).getValue()).toBe(5));
 test("Should throw an error when sticker position is decimal", () =>

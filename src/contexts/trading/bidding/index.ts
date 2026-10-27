@@ -1,8 +1,8 @@
-import type { EventBus } from "@/shared/application/event-bus";
+import type { EventBus } from "@/packages/application/event-bus";
 import { SkinListedEventListener } from "./application/event-listeners/skin-listed.event-listener";
 import { WantedSkinRepositoryInMemory } from "./infrastructure/repositories/wanted-skin.repository.in-memory";
-import type { CommandBus } from "@/shared/infrastructure/command-bus/command-bus";
-import type { Logger } from "@/shared/application/logger";
+import type { CommandBus } from "@/packages/infrastructure/command-bus/command-bus";
+import type { Logger } from "@/packages/application/logger";
 
 const wantedSkinRepo = new WantedSkinRepositoryInMemory();
 

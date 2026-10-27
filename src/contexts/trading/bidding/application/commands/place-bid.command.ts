@@ -1,4 +1,4 @@
-import { Command } from "@/shared/building-blocks/command";
+import { Command } from "@/packages/building-blocks/command";
 
 type CommandProps = {
     auctionId: number;

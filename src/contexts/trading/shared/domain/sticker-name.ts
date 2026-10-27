@@ -1,4 +1,4 @@
-import { BoundedString } from "@/shared/domain-primitives/bounded-string";
+import { BoundedString } from "@/packages/domain-primitives/bounded-string";
 
 export class StickerName extends BoundedString {
     constructor(value: string) {

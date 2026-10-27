@@ -1,5 +1,5 @@
 import { Sticker } from "@/contexts/trading/shared/domain/sticker";
-import { StickerType } from "@/shared-kernel/domain/sticker-type";
+import { StickerType } from "@/contexts/shared-kernel/domain/sticker-type";
 
 describe("Sticker", () => {
     it("Should create a sticker object", () => {
