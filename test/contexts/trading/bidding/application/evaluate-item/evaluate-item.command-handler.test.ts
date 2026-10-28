@@ -1,29 +1,28 @@
-import { SkinListedEventListener } from "@/contexts/trading/bidding/application/event-listeners/skin-listed.event-listener";
-import { PlaceBidCommand } from "@/contexts/trading/bidding/application/commands/place-bid.command";
-import type { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
-import type { EventListener } from "@/packages/application/event-listener";
-import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
-import type { CommandBus } from "@/packages/application/command-bus";
-import { skinListedEvent } from "./__mocks__/skin-listed.event.mock";
+import { EvaluateItemCommandHandler } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command-handler";
+import { evaluateItemCommand } from "./__mocks__/evaluate-item.command.mock";
 import type { Mock } from "bun:test";
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
 import { CommandHandler } from "@/packages/building-blocks/command-handler";
 import type { Logger } from "@/packages/application/logger";
 import { WantedSkin } from "@/contexts/trading/bidding/domain/wanted-skin/wanted-skin";
 import { WantedSkinRepository } from "@/contexts/trading/bidding/application/repositories/wanted-skin.repository";
+import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
+import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
+import type { EventBus } from "@/packages/application/event-bus";
+import { BidIncrementer } from "@/contexts/trading/bidding/domain/auction/bid-incrementer";
+import { ItemEvaluatedEvent } from "@/contexts/trading/bidding/application/events/item-evaluated.event";
+import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 
-let commandHandler: CommandHandler<PlaceBidCommand>;
 let wantedSkinRepo: WantedSkinRepository;
 let wantedSkinRepoSpy: Mock<WantedSkinRepository["findByName"]>;
 let logger: Logger;
 let loggerSpy: Mock<Logger["log"]>;
-let commandBus: CommandBus;
-let dispatchCommandSpy: Mock<CommandBus["dispatch"]>;
-let skinListed: EventListener<SkinListedEvent>;
+let eventBus: EventBus;
+let publishSpy: Mock<EventBus["publish"]>;
+let evaluateItem: CommandHandler<EvaluateItemCommand>;
 const fakeWantedSkins: WantedSkin[] = [];
-describe("ItemListedEventListener", () => {
+describe("EvaluateItemCommandHandler", () => {
     beforeEach(() => {
-        commandHandler = { handle: async () => {}, subscribedTo: () => PlaceBidCommand.COMMAND_NAME };
         wantedSkinRepo = {
             save: async (wantedSkin: WantedSkin) => {
                 fakeWantedSkins.push(wantedSkin);
@@ -31,12 +30,11 @@ describe("ItemListedEventListener", () => {
             findByName: async (name) => fakeWantedSkins.find((wanted) => wanted.getName() === name),
         };
         wantedSkinRepoSpy = jest.spyOn(wantedSkinRepo, "findByName");
-        logger = { log: () => {} };
+        logger = new LoggerConsoleAdapter();
         loggerSpy = jest.spyOn(logger, "log");
-        commandBus = new CommandBusInMemory();
-        commandBus.register(commandHandler);
-        dispatchCommandSpy = jest.spyOn(commandBus, "dispatch");
-        skinListed = new SkinListedEventListener(wantedSkinRepo, logger, commandBus);
+        eventBus = new EventBusInMemoryAsync();
+        publishSpy = jest.spyOn(eventBus, "publish");
+        evaluateItem = new EvaluateItemCommandHandler(wantedSkinRepo, logger, eventBus);
     });
 
     afterEach(() => (fakeWantedSkins.length = 0));
@@ -48,10 +46,15 @@ describe("ItemListedEventListener", () => {
                 criteria: [new MaxAboveRecommendedPercentage("-4.05")],
             }),
         );
-        await skinListed.on(skinListedEvent());
-        const [commandUsed] = dispatchCommandSpy.mock.calls[0];
-        expect(dispatchCommandSpy).toHaveBeenCalledTimes(1);
-        expect(commandUsed.name).toBe(PlaceBidCommand.COMMAND_NAME);
+        const command = evaluateItemCommand();
+        await evaluateItem.handle(command);
+        const [[event]] = publishSpy.mock.calls[0] as [[ItemEvaluatedEvent]];
+        expect(publishSpy).toHaveBeenCalledTimes(1);
+        expect(event.name).toBe(ItemEvaluatedEvent.EVENT_NAME);
+        expect(event.payload.auctionId).toBe(288767047);
+        expect(event.payload.value).toBe(
+            BidIncrementer.nextFor({ value: command.price, numberOfBids: command.numberOfBids }),
+        );
     });
     it("Should evaluate and decide not to place a bid on an item when certain criteria aren't met", async () => {
         const criterion = new MaxAboveRecommendedPercentage("-4.06");
@@ -61,13 +64,13 @@ describe("ItemListedEventListener", () => {
                 criteria: [criterion],
             }),
         );
-        await skinListed.on(skinListedEvent());
+        await evaluateItem.handle(evaluateItemCommand());
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(criterion.describe());
-        expect(dispatchCommandSpy).not.toHaveBeenCalled();
+        expect(publishSpy).not.toHaveBeenCalled();
     });
     it("Should don't make anything when skin isn't in auction", async () => {
-        await skinListed.on(skinListedEvent(false));
+        await evaluateItem.handle(evaluateItemCommand(false));
         expect(loggerSpy).toHaveBeenCalledTimes(0);
         expect(wantedSkinRepoSpy).not.toHaveBeenCalled();
     });
