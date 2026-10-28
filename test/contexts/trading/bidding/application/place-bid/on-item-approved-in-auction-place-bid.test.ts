@@ -1,4 +1,4 @@
-import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/events/item-approved-in-auction.event";
+import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/place-bid/item-approved-in-auction.event";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/place-bid/place-bid.command";
 import type { CommandBus } from "@/packages/application/command-bus";
 import type { EventListener } from "@/packages/application/event-listener";

@@ -1,4 +1,4 @@
-import type { AuctionDTO, AuctionGateway } from "@/contexts/trading/bidding/application/auction.gateway";
+import type { AuctionDTO, AuctionGateway } from "@/contexts/trading/bidding/application/place-bid/auction.gateway";
 import type { ActiveAuction } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/get-active-auctions";
 import type { CsgoempireAuctionHttp } from "../http/csgoempire/csgoempire-auction.http";
 

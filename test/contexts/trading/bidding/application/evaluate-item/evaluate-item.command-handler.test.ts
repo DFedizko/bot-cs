@@ -10,10 +10,10 @@ import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/eval
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { EventBus } from "@/packages/application/event-bus";
 import { BidIncrementer } from "@/contexts/trading/bidding/domain/auction/bid-incrementer";
-import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/events/item-approved-in-auction.event";
+import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/place-bid/item-approved-in-auction.event";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { fa } from "zod/v4/locales";
-import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/events/item-approved-off-auction.event";
+import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/withdraw-item/item-approved-off-auction.event";
 
 let wantedItemRepo: WantedItemRepository;
 let wantedItemRepoSpy: Mock<WantedItemRepository["findByName"]>;

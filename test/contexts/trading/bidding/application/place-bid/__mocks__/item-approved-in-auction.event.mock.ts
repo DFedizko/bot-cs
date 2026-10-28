@@ -1,4 +1,4 @@
-import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/events/item-approved-in-auction.event";
+import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/place-bid/item-approved-in-auction.event";
 
 export const itemApprovedInAuctionEvent = new ItemApprovedInAuctionEvent({
     auctionId: 288767047,

@@ -3,8 +3,8 @@ import type { WantedItemRepository } from "../wanted-item.repository";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { EvaluateItemCommand } from "./evaluate-item.command";
 import type { EventBus } from "@/packages/application/event-bus";
-import { ItemApprovedInAuctionEvent } from "../events/item-approved-in-auction.event";
-import { ItemApprovedOffAuctionEvent } from "../events/item-approved-off-auction.event";
+import { ItemApprovedInAuctionEvent } from "../place-bid/item-approved-in-auction.event";
+import { ItemApprovedOffAuctionEvent } from "../withdraw-item/item-approved-off-auction.event";
 
 export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCommand> {
     constructor(

@@ -1,8 +1,8 @@
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { PlaceBidCommand } from "./place-bid.command";
-import type { AuctionGateway } from "../auction.gateway";
+import type { AuctionGateway } from "./auction.gateway";
 import type { EventBus } from "@/packages/application/event-bus";
-import { BidPlacedEvent } from "../events/bid-placed.event";
+import { BidPlacedEvent } from "./bid-placed.event";
 import type { AccountBalanceStore } from "../account-balance.store";
 
 export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {

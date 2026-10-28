@@ -1,7 +1,7 @@
 import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
 import type { EventBus } from "@/packages/application/event-bus";
 import type { AuctionUpdate } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/auction-update";
-import { OutbidEvent } from "../../application/events/outbid.event";
+import { OutbidEvent } from "../../application/track-auction-update/outbid.event";
 
 export class AuctionUpdateWsController {
     constructor(wsClient: WsClient, eventBus: EventBus) {
