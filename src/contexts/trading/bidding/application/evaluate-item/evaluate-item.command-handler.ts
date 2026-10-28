@@ -1,10 +1,9 @@
-import { BidIncrementer } from "../../domain/auction/bid-incrementer";
 import type { Logger } from "@/packages/application/logger";
 import type { WantedItemRepository } from "../wanted-item.repository";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { EvaluateItemCommand } from "./evaluate-item.command";
 import type { EventBus } from "@/packages/application/event-bus";
-import { ItemEvaluatedEvent } from "../events/item-evaluated.event";
+import { ItemApprovedEvent } from "../events/item-approved.event";
 
 export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCommand> {
     constructor(
@@ -18,17 +17,17 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
     }
 
     async handle(command: EvaluateItemCommand): Promise<void> {
-		const { id, itemName, aboveRecommendedPercentage, price, numberOfBids, inAuction } = command;
+        const { id, itemName, aboveRecommendedPercentage, price, numberOfBids, inAuction } = command;
         if (!inAuction) return;
         const wantedItem = await this.wantedItemRepository.findByName(itemName);
         if (!wantedItem) return;
         const decision = wantedItem.evaluate({ value: price, aboveRecommendedPercentage });
         if (!decision.approved) return this.logger.log(decision.failures.join("; "));
-		const nextBid = BidIncrementer.nextFor({ value: price, numberOfBids });
         await this.eventBus.publish([
-            new ItemEvaluatedEvent({
+            new ItemApprovedEvent({
                 auctionId: id,
-                value: nextBid,
+                numberOfBids,
+                value: price,
             }),
         ]);
     }

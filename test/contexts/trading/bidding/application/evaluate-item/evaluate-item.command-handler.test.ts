@@ -10,7 +10,7 @@ import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/eval
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { EventBus } from "@/packages/application/event-bus";
 import { BidIncrementer } from "@/contexts/trading/bidding/domain/auction/bid-incrementer";
-import { ItemEvaluatedEvent } from "@/contexts/trading/bidding/application/events/item-evaluated.event";
+import { ItemApprovedEvent } from "@/contexts/trading/bidding/application/events/item-approved.event";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 
 let wantedItemRepo: WantedItemRepository;
@@ -48,13 +48,12 @@ describe("EvaluateItemCommandHandler", () => {
         );
         const command = evaluateItemCommand();
         await evaluateItem.handle(command);
-        const [[event]] = publishSpy.mock.calls[0] as [[ItemEvaluatedEvent]];
+        const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedEvent]];
         expect(publishSpy).toHaveBeenCalledTimes(1);
-        expect(event.name).toBe(ItemEvaluatedEvent.EVENT_NAME);
+        expect(event.name).toBe(ItemApprovedEvent.EVENT_NAME);
         expect(event.payload.auctionId).toBe(288767047);
-        expect(event.payload.value).toBe(
-            BidIncrementer.nextFor({ value: command.price, numberOfBids: command.numberOfBids }),
-        );
+        expect(event.payload.numberOfBids).toBe(command.numberOfBids);
+        expect(event.payload.value).toBe(command.price);
     });
     it("Should evaluate and decide not to place a bid on an item when certain criteria aren't met", async () => {
         const criterion = new MaxAboveRecommendedPercentage("-4.06");
