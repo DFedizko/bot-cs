@@ -7,8 +7,8 @@ import { WsServerSocketIoAdapter } from "@/packages/external/web-socket/server/w
 import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-server.express-adapter";
 import { WsClientSocketIoAdapter } from "@/packages/external/web-socket/client/ws-client.socket-io-adapter";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
-import { OutbidEvent } from "@/contexts/trading/bidding/application/events/outbid.event";
 import { AuctionUpdateWsController } from "@/contexts/trading/bidding/infrastructure/controllers/auction-update.ws-controller";
+import { OutbidEvent } from "@/contexts/trading/bidding/application/track-auction-update/outbid.event";
 
 const PORT = 8888;
 
