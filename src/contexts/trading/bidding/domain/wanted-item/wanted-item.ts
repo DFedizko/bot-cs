@@ -1,11 +1,11 @@
 import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
-import { SkinName } from "../value-objects/skin-name";
+import { ItemName } from "../value-objects/item-name";
 import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
-import type { SkinCriterion } from "./skin-criterion";
+import type { ItemCriterion } from "./item-criterion";
 
 type CreateWantedSkinProps = {
     name: string;
-    criteria: SkinCriterion[];
+    criteria: ItemCriterion[];
 };
 
 type BidDecision = {
@@ -13,16 +13,16 @@ type BidDecision = {
     failures: string[];
 };
 
-export class WantedSkin extends AggregateRoot<SkinName> {
+export class WantedItem extends AggregateRoot<ItemName> {
     private constructor(
-        id: SkinName,
-        private readonly criteria: SkinCriterion[],
+        id: ItemName,
+        private readonly criteria: ItemCriterion[],
     ) {
         super(id);
     }
 
-    static create(props: CreateWantedSkinProps): WantedSkin {
-        return new WantedSkin(new SkinName(props.name), props.criteria);
+    static create(props: CreateWantedSkinProps): WantedItem {
+        return new WantedItem(new ItemName(props.name), props.criteria);
     }
 
     evaluate(candidateProps: CandidatePrimitives): BidDecision {

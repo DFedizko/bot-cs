@@ -27,7 +27,7 @@ const bootstrap = async () => {
     wsClient.on("connect", async () => {
         logger.log(`Connected to websocket`);
         new InitCsgSessionWsController(wsClient, socketMetadata, logger);
-        new NewItemWsController(wsClient, eventBus);
+        new NewItemWsController(wsClient, commandBus);
     });
 };
 

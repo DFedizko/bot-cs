@@ -1,14 +1,14 @@
-import type { WantedSkinRepository } from "../../application/repositories/wanted-skin.repository";
-import { WantedSkin } from "../../domain/wanted-skin/wanted-skin";
+import type { WantedItemRepository } from "../../application/wanted-item.repository";
+import { WantedItem } from "../../domain/wanted-item/wanted-item";
 
-export class WantedSkinRepositoryInMemory implements WantedSkinRepository {
-    private readonly store = new Map<string, WantedSkin>();
+export class WantedItemRepositoryInMemory implements WantedItemRepository {
+    private readonly store = new Map<string, WantedItem>();
 
-    async findByName(name: string): Promise<WantedSkin | undefined> {
+    async findByName(name: string): Promise<WantedItem | undefined> {
         return this.store.get(name);
     }
 
-    async save(desiredSkin: WantedSkin): Promise<void> {
+    async save(desiredSkin: WantedItem): Promise<void> {
         this.store.set(desiredSkin.getName(), desiredSkin);
     }
 }

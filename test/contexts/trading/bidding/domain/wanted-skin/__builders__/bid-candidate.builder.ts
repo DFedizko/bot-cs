@@ -1,4 +1,4 @@
-import { BidCandidate } from "@/contexts/trading/bidding/domain/wanted-skin/bid-candidate";
+import { BidCandidate } from "@/contexts/trading/bidding/domain/wanted-item/bid-candidate";
 
 export const bidCandidate = (
     overrides: Partial<{ value: number; aboveRecommendedPercentage: string }> = {},

@@ -1,4 +1,4 @@
-import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
+import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-item/criteria/max-above-recommended-percentage";
 import { bidCandidate } from "../__builders__/bid-candidate.builder";
 
 test("Should return true when use a percentage below than specification", () =>

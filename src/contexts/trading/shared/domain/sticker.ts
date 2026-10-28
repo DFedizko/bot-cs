@@ -2,7 +2,7 @@ import { ValueObject } from "@/packages/building-blocks/value-object";
 import { PercentageWear } from "./percentage-wear";
 import type { StickerType } from "@/contexts/shared-kernel/domain/sticker-type";
 import { StickerSlot } from "./sticker-slot";
-import { SkinName } from "../../bidding/domain/value-objects/skin-name";
+import { ItemName } from "../../bidding/domain/value-objects/item-name";
 
 type CreateStickerProps = {
     name: string;
@@ -12,14 +12,14 @@ type CreateStickerProps = {
 };
 
 export class Sticker extends ValueObject<{
-    name: SkinName;
+    name: ItemName;
     percentageWear?: PercentageWear;
     type: StickerType;
     slot: StickerSlot;
 }> {
     private constructor(props: CreateStickerProps) {
         super({
-            name: new SkinName(props.name),
+            name: new ItemName(props.name),
             ...(props.percentageWear && { percentageWear: PercentageWear.fromFraction(props.percentageWear) }),
             type: props.type,
             slot: new StickerSlot(props.slot),

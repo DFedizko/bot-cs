@@ -1,9 +1,9 @@
 import { Specification } from "@/packages/building-blocks/specification";
 import { AboveRecommendedPercentage } from "../../value-objects/above-recommended-percentage";
 import type { BidCandidate } from "../bid-candidate";
-import type { SkinCriterion } from "../skin-criterion";
+import type { ItemCriterion } from "../item-criterion";
 
-export class MaxAboveRecommendedPercentage extends Specification<BidCandidate> implements SkinCriterion {
+export class MaxAboveRecommendedPercentage extends Specification<BidCandidate> implements ItemCriterion {
     readonly maxPercentage: AboveRecommendedPercentage;
     readonly type = "MaxAboveRecommendedPercentage" as const;
 
