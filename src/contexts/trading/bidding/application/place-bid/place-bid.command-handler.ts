@@ -1,9 +1,9 @@
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
-import { PlaceBidCommand } from "../commands/place-bid.command";
-import type { AuctionGateway } from "../gateways/auction.gateway";
+import { PlaceBidCommand } from "./place-bid.command";
+import type { AuctionGateway } from "../auction.gateway";
 import type { EventBus } from "@/packages/application/event-bus";
 import { BidPlacedEvent } from "../events/bid-placed.event";
-import type { AccountBalanceStore } from "../stores/account-balance.store";
+import type { AccountBalanceStore } from "../account-balance.store";
 
 export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
     constructor(
@@ -29,7 +29,7 @@ export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
                     bidderId: bidPlaced.bidderId,
                 }),
             ]);
-		} catch (error: unknown) {
+        } catch (error: unknown) {
             // TODO: check auction error to refund amount;
             this.accountBalanceStore.refund(command.bidValue);
             throw error;

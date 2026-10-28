@@ -1,8 +1,8 @@
-import { PlaceBidCommandHandler } from "@/contexts/trading/bidding/application/command-handlers/place-bid.command-handler";
-import { PlaceBidCommand } from "@/contexts/trading/bidding/application/commands/place-bid.command";
+import { PlaceBidCommandHandler } from "@/contexts/trading/bidding/application/place-bid/place-bid.command-handler";
+import { PlaceBidCommand } from "@/contexts/trading/bidding/application/place-bid/place-bid.command";
 import { BidPlacedEvent } from "@/contexts/trading/bidding/application/events/bid-placed.event";
-import type { AuctionGateway } from "@/contexts/trading/bidding/application/gateways/auction.gateway";
-import type { AccountBalanceStore } from "@/contexts/trading/bidding/application/stores/account-balance.store";
+import type { AuctionGateway } from "@/contexts/trading/bidding/application/auction.gateway";
+import type { AccountBalanceStore } from "@/contexts/trading/bidding/application/account-balance.store";
 import { CsgoempireAuctionHttpFakeAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-auction.http.fake-adapter";
 import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
 import type { CsgoempireAuctionHttp } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/csgoempire-auction.http";

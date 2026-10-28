@@ -1,4 +1,4 @@
-import type { AccountBalance } from "../../domain/value-objects/account-balance";
+import type { AccountBalance } from "../domain/value-objects/account-balance";
 
 // TODO: support multiple accounts
 export interface AccountBalanceStore {

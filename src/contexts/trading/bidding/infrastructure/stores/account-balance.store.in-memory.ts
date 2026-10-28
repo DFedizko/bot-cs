@@ -1,4 +1,4 @@
-import type { AccountBalanceStore } from "../../application/stores/account-balance.store";
+import type { AccountBalanceStore } from "../../application/account-balance.store";
 import { AccountBalance } from "../../domain/value-objects/account-balance";
 import { FluentAccountBalance } from "../../domain/value-objects/fluent-account-balance";
 

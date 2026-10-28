@@ -1,4 +1,4 @@
-import type { AccountBalanceStore } from "@/contexts/trading/bidding/application/stores/account-balance.store";
+import type { AccountBalanceStore } from "@/contexts/trading/bidding/application/account-balance.store";
 import { AccountBalanceStoreInMemory } from "@/contexts/trading/bidding/infrastructure/stores/account-balance.store.in-memory";
 
 let accountBalanceStore: AccountBalanceStore;
