@@ -8,7 +8,7 @@ import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-s
 import { WsClientSocketIoAdapter } from "@/packages/external/web-socket/client/ws-client.socket-io-adapter";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import { OutbidEvent } from "@/contexts/trading/bidding/application/events/outbid.event";
-import { OnAuctionUpdateWsController } from "@/contexts/trading/bidding/infrastructure/controllers/on-auction-update.ws-controller";
+import { AuctionUpdateWsController } from "@/contexts/trading/bidding/infrastructure/controllers/auction-update.ws-controller";
 
 const PORT = 8888;
 
@@ -18,14 +18,14 @@ let wsClient: WsClient;
 let eventBus: EventBus;
 let publishSpy: Mock<EventBus["publish"]>;
 
-describe("OnAuctionUpdateWsController", () => {
+describe("AuctionUpdateWsController", () => {
     beforeEach(() => {
         httpServer = new HttpServerExpressAdapter();
         wsServer = new WsServerSocketIoAdapter(httpServer.http);
         wsClient = new WsClientSocketIoAdapter(`ws://localhost:${PORT}`);
         eventBus = new EventBusInMemoryAsync();
         publishSpy = jest.spyOn(eventBus, "publish");
-        new OnAuctionUpdateWsController(wsClient, eventBus);
+        new AuctionUpdateWsController(wsClient, eventBus);
         httpServer.listen(PORT);
         wsServer.on("connection", (socket) => {
             socket.emit("auction_update", auctionUpdate);
