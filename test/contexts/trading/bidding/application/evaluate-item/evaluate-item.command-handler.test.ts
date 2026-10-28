@@ -10,8 +10,10 @@ import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/eval
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { EventBus } from "@/packages/application/event-bus";
 import { BidIncrementer } from "@/contexts/trading/bidding/domain/auction/bid-incrementer";
-import { ItemApprovedEvent } from "@/contexts/trading/bidding/application/events/item-approved.event";
+import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/events/item-approved-in-auction.event";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
+import { fa } from "zod/v4/locales";
+import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/events/item-approved-off-auction.event";
 
 let wantedItemRepo: WantedItemRepository;
 let wantedItemRepoSpy: Mock<WantedItemRepository["findByName"]>;
@@ -39,7 +41,7 @@ describe("EvaluateItemCommandHandler", () => {
 
     afterEach(() => (fakeWantedItems.length = 0));
 
-    it("Should evaluate and decide whether to place a bid on an item when all criteria are met", async () => {
+    it("Should evaluate and approve a item in auction when all criteria are met", async () => {
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
@@ -48,14 +50,29 @@ describe("EvaluateItemCommandHandler", () => {
         );
         const command = evaluateItemCommand();
         await evaluateItem.handle(command);
-        const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedEvent]];
+        const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedInAuctionEvent]];
         expect(publishSpy).toHaveBeenCalledTimes(1);
-        expect(event.name).toBe(ItemApprovedEvent.EVENT_NAME);
+        expect(event.name).toBe(ItemApprovedInAuctionEvent.EVENT_NAME);
         expect(event.payload.auctionId).toBe(288767047);
         expect(event.payload.numberOfBids).toBe(command.numberOfBids);
         expect(event.payload.value).toBe(command.price);
+	});
+    it("Should evaluate and approve a item out of the auction when all criteria are met", async () => {
+        await wantedItemRepo.save(
+            WantedItem.create({
+                name: "M4A4 | Cyber Security (Field-Tested)",
+                criteria: [new MaxAboveRecommendedPercentage("-4.05")],
+            }),
+        );
+        const command = evaluateItemCommand(false);
+        await evaluateItem.handle(command);
+        const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedOffAuctionEvent]];
+        expect(publishSpy).toHaveBeenCalledTimes(1);
+        expect(event.name).toBe(ItemApprovedOffAuctionEvent.EVENT_NAME);
+        expect(event.payload.itemId).toBe(288767047);
+        expect(event.payload.value).toBe(command.price);
     });
-    it("Should evaluate and decide not to place a bid on an item when certain criteria aren't met", async () => {
+    it("Should evaluate reject a item when certain criteria aren't met", async () => {
         const criterion = new MaxAboveRecommendedPercentage("-4.06");
         await wantedItemRepo.save(
             WantedItem.create({
@@ -67,10 +84,5 @@ describe("EvaluateItemCommandHandler", () => {
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(criterion.describe());
         expect(publishSpy).not.toHaveBeenCalled();
-    });
-    it("Should don't make anything when skin isn't in auction", async () => {
-        await evaluateItem.handle(evaluateItemCommand(false));
-        expect(loggerSpy).toHaveBeenCalledTimes(0);
-        expect(wantedItemRepoSpy).not.toHaveBeenCalled();
     });
 });
