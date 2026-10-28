@@ -2,14 +2,12 @@ import { FooCommand } from "@/packages/building-blocks/__mocks__/foo.command";
 import { FooRepository } from "@/packages/building-blocks/__mocks__/foo.repository";
 import { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
-import { CommandBus } from "@/packages/infrastructure/command-bus/command-bus";
-import { CommandBusInMemory } from "@/packages/external/command-bus/command-bus.in-memory";
-import { CommandHandlers } from "@/packages/infrastructure/command-bus/command-handlers";
+import { CommandBus } from "@/packages/application/command-bus";
+import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 
 let fooRepository: FooRepository;
 let command: Command;
 let commandHandler: CommandHandler<Command>;
-let commandHandlers: CommandHandlers;
 let commandBus: CommandBus;
 beforeEach(() => {
     fooRepository = { save: jest.fn() };
@@ -20,8 +18,8 @@ beforeEach(() => {
         }),
         subscribedTo: () => command.name,
     };
-    commandHandlers = new CommandHandlers([commandHandler]);
-    commandBus = new CommandBusInMemory(commandHandlers);
+    commandBus = new CommandBusInMemory();
+    commandBus.register(commandHandler);
 });
 describe("CommandBusInMemory", () => {
     it("Should dispatch a command", async () => {

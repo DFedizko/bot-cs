@@ -37,7 +37,7 @@ afterEach(async () => {
 });
 
 describe("NewItemWsController", () => {
-    it("Should receive a new item and publish ", (done) => {
+    it("Should receive a new item and publish a command to evaluate it", (done) => {
         wsClient.on("new_item", () => {
             const [events] = publishSpy.mock.calls[0] as SkinListedEvent[][];
             expect(publishSpy).toHaveBeenCalled();

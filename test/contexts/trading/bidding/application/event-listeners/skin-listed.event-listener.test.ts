@@ -2,9 +2,8 @@ import { SkinListedEventListener } from "@/contexts/trading/bidding/application/
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/commands/place-bid.command";
 import type { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
 import type { EventListener } from "@/packages/application/event-listener";
-import { CommandBusInMemory } from "@/packages/external/command-bus/command-bus.in-memory";
-import type { CommandBus } from "@/packages/infrastructure/command-bus/command-bus";
-import { CommandHandlers } from "@/packages/infrastructure/command-bus/command-handlers";
+import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
+import type { CommandBus } from "@/packages/application/command-bus";
 import { skinListedEvent } from "./__mocks__/skin-listed.event.mock";
 import type { Mock } from "bun:test";
 import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-skin/criteria/max-above-recommended-percentage";
@@ -14,7 +13,6 @@ import { WantedSkin } from "@/contexts/trading/bidding/domain/wanted-skin/wanted
 import { WantedSkinRepository } from "@/contexts/trading/bidding/application/repositories/wanted-skin.repository";
 
 let commandHandler: CommandHandler<PlaceBidCommand>;
-let commandHandlers: CommandHandlers;
 let wantedSkinRepo: WantedSkinRepository;
 let wantedSkinRepoSpy: Mock<WantedSkinRepository["findByName"]>;
 let logger: Logger;
@@ -26,7 +24,6 @@ const fakeWantedSkins: WantedSkin[] = [];
 describe("ItemListedEventListener", () => {
     beforeEach(() => {
         commandHandler = { handle: async () => {}, subscribedTo: () => PlaceBidCommand.COMMAND_NAME };
-        commandHandlers = new CommandHandlers([commandHandler]);
         wantedSkinRepo = {
             save: async (wantedSkin: WantedSkin) => {
                 fakeWantedSkins.push(wantedSkin);
@@ -36,7 +33,8 @@ describe("ItemListedEventListener", () => {
         wantedSkinRepoSpy = jest.spyOn(wantedSkinRepo, "findByName");
         logger = { log: () => {} };
         loggerSpy = jest.spyOn(logger, "log");
-        commandBus = new CommandBusInMemory(commandHandlers);
+        commandBus = new CommandBusInMemory();
+        commandBus.register(commandHandler);
         dispatchCommandSpy = jest.spyOn(commandBus, "dispatch");
         skinListed = new SkinListedEventListener(wantedSkinRepo, logger, commandBus);
     });
