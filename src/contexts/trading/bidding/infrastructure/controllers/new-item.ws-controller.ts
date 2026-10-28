@@ -3,7 +3,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import type { NewItem } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/new-item";
 import { SkinListedEvent } from "../../application/events/skin-listed.event";
 
-export class OnNewItemWsController {
+export class NewItemWsController {
     constructor(wsClient: WsClient, eventBus: EventBus) {
         wsClient.on("new_item", (data: NewItem) => {
             const events = data.map(

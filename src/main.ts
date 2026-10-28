@@ -1,5 +1,5 @@
 import { registerBiddingEvents } from "./contexts/trading/bidding";
-import { OnNewItemWsController } from "./contexts/trading/bidding/infrastructure/controllers/on-new-item.ws-controller";
+import { NewItemWsController } from "./contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import { CsgoempireWsClient } from "./contexts/trading/shared/external/csgoempire/csgoempire.ws-client";
 import { CsgoempireHttpClientFactory } from "./contexts/trading/shared/external/csgoempire/http/csgoempire.http-client";
 import { SocketMetadataHttp } from "./contexts/trading/shared/external/csgoempire/http/socket-metadata.gateway.http";
@@ -29,7 +29,7 @@ const bootstrap = async () => {
     wsClient.on("connect", async () => {
         logger.log(`Connected to websocket`);
         new InitCsgSessionWsController(wsClient, socketMetadata, logger);
-        new OnNewItemWsController(wsClient, eventBus);
+        new NewItemWsController(wsClient, eventBus);
     });
 };
 

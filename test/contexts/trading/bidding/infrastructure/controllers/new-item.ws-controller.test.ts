@@ -3,7 +3,7 @@ import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.i
 import { newItem } from "./__mocks__/new-item.mock";
 import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
 import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
-import { OnNewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/on-new-item.ws-controller";
+import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import type { Mock } from "bun:test";
 import { SkinListedEvent } from "@/contexts/trading/bidding/application/events/skin-listed.event";
@@ -24,7 +24,7 @@ beforeEach(async () => {
     wsClient = new WsClientSocketIoAdapter(`ws://localhost:${PORT}`);
     eventBus = new EventBusInMemoryAsync();
     publishSpy = jest.spyOn(eventBus, "publish");
-    new OnNewItemWsController(wsClient, eventBus);
+    new NewItemWsController(wsClient, eventBus);
     httpServer.listen(PORT);
     wsServer.on("connection", (socket) => {
         socket.emit("new_item", newItem);
@@ -36,7 +36,7 @@ afterEach(async () => {
     wsClient.close();
 });
 
-describe("OnNewItemWsController", () => {
+describe("NewItemWsController", () => {
     it("Should receive a new item and publish ", (done) => {
         wsClient.on("new_item", () => {
             const [events] = publishSpy.mock.calls[0] as SkinListedEvent[][];
