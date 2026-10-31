@@ -1,7 +1,7 @@
 import { ApplicationEvent } from "@/packages/building-blocks/application-event";
 
 type Payload = {
-    id: number;
+    auctionId: number;
     bidderId: number;
     value: number;
     endsAt: number;
