@@ -2,6 +2,7 @@ import { ApplicationEvent } from "@/packages/building-blocks/application-event";
 
 type Payload = {
     itemId: number;
+    accountId: number;
     value: number;
 };
 

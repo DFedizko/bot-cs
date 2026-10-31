@@ -18,7 +18,7 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
     }
 
     async handle(command: EvaluateItemCommand): Promise<void> {
-        const { id, itemName, aboveRecommendedPercentage, price, numberOfBids, inAuction } = command;
+        const { itemId, accountId, itemName, aboveRecommendedPercentage, price, numberOfBids, inAuction } = command;
         const wantedItem = await this.wantedItemRepository.findByName(itemName);
         if (!wantedItem) return;
         const decision = wantedItem.evaluate({ value: price, aboveRecommendedPercentage });
@@ -27,12 +27,13 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
             inAuction
                 ? [
                       new ItemApprovedInAuctionEvent({
-                          auctionId: id,
+                          auctionId: itemId,
+                          accountId,
                           value: price,
                           numberOfBids,
                       }),
                   ]
-                : [new ItemApprovedOffAuctionEvent({ itemId: id, value: price })],
+                : [new ItemApprovedOffAuctionEvent({ itemId, accountId, value: price })],
         );
     }
 }

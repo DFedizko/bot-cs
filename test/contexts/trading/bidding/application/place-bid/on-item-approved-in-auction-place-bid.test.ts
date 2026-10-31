@@ -24,6 +24,7 @@ describe("OnItemApprovedInAuctionPlaceBid", () => {
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
         expect(command.name).toBe(PlaceBidCommand.COMMAND_NAME);
         expect(command.auctionId).toBe(itemApprovedInAuctionEvent.payload.auctionId);
+        expect(command.accountId).toBe(itemApprovedInAuctionEvent.payload.accountId);
         expect(command.bidValue).toBe(itemApprovedInAuctionEvent.payload.value);
     });
 });

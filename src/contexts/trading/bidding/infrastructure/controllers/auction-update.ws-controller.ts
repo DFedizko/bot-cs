@@ -9,7 +9,7 @@ export class AuctionUpdateWsController {
             data.forEach((auction) =>
                 commandBus.dispatch(
                     new TrackAuctionUpdateCommand({
-                        id: auction.id,
+                        auctionId: auction.id,
                         bidderId: auction.auction_highest_bidder,
                         value: auction.auction_highest_bid,
                         endsAt: auction.auction_ends_at,

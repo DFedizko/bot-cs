@@ -2,6 +2,7 @@ import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/applicati
 
 export const itemApprovedInAuctionEvent = new ItemApprovedInAuctionEvent({
     auctionId: 288767047,
+    accountId: 1,
     numberOfBids: 0,
     value: 3656,
 });

@@ -11,7 +11,7 @@ export class OnItemApprovedOffAuctionWithdraw implements EventListener<ItemAppro
     }
 
     async on(event: ItemApprovedOffAuctionEvent): Promise<void> {
-        const { itemId, value } = event.payload;
-        await this.commandBus.dispatch(new WithdrawItemCommand({ itemId, value }));
+        const { itemId, accountId, value } = event.payload;
+        await this.commandBus.dispatch(new WithdrawItemCommand({ itemId, accountId, value }));
     }
 }

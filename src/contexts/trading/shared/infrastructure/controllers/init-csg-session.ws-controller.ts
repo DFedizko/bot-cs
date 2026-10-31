@@ -1,20 +1,19 @@
-import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
-import type { InitCsgSessionController } from "./init-csg-session.controller";
 import type { InitEvent } from "../csgoempire/ws-events/init";
 import type { GetSocketMetadataIO, SocketMetadataGateway } from "../csgoempire/http/socket-metadata.gateway";
 import { BaseError } from "@/packages/building-blocks/base-error";
 import type { Logger } from "@/packages/application/logger";
+import type { CsgWsClient } from "../csgoempire/csg.ws-client";
 
 const MS_IN_SECONDS = 1000;
 const FIFTEEN_SECONDS = 15;
 const PRICE_MAX_FILTER_VALUE = 9999999;
 
-export class InitCsgSessionWsController implements InitCsgSessionController {
+export class InitCsgSessionWsController {
     private userData: GetSocketMetadataIO.Response | null = null;
     private userDataRefreshedAt: number | null = null;
 
     constructor(
-        wsClient: WsClient,
+        wsClient: CsgWsClient,
         private readonly socketMetadataGateway: SocketMetadataGateway,
         private readonly logger: Logger,
     ) {

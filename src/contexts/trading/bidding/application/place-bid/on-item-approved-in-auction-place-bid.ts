@@ -11,7 +11,7 @@ export class OnItemApprovedInAuctionPlaceBid implements EventListener<ItemApprov
     }
 
     async on(event: ItemApprovedInAuctionEvent): Promise<void> {
-        const { auctionId, value } = event.payload;
-        await this.commandBus.dispatch(new PlaceBidCommand({ auctionId, bidValue: value }));
+        const { auctionId, accountId, value } = event.payload;
+        await this.commandBus.dispatch(new PlaceBidCommand({ auctionId, accountId, bidValue: value }));
     }
 }

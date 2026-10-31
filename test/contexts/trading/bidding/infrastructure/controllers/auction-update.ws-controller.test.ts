@@ -43,14 +43,14 @@ describe("AuctionUpdateWsController", () => {
             const commands = dispatchSpy.mock.calls as [TrackAuctionUpdateCommand][];
             expect(dispatchSpy).toHaveBeenCalledTimes(3);
             const commandPayloads = commands.flatMap(([command]) => ({
-                id: command.id,
+                auctionId: command.auctionId,
                 bidderId: command.bidderId,
                 value: command.value,
                 endsAt: command.endsAt,
             }));
             expect(commandPayloads).toEqual(
                 auctionUpdate.map((auction) => ({
-                    id: auction.id,
+                    auctionId: auction.id,
                     bidderId: auction.auction_highest_bidder,
                     value: auction.auction_highest_bid,
                     endsAt: auction.auction_ends_at,

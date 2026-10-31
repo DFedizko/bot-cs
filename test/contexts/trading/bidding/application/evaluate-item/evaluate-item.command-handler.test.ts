@@ -9,10 +9,8 @@ import { WantedItemRepository } from "@/contexts/trading/bidding/application/wan
 import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { EventBus } from "@/packages/application/event-bus";
-import { BidIncrementer } from "@/contexts/trading/bidding/domain/auction/bid-incrementer";
 import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/place-bid/item-approved-in-auction.event";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
-import { fa } from "zod/v4/locales";
 import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/withdraw-item/item-approved-off-auction.event";
 
 let wantedItemRepo: WantedItemRepository;
@@ -51,12 +49,14 @@ describe("EvaluateItemCommandHandler", () => {
         const command = evaluateItemCommand();
         await evaluateItem.handle(command);
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedInAuctionEvent]];
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
         expect(publishSpy).toHaveBeenCalledTimes(1);
-        expect(event.name).toBe(ItemApprovedInAuctionEvent.EVENT_NAME);
         expect(event.payload.auctionId).toBe(288767047);
+        expect(event.payload.accountId).toBe(command.accountId);
+        expect(event.name).toBe(ItemApprovedInAuctionEvent.EVENT_NAME);
         expect(event.payload.numberOfBids).toBe(command.numberOfBids);
         expect(event.payload.value).toBe(command.price);
-	});
+    });
     it("Should evaluate and approve a item out of the auction when all criteria are met", async () => {
         await wantedItemRepo.save(
             WantedItem.create({
@@ -67,9 +67,11 @@ describe("EvaluateItemCommandHandler", () => {
         const command = evaluateItemCommand(false);
         await evaluateItem.handle(command);
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedOffAuctionEvent]];
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.name).toBe(ItemApprovedOffAuctionEvent.EVENT_NAME);
         expect(event.payload.itemId).toBe(288767047);
+        expect(event.payload.accountId).toBe(command.accountId);
         expect(event.payload.value).toBe(command.price);
     });
     it("Should evaluate reject a item when certain criteria aren't met", async () => {
@@ -81,6 +83,7 @@ describe("EvaluateItemCommandHandler", () => {
             }),
         );
         await evaluateItem.handle(evaluateItemCommand());
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(criterion.describe());
         expect(publishSpy).not.toHaveBeenCalled();

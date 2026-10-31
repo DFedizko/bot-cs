@@ -24,6 +24,7 @@ describe("OnItemApprovedOffAuctionWithdraw", () => {
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
         expect(command.name).toBe(WithdrawItemCommand.COMMAND_NAME);
         expect(command.itemId).toBe(itemApprovedOffAuctionEvent.payload.itemId);
+        expect(command.accountId).toBe(itemApprovedOffAuctionEvent.payload.accountId);
         expect(command.value).toBe(itemApprovedOffAuctionEvent.payload.value);
     });
 });

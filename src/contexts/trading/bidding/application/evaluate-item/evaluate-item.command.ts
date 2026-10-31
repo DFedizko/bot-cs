@@ -1,7 +1,8 @@
 import { Command } from "@/packages/building-blocks/command";
 
 type CommandProps = {
-    id: number;
+    itemId: number;
+    accountId: number;
     itemName: string;
     price: number;
     aboveRecommendedPercentage: string;
@@ -12,7 +13,8 @@ type CommandProps = {
 
 export class EvaluateItemCommand extends Command {
     public static readonly COMMAND_NAME = "evaluate_item";
-    public readonly id: number;
+    public readonly itemId: number;
+    public readonly accountId: number;
     public readonly itemName: string;
     public readonly price: number;
     public readonly aboveRecommendedPercentage: string;
@@ -22,7 +24,8 @@ export class EvaluateItemCommand extends Command {
 
     constructor(props: CommandProps) {
         super();
-        this.id = props.id;
+        this.itemId = props.itemId;
+        this.accountId = props.accountId;
         this.itemName = props.itemName;
         this.price = props.price;
         this.aboveRecommendedPercentage = props.aboveRecommendedPercentage;
