@@ -53,7 +53,7 @@ describe("PlaceBidCommandHandler", () => {
         expect(account.getAvailableAmount()).toBe(0);
         expect(publishEventSpy).toHaveBeenCalledTimes(1);
         expect(event.name).toBe(BidPlacedEvent.EVENT_NAME);
-        expect(event.payload).toMatchObject({ auctionId: 11204, bidValue: 227, bidderId: 303119 });
+        expect(event.payload).toMatchObject({ auctionId: 11204, accountId: 1, bidValue: 227, bidderId: 303119 });
     });
     it("Shouldn't place a bid and log if the account hasn't sufficient balance", async () => {
         await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 9999 }));

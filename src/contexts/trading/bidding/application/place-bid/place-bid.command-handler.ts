@@ -37,6 +37,7 @@ export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
             await this.eventBus.publish([
                 new BidPlacedEvent({
                     auctionId: bidPlaced.id,
+                    accountId: command.accountId,
                     bidValue: bidPlaced.highestBid,
                     bidderId: bidPlaced.bidderId,
                 }),

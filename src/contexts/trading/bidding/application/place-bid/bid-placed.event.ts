@@ -1,6 +1,6 @@
 import { ApplicationEvent } from "@/packages/building-blocks/application-event";
 
-type BidPlacedPayload = { auctionId: number; bidValue: number; bidderId: number };
+type BidPlacedPayload = { auctionId: number; accountId: number; bidValue: number; bidderId: number };
 
 export class BidPlacedEvent extends ApplicationEvent<BidPlacedPayload> {
     static readonly EVENT_NAME = "bid_placed";
