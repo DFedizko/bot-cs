@@ -7,6 +7,6 @@ import { EvaluateItemCommandHandler } from "./application/evaluate-item/evaluate
 const wantedSkinRepo = new WantedItemRepositoryInMemory();
 
 export const registerBiddingEvents = (eventBus: EventBus, commandBus: CommandBus, logger: Logger): void => {
-    const skinListedEventListener = new EvaluateItemCommandHandler(wantedSkinRepo, logger, eventBus);
-    commandBus.register(skinListedEventListener);
+    const evaluateItemCommandHandler = new EvaluateItemCommandHandler(wantedSkinRepo, logger, eventBus);
+    commandBus.register(evaluateItemCommandHandler);
 };
