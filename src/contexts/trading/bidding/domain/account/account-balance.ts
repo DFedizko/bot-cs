@@ -3,8 +3,12 @@ import { ValueObject } from "@/packages/building-blocks/value-object";
 import { Money } from "@/packages/domain-primitives/money";
 
 export class AccountBalance extends ValueObject<{ total: Money; reserved: Money; available: Money }> {
-    constructor({ total, reserved, available }: { total: number; reserved: number; available: number }) {
-        super({ total: CoinCent(total), reserved: CoinCent(reserved), available: CoinCent(available) });
+    constructor({ total, reserved }: { total: number; reserved: number }) {
+        super({
+            total: CoinCent(total),
+            reserved: CoinCent(reserved),
+            available: CoinCent(total).substract(CoinCent(reserved)),
+        });
     }
 
     covers(value: number): boolean {

@@ -1,4 +1,4 @@
-import { AccountBalance } from "./account-balance";
+import { AccountBalance } from "../account/account-balance";
 
 export class FluentAccountBalance {
     private total: number;
@@ -42,6 +42,6 @@ export class FluentAccountBalance {
     }
 
     getBalance(): AccountBalance {
-        return new AccountBalance({ total: this.total, reserved: this.reserved, available: this.available });
+        return new AccountBalance({ total: this.total, reserved: this.reserved });
     }
 }
