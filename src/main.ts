@@ -22,12 +22,12 @@ const bootstrap = async () => {
     registerBiddingEvents(eventBus, commandBus, logger);
 
     const metadata = await socketMetadata.getSocketMetadata();
-    const wsClient = new CsgoempireWsClient({ id: metadata.user.id, socketToken: metadata.socket_token });
+    const csgWsClient = new CsgoempireWsClient({ id: metadata.user.id, socketToken: metadata.socket_token });
 
-    wsClient.on("connect", async () => {
+    csgWsClient.on("connect", async () => {
         logger.log(`Connected to websocket`);
-        new InitCsgSessionWsController(wsClient, socketMetadata, logger);
-        new NewItemWsController(wsClient, commandBus);
+        new InitCsgSessionWsController(csgWsClient, socketMetadata, logger);
+        new NewItemWsController(csgWsClient, commandBus);
     });
 };
 
