@@ -1,4 +1,4 @@
-import { AccountBalance } from "../account/account-balance";
+import { AccountBalance } from "./account-balance";
 
 export class FluentAccountBalance {
     private total: number;
