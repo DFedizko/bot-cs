@@ -4,7 +4,7 @@ type Payload = {
     auctionId: number;
     accountId: number;
     value: number;
-    numberOfBids: number;
+    maxPrice: number;
 };
 
 export class ItemApprovedInAuctionEvent extends ApplicationEvent<Payload> {
