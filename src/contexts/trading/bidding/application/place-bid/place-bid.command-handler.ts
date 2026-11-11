@@ -7,10 +7,14 @@ import type { AccountRepository } from "../account.repository";
 import { AccountId } from "../../domain/account/account-id";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
 import type { Logger } from "@/packages/application/logger";
+import type { AuctionParticipationRepository } from "../auction-participation.repository";
+import { AuctionParticipation } from "../../domain/auction-participation/auction-participation";
+import { AuctionId } from "../../domain/auction-participation/auction-id";
 
 export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
     constructor(
         private readonly accountRepository: AccountRepository,
+        private readonly auctionParticipationRepository: AuctionParticipationRepository,
         private readonly logger: Logger,
         private readonly auctionGateway: AuctionGateway,
         private readonly eventBus: EventBus,
@@ -34,6 +38,15 @@ export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
         await this.accountRepository.save(account);
         try {
             const bidPlaced = await this.auctionGateway.placeBid(command.auctionId, command.bidValue);
+            if (await this.isFirstBid(command)) {
+                await this.auctionParticipationRepository.save(
+                    AuctionParticipation.create({
+                        auctionId: command.auctionId,
+                        accountId: command.accountId,
+                        maxBid: command.maxBid!,
+                    }),
+                );
+            }
             await this.eventBus.publish([
                 new BidPlacedEvent({
                     auctionId: bidPlaced.id,
@@ -48,5 +61,12 @@ export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
             await this.accountRepository.save(account);
             throw error;
         }
+    }
+
+    private async isFirstBid(command: PlaceBidCommand): Promise<boolean> {
+        return (
+            !(await this.auctionParticipationRepository.findByAuctionId(new AuctionId(command.auctionId))) &&
+            command.maxBid !== undefined
+        );
     }
 }

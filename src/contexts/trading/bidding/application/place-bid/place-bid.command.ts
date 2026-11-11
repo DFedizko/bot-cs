@@ -4,6 +4,7 @@ type CommandProps = {
     auctionId: number;
     accountId: number;
     bidValue: number;
+    maxBid?: number;
 };
 
 export class PlaceBidCommand extends Command {
@@ -11,11 +12,13 @@ export class PlaceBidCommand extends Command {
     public readonly auctionId: number;
     public readonly accountId: number;
     public readonly bidValue: number;
+    public readonly maxBid?: number;
 
     constructor(props: CommandProps) {
         super();
         this.auctionId = props.auctionId;
         this.accountId = props.accountId;
         this.bidValue = props.bidValue;
+        this.maxBid = props.maxBid;
     }
 }
