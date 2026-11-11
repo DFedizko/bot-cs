@@ -1,5 +1,5 @@
 import type { EventListener } from "@/packages/application/event-listener";
-import { ItemApprovedInAuctionEvent } from "./item-approved-in-auction.event";
+import { ItemApprovedInAuctionEvent } from "../evaluate-item/item-approved-in-auction.event";
 import type { CommandBus } from "@/packages/application/command-bus";
 import { PlaceBidCommand } from "./place-bid.command";
 
@@ -11,7 +11,9 @@ export class OnItemApprovedInAuctionPlaceBid implements EventListener<ItemApprov
     }
 
     async on(event: ItemApprovedInAuctionEvent): Promise<void> {
-        const { auctionId, accountId, value } = event.payload;
-        await this.commandBus.dispatch(new PlaceBidCommand({ auctionId, accountId, bidValue: value }));
+        const { auctionId, accountId, value, maxPrice } = event.payload;
+        await this.commandBus.dispatch(
+            new PlaceBidCommand({ auctionId, accountId, bidValue: value, maxBid: maxPrice }),
+        );
     }
 }

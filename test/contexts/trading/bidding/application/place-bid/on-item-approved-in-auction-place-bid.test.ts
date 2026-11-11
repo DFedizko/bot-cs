@@ -1,11 +1,11 @@
-import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/place-bid/item-approved-in-auction.event";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/place-bid/place-bid.command";
 import type { CommandBus } from "@/packages/application/command-bus";
 import type { EventListener } from "@/packages/application/event-listener";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import type { Mock } from "bun:test";
-import { itemApprovedInAuctionEvent } from "./__mocks__/item-approved-in-auction.event.mock";
+import { itemApprovedInAuctionEvent } from "../evaluate-item/__mocks__/item-approved-in-auction.event.mock";
 import { OnItemApprovedInAuctionPlaceBid } from "@/contexts/trading/bidding/application/place-bid/on-item-approved-in-auction-place-bid";
+import type { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
 
 let commandBus: CommandBus;
 let onItemApprovedInAuctionPlaceBid: EventListener<ItemApprovedInAuctionEvent>;
@@ -26,5 +26,6 @@ describe("OnItemApprovedInAuctionPlaceBid", () => {
         expect(command.auctionId).toBe(itemApprovedInAuctionEvent.payload.auctionId);
         expect(command.accountId).toBe(itemApprovedInAuctionEvent.payload.accountId);
         expect(command.bidValue).toBe(itemApprovedInAuctionEvent.payload.value);
+        expect(command.maxBid).toBe(itemApprovedInAuctionEvent.payload.maxPrice);
     });
 });
