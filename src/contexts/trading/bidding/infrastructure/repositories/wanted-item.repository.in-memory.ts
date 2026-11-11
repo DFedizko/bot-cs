@@ -8,7 +8,7 @@ export class WantedItemRepositoryInMemory implements WantedItemRepository {
         return this.store.get(name);
     }
 
-    async save(desiredSkin: WantedItem): Promise<void> {
-        this.store.set(desiredSkin.getName(), desiredSkin);
+    async save(wantedItem: WantedItem): Promise<void> {
+        this.store.set(wantedItem.getName(), wantedItem);
     }
 }
