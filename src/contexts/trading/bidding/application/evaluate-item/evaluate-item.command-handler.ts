@@ -3,8 +3,8 @@ import type { WantedItemRepository } from "../wanted-item.repository";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { EvaluateItemCommand } from "./evaluate-item.command";
 import type { EventBus } from "@/packages/application/event-bus";
-import { ItemApprovedInAuctionEvent } from "../place-bid/item-approved-in-auction.event";
-import { ItemApprovedOffAuctionEvent } from "../withdraw-item/item-approved-off-auction.event";
+import { ItemApprovedInAuctionEvent } from "./item-approved-in-auction.event";
+import { ItemApprovedOffAuctionEvent } from "./item-approved-off-auction.event";
 
 export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCommand> {
     constructor(
@@ -17,11 +17,18 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
         return EvaluateItemCommand.COMMAND_NAME;
     }
 
-    async handle(command: EvaluateItemCommand): Promise<void> {
-        const { itemId, accountId, itemName, aboveRecommendedPercentage, price, numberOfBids, inAuction } = command;
+    async handle({
+        itemId,
+        accountId,
+        itemName,
+        aboveRecommendedPercentage,
+        price,
+        referencePrice,
+        inAuction,
+    }: EvaluateItemCommand): Promise<void> {
         const wantedItem = await this.wantedItemRepository.findByName(itemName);
         if (!wantedItem) return;
-        const decision = wantedItem.evaluate({ value: price, aboveRecommendedPercentage });
+        const decision = wantedItem.evaluate({ value: price, referencePrice, aboveRecommendedPercentage });
         if (!decision.approved) return this.logger.log(decision.failures.join("; "));
         await this.eventBus.publish(
             inAuction
@@ -30,7 +37,7 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
                           auctionId: itemId,
                           accountId,
                           value: price,
-                          numberOfBids,
+                          maxPrice: decision.maxPrice,
                       }),
                   ]
                 : [new ItemApprovedOffAuctionEvent({ itemId, accountId, value: price })],

@@ -1,7 +1,6 @@
 import { EvaluateItemCommandHandler } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command-handler";
 import { evaluateItemCommand } from "./__mocks__/evaluate-item.command.mock";
 import type { Mock } from "bun:test";
-import { MaxAboveRecommendedPercentage } from "@/contexts/trading/bidding/domain/wanted-item/criteria/max-above-recommended-percentage";
 import { CommandHandler } from "@/packages/building-blocks/command-handler";
 import type { Logger } from "@/packages/application/logger";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
@@ -9,9 +8,11 @@ import { WantedItemRepository } from "@/contexts/trading/bidding/application/wan
 import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { EventBus } from "@/packages/application/event-bus";
-import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/place-bid/item-approved-in-auction.event";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
-import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/withdraw-item/item-approved-off-auction.event";
+import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-off-auction.event";
+import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
+import { IsWear } from "@/contexts/trading/bidding/domain/wanted-item/criteria/is-wear";
+import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 
 let wantedItemRepo: WantedItemRepository;
 let wantedItemRepoSpy: Mock<WantedItemRepository["findByName"]>;
@@ -43,7 +44,7 @@ describe("EvaluateItemCommandHandler", () => {
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                criteria: [new MaxAboveRecommendedPercentage("-4.05")],
+                maxFor: "-4.05",
             }),
         );
         const command = evaluateItemCommand();
@@ -54,14 +55,14 @@ describe("EvaluateItemCommandHandler", () => {
         expect(event.payload.auctionId).toBe(288767047);
         expect(event.payload.accountId).toBe(command.accountId);
         expect(event.name).toBe(ItemApprovedInAuctionEvent.EVENT_NAME);
-        expect(event.payload.numberOfBids).toBe(command.numberOfBids);
         expect(event.payload.value).toBe(command.price);
+        expect(event.payload.maxPrice).toBe(3647);
     });
     it("Should evaluate and approve a item out of the auction when all criteria are met", async () => {
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                criteria: [new MaxAboveRecommendedPercentage("-4.05")],
+                maxFor: "-4.05",
             }),
         );
         const command = evaluateItemCommand(false);
@@ -75,17 +76,18 @@ describe("EvaluateItemCommandHandler", () => {
         expect(event.payload.value).toBe(command.price);
     });
     it("Should evaluate reject a item when certain criteria aren't met", async () => {
-        const criterion = new MaxAboveRecommendedPercentage("-4.06");
+        const criterion = new IsWear(WearName.BATTLE_SCARRED);
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
+                maxFor: "-4.06",
                 criteria: [criterion],
             }),
         );
         await evaluateItem.handle(evaluateItemCommand());
         expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
         expect(loggerSpy).toHaveBeenCalledTimes(1);
-        expect(loggerSpy).toHaveBeenCalledWith(criterion.describe());
+        expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); ${criterion.describe()}`);
         expect(publishSpy).not.toHaveBeenCalled();
     });
 });
