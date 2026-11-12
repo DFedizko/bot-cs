@@ -1,4 +1,5 @@
 import { NonExistentReservationError } from "@/contexts/trading/bidding/domain/account/errors/non-existent-reservation.error";
+import { ReservationAlreadyExistsError } from "@/contexts/trading/bidding/domain/account/errors/reservation-already-exists.error";
 import { Reservations } from "@/contexts/trading/bidding/domain/account/reservations";
 
 describe("Reservations", () => {
@@ -24,7 +25,12 @@ describe("Reservations", () => {
         expect(reservations.getTotalReserved()).toBe(0);
         expect(reservations.amountFor(1)).toBe(0);
     });
-    it("Should throw an error when refund amount with a non-existent reservation", () => {
-        expect(() => Reservations.empty().refundFor(1)).toThrow(NonExistentReservationError);
+    it("Should throw an error when refund amount with a non-existent reservation", () =>
+        expect(() => Reservations.empty().refundFor(1)).toThrow(NonExistentReservationError));
+    it("Should throw an error when reserve more than one time in a row using the same id", () => {
+        const reservations = Reservations.empty().reserveFor(1, 100);
+        expect(() => reservations.reserveFor(1, 100)).toThrow(ReservationAlreadyExistsError);
+        expect(reservations.getTotalReserved()).toBe(100);
+        expect(reservations.amountFor(1)).toBe(100);
     });
 });

@@ -3,6 +3,7 @@ import { Money } from "@/packages/domain-primitives/money";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
 import { ReservationId } from "./reservation-id";
 import { NonExistentReservationError } from "./errors/non-existent-reservation.error";
+import { ReservationAlreadyExistsError } from "./errors/reservation-already-exists.error";
 
 export type ReservationsPrimitives = Record<number, number>;
 
@@ -20,7 +21,9 @@ export class Reservations extends ValueObject<ReadonlyMap<Primitive<ReservationI
     }
 
     reserveFor(reservationId: number, amount: number): Reservations {
-        return new Reservations(new Map(this.value).set(new ReservationId(reservationId).getValue(), CoinCent(amount)));
+        const validReservationId = new ReservationId(reservationId);
+        if (this.value.has(validReservationId.getValue())) throw new ReservationAlreadyExistsError(reservationId);
+        return new Reservations(new Map(this.value).set(validReservationId.getValue(), CoinCent(amount)));
     }
 
     refundFor(reservationId: number): Reservations {
