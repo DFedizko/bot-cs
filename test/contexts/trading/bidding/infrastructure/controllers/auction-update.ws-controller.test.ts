@@ -1,6 +1,5 @@
 import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
 import { auctionUpdate } from "./__mocks__/auction-update.mock";
-import type { WsClient } from "@/packages/infrastructure/web-socket/ws-client";
 import type { Mock } from "bun:test";
 import { WsServerSocketIoAdapter } from "@/packages/external/web-socket/server/ws-server.socket-io-adapter";
 import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-server.express-adapter";
@@ -9,12 +8,14 @@ import { AuctionUpdateWsController } from "@/contexts/trading/bidding/infrastruc
 import type { CommandBus } from "@/packages/application/command-bus";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { TrackAuctionUpdateCommand } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command";
+import { CsgWsClientFakeAdapter } from "@/contexts/trading/shared/external/csgoempire/csg-ws-client.fake-adapter";
+import type { CsgWsClient } from "@/contexts/trading/shared/infrastructure/csgoempire/csg.ws-client";
 
 const PORT = 8888;
 
 let httpServer: HttpServerExpressAdapter;
 let wsServer: WsServer;
-let wsClient: WsClient;
+let csgWsClient: CsgWsClient;
 let commandBus: CommandBus;
 let dispatchSpy: Mock<CommandBus["dispatch"]>;
 
@@ -22,11 +23,11 @@ describe("AuctionUpdateWsController", () => {
     beforeEach(() => {
         httpServer = new HttpServerExpressAdapter();
         wsServer = new WsServerSocketIoAdapter(httpServer.http);
-        wsClient = new WsClientSocketIoAdapter(`ws://localhost:${PORT}`);
+        csgWsClient = new CsgWsClientFakeAdapter(`ws://localhost:${PORT}`);
         commandBus = new CommandBusInMemory();
         commandBus.register({ handle: async () => {}, subscribedTo: () => TrackAuctionUpdateCommand.COMMAND_NAME });
         dispatchSpy = jest.spyOn(commandBus, "dispatch");
-        new AuctionUpdateWsController(wsClient, commandBus);
+        new AuctionUpdateWsController(csgWsClient, commandBus);
         httpServer.listen(PORT);
         wsServer.on("connection", (socket) => {
             socket.emit("auction_update", auctionUpdate);
@@ -35,11 +36,11 @@ describe("AuctionUpdateWsController", () => {
 
     afterEach(async () => {
         await httpServer.close();
-        wsClient.close();
+        csgWsClient.close();
     });
 
     it("Should receive a auction update socket and publish outbid event", (done) => {
-        wsClient.on("auction_update", () => {
+        csgWsClient.on("auction_update", () => {
             const commands = dispatchSpy.mock.calls as [TrackAuctionUpdateCommand][];
             expect(dispatchSpy).toHaveBeenCalledTimes(3);
             const commandPayloads = commands.flatMap(([command]) => ({
