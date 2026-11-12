@@ -1,10 +1,13 @@
-import type { CsgoempireAuctionHttp } from "../../../infrastructure/http/csgoempire/csgoempire-auction.http";
-import type { PlaceBid } from "../../../infrastructure/http/csgoempire/place-bid";
-import type { ActiveAuction, GetActiveAuctions } from "../../../infrastructure/http/csgoempire/get-active-auctions";
 import { auctions } from "./__mocks__/auctions.mock";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
 import { invoice } from "./__mocks__/place-bid.mock";
 import { CS_APP_ID } from "@/contexts/shared-kernel/domain/cs-app-id";
+import type { CsgoempireAuctionHttp } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/csgoempire-auction.http";
+import type {
+    ActiveAuction,
+    GetActiveAuctions,
+} from "@/contexts/trading/bidding/infrastructure/http/csgoempire/get-active-auctions";
+import type { PlaceBid } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/place-bid";
 
 export class CsgoempireAuctionHttpFakeAdapter implements CsgoempireAuctionHttp {
     private readonly store: ActiveAuction[] = [];
