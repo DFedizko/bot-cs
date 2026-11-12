@@ -1,5 +1,6 @@
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { InsufficientBalanceError } from "@/contexts/trading/bidding/domain/account/errors/insufficient-balance.error";
+import { ReservationAlreadyExistsError } from "@/contexts/trading/bidding/domain/account/errors/reservation-already-exists.error";
 
 describe("Account", () => {
     it("Should syncrhonize an account", () => {
@@ -60,5 +61,13 @@ describe("Account", () => {
     it("Should throw insufficient balance error when reserve amount with insufficient balance", () => {
         const account = Account.sync({ id: 1, name: "John Doe" });
         expect(() => account.reserveFor(1, 100)).toThrow(InsufficientBalanceError);
+    });
+    it("Shoudn't change reserved and available amount when some reservation fail", () => {
+        const account = Account.sync({ id: 1, name: "John Doe", totalAmount: 1200 });
+        account.reserveFor(1, 600);
+        expect(() => account.reserveFor(1, 600)).toThrow(ReservationAlreadyExistsError);
+        expect(account.getTotalAmount()).toBe(1200);
+        expect(account.getReservedAmount()).toBe(600);
+        expect(account.getAvailableAmount()).toBe(600);
     });
 });
