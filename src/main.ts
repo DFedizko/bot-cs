@@ -20,15 +20,13 @@ const logger = new LoggerConsoleAdapter();
 
 const bootstrap = async () => {
     registerBiddingEvents(eventBus, commandBus, logger);
-
     const metadata = await socketMetadata.getSocketMetadata();
     const csgWsClient = new CsgoempireWsClient({ id: metadata.user.id, socketToken: metadata.socket_token });
-
     csgWsClient.on("connect", async () => {
         logger.log(`Connected to websocket`);
-        new InitCsgSessionWsController(csgWsClient, socketMetadata, logger);
-        new NewItemWsController(csgWsClient, commandBus);
     });
+    new InitCsgSessionWsController(csgWsClient, socketMetadata, logger);
+    new NewItemWsController(csgWsClient, commandBus);
 };
 
 await bootstrap();
