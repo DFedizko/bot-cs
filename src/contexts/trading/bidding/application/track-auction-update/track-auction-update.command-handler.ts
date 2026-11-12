@@ -16,21 +16,21 @@ export class TrackAuctionUpdateCommandHandler implements CommandHandler<TrackAuc
     }
 
     async handle(command: TrackAuctionUpdateCommand): Promise<void> {
-        const { auctionId, bidderId, value, endsAt } = command;
+        const { auctionId, accountId, bidderId, value, endsAt } = command;
         const accounts = await this.accountRepository.findMany();
         const accountWithReservation = this.findAccountWithReservation(accounts, auctionId);
         if (!accountWithReservation) return;
-        if (this.outBidFromAccount(accounts, bidderId)) return;
+        if (this.outbidFromSomeAccount(accounts, bidderId)) return;
         accountWithReservation.refundFor(auctionId);
         await this.accountRepository.save(accountWithReservation);
-        await this.eventBus.publish([new OutbidEvent({ auctionId, bidderId, value, endsAt })]);
+        await this.eventBus.publish([new OutbidEvent({ auctionId, accountId, value, endsAt })]);
     }
 
     private findAccountWithReservation(accounts: Account[], reservationId: number): Account | undefined {
         return accounts.find((account) => account.hasReservationFor(reservationId));
     }
 
-    private outBidFromAccount(accounts: Account[], bidderId: number): boolean {
+    private outbidFromSomeAccount(accounts: Account[], bidderId: number): boolean {
         return accounts.some((account) => account.isMe(bidderId));
     }
 }

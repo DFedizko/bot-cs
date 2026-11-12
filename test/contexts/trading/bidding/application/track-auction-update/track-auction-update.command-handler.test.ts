@@ -38,7 +38,7 @@ describe("TrackAuctionUpdateCommandHandler", () => {
         expect(accountAfterCommand.getReservedAmount()).toBe(0);
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.payload.auctionId).toBe(command.auctionId);
-        expect(event.payload.bidderId).toBe(command.bidderId);
+        expect(event.payload.accountId).toBe(command.accountId);
         expect(event.payload.value).toBe(command.value);
         expect(event.payload.endsAt).toBe(command.endsAt);
     });
