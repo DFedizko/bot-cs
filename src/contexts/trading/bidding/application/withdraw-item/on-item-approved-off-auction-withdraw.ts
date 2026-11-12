@@ -1,5 +1,5 @@
 import type { EventListener } from "@/packages/application/event-listener";
-import { ItemApprovedOffAuctionEvent } from "./item-approved-off-auction.event";
+import { ItemApprovedOffAuctionEvent } from "../evaluate-item/item-approved-off-auction.event";
 import type { CommandBus } from "@/packages/application/command-bus";
 import { WithdrawItemCommand } from "./withdraw-item.command";
 
