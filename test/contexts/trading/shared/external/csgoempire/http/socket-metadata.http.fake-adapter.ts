@@ -1,6 +1,9 @@
-import type { GetSocketMetadataIO, SocketMetadataGateway } from "../../../infrastructure/csgoempire/http/socket-metadata.gateway";
+import type {
+    GetSocketMetadataIO,
+    SocketMetadataHttp,
+} from "../../../../../../../src/contexts/trading/shared/infrastructure/csgoempire/http/socket-metadata.http";
 
-export class SocketMetadataGatewayFake implements SocketMetadataGateway {
+export class SocketMetadataHttpFakeAdapter implements SocketMetadataHttp {
     async getSocketMetadata(): Promise<GetSocketMetadataIO.Response> {
         return getSktMetafakeResponse;
     }

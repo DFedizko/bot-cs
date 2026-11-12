@@ -2,7 +2,7 @@ import { registerBiddingEvents } from "./contexts/trading/bidding";
 import { NewItemWsController } from "./contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import { CsgoempireWsClient } from "./contexts/trading/shared/external/csgoempire/csgoempire.ws-client";
 import { CsgoempireHttpClientFactory } from "./contexts/trading/shared/external/csgoempire/http/csgoempire.http-client";
-import { SocketMetadataHttp } from "./contexts/trading/shared/external/csgoempire/http/socket-metadata.gateway.http";
+import { SocketMetadataHttpAdapter } from "./contexts/trading/shared/external/csgoempire/http/socket-metadata.http.adapter";
 import { InitCsgSessionWsController } from "./contexts/trading/shared/infrastructure/controllers/init-csg-session.ws-controller";
 import { CommandBusInMemory } from "./packages/infrastructure/command-bus/command-bus.in-memory";
 import { EnvZodAdapter } from "./packages/external/environment/env.zod-adapter";
@@ -13,7 +13,7 @@ import { LoggerConsoleAdapter } from "./packages/infrastructure/logger/logger.co
 const env = new EnvZodAdapter().parse(Bun.env);
 const httpClientFactory = new HttpClientFactoryAdapter("axios");
 const csgoempireHttpClient = CsgoempireHttpClientFactory.create(httpClientFactory, env.CSGOEMPIRE_API_KEY);
-const socketMetadata = new SocketMetadataHttp(csgoempireHttpClient);
+const socketMetadata = new SocketMetadataHttpAdapter(csgoempireHttpClient);
 const eventBus = new EventBusInMemoryAsync();
 const commandBus = new CommandBusInMemory();
 const logger = new LoggerConsoleAdapter();

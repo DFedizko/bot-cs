@@ -4,12 +4,12 @@ import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
 import type { Mock } from "bun:test";
 import { initAuthenticatedFake, initGuestFake } from "./__mocks__/init.mock";
-import type { SocketMetadataGateway } from "@/contexts/trading/shared/infrastructure/csgoempire/http/socket-metadata.gateway";
+import type { SocketMetadataHttp } from "@/contexts/trading/shared/infrastructure/csgoempire/http/socket-metadata.http";
 import { InitCsgSessionWsController } from "@/contexts/trading/shared/infrastructure/controllers/init-csg-session.ws-controller";
 import {
     getSktMetafakeResponse,
-    SocketMetadataGatewayFake,
-} from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.gateway.fake";
+    SocketMetadataHttpFakeAdapter,
+} from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 import type { Logger } from "@/packages/application/logger";
 import { BaseError } from "@/packages/building-blocks/base-error";
 import type { CsgWsClient } from "@/contexts/trading/shared/infrastructure/csgoempire/csg.ws-client";
@@ -21,8 +21,8 @@ let httpServer: HttpServer;
 let wsServer: WsServer;
 let csgWsClient: CsgWsClient;
 let emitSpy: Mock<CsgWsClient["emit"]>;
-let socketMetadataGateway: SocketMetadataGateway;
-let getMetadataSpy: Mock<SocketMetadataGateway["getSocketMetadata"]>;
+let socketMetadataGateway: SocketMetadataHttp;
+let getMetadataSpy: Mock<SocketMetadataHttp["getSocketMetadata"]>;
 let logger: Logger;
 let logSpy: Mock<Logger["log"]>;
 
@@ -31,7 +31,7 @@ beforeEach(async () => {
     wsServer = new WsServerSocketIoAdapter((httpServer as HttpServerExpressAdapter).http);
     csgWsClient = new CsgWsClientFakeAdapter(`ws://localhost:${PORT}`);
     emitSpy = jest.spyOn(csgWsClient, "emit");
-    socketMetadataGateway = new SocketMetadataGatewayFake();
+    socketMetadataGateway = new SocketMetadataHttpFakeAdapter();
     getMetadataSpy = jest.spyOn(socketMetadataGateway, "getSocketMetadata");
     logger = { log: () => {} };
     logSpy = jest.spyOn(logger, "log");

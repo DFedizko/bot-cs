@@ -1,5 +1,5 @@
 import type { InitEvent } from "../csgoempire/ws-events/init";
-import type { GetSocketMetadataIO, SocketMetadataGateway } from "../csgoempire/http/socket-metadata.gateway";
+import type { GetSocketMetadataIO, SocketMetadataHttp } from "../csgoempire/http/socket-metadata.http";
 import { BaseError } from "@/packages/building-blocks/base-error";
 import type { Logger } from "@/packages/application/logger";
 import type { CsgWsClient } from "../csgoempire/csg.ws-client";
@@ -14,7 +14,7 @@ export class InitCsgSessionWsController {
 
     constructor(
         wsClient: CsgWsClient,
-        private readonly socketMetadataGateway: SocketMetadataGateway,
+        private readonly socketMetadataGateway: SocketMetadataHttp,
         private readonly logger: Logger,
     ) {
         wsClient.on("init", async (data: InitEvent) => {

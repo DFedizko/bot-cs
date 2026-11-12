@@ -1,7 +1,10 @@
 import type { HttpClient } from "@/packages/infrastructure/http/http-client";
-import type { GetSocketMetadataIO, SocketMetadataGateway } from "../../../infrastructure/csgoempire/http/socket-metadata.gateway";
+import type {
+    GetSocketMetadataIO,
+    SocketMetadataHttp,
+} from "../../../infrastructure/csgoempire/http/socket-metadata.http";
 
-export class SocketMetadataHttp implements SocketMetadataGateway {
+export class SocketMetadataHttpAdapter implements SocketMetadataHttp {
     constructor(private readonly httpClient: HttpClient) {}
 
     async getSocketMetadata(): Promise<GetSocketMetadataIO.Response> {
