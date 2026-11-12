@@ -52,7 +52,7 @@ describe("InitWsController", () => {
         csgWsClient.on("init", () => {
             expect(getMetadataSpy).not.toHaveBeenCalled();
             expect(logSpy).toHaveBeenCalledTimes(1);
-            expect(logSpy).toHaveBeenCalledWith("Successfully authenticated as fake_trader");
+            expect(logSpy).toHaveBeenCalledWith("Successfully authenticated in csgoempire as fake_trader");
             expect(emitSpy).toHaveBeenCalledWith("filters", { price_max: 9999999 });
             done();
         });

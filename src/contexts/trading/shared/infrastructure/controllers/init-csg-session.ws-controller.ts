@@ -19,7 +19,7 @@ export class InitCsgSessionWsController {
     ) {
         wsClient.on("init", async (data: InitEvent) => {
             if (data && data.authenticated) {
-                this.logger.log(`Successfully authenticated as ${data.name}`);
+                this.logger.log(`Successfully authenticated in csgoempire as ${data.name}`);
                 wsClient.emit("filters", { price_max: PRICE_MAX_FILTER_VALUE });
                 return;
             }
