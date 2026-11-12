@@ -7,7 +7,6 @@ type CommandProps = {
     price: number;
     aboveRecommendedPercentage: string;
     referencePrice: number;
-    numberOfBids: number;
     inAuction: boolean;
 };
 
@@ -19,7 +18,6 @@ export class EvaluateItemCommand extends Command {
     public readonly price: number;
     public readonly aboveRecommendedPercentage: string;
     public readonly referencePrice: number;
-    public readonly numberOfBids: number;
     public readonly inAuction: boolean;
 
     constructor(props: CommandProps) {
@@ -30,7 +28,6 @@ export class EvaluateItemCommand extends Command {
         this.price = props.price;
         this.aboveRecommendedPercentage = props.aboveRecommendedPercentage;
         this.referencePrice = props.referencePrice;
-        this.numberOfBids = props.numberOfBids;
         this.inAuction = props.inAuction;
     }
 }

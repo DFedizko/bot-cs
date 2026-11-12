@@ -5,9 +5,8 @@ export const evaluateItemCommand = (inAuction = true) =>
         itemId: 288767047,
         accountId: 1,
         itemName: "M4A4 | Cyber Security (Field-Tested)",
-        price: 3656,
+        price: 3647,
         referencePrice: 3801,
-        numberOfBids: 0,
         aboveRecommendedPercentage: "-4.05",
         inAuction,
     });
