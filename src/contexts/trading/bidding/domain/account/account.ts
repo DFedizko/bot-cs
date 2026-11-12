@@ -3,7 +3,7 @@ import { AccountId } from "./account-id";
 import { AccountBalance } from "./account-balance";
 import { Reservations, type ReservationsPrimitives } from "./reservations";
 import { InsufficientBalanceError } from "./errors/insufficient-balance.error";
-import { FluentAccountBalance } from "../value-objects/fluent-account-balance";
+import { FluentAccountBalance } from "./fluent-account-balance";
 import { ReservationId } from "./reservation-id";
 import { AccountName } from "./account-name";
 
