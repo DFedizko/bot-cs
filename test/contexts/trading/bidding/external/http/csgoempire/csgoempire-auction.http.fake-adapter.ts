@@ -12,8 +12,13 @@ import type { PlaceBid } from "@/contexts/trading/bidding/infrastructure/http/cs
 export class CsgoempireAuctionHttpFakeAdapter implements CsgoempireAuctionHttp {
     private readonly store: ActiveAuction[] = [];
 
-    constructor() {
-        auctions.active_auctions.forEach((auction) => this.store.push(auction));
+    constructor(allHighestBidderIds?: number) {
+        auctions.active_auctions.forEach((auction) =>
+            this.store.push({
+                ...auction,
+                ...(allHighestBidderIds && { auction_highest_bidder: allHighestBidderIds }),
+            }),
+        );
     }
 
     async getActiveAuctions(): Promise<GetActiveAuctions.Response> {
