@@ -11,8 +11,8 @@ import type { EventBus } from "@/packages/application/event-bus";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-off-auction.event";
 import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
-import { IsWear } from "@/contexts/trading/bidding/domain/wanted-item/criteria/is-wear";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
+import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 
 let wantedItemRepo: WantedItemRepository;
 let wantedItemRepoSpy: Mock<WantedItemRepository["findByName"]>;
@@ -76,7 +76,7 @@ describe("EvaluateItemCommandHandler", () => {
         expect(event.payload.value).toBe(command.price);
     });
     it("Should evaluate reject a item when certain criteria aren't met", async () => {
-        const criterion = new IsWear(WearName.BATTLE_SCARRED);
+        const criterion = { type: ItemCriterionType.IS_WEAR, value: WearName.BATTLE_SCARRED };
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
@@ -87,7 +87,7 @@ describe("EvaluateItemCommandHandler", () => {
         await evaluateItem.handle(evaluateItemCommand());
         expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
         expect(loggerSpy).toHaveBeenCalledTimes(1);
-        expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); ${criterion.describe()}`);
+        expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); IsWear(Battle-Scarred)`);
         expect(publishSpy).not.toHaveBeenCalled();
     });
 });

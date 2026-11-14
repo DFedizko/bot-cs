@@ -4,11 +4,12 @@ import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
 import type { ItemCriterion } from "./criteria/item-criterion";
 import { AboveRecommendedPercentage } from "./above-recommended-percentage";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
+import { CriteriaFactory, type CriteriaPrimitives } from "./criteria/criteria.factory";
 
 type CreateWantedSkinProps = {
     name: string;
     maxFor: string;
-    criteria?: ItemCriterion[];
+    criteria?: CriteriaPrimitives;
 };
 
 type BidDecision = {
@@ -30,7 +31,7 @@ export class WantedItem extends AggregateRoot<ItemName> {
         return new WantedItem(
             new ItemName(props.name),
             AboveRecommendedPercentage.fromPercent(props.maxFor),
-            props?.criteria ?? [],
+            CriteriaFactory.create(props.criteria ?? []),
         );
     }
 

@@ -1,5 +1,5 @@
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import { IsWear } from "@/contexts/trading/bidding/domain/wanted-item/criteria/is-wear";
+import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 
 describe("Wanted Item", () => {
@@ -7,7 +7,7 @@ describe("Wanted Item", () => {
         const wantedItem = WantedItem.create({
             name: "AWP | Asiimov (Field-Tested)",
             maxFor: "-3",
-            criteria: [new IsWear(WearName.FIELD_TESTED)],
+            criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
         });
         expect(wantedItem.getName()).toBe("AWP | Asiimov (Field-Tested)");
         expect(wantedItem.getCriteria()).toEqual(["IsWear"]);
@@ -30,7 +30,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: "-3",
-                criteria: [new IsWear(WearName.FIELD_TESTED)],
+                criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
             });
             expect(
                 wantedItem.evaluate({
@@ -77,7 +77,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: "-3",
-                criteria: [new IsWear(WearName.FIELD_TESTED)],
+                criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
             });
             expect(
                 wantedItem.evaluate({
