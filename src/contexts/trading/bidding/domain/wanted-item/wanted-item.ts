@@ -1,7 +1,7 @@
 import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
 import { ItemName } from "./item-name";
 import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
-import type { ItemCriterion } from "./item-criterion";
+import type { ItemCriterion } from "./criteria/item-criterion";
 import { AboveRecommendedPercentage } from "./above-recommended-percentage";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
 
