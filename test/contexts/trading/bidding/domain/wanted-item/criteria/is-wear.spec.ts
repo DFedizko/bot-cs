@@ -1,6 +1,7 @@
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { IsWear } from "@/contexts/trading/bidding/domain/wanted-item/criteria/is-wear";
 import { bidCandidate } from "../__builders__/bid-candidate.builder";
+import { DomainError } from "@/packages/error/domain-error";
 
 test("Should return true when the candidate has the desired wear", () => {
     expect(new IsWear(WearName.BATTLE_SCARRED).isSatisfiedBy(bidCandidate({ wearName: WearName.BATTLE_SCARRED }))).toBe(
@@ -28,3 +29,5 @@ test("Should return false when the candidate hasn't the desired wear", () => {
         false,
     );
 });
+test("Should throw an error when create a IsWear criterion with an invalid wear", () =>
+    expect(() => new IsWear("Field Tested")).toThrow(DomainError));
