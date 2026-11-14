@@ -1,10 +1,10 @@
 import { Specification } from "@/packages/building-blocks/specification";
 import type { BidCandidate } from "../bid-candidate";
-import type { ItemCriterion } from "./item-criterion";
+import { ItemCriterionType, type ItemCriterion } from "./item-criterion";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 
 export class IsWear extends Specification<BidCandidate> implements ItemCriterion {
-    readonly type = "IsWear" as const;
+    readonly type = ItemCriterionType.IS_WEAR;
 
     constructor(private readonly wearName: WearName) {
         super();
