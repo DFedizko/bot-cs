@@ -3,6 +3,7 @@ import { AddWantedItemCommand } from "@/contexts/trading/bidding/application/add
 import { AddWantedItemCommandHandler } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command-handler";
 import type { WantedItemRepository } from "@/contexts/trading/bidding/application/wanted-item.repository";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
+import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 import { WantedItemRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/wanted-item.repository.in-memory";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 
@@ -22,7 +23,7 @@ describe("AddWantedItemCommandHandler", () => {
         };
         const command = new AddWantedItemCommand(input);
         await addWantedItemCommandHandler.handle(command);
-        const wantedItem = await wantedItemRepo.findByName(input.name);
+        const wantedItem = await wantedItemRepo.findByName(new ItemName(input.name));
         expect(wantedItem?.getId()).toBe(input.name);
         expect(wantedItem?.getName()).toBe(input.name);
         expect(wantedItem?.getCriteria()).toEqual(["IsWear"]);

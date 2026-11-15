@@ -13,6 +13,8 @@ import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/applicat
 import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
+import { WantedItemRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/wanted-item.repository.in-memory";
+import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 
 let wantedItemRepo: WantedItemRepository;
 let wantedItemRepoSpy: Mock<WantedItemRepository["findByName"]>;
@@ -24,12 +26,7 @@ let evaluateItem: CommandHandler<EvaluateItemCommand>;
 const fakeWantedItems: WantedItem[] = [];
 describe("EvaluateItemCommandHandler", () => {
     beforeEach(() => {
-        wantedItemRepo = {
-            save: async (wantedItem: WantedItem) => {
-                fakeWantedItems.push(wantedItem);
-            },
-            findByName: async (name) => fakeWantedItems.find((wanted) => wanted.getName() === name),
-        };
+        wantedItemRepo = new WantedItemRepositoryInMemory();
         wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
         logger = new LoggerConsoleAdapter();
         loggerSpy = jest.spyOn(logger, "log");
@@ -50,7 +47,7 @@ describe("EvaluateItemCommandHandler", () => {
         const command = evaluateItemCommand();
         await evaluateItem.handle(command);
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedInAuctionEvent]];
-        expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.payload.auctionId).toBe(288767047);
         expect(event.payload.accountId).toBe(command.accountId);
@@ -68,7 +65,7 @@ describe("EvaluateItemCommandHandler", () => {
         const command = evaluateItemCommand(false);
         await evaluateItem.handle(command);
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedOffAuctionEvent]];
-        expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.name).toBe(ItemApprovedOffAuctionEvent.EVENT_NAME);
         expect(event.payload.itemId).toBe(288767047);
@@ -85,7 +82,7 @@ describe("EvaluateItemCommandHandler", () => {
             }),
         );
         await evaluateItem.handle(evaluateItemCommand());
-        expect(wantedItemRepoSpy).toHaveBeenCalledWith("M4A4 | Cyber Security (Field-Tested)");
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); IsWear(Battle-Scarred)`);
         expect(publishSpy).not.toHaveBeenCalled();
