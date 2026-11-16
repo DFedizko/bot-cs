@@ -10,6 +10,7 @@ describe("Wanted Item", () => {
             criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
         });
         expect(wantedItem.getName()).toBe("AWP | Asiimov (Field-Tested)");
+        expect(wantedItem.getMaxFor()).toBe("-3");
         expect(wantedItem.getCriteria()).toEqual(["IsWear"]);
     });
     describe("Should evaluate an item and approve", () => {

@@ -52,6 +52,10 @@ export class WantedItem extends AggregateRoot<ItemName> {
         return this.getName();
     }
 
+    getMaxFor(): string {
+        return this.maxFor.toPercentString();
+    }
+
     getName(): string {
         return this.id.getValue();
     }
