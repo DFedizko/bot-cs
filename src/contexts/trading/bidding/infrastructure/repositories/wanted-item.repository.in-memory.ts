@@ -12,4 +12,8 @@ export class WantedItemRepositoryInMemory implements WantedItemRepository {
     async save(wantedItem: WantedItem): Promise<void> {
         this.store.set(wantedItem.getName(), wantedItem);
     }
+
+    async removeByName(name: ItemName): Promise<void> {
+        this.store.delete(name.getValue());
+    }
 }
