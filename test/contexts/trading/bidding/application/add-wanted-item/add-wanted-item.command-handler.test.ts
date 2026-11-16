@@ -26,6 +26,7 @@ describe("AddWantedItemCommandHandler", () => {
         const wantedItem = await wantedItemRepo.findByName(new ItemName(input.name));
         expect(wantedItem?.getId()).toBe(input.name);
         expect(wantedItem?.getName()).toBe(input.name);
+        expect(wantedItem?.getMaxFor()).toBe(input.maxFor);
         expect(wantedItem?.getCriteria()).toEqual(["IsWear"]);
     });
 });
