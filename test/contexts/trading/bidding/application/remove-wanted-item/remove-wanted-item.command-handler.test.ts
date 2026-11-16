@@ -8,7 +8,7 @@ import type { CommandHandler } from "@/packages/building-blocks/command-handler"
 
 let wantedItemRepo: WantedItemRepository;
 let removeWantedItemCommandHandler: CommandHandler<RemoveWantedItemCommand>;
-describe("RemoveWantedItem", () => {
+describe("RemoveWantedItemCommandHandler", () => {
     beforeEach(() => {
         wantedItemRepo = new WantedItemRepositoryInMemory();
         removeWantedItemCommandHandler = new RemoveWantedItemCommandHandler(wantedItemRepo);
