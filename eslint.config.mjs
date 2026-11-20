@@ -23,4 +23,18 @@ export default defineConfig([
             },
         },
     },
+
+    {
+        files: ["src/contexts/**/infrastructure/**/*.ts"],
+        rules: {
+            "@typescript-eslint/no-namespace": "off",
+        },
+    },
+
+    {
+        files: ["**/*.d.ts"],
+        rules: {
+            "@typescript-eslint/no-empty-object-type": ["error", { allowInterfaces: "with-single-extends" }],
+        },
+    },
 ]);
