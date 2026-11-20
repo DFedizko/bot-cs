@@ -1,25 +1,22 @@
+import type { Container } from "inversify";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/place-bid/place-bid.command";
-import type { CommandBus } from "@/packages/application/command-bus";
-import type { EventListener } from "@/packages/application/event-listener";
-import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
-import type { Mock } from "bun:test";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";
+import { ON_APPROVED_IN_AUCTION } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { itemApprovedInAuctionEvent } from "../evaluate-item/__mocks__/item-approved-in-auction.event.mock";
-import { OnItemApprovedInAuctionPlaceBid } from "@/contexts/trading/bidding/application/place-bid/on-item-approved-in-auction-place-bid";
-import type { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
 
-let commandBus: CommandBus;
-let onItemApprovedInAuctionPlaceBid: EventListener<ItemApprovedInAuctionEvent>;
-let dispatchSpy: Mock<CommandBus["dispatch"]>;
+let container: Container;
+
 describe("OnItemApprovedInAuctionPlaceBid", () => {
     beforeEach(() => {
-        commandBus = new CommandBusInMemory();
-        commandBus.register({ handle: async () => {}, subscribedTo: () => PlaceBidCommand.COMMAND_NAME });
-        onItemApprovedInAuctionPlaceBid = new OnItemApprovedInAuctionPlaceBid(commandBus);
-        dispatchSpy = jest.spyOn(commandBus, "dispatch");
+        container = testContainer();
     });
 
     it("Should dispatch a command to place a bid", async () => {
-        await onItemApprovedInAuctionPlaceBid.on(itemApprovedInAuctionEvent);
+        const dispatchSpy = jest.spyOn(container.get(COMMAND_BUS), "dispatch").mockResolvedValue();
+
+        await container.get(ON_APPROVED_IN_AUCTION).on(itemApprovedInAuctionEvent);
+
         const [command] = dispatchSpy.mock.calls[0] as [PlaceBidCommand];
         expect(dispatchSpy).toHaveBeenCalledTimes(1);
         expect(command.name).toBe(PlaceBidCommand.COMMAND_NAME);

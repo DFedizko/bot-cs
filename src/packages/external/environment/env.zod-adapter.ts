@@ -3,8 +3,12 @@ import { envSchema } from "./env.schema";
 import { InternalServerError } from "@/packages/infrastructure/http/errors/internal-server.error";
 import type { ZodError } from "zod";
 
+type EnvSource = Record<string, string | undefined>;
+
 export class EnvZodAdapter implements Env {
-    parse(env: NodeJS.ProcessEnv): AppEnv {
+    constructor(private readonly runtimeEnv: EnvSource = Bun.env) {}
+
+    parse(env: EnvSource): AppEnv {
         const result = envSchema.safeParse(env);
         if (!result.success)
             throw new InternalServerError(
@@ -14,7 +18,7 @@ export class EnvZodAdapter implements Env {
     }
 
     load(): AppEnv {
-        return this.parse(Bun.env);
+        return this.parse(this.runtimeEnv);
     }
 
     private formatErrorMessage(error: ZodError): string {

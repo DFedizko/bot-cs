@@ -1,36 +1,30 @@
-import type { TrackAuctionUpdateCommand } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command";
-import { AccountRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/account.repository.in-memory";
-import type { EventBus } from "@/packages/application/event-bus";
-import type { CommandHandler } from "@/packages/building-blocks/command-handler";
-import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
+import type { Container } from "inversify";
 import { trackAuctionUpdateCommand } from "./__mocks__/track-auction-update.command.mock";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
-import type { Mock } from "bun:test";
 import type { OutbidEvent } from "@/contexts/trading/bidding/application/track-auction-update/outbid.event";
-import type { AccountRepository } from "@/contexts/trading/bidding/application/account.repository";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { TrackAuctionUpdateCommandHandler } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command-handler";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { EVENT_BUS } from "@/packages/external/di/packages.identifiers";
+import { ACCOUNT_REPOSITORY, TRACK_AUCTION_HANDLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
-let accountRepository: AccountRepository;
-let eventBus: EventBus;
-let publishSpy: Mock<EventBus["publish"]>;
-let trackAuctionUpdateCommandHandler: CommandHandler<TrackAuctionUpdateCommand>;
+let container: Container;
+
 describe("TrackAuctionUpdateCommandHandler", () => {
     beforeEach(async () => {
-        accountRepository = new AccountRepositoryInMemory();
-        eventBus = new EventBusInMemoryAsync();
-        publishSpy = jest.spyOn(eventBus, "publish");
-        trackAuctionUpdateCommandHandler = new TrackAuctionUpdateCommandHandler(accountRepository, eventBus);
-
-        await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 20000 }));
+        container = testContainer();
+        await container.get(ACCOUNT_REPOSITORY).save(Account.sync({ id: 1, name: "John Doe", totalAmount: 20000 }));
     });
 
     it("Should verify if the update is an outbid", async () => {
+        const accountRepository = container.get(ACCOUNT_REPOSITORY);
         const account = (await accountRepository.findById(new AccountId(1))) as Account;
         account.reserveFor(1, 20000);
         await accountRepository.save(account);
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
         const command = trackAuctionUpdateCommand();
-        await trackAuctionUpdateCommandHandler.handle(command);
+
+        await container.get(TRACK_AUCTION_HANDLER).handle(command);
+
         const accountAfterCommand = (await accountRepository.findById(new AccountId(1))) as Account;
         const [[event]] = publishSpy.mock.calls[0] as [[OutbidEvent]];
         expect(accountAfterCommand.getTotalAmount()).toBe(20000);
@@ -43,14 +37,21 @@ describe("TrackAuctionUpdateCommandHandler", () => {
         expect(event.payload.endsAt).toBe(command.endsAt);
     });
     it("Should ignore an auction update and not publish an outbid event when the highest bidder has the same id as one of the accounts", async () => {
+        const accountRepository = container.get(ACCOUNT_REPOSITORY);
         const account = (await accountRepository.findById(new AccountId(1))) as Account;
         account.reserveFor(1, 20000);
         await accountRepository.save(account);
-        await trackAuctionUpdateCommandHandler.handle(trackAuctionUpdateCommand({ bidderId: 1 }));
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+
+        await container.get(TRACK_AUCTION_HANDLER).handle(trackAuctionUpdateCommand({ bidderId: 1 }));
+
         expect(publishSpy).toHaveBeenCalledTimes(0);
     });
     it("Should igonre an auction update and not publish an outbid event when no accounts has a reservation for this bid", async () => {
-        await trackAuctionUpdateCommandHandler.handle(trackAuctionUpdateCommand());
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+
+        await container.get(TRACK_AUCTION_HANDLER).handle(trackAuctionUpdateCommand());
+
         expect(publishSpy).toHaveBeenCalledTimes(0);
     });
 });

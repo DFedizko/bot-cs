@@ -1,51 +1,39 @@
-import { EvaluateItemCommandHandler } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command-handler";
+import type { Container } from "inversify";
 import { evaluateItemCommand } from "./__mocks__/evaluate-item.command.mock";
-import type { Mock } from "bun:test";
-import { CommandHandler } from "@/packages/building-blocks/command-handler";
-import type { Logger } from "@/packages/application/logger";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
-import { WantedItemRepository } from "@/contexts/trading/bidding/application/wanted-item.repository";
-import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
-import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
-import type { EventBus } from "@/packages/application/event-bus";
-import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-off-auction.event";
 import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { WantedItemRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/wanted-item.repository.in-memory";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    EVALUATE_ITEM_HANDLER,
+    WANTED_ITEM_REPOSITORY,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
-let wantedItemRepo: WantedItemRepository;
-let wantedItemRepoSpy: Mock<WantedItemRepository["findByName"]>;
-let logger: Logger;
-let loggerSpy: Mock<Logger["log"]>;
-let eventBus: EventBus;
-let publishSpy: Mock<EventBus["publish"]>;
-let evaluateItem: CommandHandler<EvaluateItemCommand>;
-const fakeWantedItems: WantedItem[] = [];
+let container: Container;
+
 describe("EvaluateItemCommandHandler", () => {
     beforeEach(() => {
-        wantedItemRepo = new WantedItemRepositoryInMemory();
-        wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
-        logger = new LoggerConsoleAdapter();
-        loggerSpy = jest.spyOn(logger, "log");
-        eventBus = new EventBusInMemoryAsync();
-        publishSpy = jest.spyOn(eventBus, "publish");
-        evaluateItem = new EvaluateItemCommandHandler(wantedItemRepo, logger, eventBus);
+        container = testContainer();
     });
 
-    afterEach(() => (fakeWantedItems.length = 0));
-
     it("Should evaluate and approve a item in auction when all criteria are met", async () => {
+        const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
                 maxFor: "-4.05",
             }),
         );
+        const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
         const command = evaluateItemCommand();
-        await evaluateItem.handle(command);
+
+        await container.get(EVALUATE_ITEM_HANDLER).handle(command);
+
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedInAuctionEvent]];
         expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
         expect(publishSpy).toHaveBeenCalledTimes(1);
@@ -56,14 +44,19 @@ describe("EvaluateItemCommandHandler", () => {
         expect(event.payload.maxPrice).toBe(3647);
     });
     it("Should evaluate and approve a item out of the auction when all criteria are met", async () => {
+        const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
                 maxFor: "-4.05",
             }),
         );
+        const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
         const command = evaluateItemCommand(false);
-        await evaluateItem.handle(command);
+
+        await container.get(EVALUATE_ITEM_HANDLER).handle(command);
+
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedOffAuctionEvent]];
         expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
         expect(publishSpy).toHaveBeenCalledTimes(1);
@@ -74,6 +67,7 @@ describe("EvaluateItemCommandHandler", () => {
     });
     it("Should evaluate reject a item when certain criteria aren't met", async () => {
         const criterion = { type: ItemCriterionType.IS_WEAR, value: WearName.BATTLE_SCARRED };
+        const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
             WantedItem.create({
                 name: "M4A4 | Cyber Security (Field-Tested)",
@@ -81,7 +75,12 @@ describe("EvaluateItemCommandHandler", () => {
                 criteria: [criterion],
             }),
         );
-        await evaluateItem.handle(evaluateItemCommand());
+        const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
+        const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+
+        await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
+
         expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); IsWear(Battle-Scarred)`);

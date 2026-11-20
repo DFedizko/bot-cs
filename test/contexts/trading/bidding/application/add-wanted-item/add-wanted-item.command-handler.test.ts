@@ -1,18 +1,19 @@
+import type { Container } from "inversify";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { AddWantedItemCommand } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command";
-import { AddWantedItemCommandHandler } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command-handler";
-import type { WantedItemRepository } from "@/contexts/trading/bidding/application/wanted-item.repository";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { WantedItemRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/wanted-item.repository.in-memory";
-import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import { testContainer } from "@/__builders__/test-container.builder";
+import {
+    ADD_WANTED_ITEM_HANDLER,
+    WANTED_ITEM_REPOSITORY,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
-let wantedItemRepo: WantedItemRepository;
-let addWantedItemCommandHandler: CommandHandler<AddWantedItemCommand>;
+let container: Container;
+
 describe("AddWantedItemCommandHandler", () => {
     beforeEach(() => {
-        wantedItemRepo = new WantedItemRepositoryInMemory();
-        addWantedItemCommandHandler = new AddWantedItemCommandHandler(wantedItemRepo);
+        container = testContainer();
     });
 
     it("Should create and add wanted items", async () => {
@@ -22,8 +23,10 @@ describe("AddWantedItemCommandHandler", () => {
             criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
         };
         const command = new AddWantedItemCommand(input);
-        await addWantedItemCommandHandler.handle(command);
-        const wantedItem = await wantedItemRepo.findByName(new ItemName(input.name));
+
+        await container.get(ADD_WANTED_ITEM_HANDLER).handle(command);
+
+        const wantedItem = await container.get(WANTED_ITEM_REPOSITORY).findByName(new ItemName(input.name));
         expect(wantedItem?.getId()).toBe(input.name);
         expect(wantedItem?.getName()).toBe(input.name);
         expect(wantedItem?.getMaxFor()).toBe(input.maxFor);

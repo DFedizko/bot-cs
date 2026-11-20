@@ -1,24 +1,28 @@
-import type { AuctionParticipationRepository } from "@/contexts/trading/bidding/application/auction-participation.repository";
+import type { Container } from "inversify";
 import { LeaveAuctionCommand } from "@/contexts/trading/bidding/application/leave-auction/leave-auction.command";
-import { LeaveAuctionCommandHandler } from "@/contexts/trading/bidding/application/leave-auction/leave-auction.command-handler";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
 import { AuctionParticipation } from "@/contexts/trading/bidding/domain/auction-participation/auction-participation";
-import { AuctionParticipationRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/auction-participation.repository.in-memory";
-import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import { testContainer } from "@/__builders__/test-container.builder";
+import {
+    AUCTION_PARTICIPATION_REPO,
+    LEAVE_AUCTION_HANDLER,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
-let auctionParticipationRepository: AuctionParticipationRepository;
-let leaveAuctionCommandHandler: CommandHandler<LeaveAuctionCommand>;
+let container: Container;
+
 describe("LeaveAuctionCommandHandler", () => {
     beforeEach(() => {
-        auctionParticipationRepository = new AuctionParticipationRepositoryInMemory();
-        leaveAuctionCommandHandler = new LeaveAuctionCommandHandler(auctionParticipationRepository);
+        container = testContainer();
     });
 
     it("Should leave auction by auction id", async () => {
+        const auctionParticipationRepository = container.get(AUCTION_PARTICIPATION_REPO);
         await auctionParticipationRepository.save(
             AuctionParticipation.create({ accountId: 1, auctionId: 1, maxBid: 200 }),
         );
-        await leaveAuctionCommandHandler.handle(new LeaveAuctionCommand(1));
+
+        await container.get(LEAVE_AUCTION_HANDLER).handle(new LeaveAuctionCommand(1));
+
         const auctionParticipation = await auctionParticipationRepository.findByAuctionId(new AuctionId(1));
         expect(auctionParticipation).toBe(undefined);
     });

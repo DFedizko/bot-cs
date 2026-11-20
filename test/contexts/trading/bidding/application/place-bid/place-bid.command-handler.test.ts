@@ -1,57 +1,38 @@
-import { PlaceBidCommandHandler } from "@/contexts/trading/bidding/application/place-bid/place-bid.command-handler";
+import type { Container } from "inversify";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/place-bid/place-bid.command";
 import { BidPlacedEvent } from "@/contexts/trading/bidding/application/place-bid/bid-placed.event";
-import type { AuctionGateway } from "@/contexts/trading/bidding/application/place-bid/auction.gateway";
-import { CsgoempireAuctionHttpFakeAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-auction.http.fake-adapter";
-import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
-import type { CsgoempireAuctionHttp } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/csgoempire-auction.http";
-import type { EventBus } from "@/packages/application/event-bus";
-import type { CommandHandler } from "@/packages/building-blocks/command-handler";
-import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
-import type { Mock } from "bun:test";
-import type { AccountRepository } from "@/contexts/trading/bidding/application/account.repository";
-import { AccountRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/account.repository.in-memory";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    ACCOUNT_REPOSITORY,
+    AUCTION_GATEWAY,
+    AUCTION_PARTICIPATION_REPO,
+    PLACE_BID_HANDLER,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { InsufficientBalanceError } from "@/contexts/trading/bidding/domain/account/errors/insufficient-balance.error";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
-import type { Logger } from "@/packages/application/logger";
-import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
-import type { AuctionParticipationRepository } from "@/contexts/trading/bidding/application/auction-participation.repository";
-import { AuctionParticipationRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/auction-participation.repository.in-memory";
 import { AuctionParticipation } from "@/contexts/trading/bidding/domain/auction-participation/auction-participation";
 import { ReservationAlreadyExistsError } from "@/contexts/trading/bidding/domain/account/errors/reservation-already-exists.error";
 
-let accountRepository: AccountRepository;
-let auctionParticipationRepo: AuctionParticipationRepository;
-let auctionParticipationSaveSpy: Mock<AuctionParticipationRepository["save"]>;
-let logger: Logger;
-let loggerSpy: Mock<Logger["log"]>;
-let csgoempireAuctionHttp: CsgoempireAuctionHttp;
-let auctionGateway: AuctionGateway;
-let eventBus: EventBus;
-let handler: CommandHandler<PlaceBidCommand>;
-let placeBidSpy: Mock<AuctionGateway["placeBid"]>;
-let publishEventSpy: Mock<EventBus["publish"]>;
-beforeEach(async () => {
-    accountRepository = new AccountRepositoryInMemory();
-    auctionParticipationRepo = new AuctionParticipationRepositoryInMemory();
-    auctionParticipationSaveSpy = jest.spyOn(auctionParticipationRepo, "save");
-    logger = new LoggerConsoleAdapter();
-    loggerSpy = jest.spyOn(logger, "log");
-    csgoempireAuctionHttp = new CsgoempireAuctionHttpFakeAdapter();
-    auctionGateway = new AuctionGatewayCsgoempireAdapter(csgoempireAuctionHttp);
-    eventBus = new EventBusInMemoryAsync();
-    handler = new PlaceBidCommandHandler(accountRepository, auctionParticipationRepo, logger, auctionGateway, eventBus);
-    placeBidSpy = jest.spyOn(auctionGateway, "placeBid");
-    publishEventSpy = jest.spyOn(eventBus, "publish");
+let container: Container;
+
+beforeEach(() => {
+    container = testContainer();
 });
 
 describe("PlaceBidCommandHandler", () => {
     it("Should place a bid and publish bid placed event", async () => {
+        const accountRepository = container.get(ACCOUNT_REPOSITORY);
+        const auctionParticipationRepo = container.get(AUCTION_PARTICIPATION_REPO);
         await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 227 }));
+        const auctionParticipationSaveSpy = jest.spyOn(auctionParticipationRepo, "save");
+        const placeBidSpy = jest.spyOn(container.get(AUCTION_GATEWAY), "placeBid");
+        const publishEventSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 230 });
-        await handler.handle(placeBidCommand);
+
+        await container.get(PLACE_BID_HANDLER).handle(placeBidCommand);
+
         const auctionParticipation = await auctionParticipationRepo.findByAuctionId(
             new AccountId(placeBidCommand.auctionId),
         );
@@ -75,8 +56,10 @@ describe("PlaceBidCommandHandler", () => {
         expect(event.payload).toMatchObject({ auctionId: 11204, accountId: 1, bidValue: 227, bidderId: 303119 });
     });
     it("Shouldn't create another auction participation when placing a bid, and it's already there", async () => {
+        const auctionParticipationRepo = container.get(AUCTION_PARTICIPATION_REPO);
+        const auctionParticipationSaveSpy = jest.spyOn(auctionParticipationRepo, "save");
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 230 });
-        await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 227 }));
+        await container.get(ACCOUNT_REPOSITORY).save(Account.sync({ id: 1, name: "John Doe", totalAmount: 227 }));
         await auctionParticipationRepo.save(
             AuctionParticipation.create({
                 auctionId: placeBidCommand.auctionId,
@@ -84,16 +67,24 @@ describe("PlaceBidCommandHandler", () => {
                 maxBid: placeBidCommand.maxBid!,
             }),
         );
-        await handler.handle(placeBidCommand);
+
+        await container.get(PLACE_BID_HANDLER).handle(placeBidCommand);
+
         expect(auctionParticipationSaveSpy).toHaveBeenCalledTimes(1);
     });
     it("Shouldn't place a bid and log if the account hasn't sufficient balance", async () => {
+        const accountRepository = container.get(ACCOUNT_REPOSITORY);
         await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 9999 }));
+        const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
+        const placeBidSpy = jest.spyOn(container.get(AUCTION_GATEWAY), "placeBid");
+        const publishEventSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 10000, maxBid: 10100 });
-        await handler.handle(placeBidCommand);
-        const auctionParticipation = await auctionParticipationRepo.findByAuctionId(
-            new AccountId(placeBidCommand.auctionId),
-        );
+
+        await container.get(PLACE_BID_HANDLER).handle(placeBidCommand);
+
+        const auctionParticipation = await container
+            .get(AUCTION_PARTICIPATION_REPO)
+            .findByAuctionId(new AccountId(placeBidCommand.auctionId));
         const account = (await accountRepository.findById(new AccountId(1))) as Account;
         expect(loggerSpy).toHaveBeenCalledWith(
             `Couldn't place bid on auction "11204" because the "John Doe" account has insufficient balance`,
@@ -106,19 +97,25 @@ describe("PlaceBidCommandHandler", () => {
         expect(account.getAvailableAmount()).toBe(9999);
     });
     it("Should refund an amount in the account balance and remove auction participation when auction gateway throw an error", async () => {
+        const accountRepository = container.get(ACCOUNT_REPOSITORY);
         await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 227 }));
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 231 });
-        placeBidSpy.mockRejectedValue(new Error());
-        const auctionParticipation = await auctionParticipationRepo.findByAuctionId(
-            new AccountId(placeBidCommand.auctionId),
-        );
+        jest.spyOn(container.get(AUCTION_GATEWAY), "placeBid").mockRejectedValue(new Error());
+        const auctionParticipation = await container
+            .get(AUCTION_PARTICIPATION_REPO)
+            .findByAuctionId(new AccountId(placeBidCommand.auctionId));
         const account = await accountRepository.findById(new AccountId(1));
+        const handler = container.get(PLACE_BID_HANDLER);
+
         expect(async () => await handler.handle(placeBidCommand)).toThrow(Error);
+
         expect(auctionParticipation).toBe(undefined);
         expect(account?.getReservedAmount()).toBe(0);
         expect(account?.getAvailableAmount()).toBe(227);
     });
     it("Should throw an error when account not found by the id", () => {
+        const handler = container.get(PLACE_BID_HANDLER);
+
         expect(
             async () =>
                 await handler.handle(
@@ -127,10 +124,14 @@ describe("PlaceBidCommandHandler", () => {
         ).toThrow(NotFoundError);
     });
     it("Shouldn't call the gateway when a dispatch a second command for an auction that's already reserved", async () => {
-        await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 459 }));
+        await container.get(ACCOUNT_REPOSITORY).save(Account.sync({ id: 1, name: "John Doe", totalAmount: 459 }));
+        const placeBidSpy = jest.spyOn(container.get(AUCTION_GATEWAY), "placeBid");
+        const handler = container.get(PLACE_BID_HANDLER);
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 230 });
         await handler.handle(placeBidCommand);
+
         expect(async () => await handler.handle(placeBidCommand)).toThrow(ReservationAlreadyExistsError);
+
         expect(placeBidSpy).toHaveBeenCalledTimes(1);
     });
 });
