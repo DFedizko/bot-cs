@@ -5,8 +5,19 @@ import { InternalServerError } from "@/packages/infrastructure/http/errors/inter
 const API_KEY = "api-key";
 
 let env: Env;
+let runtimeEnv: Partial<AppEnv>;
+
+const restoreRuntimeEnv = ([key, value]: [string, string | undefined]): void => {
+    if (value === undefined) delete Bun.env[key];
+    else Bun.env[key] = value;
+};
+
 beforeEach(() => {
     env = new EnvZodAdapter();
+    runtimeEnv = { NODE_ENV: Bun.env.NODE_ENV, CSGOEMPIRE_API_KEY: Bun.env.CSGOEMPIRE_API_KEY };
+});
+afterEach(() => {
+    Object.entries(runtimeEnv).forEach(restoreRuntimeEnv);
 });
 
 describe("Env", () => {
