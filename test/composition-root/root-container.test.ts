@@ -21,13 +21,44 @@ import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastr
 import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
 import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
+import {
+    ACCEPT_OFFER_HANDLER,
+    CSGOEMPIRE_TRADES,
+    STEAM_TRADE_OFFERS,
+} from "@/contexts/delivery/external/di/delivery.identifiers";
+import { AcceptDeliveryOfferCommandHandler } from "@/contexts/delivery/application/accept-delivery-offer/accept-delivery-offer.command-handler";
+import { SteamTradeOffersGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.dry-run-adapter";
+import { SteamTradeOffersGatewaySteamAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.steam-adapter";
+import { CsgoempireTradesGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/csgoempire-trades.gateway.dry-run-adapter";
+import { CsgoempireTradesGatewayCsgoempireAdapter } from "@/contexts/delivery/infrastructure/gateways/csgoempire-trades.gateway.csgoempire-adapter";
+
 const API_KEY = "api-key";
 const ANY_FREE_PORT = 0;
 const AUCTION_GATEWAYS = [
-    { nodeEnv: "development", gateway: AuctionGatewayDryRunAdapter },
-    { nodeEnv: "test", gateway: AuctionGatewayDryRunAdapter },
-    { nodeEnv: "production", gateway: AuctionGatewayCsgoempireAdapter },
-] as const satisfies { nodeEnv: AppEnv["NODE_ENV"]; gateway: unknown }[];
+    {
+        nodeEnv: "development",
+        gateway: AuctionGatewayDryRunAdapter,
+        steamOffers: SteamTradeOffersGatewayDryRunAdapter,
+        csgoempireTrades: CsgoempireTradesGatewayDryRunAdapter,
+    },
+    {
+        nodeEnv: "test",
+        gateway: AuctionGatewayDryRunAdapter,
+        steamOffers: SteamTradeOffersGatewayDryRunAdapter,
+        csgoempireTrades: CsgoempireTradesGatewayDryRunAdapter,
+    },
+    {
+        nodeEnv: "production",
+        gateway: AuctionGatewayCsgoempireAdapter,
+        steamOffers: SteamTradeOffersGatewaySteamAdapter,
+        csgoempireTrades: CsgoempireTradesGatewayCsgoempireAdapter,
+    },
+] as const satisfies {
+    nodeEnv: AppEnv["NODE_ENV"];
+    gateway: unknown;
+    steamOffers: unknown;
+    csgoempireTrades: unknown;
+}[];
 const HTTP_CONTROLLERS = [
     { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
     { identifier: EDIT_WANTED_ITEM_CONTROLLER, implementation: EditWantedItemHttpController },
@@ -36,58 +67,79 @@ const HTTP_CONTROLLERS = [
 
 let container: Container;
 
-describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, gateway }) => {
-    beforeEach(() => {
-        container = fakeExternals(
-            new RootContainer({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
-        );
-    });
+describe.each([...AUCTION_GATEWAYS])(
+    "RootContainer in $nodeEnv",
+    ({ nodeEnv, gateway, steamOffers, csgoempireTrades }) => {
+        beforeEach(() => {
+            container = fakeExternals(
+                new RootContainer({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
+            );
+        });
 
-    it("Should bind the validated enviroment", () => {
-        const env = container.get(ENV);
+        it("Should bind the validated enviroment", () => {
+            const env = container.get(ENV);
 
-        expect(env).toEqual({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT });
-    });
+            expect(env).toEqual({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT });
+        });
 
-    it("Should resolve the command bus", async () => {
-        const commandBus = await container.getAsync(COMMAND_BUS);
+        it("Should resolve the command bus", async () => {
+            const commandBus = await container.getAsync(COMMAND_BUS);
 
-        expect(commandBus).toBeInstanceOf(CommandBusInMemory);
-    });
+            expect(commandBus).toBeInstanceOf(CommandBusInMemory);
+        });
 
-    it("Should resolve the bun http server", async () => {
-        const httpServer = await container.getAsync(HTTP_SERVER);
+        it("Should resolve the bun http server", async () => {
+            const httpServer = await container.getAsync(HTTP_SERVER);
 
-        expect(httpServer).toBeInstanceOf(HttpServerBunAdapter);
-    });
+            expect(httpServer).toBeInstanceOf(HttpServerBunAdapter);
+        });
 
-    it("Should resolve the socket metadata", async () => {
-        const metadata = await container.getAsync(SOCKET_METADATA);
+        it("Should resolve the socket metadata", async () => {
+            const metadata = await container.getAsync(SOCKET_METADATA);
 
-        expect(metadata).toEqual(getSktMetafakeResponse);
-    });
+            expect(metadata).toEqual(getSktMetafakeResponse);
+        });
 
-    it("Should resolve the csgoempire session controller", async () => {
-        const controller = await container.getAsync(INIT_CSG_SESSION);
+        it("Should resolve the csgoempire session controller", async () => {
+            const controller = await container.getAsync(INIT_CSG_SESSION);
 
-        expect(controller).toBeInstanceOf(InitCsgSessionWsController);
-    });
+            expect(controller).toBeInstanceOf(InitCsgSessionWsController);
+        });
 
-    it("Should resolve the new item controller", async () => {
-        const controller = await container.getAsync(NEW_ITEM_CONTROLLER);
+        it("Should resolve the new item controller", async () => {
+            const controller = await container.getAsync(NEW_ITEM_CONTROLLER);
 
-        expect(controller).toBeInstanceOf(NewItemWsController);
-    });
+            expect(controller).toBeInstanceOf(NewItemWsController);
+        });
 
-    it.each(HTTP_CONTROLLERS)("Should resolve the $implementation.name", async ({ identifier, implementation }) => {
-        const controller = await container.getAsync(identifier);
+        it.each(HTTP_CONTROLLERS)("Should resolve the $implementation.name", async ({ identifier, implementation }) => {
+            const controller = await container.getAsync(identifier);
 
-        expect(controller).toBeInstanceOf(implementation);
-    });
+            expect(controller).toBeInstanceOf(implementation);
+        });
 
-    it("Should resolve the auction gateway of the enviroment", async () => {
-        const auctionGateway = await container.getAsync(AUCTION_GATEWAY);
+        it("Should resolve the auction gateway of the enviroment", async () => {
+            const auctionGateway = await container.getAsync(AUCTION_GATEWAY);
 
-        expect(auctionGateway).toBeInstanceOf(gateway);
-    });
-});
+            expect(auctionGateway).toBeInstanceOf(gateway);
+        });
+
+        it("Should resolve the delivery offer handler", async () => {
+            const handler = await container.getAsync(ACCEPT_OFFER_HANDLER);
+
+            expect(handler).toBeInstanceOf(AcceptDeliveryOfferCommandHandler);
+        });
+
+        it("Should resolve the steam offers gateway of the enviroment", async () => {
+            const steamOffersGateway = await container.getAsync(STEAM_TRADE_OFFERS);
+
+            expect(steamOffersGateway).toBeInstanceOf(steamOffers);
+        });
+
+        it("Should resolve the csgoempire trades gateway of the enviroment", async () => {
+            const tradesGateway = await container.getAsync(CSGOEMPIRE_TRADES);
+
+            expect(tradesGateway).toBeInstanceOf(csgoempireTrades);
+        });
+    },
+);

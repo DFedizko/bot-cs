@@ -1,0 +1,26 @@
+import { Container, type ContainerModule } from "inversify";
+import { PackagesModule } from "@/packages/external/di/packages.module";
+import { TradingSharedModule } from "@/contexts/trading/shared/external/di/trading-shared.module";
+import { DeliveryModule } from "@/contexts/delivery/external/di/delivery.module";
+import { DeliveryDevModule } from "@/contexts/delivery/external/di/delivery.dev-module";
+import { DeliveryProdModule } from "@/contexts/delivery/external/di/delivery.prod-module";
+
+const API_KEY = "api-key";
+
+export type DeliveryEnv = Exclude<AppEnv["NODE_ENV"], "test">;
+
+const DELIVERY_ENV_MODULES: Record<DeliveryEnv, () => ContainerModule> = {
+    development: () => new DeliveryDevModule(),
+    production: () => new DeliveryProdModule(),
+};
+
+export const deliveryContainer = (nodeEnv: DeliveryEnv): Container => {
+    const container = new Container();
+    container.load(
+        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }),
+        new TradingSharedModule(),
+        new DeliveryModule(),
+        DELIVERY_ENV_MODULES[nodeEnv](),
+    );
+    return container;
+};
