@@ -1,5 +1,5 @@
+import type { Container } from "inversify";
 import { CsgoempireAuctionHttpFakeAdapter } from "../../external/http/csgoempire/csgoempire-auction.http.fake-adapter";
-import type { AccountRepository } from "@/contexts/trading/bidding/application/account.repository";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
@@ -7,30 +7,25 @@ import {
     CSGOEMPIRE_AUCTION_HTTP,
     SYNC_ACCOUNT_HANDLER,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
-import type { Logger } from "@/packages/application/logger";
-import type { Mock } from "bun:test";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
 
-let accountRepo: AccountRepository;
-let logger: Logger;
-let loggerSpy: Mock<Logger["log"]>;
-let synchronizeAccountCommandHandler: CommandHandler<SynchronizeAccountCommand>;
+let container: Container;
+
 describe("SynchronizeAccountCommandHandler", () => {
     beforeEach(() => {
-        const container = testContainer();
-        container.rebind(CSGOEMPIRE_AUCTION_HTTP).toConstantValue(new CsgoempireAuctionHttpFakeAdapter(1));
-        accountRepo = container.get(ACCOUNT_REPOSITORY);
-        logger = container.get(LOGGER);
-        loggerSpy = jest.spyOn(logger, "log");
-        synchronizeAccountCommandHandler = container.get(SYNC_ACCOUNT_HANDLER);
+        container = testContainer();
     });
 
     it("Should fetch data and synchronize the account and auction participations", async () => {
-        await synchronizeAccountCommandHandler.handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
-        const account = await accountRepo.findById(new AccountId(1));
+        container.rebind(CSGOEMPIRE_AUCTION_HTTP).toConstantValue(new CsgoempireAuctionHttpFakeAdapter(1));
+        const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
+        const handler = container.get(SYNC_ACCOUNT_HANDLER);
+
+        await handler.handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
+
+        const account = await container.get(ACCOUNT_REPOSITORY).findById(new AccountId(1));
         expect(account?.getId()).toBe(1);
         expect(account?.getName()).toBe("John Doe");
         expect(account?.getTotalAmount()).toBe(18149);
@@ -48,8 +43,14 @@ describe("SynchronizeAccountCommandHandler", () => {
         );
     });
     it("Should fetch data and synchronize the account and auction participations one time, even though the command was called tiwce", async () => {
-        await synchronizeAccountCommandHandler.handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
-        await synchronizeAccountCommandHandler.handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
+        container.rebind(CSGOEMPIRE_AUCTION_HTTP).toConstantValue(new CsgoempireAuctionHttpFakeAdapter(1));
+        const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
+        const handler = container.get(SYNC_ACCOUNT_HANDLER);
+
+        await handler.handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
+        await handler.handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
+
+        const accountRepo = container.get(ACCOUNT_REPOSITORY);
         const account = await accountRepo.findById(new AccountId(1));
         const accounts = await accountRepo.findMany();
         expect(accounts.length).toBe(1);
