@@ -123,7 +123,7 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
     }
 
     private async completeDelivery(delivery: Delivery): Promise<void> {
-        await this.csgoempireTrades.markAsReceived(delivery.getTradeId());
+        await this.csgoempireTrades.markAsReceived(delivery.getTradeOfferId());
         delivery.markReceived();
         await this.repository.save(delivery);
         await this.eventBus.publish([

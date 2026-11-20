@@ -7,7 +7,7 @@ import {
     STEAM_SESSIONS,
     STEAM_TRADE_OFFERS,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
-import { ACCOUNT_ID, TRADE_ID } from "../../domain/__builders__/delivery.builder";
+import { ACCOUNT_ID, TRADE_ID, TRADE_OFFER_ID } from "../../domain/__builders__/delivery.builder";
 import { OFFER_ID } from "../../domain/__builders__/received-offer.builder";
 
 const DRY_RUN_ENV = "development";
@@ -58,7 +58,7 @@ describe("Delivery dry-run gateways", () => {
         const http = container.get(CSGOEMPIRE_DELIVERY_HTTP);
         const spies = [jest.spyOn(http, "markAsReceived"), jest.spyOn(http, "disputeTrade")];
 
-        await container.get(CSGOEMPIRE_TRADES)[action](TRADE_ID);
+        await container.get(CSGOEMPIRE_TRADES)[action](TRADE_OFFER_ID);
 
         spies.forEach((spy) => expect(spy).not.toHaveBeenCalled());
     });

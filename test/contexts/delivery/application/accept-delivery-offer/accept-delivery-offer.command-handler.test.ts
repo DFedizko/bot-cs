@@ -9,7 +9,12 @@ import { DeliveryReceivedEvent } from "@/contexts/delivery/application/accept-de
 import { TradeOfferCancelledEvent } from "@/contexts/delivery/application/accept-delivery-offer/trade-offer-cancelled.event";
 import { DeliveryOfferNotFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-offer-not-found.event";
 import { DeliveryFailedEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-failed.event";
-import { ACCOUNT_ID, delivery, TRADE_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
+import {
+    ACCOUNT_ID,
+    delivery,
+    TRADE_ID,
+    TRADE_OFFER_ID,
+} from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import { OFFER_ID, OTHER_STEAM_ID } from "@/contexts/delivery/domain/__builders__/received-offer.builder";
 import {
     OTHER_OFFER_ID,
@@ -49,7 +54,7 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
 
             await acceptDeliveryOffer(container);
 
-            expect(markSpy).toHaveBeenCalledWith({ tradeoffer_id: TRADE_ID });
+            expect(markSpy).toHaveBeenCalledWith({ tradeoffer_id: TRADE_OFFER_ID });
         });
 
         it("Should record the delivery as received", async () => {

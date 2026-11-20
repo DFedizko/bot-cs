@@ -2,7 +2,15 @@ import { Delivery } from "@/contexts/delivery/domain/delivery/delivery";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { InvalidDeliveryTransitionError } from "@/contexts/delivery/domain/delivery/errors/invalid-delivery-transition.error";
 import { DomainError } from "@/packages/error/domain-error";
-import { ACCOUNT_ID, ASSET_ID, delivery, deliveryProps, MARKET_NAME, TRADE_ID } from "../__builders__/delivery.builder";
+import {
+    ACCOUNT_ID,
+    ASSET_ID,
+    delivery,
+    deliveryProps,
+    MARKET_NAME,
+    TRADE_ID,
+    TRADE_OFFER_ID,
+} from "../__builders__/delivery.builder";
 import { OFFER_ID } from "../__builders__/received-offer.builder";
 
 const confirmedDelivery = (): Delivery => {
@@ -25,6 +33,7 @@ describe("Delivery", () => {
 
             expect(started.toPrimitives()).toMatchObject({
                 tradeId: TRADE_ID,
+                tradeOfferId: TRADE_OFFER_ID,
                 accountId: ACCOUNT_ID,
                 expectedItem: { assetId: ASSET_ID, marketName: MARKET_NAME },
             });

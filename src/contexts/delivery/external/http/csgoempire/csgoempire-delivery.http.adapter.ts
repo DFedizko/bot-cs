@@ -15,7 +15,9 @@ export class CsgoempireDeliveryHttpAdapter implements CsgoempireDeliveryHttp {
         return this.httpClient.post<DisputeTrade.Response>(`/trading/deposit/${request.tradeoffer_id}/dispute`);
     }
 
-    getTrade(request: GetTrade.Request): Promise<GetTrade.Response> {
-        return this.httpClient.get<GetTrade.Response>(`/trading/user/trade/${request.depositId}/${request.type}`);
+    getTrade(request: GetTrade.Request): Promise<GetTrade.Response | GetTrade.NotFoundResponse> {
+        return this.httpClient.get<GetTrade.Response | GetTrade.NotFoundResponse>(
+            `/trading/user/trade/${request.depositId}/${request.type}`,
+        );
     }
 }

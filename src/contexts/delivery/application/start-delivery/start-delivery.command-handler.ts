@@ -32,6 +32,7 @@ export class StartDeliveryCommandHandler implements CommandHandler<StartDelivery
     private startDelivery(command: StartDeliveryCommand): Delivery {
         return Delivery.start({
             tradeId: command.tradeId,
+            tradeOfferId: command.tradeOfferId,
             accountId: command.accountId,
             expectedItem: { assetId: command.assetId, marketName: command.marketName, appId: command.appId },
             sellerSteamId: command.sellerSteamId,

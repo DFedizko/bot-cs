@@ -5,9 +5,11 @@ import { ExpectedItem, type ExpectedItemProps } from "./expected-item";
 import { InvalidDeliveryTransitionError } from "./errors/invalid-delivery-transition.error";
 import { SteamId } from "./steam-id";
 import { TradeId } from "./trade-id";
+import { TradeOfferId } from "./trade-offer-id";
 
 export type DeliveryProps = {
     tradeId: number;
+    tradeOfferId: number;
     accountId: number;
     expectedItem: ExpectedItemProps;
     sellerSteamId?: string;
@@ -23,6 +25,7 @@ export class Delivery extends AggregateRoot<TradeId> {
 
     private constructor(
         id: TradeId,
+        private readonly tradeOfferId: TradeOfferId,
         private readonly accountId: AccountId,
         private readonly expectedItem: ExpectedItem,
         private readonly sellerSteamId?: SteamId,
@@ -33,6 +36,7 @@ export class Delivery extends AggregateRoot<TradeId> {
     static start(props: DeliveryProps): Delivery {
         return new Delivery(
             new TradeId(props.tradeId),
+            new TradeOfferId(props.tradeOfferId),
             new AccountId(props.accountId),
             ExpectedItem.create(props.expectedItem),
             props.sellerSteamId === undefined ? undefined : new SteamId(props.sellerSteamId),
@@ -41,6 +45,10 @@ export class Delivery extends AggregateRoot<TradeId> {
 
     getTradeId(): number {
         return this.id.getValue();
+    }
+
+    getTradeOfferId(): number {
+        return this.tradeOfferId.getValue();
     }
 
     getAccountId(): number {
@@ -99,6 +107,7 @@ export class Delivery extends AggregateRoot<TradeId> {
     toPrimitives(): DeliveryPrimitives {
         return {
             tradeId: this.getTradeId(),
+            tradeOfferId: this.getTradeOfferId(),
             accountId: this.getAccountId(),
             expectedItem: this.expectedItem.toPrimitives(),
             sellerSteamId: this.getSellerSteamId(),

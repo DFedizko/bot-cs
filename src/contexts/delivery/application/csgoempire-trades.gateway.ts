@@ -1,7 +1,7 @@
-export type TradeStatusDTO = { tradeId: number; status: string };
+export type TradeStatusDTO = { tradeId: number; tradeOfferId: number; status: string };
 
 export interface CsgoempireTradesGateway {
-    markAsReceived(tradeId: number): Promise<void>;
-    dispute(tradeId: number): Promise<void>;
+    markAsReceived(tradeOfferId: number): Promise<void>;
+    dispute(tradeOfferId: number): Promise<void>;
     getTradeStatus(tradeId: number): Promise<TradeStatusDTO>;
 }

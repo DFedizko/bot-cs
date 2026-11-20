@@ -2,6 +2,7 @@ import { Command } from "@/packages/building-blocks/command";
 
 export type StartDeliveryProps = {
     tradeId: number;
+    tradeOfferId: number;
     accountId: number;
     assetId: string;
     marketName: string;
@@ -12,6 +13,7 @@ export type StartDeliveryProps = {
 export class StartDeliveryCommand extends Command {
     static readonly COMMAND_NAME = "start_delivery";
     readonly tradeId: number;
+    readonly tradeOfferId: number;
     readonly accountId: number;
     readonly assetId: string;
     readonly marketName: string;
@@ -21,6 +23,7 @@ export class StartDeliveryCommand extends Command {
     constructor(props: StartDeliveryProps) {
         super();
         this.tradeId = props.tradeId;
+        this.tradeOfferId = props.tradeOfferId;
         this.accountId = props.accountId;
         this.assetId = props.assetId;
         this.marketName = props.marketName;

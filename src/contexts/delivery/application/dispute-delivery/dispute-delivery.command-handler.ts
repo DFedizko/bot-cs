@@ -23,7 +23,7 @@ export class DisputeDeliveryCommandHandler implements CommandHandler<DisputeDeli
         const delivery = await loadDelivery(this.repository, command.tradeId);
         if (!delivery.canBeDisputed())
             return this.logger.log(`Not disputing trade "${command.tradeId}": it is ${delivery.getStatus()}`);
-        await this.csgoempireTrades.dispute(delivery.getTradeId());
+        await this.csgoempireTrades.dispute(delivery.getTradeOfferId());
         delivery.dispute();
         await this.repository.save(delivery);
         await this.eventBus.publish([

@@ -2,57 +2,66 @@ import type { DisputeTrade } from "@/contexts/delivery/infrastructure/http/csgoe
 import type { GetTrade } from "@/contexts/delivery/infrastructure/http/csgoempire/get-trade";
 import type { MarkAsReceived } from "@/contexts/delivery/infrastructure/http/csgoempire/mark-as-received";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
-import { TRADE_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
+import { TRADE_ID, TRADE_OFFER_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import { CsgoempireDeliveryHttpFakeAdapter } from "./csgoempire-delivery.http.fake-adapter";
-import { sentWithdrawal } from "./__mocks__/trade.mock";
+import { sentWithdrawal, tradeNotFound } from "./__mocks__/trade.mock";
 
-const UNKNOWN_TRADE_ID = 1;
+const UNKNOWN_ID = 1;
 const WITHDRAWAL = "withdrawal";
 
+const statusOf = async (http: CsgoempireDeliveryHttpFakeAdapter) => {
+    const response = await http.getTrade({ depositId: TRADE_ID, type: WITHDRAWAL });
+    return "status_message" in response.data ? response.data.status_message : undefined;
+};
+
 describe("CsgoempireDeliveryHttp", () => {
-    it("Should get a sent withdrawal", async () => {
+    it("Should get a sent withdrawal by its trade id", async () => {
         const response = await new CsgoempireDeliveryHttpFakeAdapter().getTrade({
             depositId: TRADE_ID,
             type: WITHDRAWAL,
         });
 
-        expectTypeOf(response).toEqualTypeOf<GetTrade.Response>();
-        expect(response.data).toEqual(sentWithdrawal());
+        expectTypeOf(response).toEqualTypeOf<GetTrade.Response | GetTrade.NotFoundResponse>();
+        expect(response).toEqual({ success: true, data: sentWithdrawal() });
     });
 
-    it("Should mark a trade as received", async () => {
+    it("Should answer the documented empty trade for an unknown trade id", async () => {
+        const response = await new CsgoempireDeliveryHttpFakeAdapter().getTrade({
+            depositId: UNKNOWN_ID,
+            type: WITHDRAWAL,
+        });
+
+        expect(response).toEqual(tradeNotFound);
+    });
+
+    it("Should mark a trade as received by its trade offer id", async () => {
         const http = new CsgoempireDeliveryHttpFakeAdapter();
 
-        const response = await http.markAsReceived({ tradeoffer_id: TRADE_ID });
+        const response = await http.markAsReceived({ tradeoffer_id: TRADE_OFFER_ID });
 
         expectTypeOf(response).toEqualTypeOf<MarkAsReceived.Response>();
-        expect((await http.getTrade({ depositId: TRADE_ID, type: WITHDRAWAL })).data.status_message).toBe("Completed");
+        expect(await statusOf(http)).toBe("Completed");
     });
 
-    it("Should dispute a trade", async () => {
+    it("Should dispute a trade by its trade offer id", async () => {
         const http = new CsgoempireDeliveryHttpFakeAdapter();
 
-        const response = await http.disputeTrade({ tradeoffer_id: TRADE_ID });
+        const response = await http.disputeTrade({ tradeoffer_id: TRADE_OFFER_ID });
 
         expectTypeOf(response).toEqualTypeOf<DisputeTrade.Response>();
-        expect((await http.getTrade({ depositId: TRADE_ID, type: WITHDRAWAL })).data.status_message).toBe("Disputed");
+        expect(await statusOf(http)).toBe("Disputed");
     });
 
     it.each([
         {
             endpoint: "markAsReceived",
-            call: (http: CsgoempireDeliveryHttpFakeAdapter) => http.markAsReceived({ tradeoffer_id: UNKNOWN_TRADE_ID }),
+            call: (http: CsgoempireDeliveryHttpFakeAdapter) => http.markAsReceived({ tradeoffer_id: TRADE_ID }),
         },
         {
             endpoint: "disputeTrade",
-            call: (http: CsgoempireDeliveryHttpFakeAdapter) => http.disputeTrade({ tradeoffer_id: UNKNOWN_TRADE_ID }),
+            call: (http: CsgoempireDeliveryHttpFakeAdapter) => http.disputeTrade({ tradeoffer_id: UNKNOWN_ID }),
         },
-        {
-            endpoint: "getTrade",
-            call: (http: CsgoempireDeliveryHttpFakeAdapter) =>
-                http.getTrade({ depositId: UNKNOWN_TRADE_ID, type: WITHDRAWAL }),
-        },
-    ])("Should fail $endpoint for an unknown trade", async ({ call }) => {
+    ])("Should refuse $endpoint for an id that is not a trade offer id", async ({ call }) => {
         await expect(call(new CsgoempireDeliveryHttpFakeAdapter())).rejects.toThrow(NotFoundError);
     });
 });

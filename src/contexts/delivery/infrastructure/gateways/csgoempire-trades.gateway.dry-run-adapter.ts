@@ -7,12 +7,12 @@ export class CsgoempireTradesGatewayDryRunAdapter implements CsgoempireTradesGat
         private readonly logger: Logger,
     ) {}
 
-    async markAsReceived(tradeId: number): Promise<void> {
-        this.logger.log(`[dry-run] Would mark trade "${tradeId}" as received`);
+    async markAsReceived(tradeOfferId: number): Promise<void> {
+        this.logger.log(`[dry-run] Would mark trade offer "${tradeOfferId}" as received`);
     }
 
-    async dispute(tradeId: number): Promise<void> {
-        this.logger.log(`[dry-run] Would dispute trade "${tradeId}"`);
+    async dispute(tradeOfferId: number): Promise<void> {
+        this.logger.log(`[dry-run] Would dispute trade offer "${tradeOfferId}"`);
     }
 
     getTradeStatus(tradeId: number): Promise<TradeStatusDTO> {

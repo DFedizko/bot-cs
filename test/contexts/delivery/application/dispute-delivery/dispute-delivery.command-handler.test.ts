@@ -10,7 +10,7 @@ import { DisputeDeliveryCommand } from "@/contexts/delivery/application/dispute-
 import { DeliveryDisputedEvent } from "@/contexts/delivery/application/dispute-delivery/delivery-disputed.event";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { DeliveryNotFoundError } from "@/contexts/delivery/domain/delivery/errors/delivery-not-found.error";
-import { ACCOUNT_ID, delivery, TRADE_ID } from "../../domain/__builders__/delivery.builder";
+import { ACCOUNT_ID, delivery, TRADE_ID, TRADE_OFFER_ID } from "../../domain/__builders__/delivery.builder";
 import { OFFER_ID } from "../../domain/__builders__/received-offer.builder";
 
 let container: Container;
@@ -27,7 +27,7 @@ describe("DisputeDeliveryCommandHandler", () => {
 
         await container.get(DISPUTE_DELIVERY_HANDLER).handle(new DisputeDeliveryCommand(TRADE_ID));
 
-        expect(disputeSpy).toHaveBeenCalledWith({ tradeoffer_id: TRADE_ID });
+        expect(disputeSpy).toHaveBeenCalledWith({ tradeoffer_id: TRADE_OFFER_ID });
     });
 
     it("Should record the dispute on the delivery", async () => {

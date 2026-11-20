@@ -12,11 +12,13 @@ import {
     MARKET_NAME,
     SELLER_STEAM_ID,
     TRADE_ID,
+    TRADE_OFFER_ID,
 } from "../../domain/__builders__/delivery.builder";
 
 const startDeliveryCommand = () =>
     new StartDeliveryCommand({
         tradeId: TRADE_ID,
+        tradeOfferId: TRADE_OFFER_ID,
         accountId: ACCOUNT_ID,
         assetId: ASSET_ID,
         marketName: MARKET_NAME,
