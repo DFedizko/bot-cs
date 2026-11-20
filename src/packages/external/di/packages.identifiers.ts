@@ -4,6 +4,8 @@ import type { Logger } from "@/packages/application/logger";
 import type { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import type { HttpClientFactory } from "../http/client/http-client.factory";
+import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
+import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import { identifier } from "./identifier";
 
 export const ENV = identifier<AppEnv>("Env");
@@ -12,3 +14,6 @@ export const EVENT_BUS = identifier<EventBus>("EventBus");
 export const COMMAND_BUS = identifier<CommandBus>("CommandBus");
 export const COMMAND_HANDLER = identifier<CommandHandler<Command>>("CommandHandler");
 export const HTTP_CLIENT_FACTORY = identifier<HttpClientFactory>("HttpClientFactory");
+export const HTTP_ERROR_MAPPER = identifier<HttpErrorMapper>("HttpErrorMapper");
+export const HTTP_ERROR_MAPPING = identifier<HttpErrorMapping>("HttpErrorMapping");
+export const HTTP_SERVER = identifier<HttpServer>("HttpServer");
