@@ -9,8 +9,15 @@ import {
     ENV,
     EVENT_BUS,
     HTTP_CLIENT_FACTORY,
+    HTTP_ERROR_MAPPER,
+    HTTP_ERROR_MAPPING,
+    HTTP_SERVER,
     LOGGER,
 } from "@/packages/external/di/packages.identifiers";
+import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
+import { HttpServerBunAdapter } from "@/packages/external/http/server/http-server.bun-adapter";
+import { HttpStatus } from "@/packages/infrastructure/http/http-status";
+import { FooNotFoundError } from "@/packages/infrastructure/http/__stubs__/foo.errors";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
@@ -79,5 +86,41 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         const commandBus = container.get(COMMAND_BUS);
 
         expect(commandBus).toBeInstanceOf(CommandBusInMemory);
+    });
+
+    it("Should bind an http error mapper that logs server errors", () => {
+        const errorMapper = container.get(HTTP_ERROR_MAPPER);
+
+        expect(errorMapper).toBeInstanceOf(HttpErrorMapperLoggingDecorator);
+    });
+
+    it("Should log server errors with the bound logger", () => {
+        const logSpy = jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
+        const error = new TypeError("Cannot read properties of undefined");
+
+        container.get(HTTP_ERROR_MAPPER).map(error);
+
+        expect(logSpy).toHaveBeenCalledWith(error.stack);
+    });
+
+    it("Should map errors with every bound http error mapping", () => {
+        container.bind(HTTP_ERROR_MAPPING).toConstantValue({ error: FooNotFoundError, status: HttpStatus.NOT_FOUND });
+        const errorMapper = container.get(HTTP_ERROR_MAPPER);
+
+        const response = errorMapper.map(new FooNotFoundError());
+
+        expect(response.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it("Should bind the bun http server", () => {
+        const httpServer = container.get(HTTP_SERVER);
+
+        expect(httpServer).toBeInstanceOf(HttpServerBunAdapter);
+    });
+
+    it("Should bind one http server", () => {
+        const httpServer = container.get(HTTP_SERVER);
+
+        expect(container.get(HTTP_SERVER)).toBe(httpServer);
     });
 });

@@ -1,10 +1,12 @@
 import express, { type Express, type Request as ExpressRequest, type Response as ExpressResponse } from "express";
-import type { Callback, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
+import type { Callback, HttpRequest, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
 import { HttpStatus } from "../../../infrastructure/http/http-status";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
 import { createServer, type Server } from "node:http";
 import cookieParser from "cookie-parser";
 import type { HttpHeaders } from "@/packages/infrastructure/http/http-headers";
+import type { HttpErrorMapper } from "../../../infrastructure/http/http-error.mapper";
+import { HttpErrorMapperByErrorClass } from "../../../infrastructure/http/http-error.mapper.by-error-class";
 
 const ONE_SECOND_IN_MS = 1000;
 
@@ -12,7 +14,7 @@ export class HttpServerExpressAdapter implements HttpServer {
     private readonly app: Express;
     readonly http: Server;
 
-    constructor() {
+    constructor(private readonly errorMapper: HttpErrorMapper = new HttpErrorMapperByErrorClass()) {
         this.app = express();
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
@@ -52,19 +54,38 @@ export class HttpServerExpressAdapter implements HttpServer {
     }
 
     private register(httpMethod: HttpMethod, path: string, callback: Callback): void {
-        this.app[httpMethod]!(path, async (expressRequest: ExpressRequest, expressResponse: ExpressResponse) => {
-            const response = await callback({
-                body: expressRequest.body,
-                headers: expressRequest.headers as HttpHeaders,
-                params: expressRequest.params as Record<string, string>,
-                searchParams: expressRequest.query as Record<string, string>,
-                cookies: expressRequest.cookies ?? {},
-            });
-            this.setCookies(response, expressResponse);
-            this.clearCookies(response, expressResponse);
-            expressResponse.status(response.status ?? HttpStatus.OK).set(response.headers ?? {});
-            response.body === undefined ? expressResponse.end() : expressResponse.json(response.body);
-        });
+        this.app[httpMethod]!(path, (expressRequest: ExpressRequest, expressResponse: ExpressResponse) =>
+            this.handle(expressRequest, expressResponse, callback),
+        );
+    }
+
+    private async handle(
+        expressRequest: ExpressRequest,
+        expressResponse: ExpressResponse,
+        callback: Callback,
+    ): Promise<void> {
+        try {
+            this.respond(await callback(this.toHttpRequest(expressRequest)), expressResponse);
+        } catch (error) {
+            this.respond(this.errorMapper.map(error), expressResponse);
+        }
+    }
+
+    private toHttpRequest(expressRequest: ExpressRequest): HttpRequest {
+        return {
+            body: expressRequest.body,
+            headers: expressRequest.headers as HttpHeaders,
+            params: expressRequest.params as Record<string, string>,
+            searchParams: expressRequest.query as Record<string, string>,
+            cookies: expressRequest.cookies ?? {},
+        };
+    }
+
+    private respond(response: HttpResponse, expressResponse: ExpressResponse): void {
+        this.setCookies(response, expressResponse);
+        this.clearCookies(response, expressResponse);
+        expressResponse.status(response.status ?? HttpStatus.OK).set(response.headers ?? {});
+        response.body === undefined ? expressResponse.end() : expressResponse.json(response.body);
     }
 
     private setCookies(httpResponse: HttpResponse, expressResponse: ExpressResponse): void {
