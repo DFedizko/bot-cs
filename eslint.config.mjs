@@ -4,8 +4,9 @@ import "./eslint.typescript-resolver.mjs";
 import js from "@eslint/js";
 import globals from "globals";
 import { defineConfig } from "eslint/config";
-import tseslint from "typescript-eslint";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+
+const { default: tseslint } = await import("typescript-eslint");
 
 export default defineConfig([
     {

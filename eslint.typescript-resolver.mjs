@@ -1,23 +1,24 @@
 // @ts-check
 
-import { registerHooks } from "node:module";
+import Module from "node:module";
 
 const TYPESCRIPT = "typescript";
 const TYPESCRIPT_FOR_ESLINT = "typescript-for-eslint";
-const ESLINT_TYPESCRIPT_IMPORTERS = /\/node_modules\/(@typescript-eslint\/[^/]+|ts-api-utils)\//;
+const TYPESCRIPT_SPECIFIER = /^typescript(\/.*)?$/;
+const ESLINT_TYPESCRIPT_IMPORTERS = /[\\/]node_modules[\\/](@typescript-eslint[\\/][^\\/]+|ts-api-utils)[\\/]/;
 
-const isTypescriptSpecifier = (specifier) => specifier === TYPESCRIPT || specifier.startsWith(`${TYPESCRIPT}/`);
+const resolveFilename = Module._resolveFilename;
 
-const isEslintTypescriptImporter = (parentURL) =>
-    parentURL !== undefined && ESLINT_TYPESCRIPT_IMPORTERS.test(parentURL);
+const isTypescriptSpecifier = (request) => TYPESCRIPT_SPECIFIER.test(request);
 
-const toTypescriptForEslint = (specifier) => TYPESCRIPT_FOR_ESLINT + specifier.slice(TYPESCRIPT.length);
+const isEslintTypescriptImporter = (parent) =>
+    typeof parent?.filename === "string" && ESLINT_TYPESCRIPT_IMPORTERS.test(parent.filename);
 
-registerHooks({
-    resolve(specifier, context, nextResolve) {
-        if (isTypescriptSpecifier(specifier) && isEslintTypescriptImporter(context.parentURL)) {
-            return nextResolve(toTypescriptForEslint(specifier), context);
-        }
-        return nextResolve(specifier, context);
-    },
-});
+const toTypescriptForEslint = (request) => TYPESCRIPT_FOR_ESLINT + request.slice(TYPESCRIPT.length);
+
+const redirectRequest = (request, parent) =>
+    isTypescriptSpecifier(request) && isEslintTypescriptImporter(parent) ? toTypescriptForEslint(request) : request;
+
+Module._resolveFilename = function (request, parent, ...rest) {
+    return resolveFilename.call(this, redirectRequest(request, parent), parent, ...rest);
+};
