@@ -9,7 +9,7 @@ export class FooCommandHandler implements CommandHandler<FooCommand> {
         return FooCommand.COMMAND_NAME;
     }
 
-    async handle(command: FooCommand): Promise<void> {
+    async handle(): Promise<void> {
         await this.fooRepository.save();
     }
 }
