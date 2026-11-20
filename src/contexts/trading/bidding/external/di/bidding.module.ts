@@ -1,5 +1,14 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
-import { COMMAND_BUS, COMMAND_HANDLER, EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    COMMAND_BUS,
+    COMMAND_HANDLER,
+    EVENT_BUS,
+    HTTP_ERROR_MAPPING,
+    HTTP_SERVER,
+    LOGGER,
+} from "@/packages/external/di/packages.identifiers";
+import type { HttpServer } from "@/packages/infrastructure/http/http-server";
+import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import {
     CSG_WS_CLIENT,
     CSGOEMPIRE_HTTP_CLIENT,
@@ -32,17 +41,24 @@ import { AuctionParticipationRepositoryInMemory } from "../../infrastructure/rep
 import { WantedItemRepositoryInMemory } from "../../infrastructure/repositories/wanted-item.repository.in-memory";
 import { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
 import { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
+import { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
+import { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
+import { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import { WantedItemNotFoundError } from "../../domain/wanted-item/errors/wanted-item-not-found.error";
+import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
 import { CsgoempireAuctionHttpAdapter } from "../http/csgoempire/csgoempire-auction.http.adapter";
 import { CsgoempireTradeHttpAdapter } from "../http/csgoempire/csgoempire-trade.http.adapter";
 import {
     ACCOUNT_REPOSITORY,
     ACTIVE_TRADES_GATEWAY,
+    ADD_WANTED_ITEM_CONTROLLER,
     ADD_WANTED_ITEM_HANDLER,
     AUCTION_GATEWAY,
     AUCTION_PARTICIPATION_REPO,
     AUCTION_UPDATE_CONTROLLER,
     CSGOEMPIRE_AUCTION_HTTP,
     CSGOEMPIRE_TRADE_HTTP,
+    EDIT_WANTED_ITEM_CONTROLLER,
     EDIT_WANTED_ITEM_HANDLER,
     EVALUATE_ITEM_HANDLER,
     LEAVE_AUCTION_HANDLER,
@@ -51,6 +67,7 @@ import {
     ON_APPROVED_OFF_AUCTION,
     ON_OUTBID,
     PLACE_BID_HANDLER,
+    REMOVE_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_HANDLER,
     SYNC_ACCOUNT_HANDLER,
     TRACK_AUCTION_HANDLER,
@@ -81,6 +98,8 @@ export class BiddingModule extends ContainerModule {
         BiddingModule.registerCommandHandlers(options);
         BiddingModule.bindEventListeners(options);
         BiddingModule.bindControllers(options);
+        BiddingModule.bindHttpControllers(options);
+        BiddingModule.bindHttpErrorMappings(options);
     }
 
     private static bindCsgoempire({ bind }: ContainerModuleLoadOptions): void {
@@ -203,6 +222,32 @@ export class BiddingModule extends ContainerModule {
                 [CSG_WS_CLIENT, COMMAND_BUS],
             )
             .inSingletonScope();
+    }
+
+    private static bindHttpControllers({ bind }: ContainerModuleLoadOptions): void {
+        bind(ADD_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus) => new AddWantedItemHttpController(http, bus),
+                [HTTP_SERVER, COMMAND_BUS],
+            )
+            .inSingletonScope();
+        bind(EDIT_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus) => new EditWantedItemHttpController(http, bus),
+                [HTTP_SERVER, COMMAND_BUS],
+            )
+            .inSingletonScope();
+        bind(REMOVE_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus) => new RemoveWantedItemHttpController(http, bus),
+                [HTTP_SERVER, COMMAND_BUS],
+            )
+            .inSingletonScope();
+    }
+
+    private static bindHttpErrorMappings({ bind }: ContainerModuleLoadOptions): void {
+        bind(HTTP_ERROR_MAPPING).toConstantValue({ error: WantedItemNotFoundError, status: HttpStatus.NOT_FOUND });
+        bind(HTTP_ERROR_MAPPING).toConstantValue({ error: WantedItemAlreadyExistsError, status: HttpStatus.CONFLICT });
     }
 
     private static createSyncAccount(

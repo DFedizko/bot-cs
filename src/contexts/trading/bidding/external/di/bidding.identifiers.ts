@@ -20,6 +20,9 @@ import type { TrackAuctionUpdateCommand } from "../../application/track-auction-
 import type { CsgoempireAuctionHttp } from "../../infrastructure/http/csgoempire/csgoempire-auction.http";
 import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/csgoempire-trade.http";
 import type { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
+import type { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
+import type { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
+import type { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
 import type { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");
@@ -31,6 +34,11 @@ export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedIt
 export const AUCTION_PARTICIPATION_REPO = identifier<AuctionParticipationRepository>("AuctionParticipationRepository");
 export const NEW_ITEM_CONTROLLER = identifier<NewItemWsController>("NewItemWsController");
 export const AUCTION_UPDATE_CONTROLLER = identifier<AuctionUpdateWsController>("AuctionUpdateWsController");
+export const ADD_WANTED_ITEM_CONTROLLER = identifier<AddWantedItemHttpController>("AddWantedItemHttpController");
+export const EDIT_WANTED_ITEM_CONTROLLER = identifier<EditWantedItemHttpController>("EditWantedItemHttpController");
+export const REMOVE_WANTED_ITEM_CONTROLLER = identifier<RemoveWantedItemHttpController>(
+    "RemoveWantedItemHttpController",
+);
 
 export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
 export const EDIT_WANTED_ITEM_HANDLER = identifier<CommandHandler<EditWantedItemCommand>>("EditWantedItemHandler");
