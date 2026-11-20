@@ -25,6 +25,7 @@ import {
 import { acceptDeliveryOffer, givenDelivery, steamSession } from "./__builders__/accept-offer-scenario.builder";
 
 const WRONG_ASSET_ID = "11111111111";
+const CANCEL_FAILED = "HTTP error 500";
 
 const publishedNames = (spy: { mock: { calls: unknown[][] } }): string[] =>
     spy.mock.calls.flatMap(([events]) => (events as { name: string }[]).map((event) => event.name));
@@ -143,6 +144,15 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
 
         it("Should still accept the right offer next to a scam", async () => {
             const tracked = await givenDelivery(container, { offers: [scamOfferAskingOurItems(), steamTradeOffer()] });
+
+            await acceptDeliveryOffer(container);
+
+            expect(tracked.getStatus()).toBe(DeliveryStatus.RECEIVED);
+        });
+
+        it("Should still accept the right offer when cancelling a scam fails", async () => {
+            const tracked = await givenDelivery(container, { offers: [scamOfferAskingOurItems(), steamTradeOffer()] });
+            jest.spyOn(steamSession(container), "cancelOffer").mockRejectedValue(new Error(CANCEL_FAILED));
 
             await acceptDeliveryOffer(container);
 

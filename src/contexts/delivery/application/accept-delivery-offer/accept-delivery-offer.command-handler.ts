@@ -13,12 +13,11 @@ import { AcceptDeliveryOfferCommand } from "./accept-delivery-offer.command";
 import { DeliveryFailedEvent } from "./delivery-failed.event";
 import { DeliveryOfferNotFoundEvent } from "./delivery-offer-not-found.event";
 import { DeliveryReceivedEvent } from "./delivery-received.event";
-import type { SteamTradeOffersGateway } from "./steam-trade-offers.gateway";
+import { ACCEPT_OUTCOME, type SteamTradeOffersGateway } from "./steam-trade-offers.gateway";
 import { TradeOfferAcceptedEvent } from "./trade-offer-accepted.event";
 import { TradeOfferCancelledEvent } from "./trade-offer-cancelled.event";
 
 const SINGLE_MATCH = 1;
-const ON_HOLD_REASON = "on_hold";
 
 export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptDeliveryOfferCommand> {
     constructor(
@@ -39,7 +38,8 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
         const acceptedOfferId = delivery.getAcceptedOfferId();
         if (delivery.getStatus() === DeliveryStatus.OFFER_ACCEPTED && acceptedOfferId)
             return this.confirmOffer(delivery, acceptedOfferId);
-        if (delivery.getStatus() === DeliveryStatus.CONFIRMED) return this.completeDelivery(delivery);
+        if (delivery.getStatus() === DeliveryStatus.CONFIRMED && acceptedOfferId)
+            return this.completeDelivery(delivery, acceptedOfferId);
         this.logger.log(`Delivery of trade "${command.tradeId}" is ${delivery.getStatus()}, nothing to accept`);
     }
 
@@ -65,6 +65,14 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
     }
 
     private async cancelOffer(delivery: Delivery, verdict: OfferVerdict): Promise<void> {
+        try {
+            await this.declineOffer(delivery, verdict);
+        } catch (error) {
+            this.logger.log(`Couldn't cancel offer "${verdict.getOfferId()}": ${(error as Error).message}`);
+        }
+    }
+
+    private async declineOffer(delivery: Delivery, verdict: OfferVerdict): Promise<void> {
         await this.steamOffers.cancel(delivery.getAccountId(), verdict.getOfferId());
         this.logger.log(`Cancelled offer "${verdict.getOfferId()}" that asked for our items`);
         await this.eventBus.publish([
@@ -92,14 +100,14 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
     private async acceptOffer(delivery: Delivery, offerId: string): Promise<void> {
         const outcome = await this.steamOffers.accept(delivery.getAccountId(), offerId);
         delivery.acceptOffer(offerId);
-        if (outcome === "on_hold") return this.failOnHold(delivery, offerId);
+        if (outcome === ACCEPT_OUTCOME.ON_HOLD) return this.failOnHold(delivery, offerId);
         await this.repository.save(delivery);
         await this.eventBus.publish([new TradeOfferAcceptedEvent({ ...this.identify(delivery), offerId })]);
         this.logger.log(
             `Accepted offer "${offerId}" for trade "${delivery.getTradeId()}" of account "${delivery.getAccountId()}"`,
         );
-        if (outcome === "needs_confirmation") return this.confirmOffer(delivery, offerId);
-        await this.confirmDelivery(delivery);
+        if (outcome === ACCEPT_OUTCOME.NEEDS_CONFIRMATION) return this.confirmOffer(delivery, offerId);
+        await this.confirmDelivery(delivery, offerId);
     }
 
     private async failOnHold(delivery: Delivery, offerId: string): Promise<void> {
@@ -107,28 +115,26 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
         await this.repository.save(delivery);
         this.logger.log(`Offer "${offerId}" for trade "${delivery.getTradeId()}" went on hold, delivery failed`);
         await this.eventBus.publish([
-            new DeliveryFailedEvent({ ...this.identify(delivery), offerId, reason: ON_HOLD_REASON }),
+            new DeliveryFailedEvent({ ...this.identify(delivery), offerId, reason: ACCEPT_OUTCOME.ON_HOLD }),
         ]);
     }
 
     private async confirmOffer(delivery: Delivery, offerId: string): Promise<void> {
         await this.steamOffers.confirm(delivery.getAccountId(), offerId);
-        await this.confirmDelivery(delivery);
+        await this.confirmDelivery(delivery, offerId);
     }
 
-    private async confirmDelivery(delivery: Delivery): Promise<void> {
+    private async confirmDelivery(delivery: Delivery, offerId: string): Promise<void> {
         delivery.confirm();
         await this.repository.save(delivery);
-        await this.completeDelivery(delivery);
+        await this.completeDelivery(delivery, offerId);
     }
 
-    private async completeDelivery(delivery: Delivery): Promise<void> {
+    private async completeDelivery(delivery: Delivery, offerId: string): Promise<void> {
         await this.csgoempireTrades.markAsReceived(delivery.getTradeOfferId());
         delivery.markReceived();
         await this.repository.save(delivery);
-        await this.eventBus.publish([
-            new DeliveryReceivedEvent({ ...this.identify(delivery), offerId: delivery.getAcceptedOfferId() ?? "" }),
-        ]);
+        await this.eventBus.publish([new DeliveryReceivedEvent({ ...this.identify(delivery), offerId })]);
         this.logger.log(`Marked trade "${delivery.getTradeId()}" as received`);
     }
 

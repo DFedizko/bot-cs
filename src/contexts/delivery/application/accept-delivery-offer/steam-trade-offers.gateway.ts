@@ -10,7 +10,13 @@ export type TradeOfferDTO = {
     itemsToReceive: OfferItemDTO[];
 };
 
-export type AcceptOutcome = "accepted" | "needs_confirmation" | "on_hold";
+export const ACCEPT_OUTCOME = {
+    ACCEPTED: "accepted",
+    NEEDS_CONFIRMATION: "needs_confirmation",
+    ON_HOLD: "on_hold",
+} as const;
+
+export type AcceptOutcome = (typeof ACCEPT_OUTCOME)[keyof typeof ACCEPT_OUTCOME];
 
 export interface SteamTradeOffersGateway {
     listReceivedActive(accountId: number): Promise<TradeOfferDTO[]>;

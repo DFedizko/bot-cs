@@ -1,8 +1,9 @@
-import type {
-    AcceptOutcome,
-    OfferItemDTO,
-    SteamTradeOffersGateway,
-    TradeOfferDTO,
+import {
+    ACCEPT_OUTCOME,
+    type AcceptOutcome,
+    type OfferItemDTO,
+    type SteamTradeOffersGateway,
+    type TradeOfferDTO,
 } from "../../application/accept-delivery-offer/steam-trade-offers.gateway";
 import type { SteamCredentials } from "../../application/steam-credentials";
 import type { SteamSessions } from "../steam/steam-sessions";
@@ -16,14 +17,14 @@ import {
 import type { SteamTradeSession } from "../steam/steam-trade-session";
 
 const OUTCOMES_BY_STATE: Partial<Record<SteamOfferState, AcceptOutcome>> = {
-    [STEAM_OFFER_STATE.ACCEPTED]: "accepted",
-    [STEAM_OFFER_STATE.IN_ESCROW]: "on_hold",
+    [STEAM_OFFER_STATE.ACCEPTED]: ACCEPT_OUTCOME.ACCEPTED,
+    [STEAM_OFFER_STATE.IN_ESCROW]: ACCEPT_OUTCOME.ON_HOLD,
 };
 
 const ACCEPT_OUTCOMES: Record<SteamAcceptStatus, AcceptOutcome> = {
-    accepted: "accepted",
-    pending: "needs_confirmation",
-    escrow: "on_hold",
+    accepted: ACCEPT_OUTCOME.ACCEPTED,
+    pending: ACCEPT_OUTCOME.NEEDS_CONFIRMATION,
+    escrow: ACCEPT_OUTCOME.ON_HOLD,
 };
 
 export class SteamTradeOffersGatewaySteamAdapter implements SteamTradeOffersGateway {

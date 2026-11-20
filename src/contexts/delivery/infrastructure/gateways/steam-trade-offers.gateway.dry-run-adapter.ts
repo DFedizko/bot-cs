@@ -1,11 +1,12 @@
 import type { Logger } from "@/packages/application/logger";
-import type {
-    AcceptOutcome,
-    SteamTradeOffersGateway,
-    TradeOfferDTO,
+import {
+    ACCEPT_OUTCOME,
+    type AcceptOutcome,
+    type SteamTradeOffersGateway,
+    type TradeOfferDTO,
 } from "../../application/accept-delivery-offer/steam-trade-offers.gateway";
 
-const DRY_RUN_OUTCOME: AcceptOutcome = "accepted";
+const DRY_RUN_OUTCOME: AcceptOutcome = ACCEPT_OUTCOME.ACCEPTED;
 
 export class SteamTradeOffersGatewayDryRunAdapter implements SteamTradeOffersGateway {
     constructor(
