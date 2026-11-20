@@ -1,4 +1,5 @@
 import { SteamRetry } from "@/contexts/delivery/external/steam/steam-retry";
+import { SteamLoginError } from "@/contexts/delivery/external/steam/steam-login.error";
 
 const RATE_LIMITED = new Error("HTTP error 429");
 const BASE_DELAY_MS = 1000;
@@ -40,6 +41,13 @@ describe("SteamRetry", () => {
         const action = jest.fn().mockRejectedValue(new Error("Offer #1 is not active"));
 
         await expect(retry().subject.run(action)).rejects.toThrow("Offer #1 is not active");
+        expect(action).toHaveBeenCalledTimes(1);
+    });
+
+    it("Should never retry a login steam refused", async () => {
+        const action = jest.fn().mockRejectedValue(new SteamLoginError("RateLimitExceeded"));
+
+        await expect(retry().subject.run(action)).rejects.toThrow(SteamLoginError);
         expect(action).toHaveBeenCalledTimes(1);
     });
 

@@ -9,10 +9,16 @@ import type { SteamSessions } from "../steam/steam-sessions";
 import {
     STEAM_OFFER_STATE,
     type SteamAcceptStatus,
+    type SteamOfferState,
     type SteamEconItem,
     type SteamTradeOffer,
 } from "../steam/steam-trade-offer";
 import type { SteamTradeSession } from "../steam/steam-trade-session";
+
+const OUTCOMES_BY_STATE: Partial<Record<SteamOfferState, AcceptOutcome>> = {
+    [STEAM_OFFER_STATE.ACCEPTED]: "accepted",
+    [STEAM_OFFER_STATE.IN_ESCROW]: "on_hold",
+};
 
 const ACCEPT_OUTCOMES: Record<SteamAcceptStatus, AcceptOutcome> = {
     accepted: "accepted",
@@ -32,7 +38,12 @@ export class SteamTradeOffersGatewaySteamAdapter implements SteamTradeOffersGate
     }
 
     async accept(accountId: number, offerId: string): Promise<AcceptOutcome> {
-        return ACCEPT_OUTCOMES[await (await this.sessionOf(accountId)).acceptOffer(offerId)];
+        const session = await this.sessionOf(accountId);
+        try {
+            return ACCEPT_OUTCOMES[await session.acceptOffer(offerId)];
+        } catch (error) {
+            return this.recoverAccept(session, offerId, error);
+        }
     }
 
     async cancel(accountId: number, offerId: string): Promise<void> {
@@ -41,6 +52,12 @@ export class SteamTradeOffersGatewaySteamAdapter implements SteamTradeOffersGate
 
     async confirm(accountId: number, offerId: string): Promise<void> {
         await (await this.sessionOf(accountId)).confirmOffer(offerId);
+    }
+
+    private async recoverAccept(session: SteamTradeSession, offerId: string, error: unknown): Promise<AcceptOutcome> {
+        const outcome = OUTCOMES_BY_STATE[await session.getOfferState(offerId)];
+        if (!outcome) throw error;
+        return outcome;
     }
 
     private async sessionOf(accountId: number): Promise<SteamTradeSession> {

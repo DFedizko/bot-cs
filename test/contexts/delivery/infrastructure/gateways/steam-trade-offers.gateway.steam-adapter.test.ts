@@ -1,6 +1,7 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { STEAM_SESSIONS, STEAM_TRADE_OFFERS } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/steam-trade.error";
 import { SteamCredentialsNotFoundError } from "@/contexts/delivery/application/steam-credentials-not-found.error";
 import { SteamSessionsFakeAdapter } from "../../external/steam/steam-sessions.fake-adapter";
 import { scamOfferAskingOurItems, steamTradeOffer } from "../../external/steam/__mocks__/steam-trade-offer.mock";
@@ -9,6 +10,7 @@ import { OFFER_ID } from "../../domain/__builders__/received-offer.builder";
 
 const UNKNOWN_ACCOUNT_ID = 1;
 const HOLD_DAYS = 7;
+const TIMED_OUT = "ETIMEDOUT";
 
 let container: Container;
 
@@ -71,6 +73,27 @@ describe("SteamTradeOffersGatewaySteamAdapter", () => {
         const outcome = await container.get(STEAM_TRADE_OFFERS).accept(ACCOUNT_ID, OFFER_ID);
 
         expect(outcome).toBe("on_hold");
+    });
+
+    it("Should report an accept that timed out after steam accepted it", async () => {
+        container
+            .rebind(STEAM_SESSIONS)
+            .toConstantValue(new SteamSessionsFakeAdapter(undefined, { acceptTimesOut: true }));
+
+        const outcome = await container.get(STEAM_TRADE_OFFERS).accept(ACCOUNT_ID, OFFER_ID);
+
+        expect(outcome).toBe("accepted");
+    });
+
+    it("Should fail an accept that steam did not carry out", async () => {
+        const session = container
+            .get(STEAM_SESSIONS)
+            .sessionFor({ accountName: "buyer", password: "", sharedSecret: "", identitySecret: "" });
+        jest.spyOn(session, "acceptOffer").mockRejectedValue(new SteamTradeError(TIMED_OUT));
+
+        const outcome = container.get(STEAM_TRADE_OFFERS).accept(ACCOUNT_ID, OFFER_ID);
+
+        await expect(outcome).rejects.toThrow(TIMED_OUT);
     });
 
     it("Should confirm a pending offer", async () => {

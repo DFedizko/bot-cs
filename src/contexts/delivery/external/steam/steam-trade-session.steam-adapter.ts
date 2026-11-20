@@ -13,16 +13,23 @@ import type {
     SteamOfferState,
     SteamTradeOffer,
 } from "../../infrastructure/steam/steam-trade-offer";
+import { SteamLoginError } from "./steam-login.error";
 import type { SteamRetry } from "./steam-retry";
 
 const LANGUAGE = "en";
 const POLLING_DISABLED = -1;
+const LOGIN_TIMEOUT_MS = 60_000;
+const LOGIN_COOLDOWN_MS = 15 * 60_000;
+const NO_LOGIN_BLOCK = 0;
 const SESSION_ERRORS = /not logged in|notloggedon|session expired/i;
+const STEAM_GUARD_REFUSED = "Steam Guard asked for a code the shared secret could not provide";
+const LOGIN_TIMED_OUT = "no web session before the login timeout";
+const LOGIN_COOLING_DOWN = "cooling down after a refused login";
 
-type Callback<T> = (resolve: (value: T) => void, reject: (error: Error) => void) => void;
+type Executor<T> = (resolve: (value: T) => void, reject: (error: Error) => void) => void;
 
 export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
-    private readonly client = new SteamUser({ autoRelogin: true });
+    private readonly client = new SteamUser({ autoRelogin: true, dataDirectory: null });
     private readonly community = new SteamCommunity();
     private readonly manager = new TradeOfferManager({
         steam: this.client,
@@ -33,6 +40,8 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
         dataDirectory: null,
     });
     private session?: Promise<void>;
+    private refuseLogin?: (error: Error) => void;
+    private blockedUntil = NO_LOGIN_BLOCK;
 
     constructor(
         private readonly login: SteamLogin,
@@ -40,6 +49,7 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
         private readonly retry: SteamRetry,
     ) {
         this.client.on("error", (error) => this.onClientError(error));
+        this.client.on("steamGuard", () => this.refuseLogin?.(new SteamLoginError(STEAM_GUARD_REFUSED)));
         this.manager.on("sessionExpired", () => this.forgetSession());
     }
 
@@ -54,22 +64,21 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
         });
     }
 
-    acceptOffer(offerId: string): Promise<SteamAcceptStatus> {
-        return this.withSession(async () => {
-            const offer = await this.findOffer(offerId);
-            return this.promise<SteamAcceptStatus>((resolve, reject) =>
-                offer.accept(false, (error, status) => (error ? reject(error) : resolve(status))),
-            );
-        });
+    async getOfferState(offerId: string): Promise<SteamOfferState> {
+        const offer = await this.withSession(() => this.findOffer(offerId));
+        return offer.state as SteamOfferState;
     }
 
-    cancelOffer(offerId: string): Promise<void> {
-        return this.withSession(async () => {
-            const offer = await this.findOffer(offerId);
-            await this.promise<void>((resolve, reject) =>
-                offer.decline((error) => (error ? reject(error) : resolve())),
-            );
-        });
+    async acceptOffer(offerId: string): Promise<SteamAcceptStatus> {
+        const offer = await this.withSession(() => this.findOffer(offerId));
+        return this.promise<SteamAcceptStatus>((resolve, reject) =>
+            offer.accept(false, (error, status) => (error ? reject(error) : resolve(status))),
+        );
+    }
+
+    async cancelOffer(offerId: string): Promise<void> {
+        const offer = await this.withSession(() => this.findOffer(offerId));
+        await this.promise<void>((resolve, reject) => offer.decline((error) => (error ? reject(error) : resolve())));
     }
 
     confirmOffer(offerId: string): Promise<void> {
@@ -93,22 +102,25 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
     }
 
     private ensureSession(): Promise<void> {
-        this.session ??= this.logIn().catch((error: Error) => {
-            this.forgetSession();
-            throw error;
-        });
+        if (Date.now() < this.blockedUntil) return Promise.reject(new SteamLoginError(LOGIN_COOLING_DOWN));
+        this.session ??= this.logIn().catch((error: Error) => this.onLoginRefused(error));
         return this.session;
     }
 
     private logIn(): Promise<void> {
         return this.promise<void>((resolve, reject) => {
-            const onError = (error: Error) => reject(error);
-            this.client.once("error", onError);
+            const timeout = setTimeout(() => reject(new SteamLoginError(LOGIN_TIMED_OUT)), LOGIN_TIMEOUT_MS);
+            this.refuseLogin = (error) => {
+                clearTimeout(timeout);
+                reject(error);
+            };
             this.client.once("webSession", (_sessionId, cookies) => {
-                this.client.removeListener("error", onError);
+                clearTimeout(timeout);
                 this.useCookies(cookies).then(resolve, reject);
             });
             this.startLogOn();
+        }).finally(() => {
+            this.refuseLogin = undefined;
         });
     }
 
@@ -119,6 +131,13 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
             password: this.login.password,
             twoFactorCode: SteamTotp.generateAuthCode(this.login.sharedSecret),
         });
+    }
+
+    private onLoginRefused(error: Error): never {
+        this.forgetSession();
+        this.blockedUntil = Date.now() + LOGIN_COOLDOWN_MS;
+        this.logger.log(`Steam login of "${this.login.accountName}" refused, pausing it: ${error.message}`);
+        throw error instanceof SteamLoginError ? error : new SteamLoginError(error.message);
     }
 
     private useCookies(cookies: string[]): Promise<void> {
@@ -171,6 +190,7 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
 
     private onClientError(error: Error): void {
         this.logger.log(`Steam client error for "${this.login.accountName}": ${error.message}`);
+        this.refuseLogin?.(error);
         this.forgetSession();
     }
 
@@ -182,7 +202,7 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
         this.session = undefined;
     }
 
-    private promise<T>(executor: Callback<T>): Promise<T> {
+    private promise<T>(executor: Executor<T>): Promise<T> {
         return new Promise<T>(executor);
     }
 }

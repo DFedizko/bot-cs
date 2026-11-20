@@ -1,3 +1,5 @@
+import { SteamLoginError } from "./steam-login.error";
+
 export type SteamRetryOptions = {
     baseDelayMs: number;
     maxAttempts: number;
@@ -27,7 +29,8 @@ export class SteamRetry {
     }
 
     private shouldRetry(error: unknown, attempt: number): boolean {
-        return attempt < this.options.maxAttempts && error instanceof Error && TEMPORARY_ERRORS.test(error.message);
+        if (error instanceof SteamLoginError || !(error instanceof Error)) return false;
+        return attempt < this.options.maxAttempts && TEMPORARY_ERRORS.test(error.message);
     }
 
     private delayFor(attempt: number): number {

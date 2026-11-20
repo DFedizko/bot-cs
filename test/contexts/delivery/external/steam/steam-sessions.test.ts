@@ -101,6 +101,28 @@ describe("SteamSessions", () => {
         await expect(session.acceptOffer(offerId)).rejects.toThrow(SteamTradeError);
     });
 
+    it("Should read the state of an offer", async () => {
+        const session = new SteamSessionsFakeAdapter().sessionFor(login());
+        await session.acceptOffer(OFFER_ID);
+
+        const state = await session.getOfferState(OFFER_ID);
+
+        expect(state).toBe(STEAM_OFFER_STATE.ACCEPTED);
+    });
+
+    it("Should fail to read the state of an unknown offer", async () => {
+        const session = new SteamSessionsFakeAdapter([]).sessionFor(login());
+
+        await expect(session.getOfferState(UNKNOWN_OFFER_ID)).rejects.toThrow(SteamTradeError);
+    });
+
+    it("Should time out an accept that steam still carried out", async () => {
+        const session = new SteamSessionsFakeAdapter(undefined, { acceptTimesOut: true }).sessionFor(login());
+
+        await expect(session.acceptOffer(OFFER_ID)).rejects.toThrow(SteamTradeError);
+        expect(await session.getOfferState(OFFER_ID)).toBe(STEAM_OFFER_STATE.ACCEPTED);
+    });
+
     it("Should hand out copies that tests can't mutate", async () => {
         const session = new SteamSessionsFakeAdapter().sessionFor(login());
         const [offer] = await session.getReceivedActiveOffers();
