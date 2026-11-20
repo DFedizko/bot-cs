@@ -1,4 +1,3 @@
-import { EvaluateItemCommandHandler } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command-handler";
 import { evaluateItemCommand } from "./__mocks__/evaluate-item.command.mock";
 import type { Mock } from "bun:test";
 import { CommandHandler } from "@/packages/building-blocks/command-handler";
@@ -6,14 +5,17 @@ import type { Logger } from "@/packages/application/logger";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { WantedItemRepository } from "@/contexts/trading/bidding/application/wanted-item.repository";
 import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
-import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import type { EventBus } from "@/packages/application/event-bus";
-import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    EVALUATE_ITEM_HANDLER,
+    WANTED_ITEM_REPOSITORY,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-off-auction.event";
 import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { WantedItemRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/wanted-item.repository.in-memory";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 
 let wantedItemRepo: WantedItemRepository;
@@ -26,13 +28,14 @@ let evaluateItem: CommandHandler<EvaluateItemCommand>;
 const fakeWantedItems: WantedItem[] = [];
 describe("EvaluateItemCommandHandler", () => {
     beforeEach(() => {
-        wantedItemRepo = new WantedItemRepositoryInMemory();
+        const container = testContainer();
+        wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
-        logger = new LoggerConsoleAdapter();
+        logger = container.get(LOGGER);
         loggerSpy = jest.spyOn(logger, "log");
-        eventBus = new EventBusInMemoryAsync();
+        eventBus = container.get(EVENT_BUS);
         publishSpy = jest.spyOn(eventBus, "publish");
-        evaluateItem = new EvaluateItemCommandHandler(wantedItemRepo, logger, eventBus);
+        evaluateItem = container.get(EVALUATE_ITEM_HANDLER);
     });
 
     afterEach(() => (fakeWantedItems.length = 0));

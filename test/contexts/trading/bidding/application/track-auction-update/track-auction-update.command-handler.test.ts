@@ -1,15 +1,15 @@
 import type { TrackAuctionUpdateCommand } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command";
-import { AccountRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/account.repository.in-memory";
 import type { EventBus } from "@/packages/application/event-bus";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
-import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { EVENT_BUS } from "@/packages/external/di/packages.identifiers";
+import { ACCOUNT_REPOSITORY, TRACK_AUCTION_HANDLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { trackAuctionUpdateCommand } from "./__mocks__/track-auction-update.command.mock";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import type { Mock } from "bun:test";
 import type { OutbidEvent } from "@/contexts/trading/bidding/application/track-auction-update/outbid.event";
 import type { AccountRepository } from "@/contexts/trading/bidding/application/account.repository";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { TrackAuctionUpdateCommandHandler } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command-handler";
 
 let accountRepository: AccountRepository;
 let eventBus: EventBus;
@@ -17,10 +17,11 @@ let publishSpy: Mock<EventBus["publish"]>;
 let trackAuctionUpdateCommandHandler: CommandHandler<TrackAuctionUpdateCommand>;
 describe("TrackAuctionUpdateCommandHandler", () => {
     beforeEach(async () => {
-        accountRepository = new AccountRepositoryInMemory();
-        eventBus = new EventBusInMemoryAsync();
+        const container = testContainer();
+        accountRepository = container.get(ACCOUNT_REPOSITORY);
+        eventBus = container.get(EVENT_BUS);
         publishSpy = jest.spyOn(eventBus, "publish");
-        trackAuctionUpdateCommandHandler = new TrackAuctionUpdateCommandHandler(accountRepository, eventBus);
+        trackAuctionUpdateCommandHandler = container.get(TRACK_AUCTION_HANDLER);
 
         await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 20000 }));
     });

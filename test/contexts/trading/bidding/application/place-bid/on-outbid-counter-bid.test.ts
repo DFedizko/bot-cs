@@ -6,12 +6,11 @@ import type { Mock } from "bun:test";
 import { outbidEvent } from "../track-auction-update/__mocks__/outbid.event.mock";
 import { PlaceBidCommand } from "@/contexts/trading/bidding/application/place-bid/place-bid.command";
 import { BidIncrementer } from "@/contexts/trading/bidding/domain/bid-incrementer";
-import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
-import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
-import { OnOutbidCounterBid } from "@/contexts/trading/bidding/application/place-bid/on-outbid-counter-bid";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { COMMAND_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { AUCTION_PARTICIPATION_REPO, ON_OUTBID } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
 import type { AuctionParticipationRepository } from "@/contexts/trading/bidding/application/auction-participation.repository";
-import { AuctionParticipationRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/auction-participation.repository.in-memory";
 import { AuctionParticipation } from "@/contexts/trading/bidding/domain/auction-participation/auction-participation";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
 import { LeaveAuctionCommand } from "@/contexts/trading/bidding/application/leave-auction/leave-auction.command";
@@ -25,15 +24,14 @@ let dispatchSpy: Mock<CommandBus["dispatch"]>;
 let onOutbidCounterBid: EventListener<OutbidEvent>;
 describe("OnOutbidCounterBid", () => {
     beforeEach(() => {
-        auctionParticipationRepo = new AuctionParticipationRepositoryInMemory();
+        const container = testContainer();
+        auctionParticipationRepo = container.get(AUCTION_PARTICIPATION_REPO);
         auctionParticipationFindSpy = jest.spyOn(auctionParticipationRepo, "findByAuctionId");
-        logger = new LoggerConsoleAdapter();
+        logger = container.get(LOGGER);
         loggerSpy = jest.spyOn(logger, "log");
-        commandBus = new CommandBusInMemory();
-        dispatchSpy = jest.spyOn(commandBus, "dispatch");
-        commandBus.register({ handle: async () => {}, subscribedTo: () => PlaceBidCommand.COMMAND_NAME });
-        commandBus.register({ handle: async () => {}, subscribedTo: () => LeaveAuctionCommand.COMMAND_NAME });
-        onOutbidCounterBid = new OnOutbidCounterBid(auctionParticipationRepo, logger, commandBus);
+        commandBus = container.get(COMMAND_BUS);
+        dispatchSpy = jest.spyOn(commandBus, "dispatch").mockResolvedValue();
+        onOutbidCounterBid = container.get(ON_OUTBID);
     });
 
     it("Should dispatch a command to place a bid on outbid", async () => {
