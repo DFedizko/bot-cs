@@ -173,4 +173,15 @@ describe("Delivery", () => {
             expect(subject.canTakeOffers()).toBe(expected);
         });
     });
+
+    describe("canBeDisputed", () => {
+        it.each([
+            { status: "awaiting", build: () => delivery(), expected: true },
+            { status: "confirmed", build: confirmedDelivery, expected: false },
+        ])("Should be $expected when $status", ({ build, expected }) => {
+            const subject = build();
+
+            expect(subject.canBeDisputed()).toBe(expected);
+        });
+    });
 });

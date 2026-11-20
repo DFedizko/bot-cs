@@ -67,6 +67,10 @@ export class Delivery extends AggregateRoot<TradeId> {
         return OFFER_TAKING_STATUSES.includes(this.status);
     }
 
+    canBeDisputed(): boolean {
+        return this.status === DeliveryStatus.AWAITING_OFFER;
+    }
+
     acceptOffer(offerId: string): void {
         this.moveTo(DeliveryStatus.OFFER_ACCEPTED);
         this.acceptedOfferId = offerId;
