@@ -86,7 +86,7 @@ When several folders share a fake, mock or builder, put it in the nearest common
 
 - **Fast:** tests touch no network, disk or real clock.
 - **Independent:** no test depends on another test's state or on run order. Build fresh state in each test.
-- **Repeatable:** same result on every machine, every run. Inject time, randomness and IDs through ports.
+- **Repeatable:** same result on every machine, every run. Inject time, randomness, IDs and environment values through ports: tests never read `Bun.env` or a local `.env` (`testContainer()` binds a fixed test env; pass a source to `EnvZodAdapter` to test it).
 - **Self-validating:** pass or fail through assertions only. No logs to read.
 - **Timely:** written before the production code (see TDD above).
 
