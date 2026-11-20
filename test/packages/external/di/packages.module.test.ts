@@ -25,6 +25,7 @@ import { HttpClientFactoryAdapter } from "@/packages/external/http/client/http-c
 import { CommandNotRegisteredError } from "@/packages/error/command-not-registered.error";
 
 const API_KEY = "api-key";
+const ANY_FREE_PORT = 0;
 const ENVIRONMENTS: AppEnv["NODE_ENV"][] = ["development", "production"];
 
 let container: Container;
@@ -34,13 +35,15 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
     beforeEach(() => {
         fooHandler = { subscribedTo: () => FooCommand.COMMAND_NAME, handle: jest.fn(async () => {}) };
         container = new Container();
-        container.load(new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }));
+        container.load(
+            new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
+        );
     });
 
     it("Should bind the validated enviroment", () => {
         const env = container.get(ENV);
 
-        expect(env).toEqual({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY });
+        expect(env).toEqual({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT });
     });
 
     it("Should bind the console logger", () => {

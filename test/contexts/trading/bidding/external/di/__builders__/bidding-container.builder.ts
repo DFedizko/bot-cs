@@ -6,6 +6,7 @@ import { BiddingDevModule } from "@/contexts/trading/bidding/external/di/bidding
 import { BiddingProdModule } from "@/contexts/trading/bidding/external/di/bidding.prod-module";
 
 const API_KEY = "api-key";
+const ANY_FREE_PORT = 0;
 
 type BiddingEnv = Exclude<AppEnv["NODE_ENV"], "test">;
 
@@ -17,7 +18,7 @@ const BIDDING_ENV_MODULES: Record<BiddingEnv, () => ContainerModule> = {
 export const biddingContainer = (nodeEnv: BiddingEnv): Container => {
     const container = new Container();
     container.load(
-        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }),
+        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
         new TradingSharedModule(),
         new BiddingModule(),
         BIDDING_ENV_MODULES[nodeEnv](),
