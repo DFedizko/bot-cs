@@ -2,6 +2,7 @@ import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
 import { HttpError } from "@/packages/infrastructure/http/errors/http.error";
+import { BadRequestError } from "@/packages/infrastructure/http/errors/bad-request.error";
 import { EmptyStringError } from "@/packages/error/empty-string.error";
 import { FooInternalError, FooNotFoundError, SpecialFooNotFoundError } from "./__stubs__/foo.errors";
 
@@ -18,6 +19,17 @@ describe("HttpErrorMapperByErrorClass", () => {
             expect(response).toEqual({
                 status: HttpStatus.NOT_FOUND,
                 body: { code: "NOT_FOUND", message: "Foo not found" },
+            });
+        });
+
+        it("Should map a bad request error to bad request", () => {
+            const mapper = new HttpErrorMapperByErrorClass();
+
+            const response = mapper.map(new BadRequestError("Foo must be a string"));
+
+            expect(response).toEqual({
+                status: HttpStatus.BAD_REQUEST,
+                body: { code: "BAD_REQUEST", message: "Foo must be a string" },
             });
         });
 
