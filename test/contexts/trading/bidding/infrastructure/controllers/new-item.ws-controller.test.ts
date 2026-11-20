@@ -16,7 +16,7 @@ const PORT = 8888;
 let container: Container;
 let httpServer: HttpServer;
 let wsServer: WsServer;
-beforeEach(async () => {
+beforeEach(() => {
     container = testContainer();
     httpServer = new HttpServerExpressAdapter();
     wsServer = new WsServerSocketIoAdapter((httpServer as HttpServerExpressAdapter).http);
