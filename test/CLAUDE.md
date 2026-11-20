@@ -44,21 +44,30 @@ Constructors take ports, so every collaborator can be swapped. Prefer real, simp
 
 ### Wiring: the test container
 
-`.test.ts` files never wire their object graph with `new`. Each one builds a fresh container in `beforeEach` with `testContainer()` from `test/__builders__/test-container.builder.ts` and resolves the class under test and its collaborators by their identifiers:
+`.test.ts` files never wire their object graph with `new`. Each file declares a single `let container`, assigns a fresh `testContainer()` (from `test/__builders__/test-container.builder.ts`) to it in `beforeEach`, and each test resolves only what it uses, where it uses it:
 
 ```ts
+let container: Container;
+
 beforeEach(() => {
-    const container = testContainer();
+    container = testContainer();
+});
+
+it("Should log the synchronized account", async () => {
     container.rebind(CSGOEMPIRE_AUCTION_HTTP).toConstantValue(new CsgoempireAuctionHttpFakeAdapter(1));
-    logger = container.get(LOGGER);
-    loggerSpy = jest.spyOn(logger, "log");
-    handler = container.get(PLACE_BID_HANDLER);
+    const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
+
+    await container.get(SYNC_ACCOUNT_HANDLER).handle(new SynchronizeAccountCommand(1, "John Doe", 1000));
+
+    expect(loggerSpy).toHaveBeenCalledTimes(1);
 });
 ```
 
 - `testContainer()` loads the real composition root (`RootContainer`) with every third-party API rebound to its fake (`fakeExternals`). It defaults to the production modules, so the real gateways run against the fakes; pass another `NODE_ENV` (`testContainer("development")`) to test that environment's wiring.
 - A new container per test keeps tests independent. Inside one container every binding is a singleton, so a `jest.spyOn` on a resolved collaborator also spies on the instance the class under test received.
-- Override a binding with `container.rebind(ID).toConstantValue(double)` **before** resolving the class under test (a different fake scenario, a ws client that connects to the test server, fixed socket metadata).
+- Identifiers are typed, so `container.get(ID)` and `jest.spyOn(container.get(ID), "method")` need no type annotation or `Mock<...>` declaration.
+- Create spies inside the test, before the act. If the class under test captures a collaborator's method when it is built (a constructor that calls `ws.on(...)`, or `bus.publish.bind(bus)`), create that spy before resolving the class.
+- Override a binding with `container.rebind(ID).toConstantValue(double)` at the start of the test that needs it, **before** resolving anything that depends on it (a different fake scenario, fixed socket metadata). When every test in a file needs the same override, a small per-file helper that builds the container may apply it in `beforeEach`.
 - To stop a dispatched command from running its real handler, stub the bus: `jest.spyOn(commandBus, "dispatch").mockResolvedValue()`.
 - A new port, adapter, handler, listener or controller is bound in its context module first, so tests can resolve it. When a test needs a new external fake, add it to `fakeExternals` (`test/__builders__/externals.builder.ts`).
 - Exceptions, which keep constructing their subject directly: contract tests (the subject is a fake), tests of generic `packages/` building blocks and adapters run against `Foo` stubs, the module tests under `external/di/` that load a single module, and the HTTP / WebSocket servers a test starts to stand in for the provider.
@@ -70,7 +79,7 @@ beforeEach(() => {
 | A repository                                  | The real in-memory adapter from `src/` (`WantedItemRepositoryInMemory`)                               | Resolved from the test container                                   |
 | Event bus, command bus, logger                | The real in-memory / console adapter from `src/packages`                                              | Resolved from the test container                                   |
 | A third-party API (CSGOEmpire HTTP or WS)     | A fake adapter implementing the `infrastructure/` contract, named `<file>.fake-adapter.ts`            | Next to the contract's test, under the mirrored `external/` folder |
-| Recording or forcing a call                   | `jest.spyOn(realObject, "method")`, typed with `Mock<Port["method"]>`                                 | Inside the test                                                    |
+| Recording or forcing a call                   | `jest.spyOn(container.get(ID), "method")`, its type inferred from the identifier                      | Inside the test                                                    |
 | Fixed input data (commands, events, payloads) | A function returning the object, named after it (`evaluateItemCommand()`), in a `<name>.mock.ts` file | `__mocks__/` next to the test                                      |
 | Domain objects with defaults                  | A builder function taking `overrides`, in a `<name>.builder.ts` file (`bidCandidate({ value })`)      | `__builders__/` next to the test                                   |
 
@@ -79,7 +88,7 @@ When several folders share a fake, mock or builder, put it in the nearest common
 ## Test layout
 
 - One top-level `describe` named after the class under test (`describe("AddWantedItemCommandHandler", ...)`); nest `describe` blocks to group scenarios.
-- Shared collaborators are declared with `let` at the top, typed by their port, and resolved in `beforeEach` from a fresh `testContainer()`, so every test starts from fresh state.
+- A single `let container` at the top, assigned a fresh `testContainer()` in `beforeEach`, so every test starts from fresh state. Each test resolves its collaborators and spies itself, as `const`s. The only other top-level `let`s are fixtures the container doesn't own and `afterEach` must clean up (the HTTP / WebSocket server a test starts).
 - Test names start with "Should" and describe the behaviour: `it("Should reject a bid above the item's max price", ...)`.
 
 ## FIRST
