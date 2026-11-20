@@ -12,6 +12,7 @@ const ACCOUNT_ID = 777;
 const AUCTION_ID = 11204;
 const BID_VALUE = 300;
 const UNKNOWN_AUCTION_ID = 1;
+const ONE_BID = 1;
 
 let auctionHttp: CsgoempireAuctionHttp;
 let placeBidSpy: Mock<CsgoempireAuctionHttp["placeBid"]>;
@@ -54,7 +55,7 @@ describe("AuctionGatewayDryRunAdapter", () => {
                 ...auction!,
                 highestBid: BID_VALUE,
                 bidderId: ACCOUNT_ID,
-                numberOfBids: auction!.numberOfBids + 1,
+                numberOfBids: auction!.numberOfBids + ONE_BID,
             });
         });
 
