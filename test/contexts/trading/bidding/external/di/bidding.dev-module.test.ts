@@ -1,6 +1,7 @@
 import type { Mock } from "bun:test";
 import type { Container } from "inversify";
-import { biddingContainer, fakeExternals } from "./__builders__/bidding-container.builder";
+import { biddingContainer } from "./__builders__/bidding-container.builder";
+import { fakeExternals } from "@/__builders__/externals.builder";
 import { AUCTION_GATEWAY, CSGOEMPIRE_AUCTION_HTTP } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.dry-run-adapter";

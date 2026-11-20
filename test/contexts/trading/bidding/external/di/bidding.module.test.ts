@@ -1,5 +1,6 @@
 import type { Container } from "inversify";
-import { biddingContainer, fakeExternals } from "./__builders__/bidding-container.builder";
+import { biddingContainer } from "./__builders__/bidding-container.builder";
+import { fakeExternals } from "@/__builders__/externals.builder";
 import {
     ACCOUNT_REPOSITORY,
     ACTIVE_TRADES_GATEWAY,
