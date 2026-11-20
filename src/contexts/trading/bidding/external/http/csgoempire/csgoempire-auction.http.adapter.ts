@@ -10,7 +10,7 @@ export class CsgoempireAuctionHttpAdapter implements CsgoempireAuctionHttp {
         return this.httpClient.get<GetActiveAuctions.Response>("/trading/user/auctions");
     }
 
-    async placeBid(request: PlaceBid.Request): Promise<PlaceBid.Response> {
+    async placeBid(): Promise<PlaceBid.Response> {
         throw new Error("Method not implemented.");
     }
 }
