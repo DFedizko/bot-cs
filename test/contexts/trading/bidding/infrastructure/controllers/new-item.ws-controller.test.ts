@@ -1,13 +1,15 @@
 import { newItem } from "./__mocks__/new-item.mock";
 import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
-import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import type { Mock } from "bun:test";
 import { WsServerSocketIoAdapter } from "@/packages/external/web-socket/server/ws-server.socket-io-adapter";
 import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-server.express-adapter";
 import type { CommandBus } from "@/packages/application/command-bus";
-import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
-import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";
+import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
+import { NEW_ITEM_CONTROLLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import type { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import type { CsgWsClient } from "@/contexts/trading/shared/infrastructure/csgoempire/csg.ws-client";
 import { CsgWsClientFakeAdapter } from "@/contexts/trading/shared/external/csgoempire/csg-ws-client.fake-adapter";
 
@@ -21,11 +23,12 @@ let dispatchSpy: Mock<CommandBus["dispatch"]>;
 beforeEach(async () => {
     httpServer = new HttpServerExpressAdapter();
     wsServer = new WsServerSocketIoAdapter((httpServer as HttpServerExpressAdapter).http);
+    const container = testContainer();
     csgWsClient = new CsgWsClientFakeAdapter(`ws://localhost:${PORT}`);
-    commandBus = new CommandBusInMemory();
-    commandBus.register({ handle: async () => {}, subscribedTo: () => EvaluateItemCommand.COMMAND_NAME });
-    dispatchSpy = jest.spyOn(commandBus, "dispatch");
-    new NewItemWsController(csgWsClient, commandBus);
+    container.rebind(CSG_WS_CLIENT).toConstantValue(csgWsClient);
+    commandBus = container.get(COMMAND_BUS);
+    dispatchSpy = jest.spyOn(commandBus, "dispatch").mockResolvedValue();
+    container.get(NEW_ITEM_CONTROLLER);
     httpServer.listen(PORT);
     wsServer.on("connection", (socket) => {
         socket.emit("new_item", newItem);

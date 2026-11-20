@@ -1,12 +1,13 @@
 import type { AccountRepository } from "@/contexts/trading/bidding/application/account.repository";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { AccountRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/account.repository.in-memory";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { ACCOUNT_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
 let accountRepository: AccountRepository;
 describe("AccountRepository", () => {
     beforeEach(() => {
-        accountRepository = new AccountRepositoryInMemory();
+        accountRepository = testContainer().get(ACCOUNT_REPOSITORY);
     });
     it("Should save and find an account by id", async () => {
         await accountRepository.save(

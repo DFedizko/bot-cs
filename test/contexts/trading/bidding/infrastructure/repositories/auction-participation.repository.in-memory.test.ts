@@ -2,12 +2,13 @@ import type { AuctionParticipationRepository } from "@/contexts/trading/bidding/
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
 import { AuctionParticipation } from "@/contexts/trading/bidding/domain/auction-participation/auction-participation";
-import { AuctionParticipationRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/auction-participation.repository.in-memory";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { AUCTION_PARTICIPATION_REPO } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
 let auctionParticipationRepository: AuctionParticipationRepository;
 describe("AuctionParticipationRepositoryInMemory", () => {
     beforeEach(() => {
-        auctionParticipationRepository = new AuctionParticipationRepositoryInMemory();
+        auctionParticipationRepository = testContainer().get(AUCTION_PARTICIPATION_REPO);
     });
     it("Should save and find an auction participation by id", async () => {
         await auctionParticipationRepository.save(

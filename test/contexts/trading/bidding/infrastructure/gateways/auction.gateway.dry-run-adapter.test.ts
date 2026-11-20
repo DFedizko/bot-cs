@@ -1,11 +1,12 @@
 import type { Mock } from "bun:test";
 import type { AuctionGateway } from "@/contexts/trading/bidding/application/place-bid/auction.gateway";
-import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
-import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.dry-run-adapter";
 import type { CsgoempireAuctionHttp } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/csgoempire-auction.http";
 import type { Logger } from "@/packages/application/logger";
-import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
-import { CsgoempireAuctionHttpFakeAdapter } from "../../external/http/csgoempire/csgoempire-auction.http.fake-adapter";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { LOGGER } from "@/packages/external/di/packages.identifiers";
+import { SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
+import { AUCTION_GATEWAY, CSGOEMPIRE_AUCTION_HTTP } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
 const ACCOUNT_ID = 777;
 const NEW_AUCTION_ID = 1;
@@ -13,6 +14,11 @@ const BID_VALUE = 300;
 const COUNTER_BID_VALUE = 330;
 const FIRST_BID = 1;
 const SECOND_BID = 2;
+const DRY_RUN_ENV = "development";
+const SOCKET_METADATA_OF_ACCOUNT = {
+    ...getSktMetafakeResponse,
+    user: { ...getSktMetafakeResponse.user, id: ACCOUNT_ID },
+};
 
 let auctionHttp: CsgoempireAuctionHttp;
 let placeBidSpy: Mock<CsgoempireAuctionHttp["placeBid"]>;
@@ -23,14 +29,16 @@ let loggerSpy: Mock<Logger["log"]>;
 let dryRunGateway: AuctionGateway;
 
 describe("AuctionGatewayDryRunAdapter", () => {
-    beforeEach(() => {
-        auctionHttp = new CsgoempireAuctionHttpFakeAdapter();
+    beforeEach(async () => {
+        const container = testContainer(DRY_RUN_ENV);
+        container.rebind(SOCKET_METADATA).toConstantValue(SOCKET_METADATA_OF_ACCOUNT);
+        auctionHttp = container.get(CSGOEMPIRE_AUCTION_HTTP);
         placeBidSpy = jest.spyOn(auctionHttp, "placeBid");
         getAuctionsSpy = jest.spyOn(auctionHttp, "getActiveAuctions");
-        realGateway = new AuctionGatewayCsgoempireAdapter(auctionHttp);
-        logger = new LoggerConsoleAdapter();
+        realGateway = testContainer().get(AUCTION_GATEWAY);
+        logger = container.get(LOGGER);
         loggerSpy = jest.spyOn(logger, "log").mockImplementation(() => {});
-        dryRunGateway = new AuctionGatewayDryRunAdapter(realGateway, logger, ACCOUNT_ID);
+        dryRunGateway = await container.getAsync(AUCTION_GATEWAY);
     });
 
     it("Should return the active auctions of the wrapped gateway", async () => {
