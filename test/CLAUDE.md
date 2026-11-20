@@ -40,12 +40,35 @@ Tests import production code through the `@/` alias, never with relative paths i
 
 ## Test doubles and fixtures
 
-Constructors take ports, so every collaborator can be swapped. Prefer real, simple implementations over hand-written doubles:
+Constructors take ports, so every collaborator can be swapped. Prefer real, simple implementations over hand-written doubles.
+
+### Wiring: the test container
+
+`.test.ts` files never wire their object graph with `new`. Each one builds a fresh container in `beforeEach` with `testContainer()` from `test/__builders__/test-container.builder.ts` and resolves the class under test and its collaborators by their identifiers:
+
+```ts
+beforeEach(() => {
+    const container = testContainer();
+    container.rebind(CSGOEMPIRE_AUCTION_HTTP).toConstantValue(new CsgoempireAuctionHttpFakeAdapter(1));
+    logger = container.get(LOGGER);
+    loggerSpy = jest.spyOn(logger, "log");
+    handler = container.get(PLACE_BID_HANDLER);
+});
+```
+
+- `testContainer()` loads the real composition root (`RootContainer`) with every third-party API rebound to its fake (`fakeExternals`). It defaults to the production modules, so the real gateways run against the fakes; pass another `NODE_ENV` (`testContainer("development")`) to test that environment's wiring.
+- A new container per test keeps tests independent. Inside one container every binding is a singleton, so a `jest.spyOn` on a resolved collaborator also spies on the instance the class under test received.
+- Override a binding with `container.rebind(ID).toConstantValue(double)` **before** resolving the class under test (a different fake scenario, a ws client that connects to the test server, fixed socket metadata).
+- To stop a dispatched command from running its real handler, stub the bus: `jest.spyOn(commandBus, "dispatch").mockResolvedValue()`.
+- A new port, adapter, handler, listener or controller is bound in its context module first, so tests can resolve it. When a test needs a new external fake, add it to `fakeExternals` (`test/__builders__/externals.builder.ts`).
+- Exceptions, which keep constructing their subject directly: contract tests (the subject is a fake), tests of generic `packages/` building blocks and adapters run against `Foo` stubs, the module tests under `external/di/` that load a single module, and the HTTP / WebSocket servers a test starts to stand in for the provider.
+
+### Which double to use
 
 | Need                                          | Use                                                                                                   | Where                                                              |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| A repository                                  | The real in-memory adapter from `src/` (`WantedItemRepositoryInMemory`)                               | Imported from `src/`                                               |
-| Event bus, command bus, logger                | The real in-memory / console adapter from `src/packages`                                              | Imported from `src/`                                               |
+| A repository                                  | The real in-memory adapter from `src/` (`WantedItemRepositoryInMemory`)                               | Resolved from the test container                                   |
+| Event bus, command bus, logger                | The real in-memory / console adapter from `src/packages`                                              | Resolved from the test container                                   |
 | A third-party API (CSGOEmpire HTTP or WS)     | A fake adapter implementing the `infrastructure/` contract, named `<file>.fake-adapter.ts`            | Next to the contract's test, under the mirrored `external/` folder |
 | Recording or forcing a call                   | `jest.spyOn(realObject, "method")`, typed with `Mock<Port["method"]>`                                 | Inside the test                                                    |
 | Fixed input data (commands, events, payloads) | A function returning the object, named after it (`evaluateItemCommand()`), in a `<name>.mock.ts` file | `__mocks__/` next to the test                                      |
@@ -56,7 +79,7 @@ When several folders share a fake, mock or builder, put it in the nearest common
 ## Test layout
 
 - One top-level `describe` named after the class under test (`describe("AddWantedItemCommandHandler", ...)`); nest `describe` blocks to group scenarios.
-- Shared collaborators are declared with `let` at the top, typed by their port, and rebuilt in `beforeEach`, so every test starts from fresh state.
+- Shared collaborators are declared with `let` at the top, typed by their port, and resolved in `beforeEach` from a fresh `testContainer()`, so every test starts from fresh state.
 - Test names start with "Should" and describe the behaviour: `it("Should reject a bid above the item's max price", ...)`.
 
 ## FIRST
@@ -132,4 +155,4 @@ Each contract has a `<contract>.test.ts` next to its fake, proving the fake hono
 - `expectTypeOf(response).toEqualTypeOf<PlaceBid.Response>()` for the shape.
 - Assertions on the behaviour (state changes, the error thrown for each documented failure).
 
-Gateways and command handlers then test against these fakes (`new AuctionGatewayCsgoempireAdapter(new CsgoempireAuctionHttpFakeAdapter())`), so the whole chain is checked against the documented API.
+Gateways and command handlers then test against these fakes (the test container binds them in place of the real clients), so the whole chain is checked against the documented API.
