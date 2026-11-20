@@ -1,6 +1,8 @@
 import { WsServerBunAdapter } from "../../web-socket/server/ws-server.bun-adapter";
-import type { Callback, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
+import type { Callback, HttpRequest, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
 import { HttpStatus } from "../../../infrastructure/http/http-status";
+import type { HttpErrorMapper } from "../../../infrastructure/http/http-error.mapper";
+import { HttpErrorMapperByErrorClass } from "../../../infrastructure/http/http-error.mapper.by-error-class";
 
 type BunCallback = (req: Bun.BunRequest) => Promise<Response>;
 
@@ -8,7 +10,10 @@ export class HttpServerBunAdapter implements HttpServer {
     private routes: Record<string, Partial<Record<Bun.Serve.HTTPMethod, BunCallback>>> = {};
     private server?: Bun.Server<unknown>;
 
-    constructor(private readonly ws?: WsServerBunAdapter) {}
+    constructor(
+        private readonly ws?: WsServerBunAdapter,
+        private readonly errorMapper: HttpErrorMapper = new HttpErrorMapperByErrorClass(),
+    ) {}
 
     get(path: string, callback: Callback): void {
         this.register("GET", path, callback);
@@ -58,13 +63,24 @@ export class HttpServerBunAdapter implements HttpServer {
     }
 
     private async handle(req: Bun.BunRequest, callback: Callback): Promise<Response> {
-        const res = await callback({
+        try {
+            return this.respond(req, await callback(await this.toHttpRequest(req)));
+        } catch (error) {
+            return this.respond(req, this.errorMapper.map(error));
+        }
+    }
+
+    private async toHttpRequest(req: Bun.BunRequest): Promise<HttpRequest> {
+        return {
             params: req.params,
             searchParams: Object.fromEntries(new URL(req.url).searchParams),
             headers: Object.fromEntries(req.headers),
             cookies: Object.fromEntries(req.cookies),
             body: await this.readBody(req),
-        });
+        };
+    }
+
+    private respond(req: Bun.BunRequest, res: HttpResponse): Response {
         this.setCookies(req, res);
         this.clearCookies(req, res);
         const init = { status: res.status ?? HttpStatus.OK, headers: res.headers };
