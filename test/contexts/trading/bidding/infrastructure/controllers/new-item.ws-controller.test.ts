@@ -33,8 +33,8 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-    await httpServer.close();
     csgWsClient.close();
+    await httpServer.close();
 });
 
 describe("NewItemWsController", () => {
