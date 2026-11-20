@@ -1,4 +1,3 @@
-import { Currency } from "@/packages/domain-primitives/currency";
 import { DomainError } from "@/packages/error/domain-error";
 import { Money } from "@/packages/domain-primitives/money";
 import { Percentage } from "@/packages/domain-primitives/percentage";

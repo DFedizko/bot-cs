@@ -37,7 +37,11 @@ export abstract class HttpClient {
     protected storeCookies(setCookies: string[]) {
         for (const raw of setCookies) {
             const [name, value] = raw.split(";")[0].split("=");
-            value ? this.cookies.set(name, value) : this.cookies.delete(name);
+            if (value) {
+                this.cookies.set(name, value);
+            } else {
+                this.cookies.delete(name);
+            }
         }
     }
 

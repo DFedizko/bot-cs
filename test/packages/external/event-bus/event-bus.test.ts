@@ -19,7 +19,7 @@ describe.each([
         repo = { save: jest.fn(async () => {}) };
         eventListener = {
             subscribedTo: jest.fn(() => "foo_created"),
-            on: jest.fn(async (_event: FooCreatedDomainEvent) => {}),
+            on: jest.fn(async () => {}),
         };
         eventBus = createEventBus();
     });
@@ -39,7 +39,7 @@ describe.each([
         const onCreated = new OnFooCreatedEventListener(repo);
         const onUpdated: EventListener<FooUpdatedDomainEvent> = {
             subscribedTo: jest.fn(() => "foo_updated"),
-            on: jest.fn(async (_event: FooUpdatedDomainEvent) => {}),
+            on: jest.fn(async () => {}),
         };
         const fooCreated = new FooCreatedDomainEvent(FooId.create(), {
             age: 18,

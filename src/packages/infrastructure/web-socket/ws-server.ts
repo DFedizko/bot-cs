@@ -1,7 +1,7 @@
 import type { HttpHeaders } from "../http/http-headers";
 
 export type Socket = {
-    on(event: string, callback: (data: any) => void): void;
+    on<T = unknown>(event: string, callback: (data: T) => void): void;
     emit<T = unknown>(event: string, data: T): void;
     headers: HttpHeaders;
 };

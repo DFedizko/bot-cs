@@ -1,6 +1,6 @@
 import type { WsClient } from "../../../infrastructure/web-socket/ws-client";
 
-type Callback = (data: any) => void;
+type Callback = (data: unknown) => void;
 
 export class WsClientBunAdapter implements WsClient {
     private readonly ws: WebSocket;
@@ -17,9 +17,9 @@ export class WsClientBunAdapter implements WsClient {
         this.ws.addEventListener("message", (event) => this.dispatch(String(event.data)));
     }
 
-    on(event: "connect" | string, callback: Callback): void {
+    on<T = unknown>(event: "connect" | string, callback: (data: T) => void): void {
         const list = this.callbacks.get(event) ?? [];
-        list.push(callback);
+        list.push(callback as Callback);
         this.callbacks.set(event, list);
     }
 

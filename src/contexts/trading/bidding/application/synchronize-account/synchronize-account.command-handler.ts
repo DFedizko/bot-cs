@@ -20,30 +20,26 @@ export class SynchronizeAccountCommandHandler implements CommandHandler<Synchron
     }
 
     async handle(command: SynchronizeAccountCommand): Promise<void> {
-        try {
-            const activeAuctions = await this.auctionGateway.getActiveAuctions();
-            const activeTrades = await this.activeTradesGateway.getActiveTrades();
-            const account = Account.sync({
-                id: command.accountId,
-                name: command.accountName,
-                totalAmount: command.balance,
-            });
-            activeAuctions.forEach((auction) => {
-                if (account.isMe(auction.bidderId)) {
-                    account.credit(auction.highestBid);
-                    account.reserveFor(auction.id, auction.highestBid);
-                }
-            });
-            activeTrades.forEach((activeTrade) => {
-                account.credit(activeTrade.value);
-                account.reserveFor(activeTrade.itemId, activeTrade.value);
-            });
-            await this.accountRepo.save(account);
-            this.logger.log(
-                `Account "${account?.getName()}" synchronized successfully with total balance of ${CoinCent(account!.getTotalAmount())}, reserved balance of ${CoinCent(account!.getReservedAmount())}, available balance of ${CoinCent(account!.getAvailableAmount())}`,
-            );
-        } catch (error: unknown) {
-            throw error;
-        }
+        const activeAuctions = await this.auctionGateway.getActiveAuctions();
+        const activeTrades = await this.activeTradesGateway.getActiveTrades();
+        const account = Account.sync({
+            id: command.accountId,
+            name: command.accountName,
+            totalAmount: command.balance,
+        });
+        activeAuctions.forEach((auction) => {
+            if (account.isMe(auction.bidderId)) {
+                account.credit(auction.highestBid);
+                account.reserveFor(auction.id, auction.highestBid);
+            }
+        });
+        activeTrades.forEach((activeTrade) => {
+            account.credit(activeTrade.value);
+            account.reserveFor(activeTrade.itemId, activeTrade.value);
+        });
+        await this.accountRepo.save(account);
+        this.logger.log(
+            `Account "${account?.getName()}" synchronized successfully with total balance of ${CoinCent(account!.getTotalAmount())}, reserved balance of ${CoinCent(account!.getReservedAmount())}, available balance of ${CoinCent(account!.getAvailableAmount())}`,
+        );
     }
 }
