@@ -112,8 +112,8 @@ describe.each([
         await httpClient.get("/test?id=2&name=John Doe");
     });
     it("Should execute a callback passed listing the port", (done) => httpServer.listen(PORT, () => done()));
-    it("Should throw an error when send request to a non-existent route", () => {
+    it("Should throw an error when send request to a non-existent route", async () => {
         httpServer.listen(PORT);
-        expect(httpClient.get("/test")).rejects.toThrow(Error);
+        await expect(httpClient.get("/test")).rejects.toThrow(Error);
     });
 });
