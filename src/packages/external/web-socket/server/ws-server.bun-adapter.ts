@@ -15,7 +15,7 @@ export class WsServerBunAdapter implements WsServer {
             this.sockets.set(ws, handlers);
             const socket: Socket = {
                 emit: (event, data) => ws.send(JSON.stringify({ event, data })),
-                on: (event, callback) => handlers.set(event, [...(handlers.get(event) ?? []), callback]),
+                on: (event, callback) => handlers.set(event, [...(handlers.get(event) ?? []), callback as Callback]),
                 headers: Object.fromEntries(ws.data.headers),
             };
             this.connectionCallbacks.forEach((callback) => callback(socket));

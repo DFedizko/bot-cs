@@ -12,7 +12,7 @@ export class WsClientSocketIoAdapter implements WsClient {
         this.socket.emit(event, data);
     }
 
-    on(event: "connect" | string, callback: (data: any) => void): void {
+    on<T = unknown>(event: "connect" | string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
     }
 
