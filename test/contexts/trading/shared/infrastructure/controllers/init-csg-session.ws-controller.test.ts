@@ -53,33 +53,29 @@ describe("InitWsController", () => {
             done();
         });
     });
-    it("Should fetch user metadata and emit 'identify' socket when user is not authenticated", async (done) => {
+    it("Should fetch user metadata and emit 'identify' socket when user is not authenticated", async () => {
         const csgWsClient = container.get(CSG_WS_CLIENT);
         const emitSpy = jest.spyOn(csgWsClient, "emit");
         const getMetadataSpy = jest.spyOn(container.get(SOCKET_METADATA_HTTP), "getSocketMetadata");
         jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
+        const identified = new Promise<void>((resolve) => emitSpy.mockImplementationOnce(() => resolve()));
         container.get(INIT_CSG_SESSION);
-        const emitted = new Promise((resolve) => {
-            resolve(emitSpy);
-        });
         wsServer.on("connection", (socket) => {
             socket.emit("init", initGuestFake);
         });
-        await emitted;
 
-        csgWsClient.on("init", () => {
-            expect(getMetadataSpy).toHaveBeenCalledTimes(1);
-            expect(emitSpy).toHaveBeenCalledTimes(1);
-            expect(emitSpy).toHaveBeenCalledWith("identify", {
-                uid: getSktMetafakeResponse.user.id,
-                model: getSktMetafakeResponse.user,
-                authorizationToken: getSktMetafakeResponse.socket_token,
-                signature: getSktMetafakeResponse.socket_signature,
-            });
-            done();
+        await identified;
+
+        expect(getMetadataSpy).toHaveBeenCalledTimes(1);
+        expect(emitSpy).toHaveBeenCalledTimes(1);
+        expect(emitSpy).toHaveBeenCalledWith("identify", {
+            uid: getSktMetafakeResponse.user.id,
+            model: getSktMetafakeResponse.user,
+            authorizationToken: getSktMetafakeResponse.socket_token,
+            signature: getSktMetafakeResponse.socket_signature,
         });
     });
-    it("Should log when socket metadata gateway breaks", () => {
+    it("Should log when socket metadata gateway breaks", async () => {
         const csgWsClient = container.get(CSG_WS_CLIENT);
         const emitSpy = jest.spyOn(csgWsClient, "emit");
         const onSpy = jest.spyOn(csgWsClient, "on");
@@ -90,7 +86,7 @@ describe("InitWsController", () => {
         container.get(INIT_CSG_SESSION);
         const initHandler = onSpy.mock.calls.find(([event]) => event === "init")![1];
 
-        expect(initHandler(initGuestFake)).rejects.toThrow("Gateway down");
+        await expect(initHandler(initGuestFake)).rejects.toThrow("Gateway down");
 
         expect(emitSpy).not.toHaveBeenCalled();
         expect(logSpy).toHaveBeenCalledTimes(1);
