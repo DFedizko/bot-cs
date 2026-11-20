@@ -101,27 +101,23 @@ describe("PlaceBidCommandHandler", () => {
         await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 227 }));
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 231 });
         jest.spyOn(container.get(AUCTION_GATEWAY), "placeBid").mockRejectedValue(new Error());
+        const handler = container.get(PLACE_BID_HANDLER);
+
+        await expect(handler.handle(placeBidCommand)).rejects.toThrow(Error);
+
         const auctionParticipation = await container
             .get(AUCTION_PARTICIPATION_REPO)
             .findByAuctionId(new AccountId(placeBidCommand.auctionId));
         const account = await accountRepository.findById(new AccountId(1));
-        const handler = container.get(PLACE_BID_HANDLER);
-
-        expect(async () => await handler.handle(placeBidCommand)).toThrow(Error);
-
         expect(auctionParticipation).toBe(undefined);
         expect(account?.getReservedAmount()).toBe(0);
         expect(account?.getAvailableAmount()).toBe(227);
     });
-    it("Should throw an error when account not found by the id", () => {
+    it("Should throw an error when account not found by the id", async () => {
         const handler = container.get(PLACE_BID_HANDLER);
+        const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 231 });
 
-        expect(
-            async () =>
-                await handler.handle(
-                    new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 231 }),
-                ),
-        ).toThrow(NotFoundError);
+        await expect(handler.handle(placeBidCommand)).rejects.toThrow(NotFoundError);
     });
     it("Shouldn't call the gateway when a dispatch a second command for an auction that's already reserved", async () => {
         await container.get(ACCOUNT_REPOSITORY).save(Account.sync({ id: 1, name: "John Doe", totalAmount: 459 }));
@@ -130,7 +126,7 @@ describe("PlaceBidCommandHandler", () => {
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 230 });
         await handler.handle(placeBidCommand);
 
-        expect(async () => await handler.handle(placeBidCommand)).toThrow(ReservationAlreadyExistsError);
+        await expect(handler.handle(placeBidCommand)).rejects.toThrow(ReservationAlreadyExistsError);
 
         expect(placeBidSpy).toHaveBeenCalledTimes(1);
     });

@@ -14,7 +14,7 @@ beforeEach(() => {
     command = new FooCommand();
     commandHandler = {
         handle: jest.fn(async () => {
-            fooRepository.save();
+            await fooRepository.save();
         }),
         subscribedTo: () => command.name,
     };
