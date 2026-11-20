@@ -5,7 +5,7 @@ const RATE_LIMITED = new Error("HTTP error 429");
 const BASE_DELAY_MS = 1000;
 const MAX_ATTEMPTS = 3;
 
-const retry = (sleep = jest.fn(async (_ms: number) => {})) => ({
+const retry = (sleep = jest.fn<(ms: number) => Promise<void>>(async () => {})) => ({
     sleep,
     subject: new SteamRetry({ baseDelayMs: BASE_DELAY_MS, maxAttempts: MAX_ATTEMPTS, sleep }),
 });

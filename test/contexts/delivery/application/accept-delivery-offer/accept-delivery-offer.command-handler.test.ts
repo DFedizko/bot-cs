@@ -24,7 +24,6 @@ import {
 } from "../../external/steam/__mocks__/steam-trade-offer.mock";
 import { acceptDeliveryOffer, givenDelivery, steamSession } from "./__builders__/accept-offer-scenario.builder";
 
-const HOLD_DAYS = 15;
 const WRONG_ASSET_ID = "11111111111";
 
 const publishedNames = (spy: { mock: { calls: unknown[][] } }): string[] =>
