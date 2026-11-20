@@ -5,15 +5,18 @@ import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
 import type { Mock } from "bun:test";
 import { initAuthenticatedFake, initGuestFake } from "./__mocks__/init.mock";
 import type { SocketMetadataHttp } from "@/contexts/trading/shared/infrastructure/csgoempire/http/socket-metadata.http";
-import { InitCsgSessionWsController } from "@/contexts/trading/shared/infrastructure/controllers/init-csg-session.ws-controller";
-import {
-    getSktMetafakeResponse,
-    SocketMetadataHttpFakeAdapter,
-} from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
+import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 import type { Logger } from "@/packages/application/logger";
 import { BaseError } from "@/packages/building-blocks/base-error";
 import type { CsgWsClient } from "@/contexts/trading/shared/infrastructure/csgoempire/csg.ws-client";
 import { CsgWsClientFakeAdapter } from "../../external/csgoempire/csg-ws-client.fake-adapter";
+import { testContainer } from "@/__builders__/test-container.builder";
+import { LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    CSG_WS_CLIENT,
+    INIT_CSG_SESSION,
+    SOCKET_METADATA_HTTP,
+} from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 
 const PORT = 8888;
 
@@ -21,6 +24,7 @@ let httpServer: HttpServer;
 let wsServer: WsServer;
 let csgWsClient: CsgWsClient;
 let emitSpy: Mock<CsgWsClient["emit"]>;
+let onSpy: Mock<CsgWsClient["on"]>;
 let socketMetadataGateway: SocketMetadataHttp;
 let getMetadataSpy: Mock<SocketMetadataHttp["getSocketMetadata"]>;
 let logger: Logger;
@@ -29,13 +33,16 @@ let logSpy: Mock<Logger["log"]>;
 beforeEach(async () => {
     httpServer = new HttpServerExpressAdapter();
     wsServer = new WsServerSocketIoAdapter((httpServer as HttpServerExpressAdapter).http);
+    const container = testContainer();
     csgWsClient = new CsgWsClientFakeAdapter(`ws://localhost:${PORT}`);
+    container.rebind(CSG_WS_CLIENT).toConstantValue(csgWsClient);
     emitSpy = jest.spyOn(csgWsClient, "emit");
-    socketMetadataGateway = new SocketMetadataHttpFakeAdapter();
+    onSpy = jest.spyOn(csgWsClient, "on");
+    socketMetadataGateway = container.get(SOCKET_METADATA_HTTP);
     getMetadataSpy = jest.spyOn(socketMetadataGateway, "getSocketMetadata");
-    logger = { log: () => {} };
-    logSpy = jest.spyOn(logger, "log");
-    new InitCsgSessionWsController(csgWsClient, socketMetadataGateway, logger);
+    logger = container.get(LOGGER);
+    logSpy = jest.spyOn(logger, "log").mockImplementation(() => {});
+    container.get(INIT_CSG_SESSION);
     httpServer.listen(PORT);
 });
 
@@ -79,8 +86,6 @@ describe("InitWsController", () => {
     });
     it("Should log when socket metadata gateway breaks", () => {
         getMetadataSpy.mockRejectedValue(new BaseError({ message: "Gateway down" }));
-        const onSpy = jest.spyOn(csgWsClient, "on");
-        new InitCsgSessionWsController(csgWsClient, socketMetadataGateway, logger);
         const initHandler = onSpy.mock.calls.find(([event]) => event === "init")![1];
         expect(initHandler(initGuestFake)).rejects.toThrow("Gateway down");
         expect(emitSpy).not.toHaveBeenCalled();
