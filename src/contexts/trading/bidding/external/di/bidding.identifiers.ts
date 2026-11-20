@@ -1,11 +1,25 @@
 import { identifier } from "@/packages/external/di/identifier";
+import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import type { EventListener } from "@/packages/application/event-listener";
 import type { AccountRepository } from "../../application/account.repository";
+import type { AuctionParticipationRepository } from "../../application/auction-participation.repository";
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
+import type { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
+import type { EvaluateItemCommand } from "../../application/evaluate-item/evaluate-item.command";
+import type { ItemApprovedInAuctionEvent } from "../../application/evaluate-item/item-approved-in-auction.event";
+import type { ItemApprovedOffAuctionEvent } from "../../application/evaluate-item/item-approved-off-auction.event";
+import type { LeaveAuctionCommand } from "../../application/leave-auction/leave-auction.command";
+import type { PlaceBidCommand } from "../../application/place-bid/place-bid.command";
+import type { RemoveWantedItemCommand } from "../../application/remove-wanted-tem/remove-wanted-item.command";
+import type { SynchronizeAccountCommand } from "../../application/synchronize-account/synchronize-account.command";
+import type { OutbidEvent } from "../../application/track-auction-update/outbid.event";
+import type { TrackAuctionUpdateCommand } from "../../application/track-auction-update/track-auction-update.command";
 import type { CsgoempireAuctionHttp } from "../../infrastructure/http/csgoempire/csgoempire-auction.http";
 import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/csgoempire-trade.http";
 import type { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
+import type { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");
 export const CSGOEMPIRE_TRADE_HTTP = identifier<CsgoempireTradeHttp>("CsgoempireTradeHttp");
@@ -13,4 +27,23 @@ export const AUCTION_GATEWAY = identifier<AuctionGateway>("AuctionGateway");
 export const ACTIVE_TRADES_GATEWAY = identifier<ActiveTradesGateway>("ActiveTradesGateway");
 export const ACCOUNT_REPOSITORY = identifier<AccountRepository>("AccountRepository");
 export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedItemRepository");
+export const AUCTION_PARTICIPATION_REPO = identifier<AuctionParticipationRepository>("AuctionParticipationRepository");
 export const NEW_ITEM_CONTROLLER = identifier<NewItemWsController>("NewItemWsController");
+export const AUCTION_UPDATE_CONTROLLER = identifier<AuctionUpdateWsController>("AuctionUpdateWsController");
+
+export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
+export const REMOVE_WANTED_ITEM_HANDLER =
+    identifier<CommandHandler<RemoveWantedItemCommand>>("RemoveWantedItemHandler");
+export const EVALUATE_ITEM_HANDLER = identifier<CommandHandler<EvaluateItemCommand>>("EvaluateItemHandler");
+export const SYNC_ACCOUNT_HANDLER = identifier<CommandHandler<SynchronizeAccountCommand>>("SyncAccountHandler");
+export const PLACE_BID_HANDLER = identifier<CommandHandler<PlaceBidCommand>>("PlaceBidHandler");
+export const LEAVE_AUCTION_HANDLER = identifier<CommandHandler<LeaveAuctionCommand>>("LeaveAuctionHandler");
+export const TRACK_AUCTION_HANDLER = identifier<CommandHandler<TrackAuctionUpdateCommand>>("TrackAuctionUpdateHandler");
+
+export const ON_APPROVED_IN_AUCTION = identifier<EventListener<ItemApprovedInAuctionEvent>>(
+    "OnItemApprovedInAuctionPlaceBid",
+);
+export const ON_APPROVED_OFF_AUCTION = identifier<EventListener<ItemApprovedOffAuctionEvent>>(
+    "OnItemApprovedOffAuctionWithdraw",
+);
+export const ON_OUTBID = identifier<EventListener<OutbidEvent>>("OnOutbidCounterBid");
