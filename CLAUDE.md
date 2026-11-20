@@ -101,6 +101,10 @@ Another bounded context is imported only through its barrel (`@/contexts/trading
 
 Generated files (type definitions, lockfiles and the like) are exempt from these rules. Never edit them by hand; regenerate them with their tool, and gitignore them when the tool can rebuild them.
 
+## Documentation files
+
+**Never create, edit or delete any `.md` file** (`CLAUDE.md` at any level, `ARCHITECTURE.md`, `README.md`, or any other Markdown file) unless the user explicitly asks for that change. If you believe a doc should change, propose the change in your final summary and let the user decide.
+
 ## Commands
 
 - `bun install`: install dependencies
