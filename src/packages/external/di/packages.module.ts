@@ -8,6 +8,8 @@ import { HttpClientFactoryAdapter } from "../http/client/http-client.factory.ada
 import { HttpServerBunAdapter } from "../http/server/http-server.bun-adapter";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
 import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http-error.mapper.by-error-class";
+import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
+import type { Logger } from "@/packages/application/logger";
 import {
     COMMAND_BUS,
     COMMAND_HANDLER,
@@ -45,6 +47,7 @@ export class PackagesModule extends ContainerModule {
             .inSingletonScope();
         bind(HTTP_ERROR_MAPPER)
             .toResolvedValue(PackagesModule.createErrorMapper, [
+                LOGGER,
                 { serviceIdentifier: HTTP_ERROR_MAPPING, isMultiple: true, optional: true },
             ])
             .inSingletonScope();
@@ -56,8 +59,8 @@ export class PackagesModule extends ContainerModule {
             .inSingletonScope();
     }
 
-    private static createErrorMapper(mappings: HttpErrorMapping[] | undefined): HttpErrorMapperByErrorClass {
-        return new HttpErrorMapperByErrorClass(mappings);
+    private static createErrorMapper(logger: Logger, mappings: HttpErrorMapping[] | undefined): HttpErrorMapper {
+        return new HttpErrorMapperLoggingDecorator(new HttpErrorMapperByErrorClass(mappings), logger);
     }
 
     private static createCommandBus(handlers: CommandHandler<Command>[] | undefined): CommandBusInMemory {

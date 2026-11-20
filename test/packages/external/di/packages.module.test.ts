@@ -14,7 +14,7 @@ import {
     HTTP_SERVER,
     LOGGER,
 } from "@/packages/external/di/packages.identifiers";
-import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http-error.mapper.by-error-class";
+import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
 import { HttpServerBunAdapter } from "@/packages/external/http/server/http-server.bun-adapter";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { FooNotFoundError } from "@/packages/infrastructure/http/__stubs__/foo.errors";
@@ -88,10 +88,19 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         expect(commandBus).toBeInstanceOf(CommandBusInMemory);
     });
 
-    it("Should bind the error class http error mapper", () => {
+    it("Should bind an http error mapper that logs server errors", () => {
         const errorMapper = container.get(HTTP_ERROR_MAPPER);
 
-        expect(errorMapper).toBeInstanceOf(HttpErrorMapperByErrorClass);
+        expect(errorMapper).toBeInstanceOf(HttpErrorMapperLoggingDecorator);
+    });
+
+    it("Should log server errors with the bound logger", () => {
+        const logSpy = jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
+        const error = new TypeError("Cannot read properties of undefined");
+
+        container.get(HTTP_ERROR_MAPPER).map(error);
+
+        expect(logSpy).toHaveBeenCalledWith(error.stack);
     });
 
     it("Should map errors with every bound http error mapping", () => {
