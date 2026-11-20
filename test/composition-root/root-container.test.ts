@@ -1,7 +1,8 @@
 import type { Container } from "inversify";
 import { RootContainer } from "@/composition-root/root-container";
 import { fakeExternals } from "@/__builders__/externals.builder";
-import { COMMAND_BUS, ENV } from "@/packages/external/di/packages.identifiers";
+import { COMMAND_BUS, ENV, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import { HttpServerBunAdapter } from "@/packages/external/http/server/http-server.bun-adapter";
 import { INIT_CSG_SESSION, SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import { AUCTION_GATEWAY, NEW_ITEM_CONTROLLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
@@ -35,6 +36,12 @@ describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, ga
         const commandBus = await container.getAsync(COMMAND_BUS);
 
         expect(commandBus).toBeInstanceOf(CommandBusInMemory);
+    });
+
+    it("Should resolve the bun http server", async () => {
+        const httpServer = await container.getAsync(HTTP_SERVER);
+
+        expect(httpServer).toBeInstanceOf(HttpServerBunAdapter);
     });
 
     it("Should resolve the socket metadata", async () => {
