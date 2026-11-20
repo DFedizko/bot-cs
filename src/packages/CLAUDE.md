@@ -1,0 +1,26 @@
+# packages
+
+`src/packages/` is **not a bounded context**. It holds what every context reuses and that has **no business meaning**: building blocks for the tactical DDD model, shared ports and adapters, shared errors (including HTTP errors), and TypeScript language helpers. Nothing here knows about CS2, skins, auctions or any marketplace; if it does, it belongs in a context or in `src/contexts/shared-kernel/`.
+
+## Folders
+
+| Folder               | Holds                                                                                                                                                                                                                                                                                                  | Purity                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `building-blocks/`   | Base classes of the model and of CQRS: `ValueObject`, `Entity`, `AggregateRoot`, `DomainEvent`, `ApplicationEvent`, `Event`, `Command`, `CommandHandler`, `Specification`, `BaseError`                                                                                                                 | Pure TypeScript                                                   |
+| `domain-primitives/` | Generic value objects: `Money`, `PositiveMoney`, `Currency`, `Decimal`, `Percentage`, `Integer`, `PositiveInteger`, `TrimmedString`, `BoundedString`, `UUID`                                                                                                                                           | Pure; a library only when wrapped (`decimal.js` inside `Decimal`) |
+| `error/`             | Shared errors with no protocol: `DomainError`, `EmptyStringError`, `CommandNotRegisteredError`, and `ErrorProps`                                                                                                                                                                                       | Pure                                                              |
+| `application/`       | Cross-cutting ports the use cases depend on: `CommandBus`, `EventBus`, `EventListener`, `Logger`, and the `Mediator`                                                                                                                                                                                   | Interfaces, no I/O                                                |
+| `infrastructure/`    | Technical ports (`HttpClient`, `HttpServer`, `WsClient`, `WsServer`, `Env`), their shared types (`HttpStatus`, `HttpMethod`, `HttpHeaders`), shared HTTP errors (`HttpError`, `NotFoundError`, `InternalServerError`) and adapters that need no library (`CommandBusInMemory`, `LoggerConsoleAdapter`) | No third-party library                                            |
+| `external/`          | Adapters backed by a library or runtime API, implementing the ports above: axios/fetch HTTP clients, Bun/Express HTTP servers, Bun/socket.io WebSockets, zod env, in-memory event buses                                                                                                                | The only place libraries are imported                             |
+| `types/`             | TypeScript helpers that fill gaps in the language: `SubsetPartial`, `SubsetRequired`                                                                                                                                                                                                                   | Types only, no runtime code                                       |
+
+## Rules
+
+- Dependencies point inward, as in a context: `external → infrastructure → application → building-blocks / domain-primitives / error / types`. Pure folders never import `infrastructure/` or `external/`.
+- Never import from `src/contexts/`. Packages serve the contexts, not the other way round.
+- Add something here only when a second context (or a second subdomain) needs it, or when it is clearly generic infrastructure. Otherwise keep it next to its only user.
+- The interface belongs to whoever uses it: ports used by use cases live in `application/`, contracts used by interface adapters live in `infrastructure/`, and implementations that use a library or the outside world live in `external/<concern>/` named `<port>.<implementation>-adapter.ts` (`http-client.axios-adapter.ts`, `ws-server.bun-adapter.ts`). Adding a provider means adding an adapter, never editing the port's users.
+- Errors carry an `UPPER_SNAKE_CASE` `code`. Domain errors extend `DomainError`; protocol errors extend `HttpError` with an `HttpStatus`.
+- `types/` holds only generic type utilities with no domain meaning, named after what they do (`subset.ts`).
+- Every context depends on this folder: run the whole test suite (`bun test`) after changing it, and keep public signatures backwards compatible unless the change is the point of the task.
+- Tests mirror the folders under `test/packages/` (see `test/CLAUDE.md`).
