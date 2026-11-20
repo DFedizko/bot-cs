@@ -16,7 +16,8 @@ import type { AuctionGateway } from "../../application/place-bid/auction.gateway
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
 import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/csgoempire-trade.http";
 import { AddWantedItemCommandHandler } from "../../application/add-wanted-item/add-wanted-item.command-handler";
-import { RemoveWantedItemCommandHandler } from "../../application/remove-wanted-tem/remove-wanted-item.command-handler";
+import { EditWantedItemCommandHandler } from "../../application/edit-wanted-item/edit-wanted-item.command-handler";
+import { RemoveWantedItemCommandHandler } from "../../application/remove-wanted-item/remove-wanted-item.command-handler";
 import { EvaluateItemCommandHandler } from "../../application/evaluate-item/evaluate-item.command-handler";
 import { SynchronizeAccountCommandHandler } from "../../application/synchronize-account/synchronize-account.command-handler";
 import { PlaceBidCommandHandler } from "../../application/place-bid/place-bid.command-handler";
@@ -42,6 +43,7 @@ import {
     AUCTION_UPDATE_CONTROLLER,
     CSGOEMPIRE_AUCTION_HTTP,
     CSGOEMPIRE_TRADE_HTTP,
+    EDIT_WANTED_ITEM_HANDLER,
     EVALUATE_ITEM_HANDLER,
     LEAVE_AUCTION_HANDLER,
     NEW_ITEM_CONTROLLER,
@@ -59,6 +61,7 @@ const COMMAND_HANDLERS = [
     EVALUATE_ITEM_HANDLER,
     SYNC_ACCOUNT_HANDLER,
     ADD_WANTED_ITEM_HANDLER,
+    EDIT_WANTED_ITEM_HANDLER,
     REMOVE_WANTED_ITEM_HANDLER,
     PLACE_BID_HANDLER,
     LEAVE_AUCTION_HANDLER,
@@ -111,6 +114,12 @@ export class BiddingModule extends ContainerModule {
         bind(ADD_WANTED_ITEM_HANDLER)
             .toResolvedValue(
                 (repo: WantedItemRepository) => new AddWantedItemCommandHandler(repo),
+                [WANTED_ITEM_REPOSITORY],
+            )
+            .inSingletonScope();
+        bind(EDIT_WANTED_ITEM_HANDLER)
+            .toResolvedValue(
+                (repo: WantedItemRepository) => new EditWantedItemCommandHandler(repo),
                 [WANTED_ITEM_REPOSITORY],
             )
             .inSingletonScope();

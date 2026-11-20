@@ -7,12 +7,13 @@ import type { WantedItemRepository } from "../../application/wanted-item.reposit
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
 import type { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
+import type { EditWantedItemCommand } from "../../application/edit-wanted-item/edit-wanted-item.command";
 import type { EvaluateItemCommand } from "../../application/evaluate-item/evaluate-item.command";
 import type { ItemApprovedInAuctionEvent } from "../../application/evaluate-item/item-approved-in-auction.event";
 import type { ItemApprovedOffAuctionEvent } from "../../application/evaluate-item/item-approved-off-auction.event";
 import type { LeaveAuctionCommand } from "../../application/leave-auction/leave-auction.command";
 import type { PlaceBidCommand } from "../../application/place-bid/place-bid.command";
-import type { RemoveWantedItemCommand } from "../../application/remove-wanted-tem/remove-wanted-item.command";
+import type { RemoveWantedItemCommand } from "../../application/remove-wanted-item/remove-wanted-item.command";
 import type { SynchronizeAccountCommand } from "../../application/synchronize-account/synchronize-account.command";
 import type { OutbidEvent } from "../../application/track-auction-update/outbid.event";
 import type { TrackAuctionUpdateCommand } from "../../application/track-auction-update/track-auction-update.command";
@@ -32,6 +33,7 @@ export const NEW_ITEM_CONTROLLER = identifier<NewItemWsController>("NewItemWsCon
 export const AUCTION_UPDATE_CONTROLLER = identifier<AuctionUpdateWsController>("AuctionUpdateWsController");
 
 export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
+export const EDIT_WANTED_ITEM_HANDLER = identifier<CommandHandler<EditWantedItemCommand>>("EditWantedItemHandler");
 export const REMOVE_WANTED_ITEM_HANDLER =
     identifier<CommandHandler<RemoveWantedItemCommand>>("RemoveWantedItemHandler");
 export const EVALUATE_ITEM_HANDLER = identifier<CommandHandler<EvaluateItemCommand>>("EvaluateItemHandler");
