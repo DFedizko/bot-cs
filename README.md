@@ -6,10 +6,10 @@ To install dependencies:
 bun install
 ```
 
-To run:
+To run, copy `.env.example` to `.env`, fill it in, then:
 
 ```bash
-bun run index.ts
+bun src/main.ts
 ```
 
 This project was created using `bun init` in bun v1.3.2. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

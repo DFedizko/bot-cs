@@ -1,3 +1,3 @@
-test('Deve testar algo', () => {
-    console.log('teste');
+test("Deve testar algo", () => {
+    console.log("teste");
 });

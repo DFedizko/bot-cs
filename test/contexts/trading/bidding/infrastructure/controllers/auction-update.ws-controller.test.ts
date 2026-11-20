@@ -35,8 +35,8 @@ describe("AuctionUpdateWsController", () => {
     });
 
     afterEach(async () => {
-        await httpServer.close();
         csgWsClient.close();
+        await httpServer.close();
     });
 
     it("Should receive a auction update socket and publish outbid event", (done) => {
