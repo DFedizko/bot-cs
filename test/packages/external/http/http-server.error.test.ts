@@ -22,70 +22,72 @@ const listenOnFreePort = (server: HttpServer): number => {
     return port;
 };
 
-describe.each(HTTP_SERVERS)("Http Server %s Adapter errors", (_name, createServer) => {
-    afterEach(async () => {
-        await httpServer.close();
-    });
-
-    it("Should answer a thrown domain error with unprocessable entity and its code", async () => {
-        httpServer = createServer();
-        httpServer.post(PATH, async () => {
-            throw new EmptyStringError();
+describe.each(HTTP_SERVERS)("HttpServer%sAdapter", (_name, createServer) => {
+    describe("Errors", () => {
+        afterEach(async () => {
+            await httpServer.close();
         });
-        const port = listenOnFreePort(httpServer);
 
-        const response = await requestFoo(port);
+        it("Should answer a thrown domain error with unprocessable entity and its code", async () => {
+            httpServer = createServer();
+            httpServer.post(PATH, async () => {
+                throw new EmptyStringError();
+            });
+            const port = listenOnFreePort(httpServer);
 
-        expect(response).toEqual({
-            status: HttpStatus.UNPROCESSABLE_ENTITY,
-            body: { code: "EMPTY_STRING", message: "The value provided must not be empty" },
+            const response = await requestFoo(port);
+
+            expect(response).toEqual({
+                status: HttpStatus.UNPROCESSABLE_ENTITY,
+                body: { code: "EMPTY_STRING", message: "The value provided must not be empty" },
+            });
         });
-    });
 
-    it("Should answer a thrown http error with its own status and code", async () => {
-        httpServer = createServer();
-        httpServer.post(PATH, () => {
-            throw new NotFoundError("Foo not found");
+        it("Should answer a thrown http error with its own status and code", async () => {
+            httpServer = createServer();
+            httpServer.post(PATH, () => {
+                throw new NotFoundError("Foo not found");
+            });
+            const port = listenOnFreePort(httpServer);
+
+            const response = await requestFoo(port);
+
+            expect(response).toEqual({
+                status: HttpStatus.NOT_FOUND,
+                body: { code: "NOT_FOUND", message: "Foo not found" },
+            });
         });
-        const port = listenOnFreePort(httpServer);
 
-        const response = await requestFoo(port);
+        it("Should answer an unknown error with internal server error and no internal message", async () => {
+            httpServer = createServer();
+            httpServer.post(PATH, async () => {
+                throw new TypeError("Cannot read properties of undefined");
+            });
+            const port = listenOnFreePort(httpServer);
 
-        expect(response).toEqual({
-            status: HttpStatus.NOT_FOUND,
-            body: { code: "NOT_FOUND", message: "Foo not found" },
+            const response = await requestFoo(port);
+
+            expect(response).toEqual({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                body: { code: "INTERNAL_SERVER_ERROR", message: "Internal server error" },
+            });
         });
-    });
 
-    it("Should answer an unknown error with internal server error and no internal message", async () => {
-        httpServer = createServer();
-        httpServer.post(PATH, async () => {
-            throw new TypeError("Cannot read properties of undefined");
-        });
-        const port = listenOnFreePort(httpServer);
+        it("Should answer with the mapping of the injected error mapper", async () => {
+            httpServer = createServer(
+                new HttpErrorMapperByErrorClass([{ error: FooNotFoundError, status: HttpStatus.NOT_FOUND }]),
+            );
+            httpServer.post(PATH, async () => {
+                throw new FooNotFoundError();
+            });
+            const port = listenOnFreePort(httpServer);
 
-        const response = await requestFoo(port);
+            const response = await requestFoo(port);
 
-        expect(response).toEqual({
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-            body: { code: "INTERNAL_SERVER_ERROR", message: "Internal server error" },
-        });
-    });
-
-    it("Should answer with the mapping of the injected error mapper", async () => {
-        httpServer = createServer(
-            new HttpErrorMapperByErrorClass([{ error: FooNotFoundError, status: HttpStatus.NOT_FOUND }]),
-        );
-        httpServer.post(PATH, async () => {
-            throw new FooNotFoundError();
-        });
-        const port = listenOnFreePort(httpServer);
-
-        const response = await requestFoo(port);
-
-        expect(response).toEqual({
-            status: HttpStatus.NOT_FOUND,
-            body: { code: "FOO_NOT_FOUND", message: "Foo not found" },
+            expect(response).toEqual({
+                status: HttpStatus.NOT_FOUND,
+                body: { code: "FOO_NOT_FOUND", message: "Foo not found" },
+            });
         });
     });
 });
