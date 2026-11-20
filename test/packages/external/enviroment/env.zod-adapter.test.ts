@@ -40,6 +40,11 @@ describe("Env", () => {
             new InternalServerError('Missing value(s) to enviroment key(s): "NODE_ENV"; "CSGOEMPIRE_API_KEY"'),
         );
     });
+    it("Should keep the optional steam accounts", () => {
+        const result = env.parse({ NODE_ENV: "production", CSGOEMPIRE_API_KEY: API_KEY, STEAM_ACCOUNTS: "[]" });
+
+        expect(result.STEAM_ACCOUNTS).toBe("[]");
+    });
     it("Should load the enviroment variables from the runtime", () => {
         const result = env.load();
 
