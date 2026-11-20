@@ -13,6 +13,10 @@ export class EnvZodAdapter implements Env {
         return result.data;
     }
 
+    load(): AppEnv {
+        return this.parse(Bun.env);
+    }
+
     private formatErrorMessage(error: ZodError): string {
         return error.issues.map((issue) => `"${issue.path}"`).join("; ");
     }
