@@ -85,7 +85,11 @@ export class HttpServerExpressAdapter implements HttpServer {
         this.setCookies(response, expressResponse);
         this.clearCookies(response, expressResponse);
         expressResponse.status(response.status ?? HttpStatus.OK).set(response.headers ?? {});
-        response.body === undefined ? expressResponse.end() : expressResponse.json(response.body);
+        if (response.body === undefined) {
+            expressResponse.end();
+        } else {
+            expressResponse.json(response.body);
+        }
     }
 
     private setCookies(httpResponse: HttpResponse, expressResponse: ExpressResponse): void {
