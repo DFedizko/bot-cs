@@ -1,8 +1,9 @@
+import type { AccountId } from "../domain/account/account-id";
 import type { ItemName } from "../domain/wanted-item/item-name";
 import type { WantedItem } from "../domain/wanted-item/wanted-item";
 
 export interface WantedItemRepository {
-    findByName(name: ItemName): Promise<WantedItem | undefined>;
+    findByName(accountId: AccountId, name: ItemName): Promise<WantedItem | undefined>;
     save(wantedItem: WantedItem): Promise<void>;
-    removeByName(name: ItemName): Promise<void>;
+    removeByName(accountId: AccountId, name: ItemName): Promise<void>;
 }

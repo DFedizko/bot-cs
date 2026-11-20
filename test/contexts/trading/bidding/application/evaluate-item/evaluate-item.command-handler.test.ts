@@ -6,12 +6,16 @@ import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/applicati
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
     EVALUATE_ITEM_HANDLER,
     WANTED_ITEM_REPOSITORY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+
+const ACCOUNT_ID = evaluateItemCommand().accountId;
+const OTHER_ACCOUNT_ID = ACCOUNT_ID + 1;
 
 let container: Container;
 
@@ -24,6 +28,7 @@ describe("EvaluateItemCommandHandler", () => {
         const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
             WantedItem.create({
+                accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
                 maxFor: "-4.05",
             }),
@@ -35,7 +40,10 @@ describe("EvaluateItemCommandHandler", () => {
         await container.get(EVALUATE_ITEM_HANDLER).handle(command);
 
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedInAuctionEvent]];
-        expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith(
+            new AccountId(ACCOUNT_ID),
+            new ItemName("M4A4 | Cyber Security (Field-Tested)"),
+        );
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.payload.auctionId).toBe(288767047);
         expect(event.payload.accountId).toBe(command.accountId);
@@ -47,6 +55,7 @@ describe("EvaluateItemCommandHandler", () => {
         const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
             WantedItem.create({
+                accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
                 maxFor: "-4.05",
             }),
@@ -58,7 +67,10 @@ describe("EvaluateItemCommandHandler", () => {
         await container.get(EVALUATE_ITEM_HANDLER).handle(command);
 
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedOffAuctionEvent]];
-        expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith(
+            new AccountId(ACCOUNT_ID),
+            new ItemName("M4A4 | Cyber Security (Field-Tested)"),
+        );
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.name).toBe(ItemApprovedOffAuctionEvent.EVENT_NAME);
         expect(event.payload.itemId).toBe(288767047);
@@ -70,6 +82,7 @@ describe("EvaluateItemCommandHandler", () => {
         const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
             WantedItem.create({
+                accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
                 maxFor: "-4.06",
                 criteria: [criterion],
@@ -81,9 +94,26 @@ describe("EvaluateItemCommandHandler", () => {
 
         await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
 
-        expect(wantedItemRepoSpy).toHaveBeenCalledWith(new ItemName("M4A4 | Cyber Security (Field-Tested)"));
+        expect(wantedItemRepoSpy).toHaveBeenCalledWith(
+            new AccountId(ACCOUNT_ID),
+            new ItemName("M4A4 | Cyber Security (Field-Tested)"),
+        );
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); IsWear(Battle-Scarred)`);
+        expect(publishSpy).not.toHaveBeenCalled();
+    });
+    it("Should ignore the same item wanted by another account", async () => {
+        await container.get(WANTED_ITEM_REPOSITORY).save(
+            WantedItem.create({
+                accountId: OTHER_ACCOUNT_ID,
+                name: "M4A4 | Cyber Security (Field-Tested)",
+                maxFor: "-4.05",
+            }),
+        );
+        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+
+        await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
+
         expect(publishSpy).not.toHaveBeenCalled();
     });
 });
