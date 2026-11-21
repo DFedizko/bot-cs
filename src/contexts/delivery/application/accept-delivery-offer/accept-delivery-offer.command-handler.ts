@@ -7,7 +7,8 @@ import type { OfferVerdict } from "../../domain/offer-verification/offer-verdict
 import { ReceivedOffer } from "../../domain/offer-verification/received-offer";
 import type { DeliveryRepository } from "../delivery.repository";
 import { loadDelivery } from "../load-delivery";
-import { ACCEPT_OUTCOME, type AcceptOutcome, type SteamTradeOffersGateway } from "../steam-trade-offers.gateway";
+import { ACCEPT_OUTCOME, type AcceptOutcome, type OfferAcceptanceGateway } from "./offer-acceptance.gateway";
+import type { ReceivedOffersGateway } from "./received-offers.gateway";
 import { AcceptDeliveryOfferCommand } from "./accept-delivery-offer.command";
 import { DeliveryOfferNotFoundEvent } from "./delivery-offer-not-found.event";
 import { ScamOffersFoundEvent } from "./scam-offers-found.event";
@@ -17,7 +18,8 @@ const SINGLE_MATCH = 1;
 export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptDeliveryOfferCommand> {
     constructor(
         private readonly repository: DeliveryRepository,
-        private readonly steamOffers: SteamTradeOffersGateway,
+        private readonly receivedOffers: ReceivedOffersGateway,
+        private readonly offerAcceptance: OfferAcceptanceGateway,
         private readonly eventBus: EventBus,
         private readonly logger: Logger,
     ) {}
@@ -41,7 +43,7 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
     }
 
     private async verifyReceivedOffers(delivery: Delivery): Promise<OfferVerdict[]> {
-        const offers = await this.steamOffers.listReceivedActive(delivery.getAccountId());
+        const offers = await this.receivedOffers.listReceivedActive(delivery.getAccountId());
         const policy = OfferVerificationPolicy.forDelivery(delivery);
         return offers.map((offer) => policy.verify(ReceivedOffer.create(offer)));
     }
@@ -78,7 +80,7 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
     }
 
     private async acceptOffer(delivery: Delivery, offerId: string): Promise<void> {
-        const outcome = await this.steamOffers.accept(delivery.getAccountId(), offerId);
+        const outcome = await this.offerAcceptance.accept(delivery.getAccountId(), offerId);
         this.recordOutcome(delivery, offerId, outcome);
         await this.repository.save(delivery);
         await this.eventBus.publish(delivery.pullDomainEvents());

@@ -1,9 +1,8 @@
-import type { SteamAcceptStatus, SteamOfferState, SteamTradeOffer } from "./steam-trade-offer";
+import type { SteamOfferAcceptor } from "./steam-offer-acceptor";
+import type { SteamOfferCanceller } from "./steam-offer-canceller";
+import type { SteamOfferConfirmer } from "./steam-offer-confirmer";
+import type { SteamOfferStateReader } from "./steam-offer-state-reader";
+import type { SteamReceivedOffers } from "./steam-received-offers";
 
-export interface SteamTradeSession {
-    getReceivedActiveOffers(): Promise<SteamTradeOffer[]>;
-    getOfferState(offerId: string): Promise<SteamOfferState>;
-    acceptOffer(offerId: string): Promise<SteamAcceptStatus>;
-    cancelOffer(offerId: string): Promise<void>;
-    confirmOffer(offerId: string): Promise<void>;
-}
+export interface SteamTradeSession
+    extends SteamReceivedOffers, SteamOfferStateReader, SteamOfferAcceptor, SteamOfferCanceller, SteamOfferConfirmer {}

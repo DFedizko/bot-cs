@@ -42,5 +42,6 @@ export {
 } from "./domain/delivery/events/delivery-cancelled.event";
 export { DeliveryFailureReason } from "./domain/delivery/delivery-failure-reason";
 
-export type { TradeOfferDTO, OfferItemDTO, AcceptOutcome } from "./application/steam-trade-offers.gateway";
+export type { TradeOfferDTO, OfferItemDTO } from "./application/accept-delivery-offer/received-offers.gateway";
+export type { AcceptOutcome } from "./application/accept-delivery-offer/offer-acceptance.gateway";
 export type { TradeStatusDTO } from "./application/csg-trades.gateway";

@@ -14,7 +14,10 @@ import type { Logger } from "@/packages/application/logger";
 import type { HttpClient } from "@/packages/infrastructure/http/http-client";
 import type { DeliveryRepository } from "../../application/delivery.repository";
 import type { CsgTradesGateway } from "../../application/csg-trades.gateway";
-import type { SteamTradeOffersGateway } from "../../application/steam-trade-offers.gateway";
+import type { ReceivedOffersGateway } from "../../application/accept-delivery-offer/received-offers.gateway";
+import type { OfferAcceptanceGateway } from "../../application/accept-delivery-offer/offer-acceptance.gateway";
+import type { OfferConfirmationGateway } from "../../application/confirm-trade-offer/offer-confirmation.gateway";
+import type { OfferCancellationGateway } from "../../application/cancel-trade-offer/offer-cancellation.gateway";
 import { StartDeliveryCommandHandler } from "../../application/start-delivery/start-delivery.command-handler";
 import { AcceptDeliveryOfferCommandHandler } from "../../application/accept-delivery-offer/accept-delivery-offer.command-handler";
 import { DisputeDeliveryCommandHandler } from "../../application/dispute-delivery/dispute-delivery.command-handler";
@@ -42,6 +45,10 @@ import {
     DELIVERY_REPOSITORY,
     DELIVERY_STEP_DISPATCHER,
     DISPUTE_DELIVERY_HANDLER,
+    OFFER_ACCEPTANCE_GATEWAY,
+    OFFER_CANCELLATION_GATEWAY,
+    OFFER_CONFIRMATION_GATEWAY,
+    RECEIVED_OFFERS_GATEWAY,
     MARK_RECEIVED_HANDLER,
     ON_DELIVERY_CONFIRMED,
     ON_OFFER_ACCEPTED,
@@ -60,6 +67,12 @@ const COMMAND_HANDLERS = [
     MARK_RECEIVED_HANDLER,
     DISPUTE_DELIVERY_HANDLER,
 ];
+const STEAM_OFFER_PORTS = [
+    RECEIVED_OFFERS_GATEWAY,
+    OFFER_ACCEPTANCE_GATEWAY,
+    OFFER_CONFIRMATION_GATEWAY,
+    OFFER_CANCELLATION_GATEWAY,
+];
 const EVENT_LISTENERS = [ON_SCAM_OFFERS_FOUND, ON_OFFER_ACCEPTED, ON_DELIVERY_CONFIRMED];
 const STEAM_BASE_DELAY_MS = 30_000;
 const STEAM_MAX_ATTEMPTS = 4;
@@ -75,6 +88,7 @@ export class DeliveryModule extends ContainerModule {
         DeliveryModule.bindHandlers(options);
         DeliveryModule.bindStepHandlers(options);
         DeliveryModule.bindListeners(options);
+        STEAM_OFFER_PORTS.forEach((port) => options.bind(port).toService(STEAM_TRADE_OFFERS));
         COMMAND_HANDLERS.forEach((handler) => options.bind(COMMAND_HANDLER).toService(handler));
         EVENT_LISTENERS.forEach((listener) => options.bind(EVENT_LISTENER).toService(listener));
     }
@@ -101,11 +115,13 @@ export class DeliveryModule extends ContainerModule {
             )
             .inSingletonScope();
         bind(ACCEPT_OFFER_HANDLER)
-            .toResolvedValue(
-                (repo: DeliveryRepository, offers: SteamTradeOffersGateway, bus: EventBus, logger: Logger) =>
-                    new AcceptDeliveryOfferCommandHandler(repo, offers, bus, logger),
-                [DELIVERY_REPOSITORY, STEAM_TRADE_OFFERS, EVENT_BUS, LOGGER],
-            )
+            .toResolvedValue(DeliveryModule.createAcceptOffer, [
+                DELIVERY_REPOSITORY,
+                RECEIVED_OFFERS_GATEWAY,
+                OFFER_ACCEPTANCE_GATEWAY,
+                EVENT_BUS,
+                LOGGER,
+            ])
             .inSingletonScope();
         bind(DISPUTE_DELIVERY_HANDLER)
             .toResolvedValue(
@@ -119,16 +135,16 @@ export class DeliveryModule extends ContainerModule {
     private static bindStepHandlers({ bind }: ContainerModuleLoadOptions): void {
         bind(CANCEL_OFFER_HANDLER)
             .toResolvedValue(
-                (offers: SteamTradeOffersGateway, bus: EventBus, logger: Logger) =>
-                    new CancelTradeOfferCommandHandler(offers, bus, logger),
-                [STEAM_TRADE_OFFERS, EVENT_BUS, LOGGER],
+                (cancellation: OfferCancellationGateway, bus: EventBus, logger: Logger) =>
+                    new CancelTradeOfferCommandHandler(cancellation, bus, logger),
+                [OFFER_CANCELLATION_GATEWAY, EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(CONFIRM_OFFER_HANDLER)
             .toResolvedValue(
-                (repo: DeliveryRepository, offers: SteamTradeOffersGateway, bus: EventBus, logger: Logger) =>
-                    new ConfirmTradeOfferCommandHandler(repo, offers, bus, logger),
-                [DELIVERY_REPOSITORY, STEAM_TRADE_OFFERS, EVENT_BUS, LOGGER],
+                (repo: DeliveryRepository, confirmation: OfferConfirmationGateway, bus: EventBus, logger: Logger) =>
+                    new ConfirmTradeOfferCommandHandler(repo, confirmation, bus, logger),
+                [DELIVERY_REPOSITORY, OFFER_CONFIRMATION_GATEWAY, EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(MARK_RECEIVED_HANDLER)
@@ -166,6 +182,16 @@ export class DeliveryModule extends ContainerModule {
                 [DELIVERY_STEP_DISPATCHER],
             )
             .inSingletonScope();
+    }
+
+    private static createAcceptOffer(
+        repository: DeliveryRepository,
+        receivedOffers: ReceivedOffersGateway,
+        acceptance: OfferAcceptanceGateway,
+        eventBus: EventBus,
+        logger: Logger,
+    ): AcceptDeliveryOfferCommandHandler {
+        return new AcceptDeliveryOfferCommandHandler(repository, receivedOffers, acceptance, eventBus, logger);
     }
 
     private static createSteamSessions(logger: Logger): SteamSessionsAdapter {

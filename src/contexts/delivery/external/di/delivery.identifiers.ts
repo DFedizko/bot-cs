@@ -4,7 +4,10 @@ import type { EventListener } from "@/packages/application/event-listener";
 import type { DeliveryRepository } from "../../application/delivery.repository";
 import type { CsgTradesGateway } from "../../application/csg-trades.gateway";
 import type { SteamCredentials } from "../../application/steam-credentials";
-import type { SteamTradeOffersGateway } from "../../application/steam-trade-offers.gateway";
+import type { ReceivedOffersGateway } from "../../application/accept-delivery-offer/received-offers.gateway";
+import type { OfferAcceptanceGateway } from "../../application/accept-delivery-offer/offer-acceptance.gateway";
+import type { OfferConfirmationGateway } from "../../application/confirm-trade-offer/offer-confirmation.gateway";
+import type { OfferCancellationGateway } from "../../application/cancel-trade-offer/offer-cancellation.gateway";
 import type { StartDeliveryCommand } from "../../application/start-delivery/start-delivery.command";
 import type { AcceptDeliveryOfferCommand } from "../../application/accept-delivery-offer/accept-delivery-offer.command";
 import type { ScamOffersFoundEvent } from "../../application/accept-delivery-offer/scam-offers-found.event";
@@ -21,7 +24,16 @@ import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
 export const CSG_DELIVERY_HTTP = identifier<CsgDeliveryHttp>("CsgDeliveryHttp");
 export const STEAM_SESSIONS = identifier<SteamSessions>("SteamSessions");
 export const STEAM_CREDENTIALS = identifier<SteamCredentials>("SteamCredentials");
-export const STEAM_TRADE_OFFERS = identifier<SteamTradeOffersGateway>("SteamTradeOffersGateway");
+type SteamTradeOffers = ReceivedOffersGateway &
+    OfferAcceptanceGateway &
+    OfferConfirmationGateway &
+    OfferCancellationGateway;
+
+export const STEAM_TRADE_OFFERS = identifier<SteamTradeOffers>("SteamTradeOffersGateway");
+export const RECEIVED_OFFERS_GATEWAY = identifier<ReceivedOffersGateway>("ReceivedOffersGateway");
+export const OFFER_ACCEPTANCE_GATEWAY = identifier<OfferAcceptanceGateway>("OfferAcceptanceGateway");
+export const OFFER_CONFIRMATION_GATEWAY = identifier<OfferConfirmationGateway>("OfferConfirmationGateway");
+export const OFFER_CANCELLATION_GATEWAY = identifier<OfferCancellationGateway>("OfferCancellationGateway");
 export const CSG_TRADES = identifier<CsgTradesGateway>("CsgTradesGateway");
 export const DELIVERY_REPOSITORY = identifier<DeliveryRepository>("DeliveryRepository");
 

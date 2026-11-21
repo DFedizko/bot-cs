@@ -7,6 +7,10 @@ import {
     CONFIRM_OFFER_HANDLER,
     CSG_DELIVERY_HTTP,
     DELIVERY_REPOSITORY,
+    OFFER_ACCEPTANCE_GATEWAY,
+    OFFER_CANCELLATION_GATEWAY,
+    OFFER_CONFIRMATION_GATEWAY,
+    RECEIVED_OFFERS_GATEWAY,
     DISPUTE_DELIVERY_HANDLER,
     MARK_RECEIVED_HANDLER,
     ON_DELIVERY_CONFIRMED,
@@ -15,6 +19,7 @@ import {
     START_DELIVERY_HANDLER,
     STEAM_CREDENTIALS,
     STEAM_SESSIONS,
+    STEAM_TRADE_OFFERS,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { CsgDeliveryHttpAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.adapter";
 import { SteamSessionsAdapter } from "@/contexts/delivery/external/steam/steam-sessions.adapter";
@@ -99,5 +104,16 @@ describe.each(ENVIRONMENTS)("DeliveryModule in %s", (nodeEnv) => {
         const listeners = await fakeExternals(container).getAllAsync(EVENT_LISTENER);
 
         expect(listeners).toEqual(EVENT_LISTENERS.map(({ implementation }) => expect.any(implementation)));
+    });
+
+    it.each([
+        RECEIVED_OFFERS_GATEWAY,
+        OFFER_ACCEPTANCE_GATEWAY,
+        OFFER_CONFIRMATION_GATEWAY,
+        OFFER_CANCELLATION_GATEWAY,
+    ])("Should give each use case its own port onto the one steam offers gateway (%s)", async (port) => {
+        const gateway = await fakeExternals(container).getAsync(port);
+
+        expect(gateway).toBe(await container.getAsync(STEAM_TRADE_OFFERS));
     });
 });

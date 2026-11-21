@@ -1,13 +1,13 @@
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import type { EventBus } from "@/packages/application/event-bus";
 import type { Logger } from "@/packages/application/logger";
-import type { SteamTradeOffersGateway } from "../steam-trade-offers.gateway";
+import type { OfferCancellationGateway } from "./offer-cancellation.gateway";
 import { CancelTradeOfferCommand } from "./cancel-trade-offer.command";
 import { TradeOfferCancelledEvent } from "./trade-offer-cancelled.event";
 
 export class CancelTradeOfferCommandHandler implements CommandHandler<CancelTradeOfferCommand> {
     constructor(
-        private readonly steamOffers: SteamTradeOffersGateway,
+        private readonly offerCancellation: OfferCancellationGateway,
         private readonly eventBus: EventBus,
         private readonly logger: Logger,
     ) {}
@@ -17,7 +17,7 @@ export class CancelTradeOfferCommandHandler implements CommandHandler<CancelTrad
     }
 
     async handle(command: CancelTradeOfferCommand): Promise<void> {
-        await this.steamOffers.cancel(command.accountId, command.offerId);
+        await this.offerCancellation.cancel(command.accountId, command.offerId);
         await this.eventBus.publish([
             new TradeOfferCancelledEvent({
                 tradeId: command.tradeId,

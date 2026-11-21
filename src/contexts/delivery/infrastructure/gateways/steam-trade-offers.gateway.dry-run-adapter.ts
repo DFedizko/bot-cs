@@ -1,16 +1,23 @@
 import type { Logger } from "@/packages/application/logger";
+import type {
+    ReceivedOffersGateway,
+    TradeOfferDTO,
+} from "../../application/accept-delivery-offer/received-offers.gateway";
 import {
     ACCEPT_OUTCOME,
     type AcceptOutcome,
-    type SteamTradeOffersGateway,
-    type TradeOfferDTO,
-} from "../../application/steam-trade-offers.gateway";
+    type OfferAcceptanceGateway,
+} from "../../application/accept-delivery-offer/offer-acceptance.gateway";
+import type { OfferConfirmationGateway } from "../../application/confirm-trade-offer/offer-confirmation.gateway";
+import type { OfferCancellationGateway } from "../../application/cancel-trade-offer/offer-cancellation.gateway";
 
 const DRY_RUN_OUTCOME: AcceptOutcome = ACCEPT_OUTCOME.ACCEPTED;
 
-export class SteamTradeOffersGatewayDryRunAdapter implements SteamTradeOffersGateway {
+export class SteamTradeOffersGatewayDryRunAdapter
+    implements ReceivedOffersGateway, OfferAcceptanceGateway, OfferConfirmationGateway, OfferCancellationGateway
+{
     constructor(
-        private readonly gateway: SteamTradeOffersGateway,
+        private readonly gateway: ReceivedOffersGateway,
         private readonly logger: Logger,
     ) {}
 

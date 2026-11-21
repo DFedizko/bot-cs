@@ -4,13 +4,13 @@ import type { Logger } from "@/packages/application/logger";
 import type { Delivery } from "../../domain/delivery/delivery";
 import type { DeliveryRepository } from "../delivery.repository";
 import { loadDelivery } from "../load-delivery";
-import type { SteamTradeOffersGateway } from "../steam-trade-offers.gateway";
+import type { OfferConfirmationGateway } from "./offer-confirmation.gateway";
 import { ConfirmTradeOfferCommand } from "./confirm-trade-offer.command";
 
 export class ConfirmTradeOfferCommandHandler implements CommandHandler<ConfirmTradeOfferCommand> {
     constructor(
         private readonly repository: DeliveryRepository,
-        private readonly steamOffers: SteamTradeOffersGateway,
+        private readonly offerConfirmation: OfferConfirmationGateway,
         private readonly eventBus: EventBus,
         private readonly logger: Logger,
     ) {}
@@ -34,6 +34,6 @@ export class ConfirmTradeOfferCommandHandler implements CommandHandler<ConfirmTr
     }
 
     private async confirmOnSteam(delivery: Delivery, offerId: string): Promise<void> {
-        if (delivery.needsConfirmation()) await this.steamOffers.confirm(delivery.getAccountId(), offerId);
+        if (delivery.needsConfirmation()) await this.offerConfirmation.confirm(delivery.getAccountId(), offerId);
     }
 }

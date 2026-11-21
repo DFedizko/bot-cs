@@ -1,10 +1,15 @@
+import type {
+    OfferItemDTO,
+    ReceivedOffersGateway,
+    TradeOfferDTO,
+} from "../../application/accept-delivery-offer/received-offers.gateway";
 import {
     ACCEPT_OUTCOME,
     type AcceptOutcome,
-    type OfferItemDTO,
-    type SteamTradeOffersGateway,
-    type TradeOfferDTO,
-} from "../../application/steam-trade-offers.gateway";
+    type OfferAcceptanceGateway,
+} from "../../application/accept-delivery-offer/offer-acceptance.gateway";
+import type { OfferConfirmationGateway } from "../../application/confirm-trade-offer/offer-confirmation.gateway";
+import type { OfferCancellationGateway } from "../../application/cancel-trade-offer/offer-cancellation.gateway";
 import type { SteamCredentials } from "../../application/steam-credentials";
 import type { SteamSessions } from "../steam/steam-sessions";
 import {
@@ -15,6 +20,7 @@ import {
     type SteamTradeOffer,
 } from "../steam/steam-trade-offer";
 import type { SteamTradeSession } from "../steam/steam-trade-session";
+import type { SteamOfferStateReader } from "../steam/steam-offer-state-reader";
 
 const OUTCOMES_BY_STATE: Partial<Record<SteamOfferState, AcceptOutcome>> = {
     [STEAM_OFFER_STATE.ACCEPTED]: ACCEPT_OUTCOME.ACCEPTED,
@@ -27,7 +33,9 @@ const ACCEPT_OUTCOMES: Record<SteamAcceptStatus, AcceptOutcome> = {
     escrow: ACCEPT_OUTCOME.ON_HOLD,
 };
 
-export class SteamTradeOffersGatewayAdapter implements SteamTradeOffersGateway {
+export class SteamTradeOffersGatewayAdapter
+    implements ReceivedOffersGateway, OfferAcceptanceGateway, OfferConfirmationGateway, OfferCancellationGateway
+{
     constructor(
         private readonly sessions: SteamSessions,
         private readonly credentials: SteamCredentials,
@@ -55,7 +63,11 @@ export class SteamTradeOffersGatewayAdapter implements SteamTradeOffersGateway {
         await (await this.sessionOf(accountId)).confirmOffer(offerId);
     }
 
-    private async recoverAccept(session: SteamTradeSession, offerId: string, error: unknown): Promise<AcceptOutcome> {
+    private async recoverAccept(
+        session: SteamOfferStateReader,
+        offerId: string,
+        error: unknown,
+    ): Promise<AcceptOutcome> {
         const outcome = OUTCOMES_BY_STATE[await session.getOfferState(offerId)];
         if (!outcome) throw error;
         return outcome;
