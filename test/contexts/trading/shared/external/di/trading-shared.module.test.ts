@@ -18,6 +18,7 @@ import {
 import { CsgWsClientFakeAdapter } from "../csgoempire/csg-ws-client.fake-adapter";
 
 const API_KEY = "api-key";
+const ANY_FREE_PORT = 0;
 const FAKE_WS_URL = "ws://localhost";
 const ENVIRONMENTS: AppEnv["NODE_ENV"][] = ["development", "production"];
 
@@ -27,7 +28,7 @@ describe.each(ENVIRONMENTS)("TradingSharedModule in %s", (nodeEnv) => {
     beforeEach(() => {
         container = new Container();
         container.load(
-            new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }),
+            new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
             new TradingSharedModule(),
         );
     });

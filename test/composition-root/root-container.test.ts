@@ -4,7 +4,16 @@ import { fakeExternals } from "@/__builders__/externals.builder";
 import { COMMAND_BUS, ENV, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpServerBunAdapter } from "@/packages/external/http/server/http-server.bun-adapter";
 import { INIT_CSG_SESSION, SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
-import { AUCTION_GATEWAY, NEW_ITEM_CONTROLLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import {
+    ADD_WANTED_ITEM_CONTROLLER,
+    AUCTION_GATEWAY,
+    EDIT_WANTED_ITEM_CONTROLLER,
+    NEW_ITEM_CONTROLLER,
+    REMOVE_WANTED_ITEM_CONTROLLER,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
+import { EditWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/edit-wanted-item.http-controller";
+import { RemoveWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/remove-wanted-item.http-controller";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { InitCsgSessionWsController } from "@/contexts/trading/shared/infrastructure/controllers/init-csg-session.ws-controller";
 import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
@@ -13,23 +22,31 @@ import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infr
 import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
 const API_KEY = "api-key";
+const ANY_FREE_PORT = 0;
 const AUCTION_GATEWAYS = [
     { nodeEnv: "development", gateway: AuctionGatewayDryRunAdapter },
     { nodeEnv: "test", gateway: AuctionGatewayDryRunAdapter },
     { nodeEnv: "production", gateway: AuctionGatewayCsgoempireAdapter },
 ] as const satisfies { nodeEnv: AppEnv["NODE_ENV"]; gateway: unknown }[];
+const HTTP_CONTROLLERS = [
+    { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
+    { identifier: EDIT_WANTED_ITEM_CONTROLLER, implementation: EditWantedItemHttpController },
+    { identifier: REMOVE_WANTED_ITEM_CONTROLLER, implementation: RemoveWantedItemHttpController },
+];
 
 let container: Container;
 
 describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, gateway }) => {
     beforeEach(() => {
-        container = fakeExternals(new RootContainer({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }));
+        container = fakeExternals(
+            new RootContainer({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
+        );
     });
 
     it("Should bind the validated enviroment", () => {
         const env = container.get(ENV);
 
-        expect(env).toEqual({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY });
+        expect(env).toEqual({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT });
     });
 
     it("Should resolve the command bus", async () => {
@@ -60,6 +77,12 @@ describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, ga
         const controller = await container.getAsync(NEW_ITEM_CONTROLLER);
 
         expect(controller).toBeInstanceOf(NewItemWsController);
+    });
+
+    it.each(HTTP_CONTROLLERS)("Should resolve the $implementation.name", async ({ identifier, implementation }) => {
+        const controller = await container.getAsync(identifier);
+
+        expect(controller).toBeInstanceOf(implementation);
     });
 
     it("Should resolve the auction gateway of the enviroment", async () => {

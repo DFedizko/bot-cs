@@ -7,18 +7,26 @@ import type { WantedItemRepository } from "../../application/wanted-item.reposit
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
 import type { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
+import type { EditWantedItemCommand } from "../../application/edit-wanted-item/edit-wanted-item.command";
 import type { EvaluateItemCommand } from "../../application/evaluate-item/evaluate-item.command";
 import type { ItemApprovedInAuctionEvent } from "../../application/evaluate-item/item-approved-in-auction.event";
 import type { ItemApprovedOffAuctionEvent } from "../../application/evaluate-item/item-approved-off-auction.event";
 import type { LeaveAuctionCommand } from "../../application/leave-auction/leave-auction.command";
 import type { PlaceBidCommand } from "../../application/place-bid/place-bid.command";
-import type { RemoveWantedItemCommand } from "../../application/remove-wanted-tem/remove-wanted-item.command";
+import type { RemoveWantedItemCommand } from "../../application/remove-wanted-item/remove-wanted-item.command";
 import type { SynchronizeAccountCommand } from "../../application/synchronize-account/synchronize-account.command";
 import type { OutbidEvent } from "../../application/track-auction-update/outbid.event";
 import type { TrackAuctionUpdateCommand } from "../../application/track-auction-update/track-auction-update.command";
 import type { CsgoempireAuctionHttp } from "../../infrastructure/http/csgoempire/csgoempire-auction.http";
 import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/csgoempire-trade.http";
 import type { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
+import type { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
+import type { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
+import type { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import type { Validator } from "@/packages/infrastructure/validation/validator";
+import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
+import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
+import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
 import type { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");
@@ -30,8 +38,17 @@ export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedIt
 export const AUCTION_PARTICIPATION_REPO = identifier<AuctionParticipationRepository>("AuctionParticipationRepository");
 export const NEW_ITEM_CONTROLLER = identifier<NewItemWsController>("NewItemWsController");
 export const AUCTION_UPDATE_CONTROLLER = identifier<AuctionUpdateWsController>("AuctionUpdateWsController");
+export const ADD_WANTED_ITEM_CONTROLLER = identifier<AddWantedItemHttpController>("AddWantedItemHttpController");
+export const EDIT_WANTED_ITEM_CONTROLLER = identifier<EditWantedItemHttpController>("EditWantedItemHttpController");
+export const REMOVE_WANTED_ITEM_CONTROLLER = identifier<RemoveWantedItemHttpController>(
+    "RemoveWantedItemHttpController",
+);
+export const ADD_WANTED_ITEM_VALIDATOR = identifier<Validator<AddWantedItemInput>>("AddWantedItemValidator");
+export const EDIT_WANTED_ITEM_VALIDATOR = identifier<Validator<EditWantedItemInput>>("EditWantedItemValidator");
+export const REMOVE_WANTED_ITEM_VALIDATOR = identifier<Validator<RemoveWantedItemInput>>("RemoveWantedItemValidator");
 
 export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
+export const EDIT_WANTED_ITEM_HANDLER = identifier<CommandHandler<EditWantedItemCommand>>("EditWantedItemHandler");
 export const REMOVE_WANTED_ITEM_HANDLER =
     identifier<CommandHandler<RemoveWantedItemCommand>>("RemoveWantedItemHandler");
 export const EVALUATE_ITEM_HANDLER = identifier<CommandHandler<EvaluateItemCommand>>("EvaluateItemHandler");

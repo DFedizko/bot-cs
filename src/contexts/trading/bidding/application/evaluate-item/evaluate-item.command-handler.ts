@@ -5,6 +5,7 @@ import { EvaluateItemCommand } from "./evaluate-item.command";
 import type { EventBus } from "@/packages/application/event-bus";
 import { ItemApprovedInAuctionEvent } from "./item-approved-in-auction.event";
 import { ItemApprovedOffAuctionEvent } from "./item-approved-off-auction.event";
+import { AccountId } from "../../domain/account/account-id";
 import { ItemName } from "../../domain/wanted-item/item-name";
 
 export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCommand> {
@@ -27,7 +28,7 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
         referencePrice,
         inAuction,
     }: EvaluateItemCommand): Promise<void> {
-        const wantedItem = await this.wantedItemRepository.findByName(new ItemName(itemName));
+        const wantedItem = await this.wantedItemRepository.findByName(new AccountId(accountId), new ItemName(itemName));
         if (!wantedItem) return;
         const decision = wantedItem.evaluate({ value: price, referencePrice, aboveRecommendedPercentage });
         if (!decision.approved) return this.logger.log(decision.failures.join("; "));

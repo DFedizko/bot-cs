@@ -1,0 +1,79 @@
+import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
+import { COMMAND_BUS, HTTP_ERROR_MAPPING, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import { ZodValidatorAdapter } from "@/packages/external/validation/validator.zod-adapter";
+import type { CommandBus } from "@/packages/application/command-bus";
+import type { HttpServer } from "@/packages/infrastructure/http/http-server";
+import { HttpStatus } from "@/packages/infrastructure/http/http-status";
+import type { Validator } from "@/packages/infrastructure/validation/validator";
+import { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
+import { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
+import { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
+import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
+import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
+import { WantedItemNotFoundError } from "../../domain/wanted-item/errors/wanted-item-not-found.error";
+import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
+import { addWantedItemSchema } from "../validation/add-wanted-item.schema";
+import { editWantedItemSchema } from "../validation/edit-wanted-item.schema";
+import { removeWantedItemSchema } from "../validation/remove-wanted-item.schema";
+import {
+    ADD_WANTED_ITEM_CONTROLLER,
+    ADD_WANTED_ITEM_VALIDATOR,
+    EDIT_WANTED_ITEM_CONTROLLER,
+    EDIT_WANTED_ITEM_VALIDATOR,
+    REMOVE_WANTED_ITEM_CONTROLLER,
+    REMOVE_WANTED_ITEM_VALIDATOR,
+} from "./bidding.identifiers";
+
+export class BiddingHttpModule extends ContainerModule {
+    constructor() {
+        super((options) => BiddingHttpModule.bindAll(options));
+    }
+
+    private static bindAll(options: ContainerModuleLoadOptions): void {
+        BiddingHttpModule.bindValidators(options);
+        BiddingHttpModule.bindControllers(options);
+        BiddingHttpModule.bindErrorMappings(options);
+    }
+
+    private static bindValidators({ bind }: ContainerModuleLoadOptions): void {
+        bind(ADD_WANTED_ITEM_VALIDATOR)
+            .toResolvedValue(() => new ZodValidatorAdapter(addWantedItemSchema))
+            .inSingletonScope();
+        bind(EDIT_WANTED_ITEM_VALIDATOR)
+            .toResolvedValue(() => new ZodValidatorAdapter(editWantedItemSchema))
+            .inSingletonScope();
+        bind(REMOVE_WANTED_ITEM_VALIDATOR)
+            .toResolvedValue(() => new ZodValidatorAdapter(removeWantedItemSchema))
+            .inSingletonScope();
+    }
+
+    private static bindControllers({ bind }: ContainerModuleLoadOptions): void {
+        bind(ADD_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus, validator: Validator<AddWantedItemInput>) =>
+                    new AddWantedItemHttpController(http, bus, validator),
+                [HTTP_SERVER, COMMAND_BUS, ADD_WANTED_ITEM_VALIDATOR],
+            )
+            .inSingletonScope();
+        bind(EDIT_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus, validator: Validator<EditWantedItemInput>) =>
+                    new EditWantedItemHttpController(http, bus, validator),
+                [HTTP_SERVER, COMMAND_BUS, EDIT_WANTED_ITEM_VALIDATOR],
+            )
+            .inSingletonScope();
+        bind(REMOVE_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus, validator: Validator<RemoveWantedItemInput>) =>
+                    new RemoveWantedItemHttpController(http, bus, validator),
+                [HTTP_SERVER, COMMAND_BUS, REMOVE_WANTED_ITEM_VALIDATOR],
+            )
+            .inSingletonScope();
+    }
+
+    private static bindErrorMappings({ bind }: ContainerModuleLoadOptions): void {
+        bind(HTTP_ERROR_MAPPING).toConstantValue({ error: WantedItemNotFoundError, status: HttpStatus.NOT_FOUND });
+        bind(HTTP_ERROR_MAPPING).toConstantValue({ error: WantedItemAlreadyExistsError, status: HttpStatus.CONFLICT });
+    }
+}

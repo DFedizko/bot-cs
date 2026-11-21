@@ -9,6 +9,7 @@ import {
     AUCTION_UPDATE_CONTROLLER,
     CSGOEMPIRE_AUCTION_HTTP,
     CSGOEMPIRE_TRADE_HTTP,
+    EDIT_WANTED_ITEM_HANDLER,
     EVALUATE_ITEM_HANDLER,
     LEAVE_AUCTION_HANDLER,
     NEW_ITEM_CONTROLLER,
@@ -32,7 +33,8 @@ import { SynchronizeAccountCommandHandler } from "@/contexts/trading/bidding/app
 import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
 import { AuctionParticipationRepositoryInMemory } from "@/contexts/trading/bidding/infrastructure/repositories/auction-participation.repository.in-memory";
 import { AddWantedItemCommandHandler } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command-handler";
-import { RemoveWantedItemCommandHandler } from "@/contexts/trading/bidding/application/remove-wanted-tem/remove-wanted-item.command-handler";
+import { EditWantedItemCommandHandler } from "@/contexts/trading/bidding/application/edit-wanted-item/edit-wanted-item.command-handler";
+import { RemoveWantedItemCommandHandler } from "@/contexts/trading/bidding/application/remove-wanted-item/remove-wanted-item.command-handler";
 import { PlaceBidCommandHandler } from "@/contexts/trading/bidding/application/place-bid/place-bid.command-handler";
 import { LeaveAuctionCommandHandler } from "@/contexts/trading/bidding/application/leave-auction/leave-auction.command-handler";
 import { TrackAuctionUpdateCommandHandler } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command-handler";
@@ -47,6 +49,7 @@ const COMMAND_HANDLERS = [
     { identifier: EVALUATE_ITEM_HANDLER, implementation: EvaluateItemCommandHandler },
     { identifier: SYNC_ACCOUNT_HANDLER, implementation: SynchronizeAccountCommandHandler },
     { identifier: ADD_WANTED_ITEM_HANDLER, implementation: AddWantedItemCommandHandler },
+    { identifier: EDIT_WANTED_ITEM_HANDLER, implementation: EditWantedItemCommandHandler },
     { identifier: REMOVE_WANTED_ITEM_HANDLER, implementation: RemoveWantedItemCommandHandler },
     { identifier: PLACE_BID_HANDLER, implementation: PlaceBidCommandHandler },
     { identifier: LEAVE_AUCTION_HANDLER, implementation: LeaveAuctionCommandHandler },
@@ -57,7 +60,6 @@ const EVENT_LISTENERS = [
     { identifier: ON_APPROVED_OFF_AUCTION, implementation: OnItemApprovedOffAuctionWithdraw },
     { identifier: ON_OUTBID, implementation: OnOutbidCounterBid },
 ];
-
 let container: Container;
 
 describe.each(ENVIRONMENTS)("BiddingModule in %s", (nodeEnv) => {

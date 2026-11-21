@@ -2,6 +2,7 @@ import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
 import { HttpError } from "@/packages/infrastructure/http/errors/http.error";
+import { ValidationError } from "@/packages/infrastructure/validation/validation.error";
 import { EmptyStringError } from "@/packages/error/empty-string.error";
 import { FooInternalError, FooNotFoundError, SpecialFooNotFoundError } from "./__stubs__/foo.errors";
 
@@ -18,6 +19,18 @@ describe("HttpErrorMapperByErrorClass", () => {
             expect(response).toEqual({
                 status: HttpStatus.NOT_FOUND,
                 body: { code: "NOT_FOUND", message: "Foo not found" },
+            });
+        });
+
+        it("Should map a validation error to bad request with its failing fields", () => {
+            const mapper = new HttpErrorMapperByErrorClass();
+            const fields = [{ path: "foo", message: "Expected string" }];
+
+            const response = mapper.map(new ValidationError(fields));
+
+            expect(response).toEqual({
+                status: HttpStatus.BAD_REQUEST,
+                body: { code: "VALIDATION_ERROR", message: "Invalid input: foo", fields },
             });
         });
 

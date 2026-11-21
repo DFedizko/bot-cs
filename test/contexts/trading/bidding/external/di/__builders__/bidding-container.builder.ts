@@ -2,10 +2,12 @@ import { Container, type ContainerModule } from "inversify";
 import { PackagesModule } from "@/packages/external/di/packages.module";
 import { TradingSharedModule } from "@/contexts/trading/shared/external/di/trading-shared.module";
 import { BiddingModule } from "@/contexts/trading/bidding/external/di/bidding.module";
+import { BiddingHttpModule } from "@/contexts/trading/bidding/external/di/bidding-http.module";
 import { BiddingDevModule } from "@/contexts/trading/bidding/external/di/bidding.dev-module";
 import { BiddingProdModule } from "@/contexts/trading/bidding/external/di/bidding.prod-module";
 
 const API_KEY = "api-key";
+const ANY_FREE_PORT = 0;
 
 type BiddingEnv = Exclude<AppEnv["NODE_ENV"], "test">;
 
@@ -17,9 +19,10 @@ const BIDDING_ENV_MODULES: Record<BiddingEnv, () => ContainerModule> = {
 export const biddingContainer = (nodeEnv: BiddingEnv): Container => {
     const container = new Container();
     container.load(
-        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }),
+        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
         new TradingSharedModule(),
         new BiddingModule(),
+        new BiddingHttpModule(),
         BIDDING_ENV_MODULES[nodeEnv](),
     );
     return container;
