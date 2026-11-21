@@ -8,6 +8,9 @@ let httpServer: HttpServer;
 let httpClient: HttpClient;
 
 const PORT = 8888;
+const HTML_PAGE = "<!doctype html><title>Docs</title>";
+const HTML_CONTENT_TYPE = "text/html";
+const HTML_HEADERS = { "content-type": HTML_CONTENT_TYPE };
 
 describe.each([
     ["Bun", () => new HttpServerBunAdapter()],
@@ -110,6 +113,22 @@ describe.each([
         });
         httpServer.listen(PORT);
         await httpClient.get("/test?id=2&name=John Doe");
+    });
+    it("Should send a text body as it is", async () => {
+        httpServer.get("/page", () => ({ body: HTML_PAGE, headers: HTML_HEADERS }));
+        httpServer.listen(PORT);
+
+        const response = await fetch(`http://localhost:${PORT}/page`);
+
+        expect(await response.text()).toBe(HTML_PAGE);
+    });
+    it("Should send a text body with its content type", async () => {
+        httpServer.get("/page", () => ({ body: HTML_PAGE, headers: HTML_HEADERS }));
+        httpServer.listen(PORT);
+
+        const response = await fetch(`http://localhost:${PORT}/page`);
+
+        expect(response.headers.get("content-type")).toStartWith(HTML_CONTENT_TYPE);
     });
     it("Should execute a callback passed listing the port", (done) => httpServer.listen(PORT, () => done()));
     it("Should throw an error when send request to a non-existent route", async () => {
