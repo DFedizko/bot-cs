@@ -4,13 +4,11 @@ import { fakeExternals } from "@/__builders__/externals.builder";
 import {
     ACCOUNT_REPOSITORY,
     ACTIVE_TRADES_GATEWAY,
-    ADD_WANTED_ITEM_CONTROLLER,
     ADD_WANTED_ITEM_HANDLER,
     AUCTION_PARTICIPATION_REPO,
     AUCTION_UPDATE_CONTROLLER,
     CSGOEMPIRE_AUCTION_HTTP,
     CSGOEMPIRE_TRADE_HTTP,
-    EDIT_WANTED_ITEM_CONTROLLER,
     EDIT_WANTED_ITEM_HANDLER,
     EVALUATE_ITEM_HANDLER,
     LEAVE_AUCTION_HANDLER,
@@ -19,19 +17,12 @@ import {
     ON_APPROVED_OFF_AUCTION,
     ON_OUTBID,
     PLACE_BID_HANDLER,
-    REMOVE_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_HANDLER,
     SYNC_ACCOUNT_HANDLER,
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { COMMAND_BUS, COMMAND_HANDLER, HTTP_ERROR_MAPPER } from "@/packages/external/di/packages.identifiers";
-import { HttpStatus } from "@/packages/infrastructure/http/http-status";
-import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
-import { EditWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/edit-wanted-item.http-controller";
-import { RemoveWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/remove-wanted-item.http-controller";
-import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
-import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
+import { COMMAND_BUS, COMMAND_HANDLER } from "@/packages/external/di/packages.identifiers";
 import { CsgoempireAuctionHttpAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-auction.http.adapter";
 import { CsgoempireTradeHttpAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-trade.http.adapter";
 import { ActiveTradesGatewayCsgAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/active-trades.gateway.csg-adapter";
@@ -69,18 +60,6 @@ const EVENT_LISTENERS = [
     { identifier: ON_APPROVED_OFF_AUCTION, implementation: OnItemApprovedOffAuctionWithdraw },
     { identifier: ON_OUTBID, implementation: OnOutbidCounterBid },
 ];
-const HTTP_CONTROLLERS = [
-    { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
-    { identifier: EDIT_WANTED_ITEM_CONTROLLER, implementation: EditWantedItemHttpController },
-    { identifier: REMOVE_WANTED_ITEM_CONTROLLER, implementation: RemoveWantedItemHttpController },
-];
-const ACCOUNT_ID = 1;
-const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
-const HTTP_ERROR_STATUSES = [
-    { error: new WantedItemNotFoundError(ACCOUNT_ID, ITEM_NAME), status: HttpStatus.NOT_FOUND },
-    { error: new WantedItemAlreadyExistsError(ACCOUNT_ID, ITEM_NAME), status: HttpStatus.CONFLICT },
-];
-
 let container: Container;
 
 describe.each(ENVIRONMENTS)("BiddingModule in %s", (nodeEnv) => {
@@ -164,19 +143,5 @@ describe.each(ENVIRONMENTS)("BiddingModule in %s", (nodeEnv) => {
         const controller = await fakeExternals(container).getAsync(AUCTION_UPDATE_CONTROLLER);
 
         expect(controller).toBeInstanceOf(AuctionUpdateWsController);
-    });
-
-    it.each(HTTP_CONTROLLERS)("Should bind the $implementation.name", async ({ identifier, implementation }) => {
-        const controller = await fakeExternals(container).getAsync(identifier);
-
-        expect(controller).toBeInstanceOf(implementation);
-    });
-
-    it.each(HTTP_ERROR_STATUSES)("Should answer $error.name with $status", ({ error, status }) => {
-        const errorMapper = container.get(HTTP_ERROR_MAPPER);
-
-        const response = errorMapper.map(error);
-
-        expect(response.status).toBe(status);
     });
 });

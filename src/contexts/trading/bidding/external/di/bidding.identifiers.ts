@@ -23,6 +23,10 @@ import type { NewItemWsController } from "../../infrastructure/controllers/new-i
 import type { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
 import type { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
 import type { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import type { Validator } from "@/packages/infrastructure/validation/validator";
+import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
+import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
+import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
 import type { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");
@@ -39,6 +43,9 @@ export const EDIT_WANTED_ITEM_CONTROLLER = identifier<EditWantedItemHttpControll
 export const REMOVE_WANTED_ITEM_CONTROLLER = identifier<RemoveWantedItemHttpController>(
     "RemoveWantedItemHttpController",
 );
+export const ADD_WANTED_ITEM_VALIDATOR = identifier<Validator<AddWantedItemInput>>("AddWantedItemValidator");
+export const EDIT_WANTED_ITEM_VALIDATOR = identifier<Validator<EditWantedItemInput>>("EditWantedItemValidator");
+export const REMOVE_WANTED_ITEM_VALIDATOR = identifier<Validator<RemoveWantedItemInput>>("RemoveWantedItemValidator");
 
 export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
 export const EDIT_WANTED_ITEM_HANDLER = identifier<CommandHandler<EditWantedItemCommand>>("EditWantedItemHandler");

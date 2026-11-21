@@ -105,4 +105,15 @@ describe("AddWantedItemHttpController", () => {
 
         expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
+
+    it("Should name the failing fields of a bad request", async () => {
+        const api = await startWantedItemsApi(container);
+
+        const response = await api.send(POST, itemsPath("john"), { maxFor: "-3" });
+
+        expect(JSON.parse(response.body).fields.map(({ path }: { path: string }) => path)).toEqual([
+            "accountId",
+            "name",
+        ]);
+    });
 });
