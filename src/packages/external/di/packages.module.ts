@@ -13,6 +13,7 @@ import { HttpClientFactoryAdapter } from "../http/client/http-client.factory.ada
 import { HttpServerBunAdapter } from "../http/server/http-server.bun-adapter";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
 import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http-error.mapper.by-error-class";
+import { HttpServerRouteRecordingDecorator } from "@/packages/infrastructure/http/http-server.route-recording-decorator";
 import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
 import type { Logger } from "@/packages/application/logger";
 import {
@@ -25,10 +26,12 @@ import {
     HTTP_CLIENT_FACTORY,
     HTTP_ERROR_MAPPER,
     HTTP_ERROR_MAPPING,
+    HTTP_ROUTE_CATALOG,
     HTTP_SERVER,
     LOGGER,
     PROCESS_EVENTS,
     UNHANDLED_ERROR_TRAP,
+    RECORDING_HTTP_SERVER,
 } from "./packages.identifiers";
 
 const HTTP_CLIENT_PROVIDER = "axios";
@@ -76,12 +79,15 @@ export class PackagesModule extends ContainerModule {
                 { serviceIdentifier: HTTP_ERROR_MAPPING, isMultiple: true, optional: true },
             ])
             .inSingletonScope();
-        bind(HTTP_SERVER)
+        bind(RECORDING_HTTP_SERVER)
             .toResolvedValue(
-                (errorMapper: HttpErrorMapper) => new HttpServerBunAdapter(undefined, errorMapper),
+                (errorMapper: HttpErrorMapper) =>
+                    new HttpServerRouteRecordingDecorator(new HttpServerBunAdapter(undefined, errorMapper)),
                 [HTTP_ERROR_MAPPER],
             )
             .inSingletonScope();
+        bind(HTTP_SERVER).toService(RECORDING_HTTP_SERVER);
+        bind(HTTP_ROUTE_CATALOG).toService(RECORDING_HTTP_SERVER);
     }
 
     private static createErrorMapper(logger: Logger, mappings: HttpErrorMapping[] | undefined): HttpErrorMapper {

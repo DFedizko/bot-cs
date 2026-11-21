@@ -12,4 +12,4 @@ export const httpErrorBodySchema = z
         message: z.string().meta({ description: "A readable explanation of the error" }),
         fields: z.array(invalidFieldSchema).optional().meta({ description: "The invalid fields of a bad request" }),
     })
-    .meta({ title: "HttpErrorBody" }) satisfies z.ZodType<HttpErrorBody>;
+    .meta({ id: "HttpErrorBody" }) satisfies z.ZodType<HttpErrorBody>;

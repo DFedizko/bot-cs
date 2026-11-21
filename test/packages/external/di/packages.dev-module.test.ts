@@ -7,9 +7,9 @@ import {
     API_REFERENCE_CONTROLLER,
     API_REFERENCE_PAGE,
     HTTP_CONTROLLER,
-    HTTP_ROUTE_DOC,
+    HTTP_SERVER,
 } from "@/packages/external/di/packages.identifiers";
-import { ApiDocumentZodAdapter } from "@/packages/external/openapi/api-document.zod-adapter";
+import { ApiDocumentZodOpenApiAdapter } from "@/packages/external/openapi/api-document.zod-openapi-adapter";
 import { ApiReferenceScalarAdapter } from "@/packages/external/openapi/api-reference.scalar-adapter";
 import { ApiDocumentHttpController } from "@/packages/infrastructure/http/docs/api-document.http-controller";
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
@@ -30,21 +30,21 @@ describe("PackagesDevModule", () => {
         container.load(new PackagesModule(ENV), new PackagesDevModule());
     });
 
-    it("Should bind the zod api document", () => {
+    it("Should bind the zod-openapi api document", () => {
         const apiDocument = container.get(API_DOCUMENT);
 
-        expect(apiDocument).toBeInstanceOf(ApiDocumentZodAdapter);
+        expect(apiDocument).toBeInstanceOf(ApiDocumentZodOpenApiAdapter);
     });
 
-    it("Should document every bound route", () => {
-        container.bind(HTTP_ROUTE_DOC).toConstantValue(addFooRoute);
+    it("Should document every route registered on the http server", () => {
+        container.get(HTTP_SERVER).post(addFooRoute.path, () => ({}), addFooRoute);
 
         const document = container.get(API_DOCUMENT).toJson();
 
         expect(Object.keys(document.paths as object)).toEqual([FOO_PATH]);
     });
 
-    it("Should bind an empty api document when no route is documented", () => {
+    it("Should bind an api document without routes when none is documented", () => {
         const document = container.get(API_DOCUMENT).toJson();
 
         expect(document.paths).toEqual({});

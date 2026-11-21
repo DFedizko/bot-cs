@@ -1,12 +1,11 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
-import type { ZodObject } from "zod";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import type { ApiDocument } from "@/packages/infrastructure/http/docs/api-document";
 import type { ApiReferencePage } from "@/packages/infrastructure/http/docs/api-reference.page";
-import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
+import type { HttpRouteCatalog } from "@/packages/infrastructure/http/docs/http-route.catalog";
 import { ApiDocumentHttpController } from "@/packages/infrastructure/http/docs/api-document.http-controller";
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
-import { ApiDocumentZodAdapter } from "../openapi/api-document.zod-adapter";
+import { ApiDocumentZodOpenApiAdapter } from "../openapi/api-document.zod-openapi-adapter";
 import { ApiReferenceScalarAdapter } from "../openapi/api-reference.scalar-adapter";
 import {
     API_DOCUMENT,
@@ -14,7 +13,7 @@ import {
     API_REFERENCE_CONTROLLER,
     API_REFERENCE_PAGE,
     HTTP_CONTROLLER,
-    HTTP_ROUTE_DOC,
+    HTTP_ROUTE_CATALOG,
     HTTP_SERVER,
 } from "./packages.identifiers";
 
@@ -31,9 +30,10 @@ export class PackagesDevModule extends ContainerModule {
 
     private static bindAll({ bind }: ContainerModuleLoadOptions): void {
         bind(API_DOCUMENT)
-            .toResolvedValue(PackagesDevModule.createApiDocument, [
-                { serviceIdentifier: HTTP_ROUTE_DOC, isMultiple: true, optional: true },
-            ])
+            .toResolvedValue(
+                (catalog: HttpRouteCatalog) => new ApiDocumentZodOpenApiAdapter(catalog, API_INFO),
+                [HTTP_ROUTE_CATALOG],
+            )
             .inSingletonScope();
         bind(API_REFERENCE_PAGE)
             .toResolvedValue(() => new ApiReferenceScalarAdapter(API_INFO.title))
@@ -52,9 +52,5 @@ export class PackagesDevModule extends ContainerModule {
             .inSingletonScope();
         bind(HTTP_CONTROLLER).toService(API_DOCUMENT_CONTROLLER);
         bind(HTTP_CONTROLLER).toService(API_REFERENCE_CONTROLLER);
-    }
-
-    private static createApiDocument(routes: HttpRouteDoc<ZodObject>[] | undefined): ApiDocument {
-        return new ApiDocumentZodAdapter(routes ?? [], API_INFO);
     }
 }

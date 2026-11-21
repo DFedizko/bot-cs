@@ -15,11 +15,12 @@ import {
     HTTP_CLIENT_FACTORY,
     HTTP_ERROR_MAPPER,
     HTTP_ERROR_MAPPING,
+    HTTP_ROUTE_CATALOG,
     HTTP_SERVER,
     LOGGER,
 } from "@/packages/external/di/packages.identifiers";
 import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
-import { HttpServerBunAdapter } from "@/packages/external/http/server/http-server.bun-adapter";
+import { HttpServerRouteRecordingDecorator } from "@/packages/infrastructure/http/http-server.route-recording-decorator";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { FooNotFoundError } from "@/packages/infrastructure/http/__stubs__/foo.errors";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
@@ -167,10 +168,16 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         expect(response.status).toBe(HttpStatus.NOT_FOUND);
     });
 
-    it("Should bind the bun http server", () => {
+    it("Should bind an http server that records its routes", () => {
         const httpServer = container.get(HTTP_SERVER);
 
-        expect(httpServer).toBeInstanceOf(HttpServerBunAdapter);
+        expect(httpServer).toBeInstanceOf(HttpServerRouteRecordingDecorator);
+    });
+
+    it("Should catalog the routes of the bound http server", () => {
+        const catalog = container.get(HTTP_ROUTE_CATALOG);
+
+        expect(Object.is(catalog, container.get(HTTP_SERVER))).toBe(true);
     });
 
     it("Should bind one http server", () => {
