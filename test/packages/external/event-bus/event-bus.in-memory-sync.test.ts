@@ -11,6 +11,9 @@ const NESTED = "nested";
 const FAILURE = "listener failed after an await";
 
 const SLOW_STEPS = 5;
+const FOO_AGE = 18;
+const FOO_EMAIL = "john-doe@email.com";
+const FOO_NAME = "John Doe";
 
 const slowReaction = (): Promise<void> =>
     Array.from({ length: SLOW_STEPS }).reduce<Promise<void>>(
@@ -18,8 +21,7 @@ const slowReaction = (): Promise<void> =>
         Promise.resolve(),
     );
 const fooUpdated = () => new FooUpdatedDomainEvent(FooId.create());
-const fooCreated = () =>
-    new FooCreatedDomainEvent(FooId.create(), { age: 18, email: "john-doe@email.com", name: "John Doe" });
+const fooCreated = () => new FooCreatedDomainEvent(FooId.create(), { age: FOO_AGE, email: FOO_EMAIL, name: FOO_NAME });
 
 describe("EventBusInMemorySync", () => {
     it("Should finish every listener before publish resolves", async () => {

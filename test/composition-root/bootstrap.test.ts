@@ -75,7 +75,7 @@ const twoAuctionItems: NewItem = [
     { ...AUCTION_ITEM!, id: NEXT_AUCTION_ID },
 ];
 
-const receiveItemsWithFailingFirstBid = async (container: Container): Promise<void> => {
+const receiveWithFailingFirstBid = async (container: Container): Promise<void> => {
     const wsOnSpy = jest.spyOn(await container.getAsync(CSG_WS_CLIENT), "on");
     const dispatchSpy = jest.spyOn(await container.getAsync(COMMAND_DISPATCHER), "dispatch");
     await new Bootstrap(container).run();
@@ -273,7 +273,7 @@ describe("Bootstrap", () => {
     it("Should log a bid that failed with its item and account and keep the bot running", async () => {
         const logSpy = jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
 
-        await receiveItemsWithFailingFirstBid(container);
+        await receiveWithFailingFirstBid(container);
 
         expect(logSpy).toHaveBeenCalledWith(
             expect.stringContaining(
@@ -283,7 +283,7 @@ describe("Bootstrap", () => {
     });
 
     it("Should still bid on the next item after a bid failed", async () => {
-        await receiveItemsWithFailingFirstBid(container);
+        await receiveWithFailingFirstBid(container);
 
         const participation = await container
             .get(AUCTION_PARTICIPATION_REPO)
