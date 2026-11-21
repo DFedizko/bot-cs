@@ -3,6 +3,7 @@ import {
     COMMAND_BUS,
     HTTP_CONTROLLER,
     HTTP_ERROR_MAPPING,
+    HTTP_ROUTE_DOC,
     HTTP_SERVER,
 } from "@/packages/external/di/packages.identifiers";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
@@ -24,6 +25,10 @@ import { addWantedItemSchema } from "../validation/add-wanted-item.schema";
 import { editWantedItemSchema } from "../validation/edit-wanted-item.schema";
 import { removeWantedItemSchema } from "../validation/remove-wanted-item.schema";
 import { toggleWantedItemSchema } from "../validation/toggle-wanted-item.schema";
+import { addWantedItemRoute } from "../docs/add-wanted-item.route-doc";
+import { editWantedItemRoute } from "../docs/edit-wanted-item.route-doc";
+import { removeWantedItemRoute } from "../docs/remove-wanted-item.route-doc";
+import { toggleWantedItemRoute } from "../docs/toggle-wanted-item.route-doc";
 import {
     ADD_WANTED_ITEM_CONTROLLER,
     ADD_WANTED_ITEM_VALIDATOR,
@@ -42,6 +47,12 @@ export class BiddingHttpModule extends ContainerModule {
         REMOVE_WANTED_ITEM_CONTROLLER,
         TOGGLE_WANTED_ITEM_CONTROLLER,
     ];
+    private static readonly ROUTE_DOCS = [
+        addWantedItemRoute,
+        editWantedItemRoute,
+        removeWantedItemRoute,
+        toggleWantedItemRoute,
+    ];
 
     constructor() {
         super((options) => BiddingHttpModule.bindAll(options));
@@ -51,6 +62,7 @@ export class BiddingHttpModule extends ContainerModule {
         BiddingHttpModule.bindValidators(options);
         BiddingHttpModule.bindControllers(options);
         BiddingHttpModule.bindErrorMappings(options);
+        BiddingHttpModule.ROUTE_DOCS.forEach((route) => options.bind(HTTP_ROUTE_DOC).toConstantValue(route));
     }
 
     private static bindValidators({ bind }: ContainerModuleLoadOptions): void {

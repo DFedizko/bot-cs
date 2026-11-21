@@ -21,7 +21,7 @@ import {
 const API_INFO = {
     title: "bot-cs API",
     version: "1.0.0",
-    description: "Manages the wanted items each CSGOEmpire account bids on.",
+    description: "The HTTP API of bot-cs.",
 };
 
 export class PackagesDevModule extends ContainerModule {

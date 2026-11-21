@@ -11,7 +11,7 @@ import {
     TOGGLE_WANTED_ITEM_CONTROLLER,
     TOGGLE_WANTED_ITEM_VALIDATOR,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { HTTP_CONTROLLER, HTTP_ERROR_MAPPER } from "@/packages/external/di/packages.identifiers";
+import { HTTP_CONTROLLER, HTTP_ERROR_MAPPER, HTTP_ROUTE_DOC } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
@@ -21,6 +21,12 @@ import { ToggleWantedItemHttpController } from "@/contexts/trading/bidding/infra
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
 
+const DOCUMENTED_ROUTES = [
+    ["post", AddWantedItemHttpController.PATH],
+    ["patch", EditWantedItemHttpController.PATH],
+    ["delete", RemoveWantedItemHttpController.PATH],
+    ["patch", ToggleWantedItemHttpController.PATH],
+];
 const ENVIRONMENTS: ("development" | "production")[] = ["development", "production"];
 const HTTP_CONTROLLERS = [
     { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
@@ -60,6 +66,12 @@ describe.each(ENVIRONMENTS)("BiddingHttpModule in %s", (nodeEnv) => {
         const controllers = await externals.getAllAsync(HTTP_CONTROLLER);
 
         expect(controllers).toContain(await externals.getAsync(identifier));
+    });
+
+    it("Should document every wanted item route", () => {
+        const routes = container.getAll(HTTP_ROUTE_DOC);
+
+        expect(routes.map(({ method, path }) => [method, path])).toEqual(DOCUMENTED_ROUTES);
     });
 
     it.each(VALIDATORS)("Should bind the zod validator of the $name wanted item input", ({ identifier }) => {
