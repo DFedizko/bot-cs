@@ -126,6 +126,7 @@ describe("EvaluateItemCommandHandler", () => {
     describe("With a disabled wanted item", () => {
         it("Should skip it without publishing any event", async () => {
             await container.get(WANTED_ITEM_REPOSITORY).save(disabledCyberSecurity(ACCOUNT_ID));
+            jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
             await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
@@ -145,6 +146,7 @@ describe("EvaluateItemCommandHandler", () => {
         it("Should still approve the same item wanted by another account", async () => {
             const repository = container.get(WANTED_ITEM_REPOSITORY);
             await repository.save(disabledCyberSecurity(OTHER_ACCOUNT_ID));
+            jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
             await repository.save(WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-4.05" }));
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 

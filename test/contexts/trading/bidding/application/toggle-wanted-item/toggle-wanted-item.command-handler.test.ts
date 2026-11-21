@@ -61,7 +61,8 @@ describe("ToggleWantedItemCommandHandler", () => {
 
         await container.get(TOGGLE_WANTED_ITEM_HANDLER).handle(toggle(false));
 
-        expect(saveSpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+        const [[savedItem]] = saveSpy.mock.calls as [[WantedItem]];
+        expect(savedItem.isEnabled()).toBe(false);
     });
 
     it("Should never disable the same item wanted by another account", async () => {
