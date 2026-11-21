@@ -1,6 +1,6 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { ASYNC_EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { ACCEPT_OFFER_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { AcceptDeliveryOfferCommand } from "@/contexts/delivery/application/accept-delivery-offer/accept-delivery-offer.command";
 import { DeliveryOfferNotFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-offer-not-found.event";
@@ -60,7 +60,7 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
 
         it("Should publish the trade offer accepted event the delivery recorded", async () => {
             await givenDelivery(container, { steam: { confirmationRequired: true } });
-            const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+            const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
             await acceptDeliveryOffer(container);
 
@@ -111,7 +111,7 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
 
         it("Should report the scam offer so it gets cancelled", async () => {
             await givenDelivery(container, { offers: [scamOfferAskingOurItems()] });
-            const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+            const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
             await acceptDeliveryOffer(container);
 
@@ -171,7 +171,7 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
         ])("Should accept nothing and say so when $scenario", async ({ offers, matchingOffers }) => {
             await givenDelivery(container, { offers });
             const acceptSpy = jest.spyOn(steamSession(container), "acceptOffer");
-            const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+            const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
             await acceptDeliveryOffer(container);
 
@@ -198,7 +198,7 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
         it("Should publish only the failed delivery", async () => {
             await givenDelivery(container);
             jest.spyOn(steamSession(container), "acceptOffer").mockResolvedValue("escrow");
-            const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+            const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
             await acceptDeliveryOffer(container);
 

@@ -1,5 +1,12 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
-import { COMMAND_BUS, COMMAND_HANDLER, EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    COMMAND_BUS,
+    COMMAND_DISPATCHER,
+    COMMAND_HANDLER,
+    EVENT_BUS,
+    LOGGER,
+} from "@/packages/external/di/packages.identifiers";
+import type { CommandDispatcher } from "@/packages/infrastructure/command-bus/command-dispatcher";
 import {
     CSG_WS_CLIENT,
     CSGOEMPIRE_HTTP_CLIENT,
@@ -202,14 +209,14 @@ export class BiddingModule extends ContainerModule {
     private static bindControllers({ bind }: ContainerModuleLoadOptions): void {
         bind(NEW_ITEM_CONTROLLER)
             .toResolvedValue(
-                (ws: CsgWsClient, bus: CommandBus) => new NewItemWsController(ws, bus),
-                [CSG_WS_CLIENT, COMMAND_BUS],
+                (ws: CsgWsClient, dispatcher: CommandDispatcher) => new NewItemWsController(ws, dispatcher),
+                [CSG_WS_CLIENT, COMMAND_DISPATCHER],
             )
             .inSingletonScope();
         bind(AUCTION_UPDATE_CONTROLLER)
             .toResolvedValue(
-                (ws: CsgWsClient, bus: CommandBus) => new AuctionUpdateWsController(ws, bus),
-                [CSG_WS_CLIENT, COMMAND_BUS],
+                (ws: CsgWsClient, dispatcher: CommandDispatcher) => new AuctionUpdateWsController(ws, dispatcher),
+                [CSG_WS_CLIENT, COMMAND_DISPATCHER],
             )
             .inSingletonScope();
     }

@@ -1,6 +1,6 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { COMMAND_BUS, EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { COMMAND_BUS, ASYNC_EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { DELIVERY_COMMAND_BUS } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { ConfirmTradeOfferCommand } from "@/contexts/delivery/application/confirm-trade-offer/confirm-trade-offer.command";
 import { DeliveryStepFailedEvent } from "@/contexts/delivery/application/delivery-step-failed.event";
@@ -70,7 +70,7 @@ describe("CommandBusStepFailureDecorator", () => {
 
     it("Should report the failed step with the trade it belongs to", async () => {
         jest.spyOn(await container.getAsync(COMMAND_BUS), "dispatch").mockRejectedValue(new Error(STEAM_DOWN));
-        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+        const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
         await (await container.getAsync(DELIVERY_COMMAND_BUS)).dispatch(confirmStep());
 

@@ -1,3 +1,5 @@
+import { EventEmitter } from "node:events";
+import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
 import type { Container } from "inversify";
 import { CSG_WS_CLIENT, SOCKET_METADATA_HTTP } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import {
@@ -30,5 +32,6 @@ export const fakeExternals = (container: Container): Container => {
     container.rebind(CSG_DELIVERY_HTTP).toConstantValue(new CsgDeliveryHttpFakeAdapter());
     container.rebind(SCHEDULER).toConstantValue(new SchedulerFakeAdapter());
     container.rebind(CLOCK).toConstantValue(new ClockFakeAdapter());
+    container.rebind(PROCESS_EVENTS).toConstantValue(new EventEmitter());
     return container;
 };

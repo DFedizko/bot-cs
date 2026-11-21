@@ -1,6 +1,6 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { ASYNC_EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
     CSG_DELIVERY_HTTP,
     DELIVERY_REPOSITORY,
@@ -41,7 +41,7 @@ describe("DisputeDeliveryCommandHandler", () => {
 
     it("Should publish that the delivery was disputed", async () => {
         await container.get(DELIVERY_REPOSITORY).save(awaitingDelivery());
-        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+        const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
         await container.get(DISPUTE_DELIVERY_HANDLER).handle(new DisputeDeliveryCommand(TRADE_ID));
 

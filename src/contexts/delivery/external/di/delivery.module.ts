@@ -3,8 +3,8 @@ import {
     COMMAND_BUS,
     COMMAND_HANDLER,
     ENV,
-    EVENT_BUS,
-    EVENT_LISTENER,
+    ASYNC_EVENT_BUS,
+    ASYNC_EVENT_LISTENER,
     LOGGER,
 } from "@/packages/external/di/packages.identifiers";
 import type { CommandBus } from "@/packages/application/command-bus";
@@ -90,7 +90,7 @@ export class DeliveryModule extends ContainerModule {
         DeliveryModule.bindListeners(options);
         STEAM_OFFER_PORTS.forEach((port) => options.bind(port).toService(STEAM_TRADE_OFFERS));
         COMMAND_HANDLERS.forEach((handler) => options.bind(COMMAND_HANDLER).toService(handler));
-        EVENT_LISTENERS.forEach((listener) => options.bind(EVENT_LISTENER).toService(listener));
+        EVENT_LISTENERS.forEach((listener) => options.bind(ASYNC_EVENT_LISTENER).toService(listener));
     }
 
     private static bindExternals({ bind }: ContainerModuleLoadOptions): void {
@@ -111,7 +111,7 @@ export class DeliveryModule extends ContainerModule {
             .toResolvedValue(
                 (repo: DeliveryRepository, bus: EventBus, logger: Logger) =>
                     new StartDeliveryCommandHandler(repo, bus, logger),
-                [DELIVERY_REPOSITORY, EVENT_BUS, LOGGER],
+                [DELIVERY_REPOSITORY, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(ACCEPT_OFFER_HANDLER)
@@ -119,7 +119,7 @@ export class DeliveryModule extends ContainerModule {
                 DELIVERY_REPOSITORY,
                 RECEIVED_OFFERS_GATEWAY,
                 OFFER_ACCEPTANCE_GATEWAY,
-                EVENT_BUS,
+                ASYNC_EVENT_BUS,
                 LOGGER,
             ])
             .inSingletonScope();
@@ -127,7 +127,7 @@ export class DeliveryModule extends ContainerModule {
             .toResolvedValue(
                 (repo: DeliveryRepository, trades: CsgTradesGateway, bus: EventBus, logger: Logger) =>
                     new DisputeDeliveryCommandHandler(repo, trades, bus, logger),
-                [DELIVERY_REPOSITORY, CSG_TRADES, EVENT_BUS, LOGGER],
+                [DELIVERY_REPOSITORY, CSG_TRADES, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
     }
@@ -137,21 +137,21 @@ export class DeliveryModule extends ContainerModule {
             .toResolvedValue(
                 (cancellation: OfferCancellationGateway, bus: EventBus, logger: Logger) =>
                     new CancelTradeOfferCommandHandler(cancellation, bus, logger),
-                [OFFER_CANCELLATION_GATEWAY, EVENT_BUS, LOGGER],
+                [OFFER_CANCELLATION_GATEWAY, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(CONFIRM_OFFER_HANDLER)
             .toResolvedValue(
                 (repo: DeliveryRepository, confirmation: OfferConfirmationGateway, bus: EventBus, logger: Logger) =>
                     new ConfirmTradeOfferCommandHandler(repo, confirmation, bus, logger),
-                [DELIVERY_REPOSITORY, OFFER_CONFIRMATION_GATEWAY, EVENT_BUS, LOGGER],
+                [DELIVERY_REPOSITORY, OFFER_CONFIRMATION_GATEWAY, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(MARK_RECEIVED_HANDLER)
             .toResolvedValue(
                 (repo: DeliveryRepository, trades: CsgTradesGateway, bus: EventBus, logger: Logger) =>
                     new MarkDeliveryReceivedCommandHandler(repo, trades, bus, logger),
-                [DELIVERY_REPOSITORY, CSG_TRADES, EVENT_BUS, LOGGER],
+                [DELIVERY_REPOSITORY, CSG_TRADES, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
     }
@@ -161,7 +161,7 @@ export class DeliveryModule extends ContainerModule {
             .toResolvedValue(
                 (commandBus: CommandBus, eventBus: EventBus, logger: Logger) =>
                     new CommandBusStepFailureDecorator(commandBus, eventBus, logger),
-                [COMMAND_BUS, EVENT_BUS, LOGGER],
+                [COMMAND_BUS, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(ON_SCAM_OFFERS_FOUND)

@@ -1,3 +1,5 @@
+import { EventEmitter } from "node:events";
+import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
 import { testContainer } from "./test-container.builder";
 import {
     AUCTION_GATEWAY,
@@ -18,6 +20,12 @@ import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/ste
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
 
 describe("testContainer", () => {
+    it("Should rebind the process events to a fake so tests never touch the running process", () => {
+        const events = testContainer().get(PROCESS_EVENTS);
+
+        expect(events).toBeInstanceOf(EventEmitter);
+    });
+
     it("Should rebind steam and the csgoempire delivery api to their fakes", () => {
         const container = testContainer();
 

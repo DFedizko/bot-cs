@@ -1,5 +1,17 @@
 import type { Container } from "inversify";
-import { COMMAND_BUS, ENV, EVENT_BUS, EVENT_LISTENER, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import {
+    ASYNC_EVENT_BUS,
+    ASYNC_EVENT_LISTENER,
+    COMMAND_BUS,
+    ENV,
+    EVENT_BUS,
+    EVENT_LISTENER,
+    HTTP_SERVER,
+    UNHANDLED_ERROR_TRAP,
+} from "@/packages/external/di/packages.identifiers";
+import type { EventBus } from "@/packages/application/event-bus";
+import type { EventListener } from "@/packages/application/event-listener";
+import type { Identifier } from "@/packages/external/di/identifier";
 import { INIT_CSG_SESSION, SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import {
     ADD_WANTED_ITEM_CONTROLLER,
@@ -25,7 +37,9 @@ export class Bootstrap {
     constructor(private readonly container: Container) {}
 
     async run(): Promise<void> {
-        await this.subscribeEventListeners();
+        this.container.get(UNHANDLED_ERROR_TRAP).install();
+        await this.subscribe(EVENT_LISTENER, EVENT_BUS);
+        await this.subscribe(ASYNC_EVENT_LISTENER, ASYNC_EVENT_BUS);
         await this.startHttpServer();
         const commandBus = await this.container.getAsync(COMMAND_BUS);
         const { user } = await this.container.getAsync(SOCKET_METADATA);
@@ -35,9 +49,9 @@ export class Bootstrap {
         await this.startDeliveryTracking(user.id);
     }
 
-    private async subscribeEventListeners(): Promise<void> {
-        const listeners = await this.container.getAllAsync(EVENT_LISTENER, { optional: true });
-        (await this.container.getAsync(EVENT_BUS)).addSubscribers(listeners);
+    private async subscribe(listenerId: Identifier<EventListener>, busId: Identifier<EventBus>): Promise<void> {
+        const listeners = await this.container.getAllAsync(listenerId, { optional: true });
+        (await this.container.getAsync(busId)).addSubscribers(listeners);
     }
 
     private async startDeliveryTracking(accountId: number): Promise<void> {

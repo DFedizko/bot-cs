@@ -7,6 +7,10 @@ import {
     COMMAND_BUS,
     COMMAND_HANDLER,
     ENV,
+    ASYNC_EVENT_BUS,
+    COMMAND_DISPATCHER,
+    PROCESS_EVENTS,
+    UNHANDLED_ERROR_TRAP,
     EVENT_BUS,
     HTTP_CLIENT_FACTORY,
     HTTP_ERROR_MAPPER,
@@ -20,6 +24,9 @@ import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { FooNotFoundError } from "@/packages/infrastructure/http/__stubs__/foo.errors";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
+import { EventBusInMemorySync } from "@/packages/external/event-bus/event-bus.in-memory-sync";
+import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
+import { UnhandledErrorTrapLoggingAdapter } from "@/packages/infrastructure/process/unhandled-error-trap.logging-adapter";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { HttpClientFactoryAdapter } from "@/packages/external/http/client/http-client.factory.adapter";
 import { CommandNotRegisteredError } from "@/packages/error/command-not-registered.error";
@@ -52,10 +59,28 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         expect(logger).toBeInstanceOf(LoggerConsoleAdapter);
     });
 
-    it("Should bind the async in-memory event bus", () => {
+    it("Should bind the sync in-memory event bus for the core flow", () => {
         const eventBus = container.get(EVENT_BUS);
 
+        expect(eventBus).toBeInstanceOf(EventBusInMemorySync);
+    });
+
+    it("Should bind one core event bus", () => {
+        const eventBus = container.get(EVENT_BUS);
+
+        expect(container.get(EVENT_BUS)).toBe(eventBus);
+    });
+
+    it("Should bind the async in-memory event bus for side effects", () => {
+        const eventBus = container.get(ASYNC_EVENT_BUS);
+
         expect(eventBus).toBeInstanceOf(EventBusInMemoryAsync);
+    });
+
+    it("Should bind one async event bus", () => {
+        const eventBus = container.get(ASYNC_EVENT_BUS);
+
+        expect(container.get(ASYNC_EVENT_BUS)).toBe(eventBus);
     });
 
     it("Should bind the http client factory", () => {
@@ -89,6 +114,33 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         const commandBus = container.get(COMMAND_BUS);
 
         expect(commandBus).toBeInstanceOf(CommandBusInMemory);
+    });
+
+    it("Should bind a command dispatcher that keeps failures away from the entry points", () => {
+        const dispatcher = container.get(COMMAND_DISPATCHER);
+
+        expect(dispatcher).toBeInstanceOf(CommandDispatcherErrorBoundary);
+    });
+
+    it("Should dispatch through the core command bus", async () => {
+        container.bind(COMMAND_HANDLER).toConstantValue(fooHandler);
+        const dispatcher = container.get(COMMAND_DISPATCHER);
+
+        await dispatcher.dispatch(new FooCommand(), {});
+
+        expect(fooHandler.handle).toHaveBeenCalled();
+    });
+
+    it("Should bind the running process as the source of process events", () => {
+        const events = container.get(PROCESS_EVENTS);
+
+        expect(events).toBe(process);
+    });
+
+    it("Should bind an unhandled error trap that logs what slips through", () => {
+        const trap = container.get(UNHANDLED_ERROR_TRAP);
+
+        expect(trap).toBeInstanceOf(UnhandledErrorTrapLoggingAdapter);
     });
 
     it("Should bind an http error mapper that logs server errors", () => {
