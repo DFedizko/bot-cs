@@ -19,6 +19,7 @@ import {
     PLACE_BID_HANDLER,
     REMOVE_WANTED_ITEM_HANDLER,
     SYNC_ACCOUNT_HANDLER,
+    TOGGLE_WANTED_ITEM_HANDLER,
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
@@ -35,6 +36,7 @@ import { AuctionParticipationRepositoryInMemory } from "@/contexts/trading/biddi
 import { AddWantedItemCommandHandler } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command-handler";
 import { EditWantedItemCommandHandler } from "@/contexts/trading/bidding/application/edit-wanted-item/edit-wanted-item.command-handler";
 import { RemoveWantedItemCommandHandler } from "@/contexts/trading/bidding/application/remove-wanted-item/remove-wanted-item.command-handler";
+import { ToggleWantedItemCommandHandler } from "@/contexts/trading/bidding/application/toggle-wanted-item/toggle-wanted-item.command-handler";
 import { PlaceBidCommandHandler } from "@/contexts/trading/bidding/application/place-bid/place-bid.command-handler";
 import { LeaveAuctionCommandHandler } from "@/contexts/trading/bidding/application/leave-auction/leave-auction.command-handler";
 import { TrackAuctionUpdateCommandHandler } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command-handler";
@@ -51,6 +53,7 @@ const COMMAND_HANDLERS = [
     { identifier: ADD_WANTED_ITEM_HANDLER, implementation: AddWantedItemCommandHandler },
     { identifier: EDIT_WANTED_ITEM_HANDLER, implementation: EditWantedItemCommandHandler },
     { identifier: REMOVE_WANTED_ITEM_HANDLER, implementation: RemoveWantedItemCommandHandler },
+    { identifier: TOGGLE_WANTED_ITEM_HANDLER, implementation: ToggleWantedItemCommandHandler },
     { identifier: PLACE_BID_HANDLER, implementation: PlaceBidCommandHandler },
     { identifier: LEAVE_AUCTION_HANDLER, implementation: LeaveAuctionCommandHandler },
     { identifier: TRACK_AUCTION_HANDLER, implementation: TrackAuctionUpdateCommandHandler },
