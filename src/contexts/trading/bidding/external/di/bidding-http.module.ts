@@ -1,6 +1,6 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
 import { COMMAND_BUS, HTTP_ERROR_MAPPING, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
-import { ZodValidatorAdapter } from "@/packages/external/validation/validator.zod-adapter";
+import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import type { CommandBus } from "@/packages/application/command-bus";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
@@ -43,16 +43,16 @@ export class BiddingHttpModule extends ContainerModule {
 
     private static bindValidators({ bind }: ContainerModuleLoadOptions): void {
         bind(ADD_WANTED_ITEM_VALIDATOR)
-            .toResolvedValue(() => new ZodValidatorAdapter(addWantedItemSchema))
+            .toResolvedValue(() => new ValidatorZodAdapter(addWantedItemSchema))
             .inSingletonScope();
         bind(EDIT_WANTED_ITEM_VALIDATOR)
-            .toResolvedValue(() => new ZodValidatorAdapter(editWantedItemSchema))
+            .toResolvedValue(() => new ValidatorZodAdapter(editWantedItemSchema))
             .inSingletonScope();
         bind(REMOVE_WANTED_ITEM_VALIDATOR)
-            .toResolvedValue(() => new ZodValidatorAdapter(removeWantedItemSchema))
+            .toResolvedValue(() => new ValidatorZodAdapter(removeWantedItemSchema))
             .inSingletonScope();
         bind(TOGGLE_WANTED_ITEM_VALIDATOR)
-            .toResolvedValue(() => new ZodValidatorAdapter(toggleWantedItemSchema))
+            .toResolvedValue(() => new ValidatorZodAdapter(toggleWantedItemSchema))
             .inSingletonScope();
     }
 

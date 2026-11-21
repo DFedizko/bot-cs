@@ -1,14 +1,14 @@
 import z from "zod";
-import { ZodValidatorAdapter } from "@/packages/external/validation/validator.zod-adapter";
+import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import { ValidationError } from "@/packages/infrastructure/validation/validation.error";
 
 type FooInput = { id: number; name: string };
 
 const fooSchema = z.object({ id: z.coerce.number().int(), name: z.string() }) satisfies z.ZodType<FooInput>;
 
-describe("ZodValidatorAdapter", () => {
+describe("ValidatorZodAdapter", () => {
     it("Should return the input converted by its schema", () => {
-        const validator = new ZodValidatorAdapter(fooSchema);
+        const validator = new ValidatorZodAdapter(fooSchema);
 
         const input = validator.validate({ id: "7", name: "Foo" });
 
@@ -16,7 +16,7 @@ describe("ZodValidatorAdapter", () => {
     });
 
     it("Should drop the keys its schema doesn't know", () => {
-        const validator = new ZodValidatorAdapter(fooSchema);
+        const validator = new ValidatorZodAdapter(fooSchema);
 
         const input = validator.validate({ id: 7, name: "Foo", extra: true });
 
@@ -24,7 +24,7 @@ describe("ZodValidatorAdapter", () => {
     });
 
     it("Should throw a validation error for an invalid input", () => {
-        const validator = new ZodValidatorAdapter(fooSchema);
+        const validator = new ValidatorZodAdapter(fooSchema);
 
         const validate = () => validator.validate({ id: "seven" });
 
@@ -32,7 +32,7 @@ describe("ZodValidatorAdapter", () => {
     });
 
     it("Should name every failing field", () => {
-        const validator = new ZodValidatorAdapter(fooSchema);
+        const validator = new ValidatorZodAdapter(fooSchema);
 
         const failingPaths = () => {
             try {
@@ -46,7 +46,7 @@ describe("ZodValidatorAdapter", () => {
     });
 
     it("Should name a nested failing field by its full path", () => {
-        const validator = new ZodValidatorAdapter(z.object({ items: z.array(z.object({ type: z.string() })) }));
+        const validator = new ValidatorZodAdapter(z.object({ items: z.array(z.object({ type: z.string() })) }));
 
         const validate = () => validator.validate({ items: [{ type: 1 }] });
 
