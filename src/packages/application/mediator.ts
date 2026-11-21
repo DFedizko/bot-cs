@@ -12,8 +12,13 @@ export class Mediator {
     }
 
     async publish(events: Event[]): Promise<void> {
-        for (const event of events) {
-            for (const handler of this.handlers.get(event.name) ?? []) await handler.handle(event);
-        }
+        await events.reduce((previous, event) => previous.then(() => this.notify(event)), Promise.resolve());
+    }
+
+    private async notify(event: Event): Promise<void> {
+        await (this.handlers.get(event.name) ?? []).reduce(
+            (previous, handler) => previous.then(() => handler.handle(event)),
+            Promise.resolve(),
+        );
     }
 }
