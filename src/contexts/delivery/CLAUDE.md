@@ -40,6 +40,7 @@ These apply to every change that touches trades:
 - `domain/delivery/`: the `Delivery` aggregate, its value objects, its status lifecycle (transitions only through intention-revealing methods), its domain events (`events/`) and errors (`errors/`).
 - `domain/offer-verification/`: `ReceivedOffer`, the `OfferVerificationPolicy`, its rules (`rules/`, one specification per rejection reason) and the `OfferVerdict`.
 - `application/<use-case>/`: one folder per intention (start, accept, confirm, mark received, cancel, dispute), holding its command, handler, the application events it produces, the listener that triggers it and the ports only it uses.
+- `application/`: ports and errors shared by several use cases live at its root (`delivery.repository.ts`, `csg-trades.gateway.ts`, `steam-credentials.ts`).
 - `infrastructure/`: gateway adapters, the in-memory repository, the command bus decorator for delivery steps, and the contracts `external/` implements (`steam/`, `http/csgoempire/`).
 - `external/`: Steam session adapters (the only code importing the Steam libraries), the CSGOEmpire HTTP adapter, the credentials adapter and the DI modules.
 
