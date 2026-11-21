@@ -5,6 +5,7 @@ import {
     ASYNC_EVENT_BUS,
     ASYNC_EVENT_LISTENER,
     COMMAND_BUS,
+    COMMAND_DISPATCHER,
     ENV,
     EVENT_BUS,
     EVENT_LISTENER,
@@ -35,6 +36,7 @@ import {
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import {
     ACCOUNT_REPOSITORY,
+    AUCTION_GATEWAY,
     AUCTION_PARTICIPATION_REPO,
     WANTED_ITEM_REPOSITORY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
@@ -42,6 +44,9 @@ import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id"
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
+import { newItem } from "@/contexts/trading/bidding/infrastructure/controllers/__mocks__/new-item.mock";
+import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
+import type { NewItem } from "@/contexts/trading/shared/infrastructure/csgoempire/ws-events/new-item";
 import { evaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/__mocks__/evaluate-item.command.mock";
 import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
@@ -60,6 +65,26 @@ const UNHANDLED_REJECTION = "unhandledRejection";
 const STRAY_FAILURE = "stray failure";
 const BIDDER_BALANCE = 10_000;
 const BIDDER_NAME = "John Doe";
+
+const BID_FAILURE = "auction already ended";
+const FAILING_AUCTION_ID = 288767047;
+const NEXT_AUCTION_ID = 288767048;
+const [AUCTION_ITEM] = newItem;
+const twoAuctionItems: NewItem = [
+    { ...AUCTION_ITEM!, id: FAILING_AUCTION_ID },
+    { ...AUCTION_ITEM!, id: NEXT_AUCTION_ID },
+];
+
+const receiveItemsWithFailingFirstBid = async (container: Container): Promise<void> => {
+    const wsOnSpy = jest.spyOn(await container.getAsync(CSG_WS_CLIENT), "on");
+    const dispatchSpy = jest.spyOn(await container.getAsync(COMMAND_DISPATCHER), "dispatch");
+    await new Bootstrap(container).run();
+    await approvedInAuctionItem(container);
+    jest.spyOn(await container.getAsync(AUCTION_GATEWAY), "placeBid").mockRejectedValueOnce(new Error(BID_FAILURE));
+    const [, onNewItem] = wsOnSpy.mock.calls.find(([event]) => event === "new_item")!;
+    onNewItem(twoAuctionItems);
+    await Promise.all(dispatchSpy.mock.results.map(({ value }) => value));
+};
 
 const approvedInAuctionItem = async (container: Container): Promise<void> => {
     const { accountId, itemName, aboveRecommendedPercentage } = evaluateItemCommand();
@@ -243,5 +268,24 @@ describe("Bootstrap", () => {
         (container.get(PROCESS_EVENTS) as EventEmitter).emit(UNHANDLED_REJECTION, STRAY_FAILURE);
 
         expect(logSpy).toHaveBeenCalledWith(`Unhandled rejection: ${STRAY_FAILURE}`);
+    });
+
+    it("Should log a bid that failed with its item and account and keep the bot running", async () => {
+        const logSpy = jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
+
+        await receiveItemsWithFailingFirstBid(container);
+
+        expect(logSpy).toHaveBeenCalledWith(
+            `Command "${EvaluateItemCommand.COMMAND_NAME}" failed (itemId=${FAILING_AUCTION_ID}, accountId=${evaluateItemCommand().accountId}): ${BID_FAILURE}`,
+        );
+    });
+
+    it("Should still bid on the next item after a bid failed", async () => {
+        await receiveItemsWithFailingFirstBid(container);
+
+        const participation = await container
+            .get(AUCTION_PARTICIPATION_REPO)
+            .findByAuctionId(new AuctionId(NEXT_AUCTION_ID));
+        expect(participation).toBeDefined();
     });
 });
