@@ -52,11 +52,17 @@ Then open `http://localhost:<HTTP_PORT>/docs` in development and send the route'
 ## Example
 
 ```ts
+// external/validation/wanted-item.fields.ts
+export const enabledField = z.boolean().meta({
+    description: "true to bid on the item again, false to pause it",
+    examples: [WANTED_ITEM_EXAMPLE.enabled],
+});
+
 // external/validation/toggle-wanted-item.schema.ts
 export const toggleWantedItemSchema = z.object({
     accountId: accountIdField,
     name: itemNameField,
-    enabled: z.boolean().meta({ description: "true to bid on the item again, false to pause it", examples: [false] }),
+    enabled: enabledField,
 }) satisfies z.ZodType<ToggleWantedItemInput>;
 
 // external/docs/toggle-wanted-item.route-doc.ts
