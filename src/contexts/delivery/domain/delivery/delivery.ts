@@ -92,6 +92,10 @@ export class Delivery extends AggregateRoot<TradeId> {
         return OFFER_TAKING_STATUSES.includes(this.status);
     }
 
+    isAwaitingOffer(): boolean {
+        return this.status === DeliveryStatus.AWAITING_OFFER;
+    }
+
     canBeDisputed(): boolean {
         return this.status === DeliveryStatus.AWAITING_OFFER;
     }
