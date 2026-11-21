@@ -20,6 +20,12 @@ import type { TradeOfferAcceptedEvent } from "../../domain/delivery/events/trade
 import type { DeliveryConfirmedEvent } from "../../domain/delivery/events/delivery-confirmed.event";
 import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
+import type { DeliveryTrackers } from "../../application/delivery-trackers";
+import type { TrackDeliveryCommand } from "../../application/track-delivery/track-delivery.command";
+import type { StopDeliveryTrackingCommand } from "../../application/stop-delivery-tracking/stop-delivery-tracking.command";
+import type { Scheduler } from "../../infrastructure/tracking/scheduler";
+import type { Clock } from "../../infrastructure/tracking/clock";
+import type { TrackingOptions } from "../../infrastructure/tracking/tracking-options";
 
 export const CSG_DELIVERY_HTTP = identifier<CsgDeliveryHttp>("CsgDeliveryHttp");
 export const STEAM_SESSIONS = identifier<SteamSessions>("SteamSessions");
@@ -52,3 +58,11 @@ export const ON_OFFER_ACCEPTED = identifier<EventListener<TradeOfferAcceptedEven
 export const ON_DELIVERY_CONFIRMED = identifier<EventListener<DeliveryConfirmedEvent>>(
     "OnDeliveryConfirmedMarkReceived",
 );
+
+export const SCHEDULER = identifier<Scheduler>("Scheduler");
+export const CLOCK = identifier<Clock>("Clock");
+export const TRACKING_OPTIONS = identifier<TrackingOptions>("TrackingOptions");
+export const DELIVERY_TRACKERS = identifier<DeliveryTrackers>("DeliveryTrackers");
+export const TRACK_DELIVERY_HANDLER = identifier<CommandHandler<TrackDeliveryCommand>>("TrackDeliveryHandler");
+export const STOP_TRACKING_HANDLER =
+    identifier<CommandHandler<StopDeliveryTrackingCommand>>("StopDeliveryTrackingHandler");

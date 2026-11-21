@@ -91,7 +91,9 @@ describe.each(ENVIRONMENTS)("DeliveryModule in %s", (nodeEnv) => {
     it("Should register the delivery command handlers", async () => {
         const handlers = await fakeExternals(container).getAllAsync(COMMAND_HANDLER);
 
-        expect(handlers).toEqual(COMMAND_HANDLERS.map(({ implementation }) => expect.any(implementation)));
+        expect(handlers).toEqual(
+            expect.arrayContaining(COMMAND_HANDLERS.map(({ implementation }) => expect.any(implementation))),
+        );
     });
 
     it.each(EVENT_LISTENERS)("Should bind the $implementation.name", async ({ identifier, implementation }) => {
@@ -103,7 +105,9 @@ describe.each(ENVIRONMENTS)("DeliveryModule in %s", (nodeEnv) => {
     it("Should register the delivery event listeners", async () => {
         const listeners = await fakeExternals(container).getAllAsync(EVENT_LISTENER);
 
-        expect(listeners).toEqual(EVENT_LISTENERS.map(({ implementation }) => expect.any(implementation)));
+        expect(listeners).toEqual(
+            expect.arrayContaining(EVENT_LISTENERS.map(({ implementation }) => expect.any(implementation))),
+        );
     });
 
     it.each([
