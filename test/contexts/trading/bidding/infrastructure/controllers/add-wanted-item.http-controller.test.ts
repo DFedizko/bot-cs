@@ -12,6 +12,7 @@ import { itemsPath, startWantedItemsApi } from "./__builders__/wanted-items-api.
 const ACCOUNT_ID = 1;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 const POST = "POST";
+const MALFORMED_JSON = "{ not json";
 const asiimov = {
     name: ITEM_NAME,
     maxFor: "-3",
@@ -98,7 +99,29 @@ describe("AddWantedItemHttpController", () => {
         expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
 
+    it.each(["0x1", "1e0", " 1", "+1", "1.0"])(
+        "Should answer bad request when the account id %p is not written as plain digits",
+        async (accountId) => {
+            const api = await startWantedItemsApi(container);
+
+            const response = await api.send(POST, itemsPath(accountId), asiimov);
+
+            expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+        },
+    );
+
     it("Should answer bad request when the body is not json", async () => {
+        const api = await startWantedItemsApi(container);
+
+        const response = await api.sendRaw(POST, itemsPath(ACCOUNT_ID), MALFORMED_JSON);
+
+        expect(response).toEqual({
+            status: HttpStatus.BAD_REQUEST,
+            body: JSON.stringify({ code: "MALFORMED_BODY", message: "The request body is not valid JSON" }),
+        });
+    });
+
+    it("Should answer bad request when the body is missing", async () => {
         const api = await startWantedItemsApi(container);
 
         const response = await api.send(POST, itemsPath(ACCOUNT_ID));

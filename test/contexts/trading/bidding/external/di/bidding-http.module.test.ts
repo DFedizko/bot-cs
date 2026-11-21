@@ -13,7 +13,7 @@ import {
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { HTTP_ERROR_MAPPER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
-import { ZodValidatorAdapter } from "@/packages/external/validation/validator.zod-adapter";
+import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
 import { EditWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/edit-wanted-item.http-controller";
 import { RemoveWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/remove-wanted-item.http-controller";
@@ -57,7 +57,7 @@ describe.each(ENVIRONMENTS)("BiddingHttpModule in %s", (nodeEnv) => {
     it.each(VALIDATORS)("Should bind the zod validator of the $name wanted item input", ({ identifier }) => {
         const validator = container.get(identifier);
 
-        expect(validator).toBeInstanceOf(ZodValidatorAdapter);
+        expect(validator).toBeInstanceOf(ValidatorZodAdapter);
     });
 
     it("Should convert the input with the endpoint's schema", () => {

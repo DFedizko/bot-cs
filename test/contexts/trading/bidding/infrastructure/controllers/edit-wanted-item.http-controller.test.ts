@@ -11,6 +11,7 @@ import { itemPath, startWantedItemsApi } from "./__builders__/wanted-items-api.b
 const ACCOUNT_ID = 1;
 const OTHER_ACCOUNT_ID = 2;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
+const OTHER_ITEM_NAME = "AK-47 | Redline (Field-Tested)";
 const PATCH = "PATCH";
 
 let container: Container;
@@ -39,6 +40,31 @@ describe("EditWantedItemHttpController", () => {
         const api = await startWantedItemsApi(container);
 
         await api.send(PATCH, itemPath(ACCOUNT_ID, ITEM_NAME), { maxFor: "-5" });
+
+        const wantedItem = await container
+            .get(WANTED_ITEM_REPOSITORY)
+            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+        expect(wantedItem?.getMaxFor()).toBe("-5");
+    });
+
+    it("Should edit the item of the path when the body names another item", async () => {
+        await container
+            .get(WANTED_ITEM_REPOSITORY)
+            .save(WantedItem.create({ accountId: ACCOUNT_ID, name: OTHER_ITEM_NAME, maxFor: "-3" }));
+        const api = await startWantedItemsApi(container);
+
+        await api.send(PATCH, itemPath(ACCOUNT_ID, ITEM_NAME), { name: OTHER_ITEM_NAME, maxFor: "-5" });
+
+        const wantedItem = await container
+            .get(WANTED_ITEM_REPOSITORY)
+            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+        expect(wantedItem?.getMaxFor()).toBe("-5");
+    });
+
+    it("Should edit the item of the path account when the body names another account", async () => {
+        const api = await startWantedItemsApi(container);
+
+        await api.send(PATCH, itemPath(ACCOUNT_ID, ITEM_NAME), { accountId: OTHER_ACCOUNT_ID, maxFor: "-5" });
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
