@@ -53,11 +53,12 @@ Before adding a use case, a port, an adapter or a bounded context, read [`ARCHIT
 
 Summary: `src/contexts/<context>/<subdomain>/` holds each bounded context, with use-case folders in `application/` and domain-concept folders in `domain/`, and dependencies point `external → infrastructure → application → domain`.
 
-Shared folders have their own `CLAUDE.md`; read it before changing anything inside them:
+Shared folders and bounded contexts have their own `CLAUDE.md`; read it before changing anything inside them:
 
 - [`src/contexts/shared-kernel/CLAUDE.md`](src/contexts/shared-kernel/CLAUDE.md): domain concepts with the same meaning in more than one bounded context.
 - [`src/contexts/trading/shared/CLAUDE.md`](src/contexts/trading/shared/CLAUDE.md): concepts and CSGOEmpire integration shared by the trading subdomains.
 - [`src/packages/CLAUDE.md`](src/packages/CLAUDE.md): shared infrastructure with no business meaning (building blocks, ports and adapters, shared and HTTP errors, TypeScript type helpers).
+- [`src/contexts/delivery/CLAUDE.md`](src/contexts/delivery/CLAUDE.md): the delivery bounded context (receiving bought items through Steam trade offers): its responsibilities, language and safety rules.
 
 ## Architecture Decision Records
 
