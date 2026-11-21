@@ -1,5 +1,7 @@
 import type { HttpHeaders } from "./http-headers";
 import { HttpStatus } from "./http-status";
+import type { Validator } from "../validation/validator";
+import type { HttpRouteDoc } from "./docs/http-route.doc";
 
 export type Cookie = {
     value: string;
@@ -28,12 +30,17 @@ export type HttpResponse = {
 
 export type Callback = (req: HttpRequest) => HttpResponse | Promise<HttpResponse>;
 
+export type HttpRouteOptions = {
+    input?: Validator<unknown>;
+    doc?: HttpRouteDoc;
+};
+
 export interface HttpServer {
-    get(path: string, callback: Callback): void;
-    post(path: string, callback: Callback): void;
-    patch(path: string, callback: Callback): void;
-    put(path: string, callback: Callback): void;
-    delete(path: string, callback: Callback): void;
+    get(path: string, callback: Callback, options?: HttpRouteOptions): void;
+    post(path: string, callback: Callback, options?: HttpRouteOptions): void;
+    patch(path: string, callback: Callback, options?: HttpRouteOptions): void;
+    put(path: string, callback: Callback, options?: HttpRouteOptions): void;
+    delete(path: string, callback: Callback, options?: HttpRouteOptions): void;
     listen(port: number, callback?: () => void): void;
     close(): Promise<void>;
 }

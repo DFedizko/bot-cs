@@ -1,4 +1,4 @@
-import { WANTED_ITEM_EXAMPLE } from "../validation/wanted-item.example";
+import { WANTED_ITEM_EXAMPLE } from "./wanted-item.example";
 
 const { accountId, name } = WANTED_ITEM_EXAMPLE;
 

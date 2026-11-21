@@ -1,24 +1,26 @@
 import type { HttpMethod } from "../http-method";
 import type { HttpStatus } from "../http-status";
+import type { HttpRouteOptions } from "../http-server";
 
 export type HttpExampleDoc = {
     summary: string;
     value: unknown;
 };
 
-export type HttpResponseDoc<TSchema> = {
+export type HttpResponseDoc = {
     status: HttpStatus;
     description: string;
-    body?: TSchema;
     examples?: Record<string, HttpExampleDoc>;
 };
 
-export type HttpRouteDoc<TSchema> = {
-    method: HttpMethod;
-    path: string;
+export type HttpRouteDoc = {
     summary: string;
     description: string;
     tags: string[];
-    input: TSchema;
-    responses: HttpResponseDoc<TSchema>[];
+    responses: HttpResponseDoc[];
+};
+
+export type HttpRoute = HttpRouteOptions & {
+    method: HttpMethod;
+    path: string;
 };

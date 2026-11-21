@@ -1,10 +1,8 @@
-import type z from "zod";
-import type { HttpExampleDoc, HttpResponseDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
-import type { HttpErrorBody } from "@/packages/infrastructure/http/http-error.mapper";
-import { HttpStatus } from "@/packages/infrastructure/http/http-status";
-import { httpErrorBodySchema } from "./http-error-body.schema";
+import type { HttpExampleDoc, HttpResponseDoc } from "./http-route.doc";
+import type { HttpErrorBody } from "../http-error.mapper";
+import { HttpStatus } from "../http-status";
 
-type ErrorResponseDoc = HttpResponseDoc<z.ZodObject>;
+type ErrorResponseDoc = HttpResponseDoc;
 type ErrorExample = HttpExampleDoc & { value: HttpErrorBody };
 
 const WORD_SEPARATOR = "_";
@@ -46,7 +44,7 @@ export class HttpErrorResponseDocs {
     private static create(status: HttpStatus, description: string, examples: ErrorExample[]): ErrorResponseDoc {
         const names = examples.map((example) => this.nameOf(example));
         const named = examples.map((example, index) => [this.numberName(names, index), example]);
-        return { status, description, body: httpErrorBodySchema, examples: Object.fromEntries(named) };
+        return { status, description, examples: Object.fromEntries(named) };
     }
 
     private static numberName(names: string[], index: number): string {

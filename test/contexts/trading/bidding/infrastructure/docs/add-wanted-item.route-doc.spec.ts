@@ -1,17 +1,17 @@
-import { addWantedItemRoute } from "@/contexts/trading/bidding/external/docs/add-wanted-item.route-doc";
+import { addWantedItemDoc } from "@/contexts/trading/bidding/infrastructure/docs/add-wanted-item.route-doc";
 import {
     BLANK_NAME,
     INVALID_WEAR,
     NAME_OUT_OF_BOUNDS,
-} from "@/contexts/trading/bidding/external/docs/wanted-item.error-examples";
+} from "@/contexts/trading/bidding/infrastructure/docs/wanted-item.error-examples";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 
 const unprocessableExamples = () =>
     Object.values(
-        addWantedItemRoute.responses.find(({ status }) => status === HttpStatus.UNPROCESSABLE_ENTITY)?.examples ?? {},
+        addWantedItemDoc.responses.find(({ status }) => status === HttpStatus.UNPROCESSABLE_ENTITY)?.examples ?? {},
     );
 
-describe("addWantedItemRoute", () => {
+describe("addWantedItemDoc", () => {
     it.each([
         ["a blank item name", BLANK_NAME],
         ["an item name out of bounds", NAME_OUT_OF_BOUNDS],
