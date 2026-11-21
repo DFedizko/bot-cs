@@ -39,6 +39,12 @@ describe("HttpErrorResponseDocs", () => {
         expect(Object.keys(response.examples ?? {})).toEqual(["fooNotFound", "validationError"]);
     });
 
+    it("Should keep every example that shares an error code", () => {
+        const response = HttpErrorResponseDocs.unprocessable(NOT_FOUND, NOT_FOUND);
+
+        expect(Object.keys(response.examples ?? {})).toEqual(["fooNotFound", "fooNotFound2"]);
+    });
+
     it("Should document the internal server error", () => {
         const response = HttpErrorResponseDocs.internalError();
 

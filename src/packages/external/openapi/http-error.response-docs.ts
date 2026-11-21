@@ -7,7 +7,10 @@ import { httpErrorBodySchema } from "./http-error-body.schema";
 type ErrorResponseDoc = HttpResponseDoc<z.ZodObject>;
 type ErrorExample = HttpExampleDoc & { value: HttpErrorBody };
 
+type NamedExamples = Record<string, ErrorExample>;
+
 const WORD_SEPARATOR = "_";
+const NUMBERED = /\d+$/;
 
 const MALFORMED_BODY: ErrorExample = {
     summary: "The body is not valid JSON",
@@ -44,8 +47,13 @@ export class HttpErrorResponseDocs {
     }
 
     private static create(status: HttpStatus, description: string, examples: ErrorExample[]): ErrorResponseDoc {
-        const namedExamples = Object.fromEntries(examples.map((example) => [this.nameOf(example), example]));
-        return { status, description, body: httpErrorBodySchema, examples: namedExamples };
+        return { status, description, body: httpErrorBodySchema, examples: examples.reduce(this.addExample, {}) };
+    }
+
+    private static addExample(named: NamedExamples, example: ErrorExample): NamedExamples {
+        const name = HttpErrorResponseDocs.nameOf(example);
+        const sameCode = Object.keys(named).filter((key) => key.replace(NUMBERED, "") === name).length;
+        return { ...named, [sameCode ? `${name}${sameCode + 1}` : name]: example };
     }
 
     private static nameOf({ value }: ErrorExample): string {

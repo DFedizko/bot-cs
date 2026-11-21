@@ -10,17 +10,20 @@ type ZodRoute = HttpRouteDoc<z.ZodObject>;
 type PathItems = OpenApiDocument["paths"];
 
 export class ApiDocumentZodAdapter implements ApiDocument {
+    private document?: OpenApiDocument;
+
     constructor(
         private readonly routes: ZodRoute[],
         private readonly info: OpenApiInfo,
     ) {}
 
-    build(): OpenApiDocument {
-        return { openapi: OPENAPI_VERSION, info: this.info, paths: this.routes.reduce(this.addRoute, {}) };
+    toJson(): OpenApiDocument {
+        this.document ??= this.build();
+        return this.document;
     }
 
-    toJson(): OpenApiDocument {
-        return this.build();
+    private build(): OpenApiDocument {
+        return { openapi: OPENAPI_VERSION, info: this.info, paths: this.routes.reduce(this.addRoute, {}) };
     }
 
     private addRoute(paths: PathItems, route: ZodRoute): PathItems {

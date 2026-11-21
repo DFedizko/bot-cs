@@ -6,7 +6,7 @@ const INFO = { title: "Foo API", version: "1.0.0", description: "Manages foos" }
 const FOO_PATH = "/foos/{fooId}";
 const JSON_TYPE = "application/json";
 
-const document = () => new ApiDocumentZodAdapter([addFooRoute, removeFooRoute], INFO).build();
+const document = () => new ApiDocumentZodAdapter([addFooRoute, removeFooRoute], INFO).toJson();
 const addFoo = () => document().paths[FOO_PATH]!.post!;
 const removeFoo = () => document().paths[FOO_PATH]!.delete!;
 
@@ -98,11 +98,11 @@ describe("ApiDocumentZodAdapter", () => {
         });
     });
 
-    it("Should answer the document as json", () => {
+    it("Should build the document once", () => {
         const adapter = new ApiDocumentZodAdapter([addFooRoute], INFO);
 
         const json = adapter.toJson();
 
-        expect(json).toEqual(adapter.build());
+        expect(adapter.toJson()).toBe(json);
     });
 });
