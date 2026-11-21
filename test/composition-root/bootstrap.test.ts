@@ -1,7 +1,7 @@
 import type { Container } from "inversify";
 import { Bootstrap } from "@/composition-root/bootstrap";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { ENV, HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { COMMAND_BUS, ENV, HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import { ACCOUNT_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
@@ -75,5 +75,14 @@ describe("Bootstrap", () => {
         await new Bootstrap(container).run();
 
         expect(postSpy.mock.invocationCallOrder[0]).toBeLessThan(listenSpy.mock.invocationCallOrder[0]!);
+    });
+
+    it("Should start the http server before synchronizing with csgoempire", async () => {
+        const listenSpy = jest.spyOn(container.get(HTTP_SERVER), "listen");
+        const dispatchSpy = jest.spyOn(await container.getAsync(COMMAND_BUS), "dispatch");
+
+        await new Bootstrap(container).run();
+
+        expect(listenSpy.mock.invocationCallOrder[0]).toBeLessThan(dispatchSpy.mock.invocationCallOrder[0]!);
     });
 });

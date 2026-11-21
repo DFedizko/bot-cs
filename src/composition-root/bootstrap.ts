@@ -15,12 +15,12 @@ export class Bootstrap {
     constructor(private readonly container: Container) {}
 
     async run(): Promise<void> {
+        await this.startHttpServer();
         const commandBus = await this.container.getAsync(COMMAND_BUS);
         const { user } = await this.container.getAsync(SOCKET_METADATA);
         await this.container.getAsync(INIT_CSG_SESSION);
         await commandBus.dispatch(new SynchronizeAccountCommand(user.id, user.steam_name, user.balance));
         await this.container.getAsync(NEW_ITEM_CONTROLLER);
-        await this.startHttpServer();
     }
 
     private async startHttpServer(): Promise<void> {
