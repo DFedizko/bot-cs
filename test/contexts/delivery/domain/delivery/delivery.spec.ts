@@ -209,6 +209,8 @@ describe("Delivery", () => {
     describe.each([
         { query: "canTakeOffers", build: awaiting, expected: true },
         { query: "canTakeOffers", build: confirmed, expected: false },
+        { query: "isAwaitingOffer", build: awaiting, expected: true },
+        { query: "isAwaitingOffer", build: accepted, expected: false },
         { query: "canBeDisputed", build: awaiting, expected: true },
         { query: "canBeDisputed", build: confirmed, expected: false },
         { query: "canBeConfirmed", build: accepted, expected: true },

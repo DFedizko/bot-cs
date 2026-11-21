@@ -24,6 +24,9 @@ describe("Delivery barrel", () => {
                 "StartDeliveryCommand",
                 "TradeOfferAcceptedEvent",
                 "TradeOfferCancelledEvent",
+                "TrackDeliveryCommand",
+                "StopDeliveryTrackingCommand",
+                "DeliveryTrackingStoppedEvent",
             ].sort(),
         );
     });

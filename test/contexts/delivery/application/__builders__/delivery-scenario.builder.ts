@@ -17,9 +17,9 @@ export const givenDelivery = async (container: Container, scenario: Scenario = {
     return tracked;
 };
 
-export const steamSession = (container: Container) =>
+export const steamSession = (container: Container, accountName = STEAM_ACCOUNT_NAME) =>
     (container.get(STEAM_SESSIONS) as SteamSessionsFakeAdapter).sessionFor({
-        accountName: STEAM_ACCOUNT_NAME,
+        accountName,
         password: "",
         sharedSecret: "",
         identitySecret: "",

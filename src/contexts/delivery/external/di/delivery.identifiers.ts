@@ -20,6 +20,16 @@ import type { TradeOfferAcceptedEvent } from "../../domain/delivery/events/trade
 import type { DeliveryConfirmedEvent } from "../../domain/delivery/events/delivery-confirmed.event";
 import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
+import type { DeliveryTrackers } from "../../application/delivery-trackers";
+import type { TrackDeliveryCommand } from "../../application/track-delivery/track-delivery.command";
+import type { StopDeliveryTrackingCommand } from "../../application/stop-delivery-tracking/stop-delivery-tracking.command";
+import type { Scheduler } from "../../infrastructure/tracking/scheduler";
+import type { Clock } from "../../infrastructure/tracking/clock";
+import type { TrackingOptions } from "../../infrastructure/tracking/tracking-options";
+import type { CsgDeliveryWsClient } from "../../infrastructure/ws/csgoempire/csg-delivery.ws-client";
+import type { WithdrawalTrackingDispatcher } from "../../infrastructure/controllers/withdrawal-tracking.dispatcher";
+import type { TradeStatusWsController } from "../../infrastructure/controllers/trade-status.ws-controller";
+import type { ActiveWithdrawalsStartupController } from "../../infrastructure/controllers/active-withdrawals.startup-controller";
 
 export const CSG_DELIVERY_HTTP = identifier<CsgDeliveryHttp>("CsgDeliveryHttp");
 export const STEAM_SESSIONS = identifier<SteamSessions>("SteamSessions");
@@ -51,4 +61,18 @@ export const ON_SCAM_OFFERS_FOUND = identifier<EventListener<ScamOffersFoundEven
 export const ON_OFFER_ACCEPTED = identifier<EventListener<TradeOfferAcceptedEvent>>("OnTradeOfferAcceptedConfirm");
 export const ON_DELIVERY_CONFIRMED = identifier<EventListener<DeliveryConfirmedEvent>>(
     "OnDeliveryConfirmedMarkReceived",
+);
+
+export const SCHEDULER = identifier<Scheduler>("Scheduler");
+export const CLOCK = identifier<Clock>("Clock");
+export const TRACKING_OPTIONS = identifier<TrackingOptions>("TrackingOptions");
+export const DELIVERY_TRACKERS = identifier<DeliveryTrackers>("DeliveryTrackers");
+export const TRACK_DELIVERY_HANDLER = identifier<CommandHandler<TrackDeliveryCommand>>("TrackDeliveryHandler");
+export const STOP_TRACKING_HANDLER =
+    identifier<CommandHandler<StopDeliveryTrackingCommand>>("StopDeliveryTrackingHandler");
+export const CSG_DELIVERY_WS_CLIENT = identifier<CsgDeliveryWsClient>("CsgDeliveryWsClient");
+export const WITHDRAWAL_DISPATCHER = identifier<WithdrawalTrackingDispatcher>("WithdrawalTrackingDispatcher");
+export const TRADE_STATUS_CONTROLLER = identifier<TradeStatusWsController>("TradeStatusWsController");
+export const ACTIVE_WITHDRAWALS_CONTROLLER = identifier<ActiveWithdrawalsStartupController>(
+    "ActiveWithdrawalsStartupController",
 );

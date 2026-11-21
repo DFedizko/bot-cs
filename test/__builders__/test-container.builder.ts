@@ -13,6 +13,13 @@ const STEAM_ACCOUNTS = JSON.stringify([
         sharedSecret: "c2hhcmVkLXNlY3JldA==",
         identitySecret: "aWRlbnRpdHktc2VjcmV0",
     },
+    {
+        accountId: 404220,
+        username: "second-buyer",
+        password: "second-password",
+        sharedSecret: "c2Vjb25kLXNoYXJlZA==",
+        identitySecret: "c2Vjb25kLWlkZW50aXR5",
+    },
 ]);
 
 export const testContainer = (nodeEnv: AppEnv["NODE_ENV"] = REAL_GATEWAYS_ENV): Container =>

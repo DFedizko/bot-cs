@@ -8,7 +8,14 @@ import { SocketMetadataHttpFakeAdapter } from "@/contexts/trading/shared/externa
 import { CsgWsClientFakeAdapter } from "@/contexts/trading/shared/external/csgoempire/csg-ws-client.fake-adapter";
 import { CsgoempireAuctionHttpFakeAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-auction.http.fake-adapter";
 import { CsgoempireTradeHttpFakeAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-trade.http.fake-adapter";
-import { CSG_DELIVERY_HTTP, STEAM_SESSIONS } from "@/contexts/delivery/external/di/delivery.identifiers";
+import {
+    CLOCK,
+    CSG_DELIVERY_HTTP,
+    SCHEDULER,
+    STEAM_SESSIONS,
+} from "@/contexts/delivery/external/di/delivery.identifiers";
+import { SchedulerFakeAdapter } from "@/contexts/delivery/external/scheduling/scheduler.fake-adapter";
+import { ClockFakeAdapter } from "@/contexts/delivery/external/scheduling/clock.fake-adapter";
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
 
@@ -21,5 +28,7 @@ export const fakeExternals = (container: Container): Container => {
     container.rebind(CSGOEMPIRE_TRADE_HTTP).toConstantValue(new CsgoempireTradeHttpFakeAdapter());
     container.rebind(STEAM_SESSIONS).toConstantValue(new SteamSessionsFakeAdapter());
     container.rebind(CSG_DELIVERY_HTTP).toConstantValue(new CsgDeliveryHttpFakeAdapter());
+    container.rebind(SCHEDULER).toConstantValue(new SchedulerFakeAdapter());
+    container.rebind(CLOCK).toConstantValue(new ClockFakeAdapter());
     return container;
 };
