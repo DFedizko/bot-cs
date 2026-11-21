@@ -24,8 +24,19 @@ import { DeliveryTrackersSchedulerAdapter } from "../../infrastructure/tracking/
 import type { TrackingOptions } from "../../infrastructure/tracking/tracking-options";
 import { SchedulerTimersAdapter } from "../scheduling/scheduler.timers-adapter";
 import { ClockSystemAdapter } from "../scheduling/clock.system-adapter";
+import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
+import { WithdrawalTrackingDispatcher } from "../../infrastructure/controllers/withdrawal-tracking.dispatcher";
+import { TradeStatusWsController } from "../../infrastructure/controllers/trade-status.ws-controller";
+import type { CsgDeliveryWsClient } from "../../infrastructure/ws/csgoempire/csg-delivery.ws-client";
+import { ActiveWithdrawalsStartupController } from "../../infrastructure/controllers/active-withdrawals.startup-controller";
+import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import {
+    ACTIVE_WITHDRAWALS_CONTROLLER,
+    CSG_DELIVERY_HTTP,
     CLOCK,
+    CSG_DELIVERY_WS_CLIENT,
+    TRADE_STATUS_CONTROLLER,
+    WITHDRAWAL_DISPATCHER,
     DELIVERY_REPOSITORY,
     DELIVERY_TRACKERS,
     SCHEDULER,
@@ -56,6 +67,7 @@ export class DeliveryTrackingModule extends ContainerModule {
         DeliveryTrackingModule.bindScheduling(options);
         DeliveryTrackingModule.bindHandlers(options);
         DeliveryTrackingModule.bindListeners(options);
+        DeliveryTrackingModule.bindControllers(options);
         COMMAND_HANDLERS.forEach((handler) => options.bind(COMMAND_HANDLER).toService(handler));
     }
 
@@ -96,6 +108,30 @@ export class DeliveryTrackingModule extends ContainerModule {
                 )
                 .inSingletonScope(),
         );
+    }
+
+    private static bindControllers({ bind }: ContainerModuleLoadOptions): void {
+        bind(CSG_DELIVERY_WS_CLIENT).toService(CSG_WS_CLIENT);
+        bind(WITHDRAWAL_DISPATCHER)
+            .toResolvedValue(
+                (commandBus: CommandBus, logger: Logger) => new WithdrawalTrackingDispatcher(commandBus, logger),
+                [COMMAND_BUS, LOGGER],
+            )
+            .inSingletonScope();
+        bind(TRADE_STATUS_CONTROLLER)
+            .toResolvedValue(
+                (wsClient: CsgDeliveryWsClient, dispatcher: WithdrawalTrackingDispatcher) =>
+                    new TradeStatusWsController(wsClient, dispatcher),
+                [CSG_DELIVERY_WS_CLIENT, WITHDRAWAL_DISPATCHER],
+            )
+            .inSingletonScope();
+        bind(ACTIVE_WITHDRAWALS_CONTROLLER)
+            .toResolvedValue(
+                (http: CsgDeliveryHttp, dispatcher: WithdrawalTrackingDispatcher, logger: Logger) =>
+                    new ActiveWithdrawalsStartupController(http, dispatcher, logger),
+                [CSG_DELIVERY_HTTP, WITHDRAWAL_DISPATCHER, LOGGER],
+            )
+            .inSingletonScope();
     }
 
     private static readOptions(env: AppEnv): TrackingOptions {

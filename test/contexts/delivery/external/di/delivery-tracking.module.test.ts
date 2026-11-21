@@ -8,7 +8,13 @@ import {
     STOP_TRACKING_HANDLER,
     TRACK_DELIVERY_HANDLER,
     TRACKING_OPTIONS,
+    ACTIVE_WITHDRAWALS_CONTROLLER,
+    CSG_DELIVERY_WS_CLIENT,
+    TRADE_STATUS_CONTROLLER,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
+import { TradeStatusWsController } from "@/contexts/delivery/infrastructure/controllers/trade-status.ws-controller";
+import { ActiveWithdrawalsStartupController } from "@/contexts/delivery/infrastructure/controllers/active-withdrawals.startup-controller";
 import { SchedulerTimersAdapter } from "@/contexts/delivery/external/scheduling/scheduler.timers-adapter";
 import { ClockSystemAdapter } from "@/contexts/delivery/external/scheduling/clock.system-adapter";
 import { DeliveryTrackersSchedulerAdapter } from "@/contexts/delivery/infrastructure/tracking/delivery-trackers.scheduler-adapter";
@@ -100,5 +106,23 @@ describe.each(ENVIRONMENTS)("DeliveryTrackingModule in %s", (nodeEnv) => {
 
         const stopping = listeners.filter((listener) => listener instanceof OnDeliveryEndedStopTracking);
         expect(stopping.map((listener) => listener.subscribedTo())).toEqual(DELIVERY_ENDING_EVENTS);
+    });
+
+    it("Should listen to trade statuses on the csgoempire socket", async () => {
+        const controller = await fakeExternals(container).getAsync(TRADE_STATUS_CONTROLLER);
+
+        expect(controller).toBeInstanceOf(TradeStatusWsController);
+    });
+
+    it("Should give delivery the account's csgoempire socket", async () => {
+        const wsClient = await fakeExternals(container).getAsync(CSG_DELIVERY_WS_CLIENT);
+
+        expect(wsClient).toBe(await container.getAsync(CSG_WS_CLIENT));
+    });
+
+    it("Should bind the controller resuming active withdrawals", () => {
+        const controller = fakeExternals(container).get(ACTIVE_WITHDRAWALS_CONTROLLER);
+
+        expect(controller).toBeInstanceOf(ActiveWithdrawalsStartupController);
     });
 });

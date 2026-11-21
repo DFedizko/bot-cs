@@ -26,6 +26,10 @@ import type { StopDeliveryTrackingCommand } from "../../application/stop-deliver
 import type { Scheduler } from "../../infrastructure/tracking/scheduler";
 import type { Clock } from "../../infrastructure/tracking/clock";
 import type { TrackingOptions } from "../../infrastructure/tracking/tracking-options";
+import type { CsgDeliveryWsClient } from "../../infrastructure/ws/csgoempire/csg-delivery.ws-client";
+import type { WithdrawalTrackingDispatcher } from "../../infrastructure/controllers/withdrawal-tracking.dispatcher";
+import type { TradeStatusWsController } from "../../infrastructure/controllers/trade-status.ws-controller";
+import type { ActiveWithdrawalsStartupController } from "../../infrastructure/controllers/active-withdrawals.startup-controller";
 
 export const CSG_DELIVERY_HTTP = identifier<CsgDeliveryHttp>("CsgDeliveryHttp");
 export const STEAM_SESSIONS = identifier<SteamSessions>("SteamSessions");
@@ -66,3 +70,9 @@ export const DELIVERY_TRACKERS = identifier<DeliveryTrackers>("DeliveryTrackers"
 export const TRACK_DELIVERY_HANDLER = identifier<CommandHandler<TrackDeliveryCommand>>("TrackDeliveryHandler");
 export const STOP_TRACKING_HANDLER =
     identifier<CommandHandler<StopDeliveryTrackingCommand>>("StopDeliveryTrackingHandler");
+export const CSG_DELIVERY_WS_CLIENT = identifier<CsgDeliveryWsClient>("CsgDeliveryWsClient");
+export const WITHDRAWAL_DISPATCHER = identifier<WithdrawalTrackingDispatcher>("WithdrawalTrackingDispatcher");
+export const TRADE_STATUS_CONTROLLER = identifier<TradeStatusWsController>("TradeStatusWsController");
+export const ACTIVE_WITHDRAWALS_CONTROLLER = identifier<ActiveWithdrawalsStartupController>(
+    "ActiveWithdrawalsStartupController",
+);
