@@ -149,9 +149,32 @@ Reads have no side effects and don't go through the command bus. A client that n
 
 ### Events announce what happened
 
-- An event is a fact in the past tense (`BidPlacedEvent`, `OutbidEvent`, `ItemApprovedInAuctionEvent`). It extends `ApplicationEvent<TPayload>` (or `DomainEvent<TPayload>` when it comes from an aggregate), has a `static readonly EVENT_NAME` in snake_case, a typed payload of primitives, an `eventId` and an `ocurredAt`.
-- The event lives in the folder of the use case that **produces** it (`evaluate-item/item-approved-in-auction.event.ts`).
-- Command handlers publish events with `EventBus.publish([...])`. The current bus (`EventBusInMemoryAsync`) is fire-and-forget: the handler doesn't wait for the listeners, and a listener's failure doesn't fail the command.
+- An event is a fact in the past tense (`BidPlacedEvent`, `OutbidEvent`, `ItemApprovedInAuctionEvent`). It has a `static readonly EVENT_NAME` in snake_case, a typed payload of primitives, an `eventId` and an `ocurredAt`.
+- Events are published with `EventBus.publish([...])`. Which bus carries them is decided in [ADR-0002](adr/0002-synchronous-buses-for-the-core.md).
+
+There are two kinds of events, and where an event is produced depends on its kind.
+
+#### Domain events: produced inside the aggregate root
+
+Use a **domain event** when the fact is a change of state of one of **our aggregates**: something the aggregate decided or that happened to it (a delivery was started, an offer was accepted, a reservation was made).
+
+- It extends `DomainEvent<TPayload>` and carries the `aggregateId`.
+- It lives in the domain, next to its aggregate: `domain/<aggregate>/events/<event>.event.ts`.
+- The aggregate produces it itself, with `this.record(new SomethingHappenedEvent(...))`, inside the method that changes its state. The application layer never builds a domain event.
+- The command handler (or listener) that changed the aggregate saves it through the repository, then publishes what the aggregate recorded: `await this.eventBus.publish(aggregate.pullDomainEvents())`. Publish only after saving, so listeners never see a fact that wasn't stored.
+- Aggregate specs assert the recorded events (`pullDomainEvents()`) after each state change.
+
+#### Application and integration events: produced in the application layer
+
+Use an **application event** when the fact is **not a change of state of our aggregate**: an outcome of a use case or of the outside world (an item was approved by an evaluation, an offer wasn't found, a scam offer was cancelled on Steam, a marketplace reported an outbid).
+
+- It extends `ApplicationEvent<TPayload>`.
+- It lives in the folder of the use case that produces it (`evaluate-item/item-approved-in-auction.event.ts`).
+- The command handler or listener builds it and publishes it with `EventBus.publish([...])`.
+
+An **integration event** is an event another bounded context may listen to. Export it from the context's barrel (`index.ts`, contracts only), so other contexts react to it without importing internals. Both domain and application events can be integration events. Keep their payloads to primitives so they can later cross a process boundary.
+
+When in doubt, ask: "Did one of our aggregates change state?" Yes → domain event, recorded by the aggregate. No → application event, built by the use case.
 
 ### Event listeners react and dispatch commands
 
