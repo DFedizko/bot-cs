@@ -7,11 +7,14 @@ import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-s
 import type { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import { CsgWsClientFakeAdapter } from "@/contexts/trading/shared/external/csgoempire/csg-ws-client.fake-adapter";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";
+import { COMMAND_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { EvaluateItemCommand as EvaluateItem } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import { NEW_ITEM_CONTROLLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
 const PORT = 8888;
+const FAILURE = "auction already ended";
+const [FAILING_ITEM] = newItem;
 
 let container: Container;
 let httpServer: HttpServer;
@@ -63,5 +66,23 @@ describe("NewItemWsController", () => {
             );
             done();
         });
+    });
+
+    it("Should log an item whose evaluation failed and still evaluate the others", async () => {
+        const csgWsClient = container.get(CSG_WS_CLIENT);
+        const dispatchSpy = jest
+            .spyOn(container.get(COMMAND_BUS), "dispatch")
+            .mockRejectedValueOnce(new Error(FAILURE))
+            .mockResolvedValue();
+        const logged = new Promise<string>((resolve) =>
+            jest.spyOn(container.get(LOGGER), "log").mockImplementation(resolve),
+        );
+
+        container.get(NEW_ITEM_CONTROLLER);
+
+        expect(await logged).toBe(
+            `Command "${EvaluateItem.COMMAND_NAME}" failed (itemId=${FAILING_ITEM!.id}, accountId=${csgWsClient.accountId}): ${FAILURE}`,
+        );
+        expect(dispatchSpy).toHaveBeenCalledTimes(newItem.length);
     });
 });

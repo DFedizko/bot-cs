@@ -2,6 +2,8 @@ import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
 import type { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
+import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
+import type { CommandBus } from "@/packages/application/command-bus";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "../event-bus/event-bus.in-memory-async";
 import { EventBusInMemorySync } from "../event-bus/event-bus.in-memory-sync";
@@ -14,6 +16,7 @@ import type { Logger } from "@/packages/application/logger";
 import {
     ASYNC_EVENT_BUS,
     COMMAND_BUS,
+    COMMAND_DISPATCHER,
     COMMAND_HANDLER,
     ENV,
     EVENT_BUS,
@@ -49,6 +52,12 @@ export class PackagesModule extends ContainerModule {
             .toResolvedValue(PackagesModule.createCommandBus, [
                 { serviceIdentifier: COMMAND_HANDLER, isMultiple: true, optional: true },
             ])
+            .inSingletonScope();
+        bind(COMMAND_DISPATCHER)
+            .toResolvedValue(
+                (commandBus: CommandBus, logger: Logger) => new CommandDispatcherErrorBoundary(commandBus, logger),
+                [COMMAND_BUS, LOGGER],
+            )
             .inSingletonScope();
         bind(HTTP_ERROR_MAPPER)
             .toResolvedValue(PackagesModule.createErrorMapper, [

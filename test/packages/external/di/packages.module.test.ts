@@ -8,6 +8,7 @@ import {
     COMMAND_HANDLER,
     ENV,
     ASYNC_EVENT_BUS,
+    COMMAND_DISPATCHER,
     EVENT_BUS,
     HTTP_CLIENT_FACTORY,
     HTTP_ERROR_MAPPER,
@@ -22,6 +23,7 @@ import { FooNotFoundError } from "@/packages/infrastructure/http/__stubs__/foo.e
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import { EventBusInMemorySync } from "@/packages/external/event-bus/event-bus.in-memory-sync";
+import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { HttpClientFactoryAdapter } from "@/packages/external/http/client/http-client.factory.adapter";
 import { CommandNotRegisteredError } from "@/packages/error/command-not-registered.error";
@@ -109,6 +111,21 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         const commandBus = container.get(COMMAND_BUS);
 
         expect(commandBus).toBeInstanceOf(CommandBusInMemory);
+    });
+
+    it("Should bind a command dispatcher that keeps failures away from the entry points", () => {
+        const dispatcher = container.get(COMMAND_DISPATCHER);
+
+        expect(dispatcher).toBeInstanceOf(CommandDispatcherErrorBoundary);
+    });
+
+    it("Should dispatch through the core command bus", async () => {
+        container.bind(COMMAND_HANDLER).toConstantValue(fooHandler);
+        const dispatcher = container.get(COMMAND_DISPATCHER);
+
+        await dispatcher.dispatch(new FooCommand(), {});
+
+        expect(fooHandler.handle).toHaveBeenCalled();
     });
 
     it("Should bind an http error mapper that logs server errors", () => {
