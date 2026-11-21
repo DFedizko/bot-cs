@@ -13,7 +13,7 @@ import type { OfferCancellationGateway } from "../../application/cancel-trade-of
 
 const DRY_RUN_OUTCOME: AcceptOutcome = ACCEPT_OUTCOME.ACCEPTED;
 
-export class SteamTradeOffersGatewayDryRunAdapter
+export class SteamTradeOffersDryRunAdapter
     implements ReceivedOffersGateway, OfferAcceptanceGateway, OfferConfirmationGateway, OfferCancellationGateway
 {
     constructor(

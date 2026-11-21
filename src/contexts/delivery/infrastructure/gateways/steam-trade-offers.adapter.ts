@@ -21,6 +21,12 @@ import {
 } from "../steam/steam-trade-offer";
 import type { SteamTradeSession } from "../steam/steam-trade-session";
 import type { SteamOfferStateReader } from "../steam/steam-offer-state-reader";
+import type { SteamReceivedOffers } from "../steam/steam-received-offers";
+import type { SteamOfferAcceptor } from "../steam/steam-offer-acceptor";
+import type { SteamOfferCanceller } from "../steam/steam-offer-canceller";
+import type { SteamOfferConfirmer } from "../steam/steam-offer-confirmer";
+
+type SteamAcceptRoles = SteamOfferAcceptor & SteamOfferStateReader;
 
 const OUTCOMES_BY_STATE: Partial<Record<SteamOfferState, AcceptOutcome>> = {
     [STEAM_OFFER_STATE.ACCEPTED]: ACCEPT_OUTCOME.ACCEPTED,
@@ -33,7 +39,7 @@ const ACCEPT_OUTCOMES: Record<SteamAcceptStatus, AcceptOutcome> = {
     escrow: ACCEPT_OUTCOME.ON_HOLD,
 };
 
-export class SteamTradeOffersGatewayAdapter
+export class SteamTradeOffersAdapter
     implements ReceivedOffersGateway, OfferAcceptanceGateway, OfferConfirmationGateway, OfferCancellationGateway
 {
     constructor(
@@ -42,12 +48,13 @@ export class SteamTradeOffersGatewayAdapter
     ) {}
 
     async listReceivedActive(accountId: number): Promise<TradeOfferDTO[]> {
-        const offers = await (await this.sessionOf(accountId)).getReceivedActiveOffers();
+        const session: SteamReceivedOffers = await this.sessionOf(accountId);
+        const offers = await session.getReceivedActiveOffers();
         return offers.map((offer) => this.mapToDto(offer));
     }
 
     async accept(accountId: number, offerId: string): Promise<AcceptOutcome> {
-        const session = await this.sessionOf(accountId);
+        const session: SteamAcceptRoles = await this.sessionOf(accountId);
         try {
             return ACCEPT_OUTCOMES[await session.acceptOffer(offerId)];
         } catch (error) {
@@ -56,11 +63,13 @@ export class SteamTradeOffersGatewayAdapter
     }
 
     async cancel(accountId: number, offerId: string): Promise<void> {
-        await (await this.sessionOf(accountId)).cancelOffer(offerId);
+        const session: SteamOfferCanceller = await this.sessionOf(accountId);
+        await session.cancelOffer(offerId);
     }
 
     async confirm(accountId: number, offerId: string): Promise<void> {
-        await (await this.sessionOf(accountId)).confirmOffer(offerId);
+        const session: SteamOfferConfirmer = await this.sessionOf(accountId);
+        await session.confirmOffer(offerId);
     }
 
     private async recoverAccept(

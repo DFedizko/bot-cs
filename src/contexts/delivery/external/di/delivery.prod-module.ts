@@ -3,7 +3,7 @@ import type { SteamCredentials } from "../../application/steam-credentials";
 import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
 import { CsgTradesGatewayAdapter } from "../../infrastructure/gateways/csg-trades.gateway.adapter";
-import { SteamTradeOffersGatewayAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.adapter";
+import { SteamTradeOffersAdapter } from "../../infrastructure/gateways/steam-trade-offers.adapter";
 import {
     CSG_DELIVERY_HTTP,
     CSG_TRADES,
@@ -18,7 +18,7 @@ export class DeliveryProdModule extends ContainerModule {
             bind(STEAM_TRADE_OFFERS)
                 .toResolvedValue(
                     (sessions: SteamSessions, credentials: SteamCredentials) =>
-                        new SteamTradeOffersGatewayAdapter(sessions, credentials),
+                        new SteamTradeOffersAdapter(sessions, credentials),
                     [STEAM_SESSIONS, STEAM_CREDENTIALS],
                 )
                 .inSingletonScope();

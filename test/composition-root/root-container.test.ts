@@ -27,8 +27,8 @@ import {
     STEAM_TRADE_OFFERS,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { AcceptDeliveryOfferCommandHandler } from "@/contexts/delivery/application/accept-delivery-offer/accept-delivery-offer.command-handler";
-import { SteamTradeOffersGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.dry-run-adapter";
-import { SteamTradeOffersGatewayAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.adapter";
+import { SteamTradeOffersDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.dry-run-adapter";
+import { SteamTradeOffersAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.adapter";
 import { CsgTradesGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/csg-trades.gateway.dry-run-adapter";
 import { CsgTradesGatewayAdapter } from "@/contexts/delivery/infrastructure/gateways/csg-trades.gateway.adapter";
 
@@ -38,19 +38,19 @@ const AUCTION_GATEWAYS = [
     {
         nodeEnv: "development",
         gateway: AuctionGatewayDryRunAdapter,
-        steamOffers: SteamTradeOffersGatewayDryRunAdapter,
+        steamOffers: SteamTradeOffersDryRunAdapter,
         csgTrades: CsgTradesGatewayDryRunAdapter,
     },
     {
         nodeEnv: "test",
         gateway: AuctionGatewayDryRunAdapter,
-        steamOffers: SteamTradeOffersGatewayDryRunAdapter,
+        steamOffers: SteamTradeOffersDryRunAdapter,
         csgTrades: CsgTradesGatewayDryRunAdapter,
     },
     {
         nodeEnv: "production",
         gateway: AuctionGatewayCsgoempireAdapter,
-        steamOffers: SteamTradeOffersGatewayAdapter,
+        steamOffers: SteamTradeOffersAdapter,
         csgTrades: CsgTradesGatewayAdapter,
     },
 ] as const satisfies {

@@ -6,8 +6,8 @@ import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-d
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
 import { CsgTradesGatewayAdapter } from "../../infrastructure/gateways/csg-trades.gateway.adapter";
 import { CsgTradesGatewayDryRunAdapter } from "../../infrastructure/gateways/csg-trades.gateway.dry-run-adapter";
-import { SteamTradeOffersGatewayAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.adapter";
-import { SteamTradeOffersGatewayDryRunAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.dry-run-adapter";
+import { SteamTradeOffersAdapter } from "../../infrastructure/gateways/steam-trade-offers.adapter";
+import { SteamTradeOffersDryRunAdapter } from "../../infrastructure/gateways/steam-trade-offers.dry-run-adapter";
 import {
     CSG_DELIVERY_HTTP,
     CSG_TRADES,
@@ -32,11 +32,8 @@ export class DeliveryDevModule extends ContainerModule {
         sessions: SteamSessions,
         credentials: SteamCredentials,
         logger: Logger,
-    ): SteamTradeOffersGatewayDryRunAdapter {
-        return new SteamTradeOffersGatewayDryRunAdapter(
-            new SteamTradeOffersGatewayAdapter(sessions, credentials),
-            logger,
-        );
+    ): SteamTradeOffersDryRunAdapter {
+        return new SteamTradeOffersDryRunAdapter(new SteamTradeOffersAdapter(sessions, credentials), logger);
     }
 
     private static createCsgTrades(http: CsgDeliveryHttp, logger: Logger): CsgTradesGatewayDryRunAdapter {

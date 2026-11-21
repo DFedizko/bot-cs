@@ -29,7 +29,7 @@ type SteamTradeOffers = ReceivedOffersGateway &
     OfferConfirmationGateway &
     OfferCancellationGateway;
 
-export const STEAM_TRADE_OFFERS = identifier<SteamTradeOffers>("SteamTradeOffersGateway");
+export const STEAM_TRADE_OFFERS = identifier<SteamTradeOffers>("SteamTradeOffers");
 export const RECEIVED_OFFERS_GATEWAY = identifier<ReceivedOffersGateway>("ReceivedOffersGateway");
 export const OFFER_ACCEPTANCE_GATEWAY = identifier<OfferAcceptanceGateway>("OfferAcceptanceGateway");
 export const OFFER_CONFIRMATION_GATEWAY = identifier<OfferConfirmationGateway>("OfferConfirmationGateway");
