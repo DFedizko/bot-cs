@@ -1,6 +1,6 @@
-import { Command } from "@/packages/building-blocks/command";
+import { DeliveryStepCommand } from "../delivery-step.command";
 
-export class ConfirmTradeOfferCommand extends Command {
+export class ConfirmTradeOfferCommand extends DeliveryStepCommand {
     static readonly COMMAND_NAME = "confirm_trade_offer";
 
     constructor(readonly tradeId: number) {

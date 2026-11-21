@@ -25,7 +25,7 @@ import { CancelTradeOfferCommandHandler } from "../../application/cancel-trade-o
 import { ConfirmTradeOfferCommandHandler } from "../../application/confirm-trade-offer/confirm-trade-offer.command-handler";
 import { MarkDeliveryReceivedCommandHandler } from "../../application/mark-delivery-received/mark-delivery-received.command-handler";
 import { OnScamOffersFoundCancelOffers } from "../../application/cancel-trade-offer/on-scam-offers-found-cancel-offers";
-import { DeliveryStepDispatcher } from "../../application/delivery-step-dispatcher";
+import { CommandBusStepFailureDecorator } from "../../infrastructure/command-bus/command-bus.step-failure-decorator";
 import { OnTradeOfferAcceptedConfirm } from "../../application/confirm-trade-offer/on-trade-offer-accepted-confirm";
 import { OnDeliveryConfirmedMarkReceived } from "../../application/mark-delivery-received/on-delivery-confirmed-mark-received";
 import { DeliveryRepositoryInMemory } from "../../infrastructure/repositories/delivery.repository.in-memory";
@@ -43,7 +43,7 @@ import {
     CSG_DELIVERY_HTTP,
     CSG_TRADES,
     DELIVERY_REPOSITORY,
-    DELIVERY_STEP_DISPATCHER,
+    DELIVERY_COMMAND_BUS,
     DISPUTE_DELIVERY_HANDLER,
     OFFER_ACCEPTANCE_GATEWAY,
     OFFER_CANCELLATION_GATEWAY,
@@ -157,29 +157,29 @@ export class DeliveryModule extends ContainerModule {
     }
 
     private static bindListeners({ bind }: ContainerModuleLoadOptions): void {
-        bind(DELIVERY_STEP_DISPATCHER)
+        bind(DELIVERY_COMMAND_BUS)
             .toResolvedValue(
                 (commandBus: CommandBus, eventBus: EventBus, logger: Logger) =>
-                    new DeliveryStepDispatcher(commandBus, eventBus, logger),
+                    new CommandBusStepFailureDecorator(commandBus, eventBus, logger),
                 [COMMAND_BUS, EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
         bind(ON_SCAM_OFFERS_FOUND)
             .toResolvedValue(
-                (steps: DeliveryStepDispatcher) => new OnScamOffersFoundCancelOffers(steps),
-                [DELIVERY_STEP_DISPATCHER],
+                (commandBus: CommandBus) => new OnScamOffersFoundCancelOffers(commandBus),
+                [DELIVERY_COMMAND_BUS],
             )
             .inSingletonScope();
         bind(ON_OFFER_ACCEPTED)
             .toResolvedValue(
-                (steps: DeliveryStepDispatcher) => new OnTradeOfferAcceptedConfirm(steps),
-                [DELIVERY_STEP_DISPATCHER],
+                (commandBus: CommandBus) => new OnTradeOfferAcceptedConfirm(commandBus),
+                [DELIVERY_COMMAND_BUS],
             )
             .inSingletonScope();
         bind(ON_DELIVERY_CONFIRMED)
             .toResolvedValue(
-                (steps: DeliveryStepDispatcher) => new OnDeliveryConfirmedMarkReceived(steps),
-                [DELIVERY_STEP_DISPATCHER],
+                (commandBus: CommandBus) => new OnDeliveryConfirmedMarkReceived(commandBus),
+                [DELIVERY_COMMAND_BUS],
             )
             .inSingletonScope();
     }

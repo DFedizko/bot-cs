@@ -1,10 +1,10 @@
+import type { CommandBus } from "@/packages/application/command-bus";
 import type { EventListener } from "@/packages/application/event-listener";
 import { type ScamOffer, ScamOffersFoundEvent } from "../accept-delivery-offer/scam-offers-found.event";
-import type { DeliveryStepDispatcher } from "../delivery-step-dispatcher";
 import { CancelTradeOfferCommand } from "./cancel-trade-offer.command";
 
 export class OnScamOffersFoundCancelOffers implements EventListener<ScamOffersFoundEvent> {
-    constructor(private readonly steps: DeliveryStepDispatcher) {}
+    constructor(private readonly commandBus: CommandBus) {}
 
     subscribedTo(): string {
         return ScamOffersFoundEvent.EVENT_NAME;
@@ -19,8 +19,7 @@ export class OnScamOffersFoundCancelOffers implements EventListener<ScamOffersFo
 
     private cancel(event: ScamOffersFoundEvent, offer: ScamOffer): Promise<void> {
         const { tradeId, accountId } = event.payload;
-        return this.steps.dispatch(
-            tradeId,
+        return this.commandBus.dispatch(
             new CancelTradeOfferCommand({ tradeId, accountId, offerId: offer.offerId, reasons: offer.reasons }),
         );
     }
