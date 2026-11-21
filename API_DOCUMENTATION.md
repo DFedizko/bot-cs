@@ -1,53 +1,49 @@
 # API documentation standard
 
-Every HTTP route is documented in one OpenAPI 3.1 document, built from the same zod schema its validator uses ([ADR-0003](adr/0003-api-docs-from-validator-schemas.md)). In development, the app serves it at `GET /openapi.json`, and as an interactive Scalar reference with a "Try it" client at `GET /docs`.
+Every HTTP route documents itself when it registers, as on Fastify: the controller passes its validator and its route doc to the `HttpServer` ([ADR-0003](adr/0003-api-docs-from-validator-schemas.md)). In development, the app turns every registered route into one OpenAPI 3.1 document with [`zod-openapi`](https://github.com/samchungy/zod-openapi), serves it at `GET /openapi.json`, and serves the [Scalar](https://scalar.com) reference with a "Try it" client at `GET /docs`.
 
 Follow this standard whenever you create or change an HTTP route.
 
-## Where things live
+## What is automatic
 
-| Piece                                  | Location                                                                          |
-| -------------------------------------- | --------------------------------------------------------------------------------- |
-| Validator schema (the single source)   | `<context>/external/validation/<route>.schema.ts`                                 |
-| Field descriptions and examples        | On the zod fields, with `.meta({ description, examples })`                        |
-| Route documentation                    | `<context>/external/docs/<route>.route-doc.ts`, typed `HttpRouteDoc<z.ZodObject>` |
-| Shared error examples of the context   | `<context>/external/docs/<concept>.error-examples.ts`                             |
-| Shared error responses and body schema | `HttpErrorResponseDocs` in `src/packages/external/openapi/`                       |
-| Registration                           | `bind(HTTP_ROUTE_DOC).toConstantValue(route)` in the context's HTTP module        |
+- **Path params and body**: they come from the validator's zod schema. Params are the `:name` segments of the path, and the remaining fields are the JSON body. Never write a second schema for the docs.
+- **`operationId`, global tags, the server and the shared `HttpErrorBody` schema** are filled in by the document builder.
+- **An undocumented route can't slip in**: a route registered without a `doc` is left out of the document, and the guard test fails.
 
-The controller never imports zod or its documentation. Bind it on `HTTP_CONTROLLER` (`bind(HTTP_CONTROLLER).toService(ID)`) so the bootstrap starts it and the guard test finds its routes.
+## What you write
 
-## Reuse the validator's schema
+| Piece                           | Location                                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Field descriptions and examples | On the zod fields of `<context>/external/validation/`, with `.meta({ description, examples })` |
+| Route doc (`HttpRouteDoc`)      | `<context>/infrastructure/docs/<route>.route-doc.ts`                                           |
+| Shared error examples           | `<context>/infrastructure/docs/<concept>.error-examples.ts`                                    |
+| Error responses                 | `HttpErrorResponseDocs` from `src/packages/infrastructure/http/docs/`                          |
 
-- Set `input` to the **same schema constant** the validator is built from. Never write a second schema for the docs.
-- Path params are read from the route's `path` (`:accountId`), and the builder splits them out of `input`. The remaining fields become the JSON request body. Don't declare params or the body separately.
-- Put `.meta()` on the **input side** of a transformed field (before `.transform()`), or zod drops it from the JSON Schema.
+The controller receives its doc through the constructor (injected by the context's HTTP module) and registers with it. It never imports zod or an OpenAPI library:
 
-## Required sections
+```ts
+httpServer.patch(ToggleWantedItemHttpController.PATH, (request) => this.handle(request), { input: validator, doc });
+```
 
-Every route doc has:
+## Required content
 
 1. **`summary`**: a short imperative title (`"Add a wanted item"`).
-2. **`description`**: what the route does for the caller, and any rule a caller must know.
+2. **`description`**: what the route does for the caller, and any rule the caller must know.
 3. **`tags`**: the resource group, from a shared constant.
-4. **Path params and body**: through `input`. **Every field** has a `description` and at least one realistic `examples` value, so "Try it" is pre-filled. Use one coherent example (same account, same item) across a resource's routes, so a person can add, then edit, toggle and remove it.
-5. **Every success response**: status and description, plus a `body` schema when it returns one.
-6. **Every error response**, each with the shared error body and realistic examples copied from a real response of the running app:
+4. **Every field** of the validator's schema has a `description` and at least one realistic `examples` value, so "Try it" is pre-filled. Put `.meta()` on the **input side** of a transformed field (before `.transform()`); for a path param, repeat the `description` on the outer schema too. Use one coherent example (same account, same item) across a resource's routes.
+5. **Every success response**: its status and description.
+6. **Every error response**, with realistic examples copied from a real response of the running app:
     - `HttpErrorResponseDocs.badRequest(example)`: 400 validation error with `fields` (malformed JSON is added for you);
-    - `notFound(...)` (404), `conflict(...)` (409), when the route can answer them;
+    - `notFound(...)` (404) and `conflict(...)` (409), when the route can answer them;
     - `unprocessable(...)` (422): one example per domain error the route can raise;
     - `internalError()` (500): always.
 
 ## Checks
 
-`test/composition-root/api-documentation.test.ts` runs the development app and fails when:
-
-- a served route has no documentation, or a documented route isn't served;
-- the documented example request is rejected by the validator;
-- the documented required fields, or the documented body fields, differ from what the validator checks;
-- a path param has no example, or a route lacks its 200 or 500 response.
-
-Then open `http://localhost:<HTTP_PORT>/docs` in development and send the route's pre-filled request with "Try it".
+- `bun test`: `test/composition-root/api-documentation.test.ts` runs the development app and fails when a served route has no doc, a documented example is rejected by the validator, a path param has no example, or a route lacks its 200 or 500 response.
+- `bun run docs:check`, with the app running in development: the [Scalar CLI](https://scalar.com/tools/cli/getting-started) validates and lints `/openapi.json`. Keep it at 0 errors and 0 warnings.
+- Open `http://localhost:<HTTP_PORT>/docs` and send the route's pre-filled request with "Try it".
+- The Scalar MCP server (`.mcp.json`) gives agents Scalar's tools from the editor.
 
 ## Example
 
@@ -58,22 +54,12 @@ export const enabledField = z.boolean().meta({
     examples: [WANTED_ITEM_EXAMPLE.enabled],
 });
 
-// external/validation/toggle-wanted-item.schema.ts
-export const toggleWantedItemSchema = z.object({
-    accountId: accountIdField,
-    name: itemNameField,
-    enabled: enabledField,
-}) satisfies z.ZodType<ToggleWantedItemInput>;
-
-// external/docs/toggle-wanted-item.route-doc.ts
-export const toggleWantedItemRoute: HttpRouteDoc<z.ZodObject> = {
-    method: HttpMethod.PATCH,
-    path: ToggleWantedItemHttpController.PATH,
+// infrastructure/docs/toggle-wanted-item.route-doc.ts
+export const toggleWantedItemDoc: HttpRouteDoc = {
     summary: "Enable or disable a wanted item",
     description:
         "Pauses the bidding on an item the account wants, or resumes it, without losing its max for and criteria.",
     tags: [WANTED_ITEMS_TAG],
-    input: toggleWantedItemSchema,
     responses: [
         { status: HttpStatus.OK, description: "The wanted item was enabled or disabled" },
         HttpErrorResponseDocs.badRequest(ENABLED_NOT_BOOLEAN),
@@ -84,5 +70,5 @@ export const toggleWantedItemRoute: HttpRouteDoc<z.ZodObject> = {
 };
 
 // external/di/<context>-http.module.ts
-bind(HTTP_ROUTE_DOC).toConstantValue(toggleWantedItemRoute);
+new ToggleWantedItemHttpController(http, bus, validator, toggleWantedItemDoc);
 ```
