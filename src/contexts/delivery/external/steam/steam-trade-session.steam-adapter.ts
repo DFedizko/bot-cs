@@ -14,22 +14,23 @@ import type {
     SteamTradeOffer,
 } from "../../infrastructure/steam/steam-trade-offer";
 import { SteamLoginError } from "./steam-login.error";
+import type { SteamLoginPause } from "./steam-login-pause";
 import type { SteamRetry } from "./steam-retry";
 
 const LANGUAGE = "en";
 const POLLING_DISABLED = -1;
 const LOGIN_TIMEOUT_MS = 60_000;
-const LOGIN_COOLDOWN_MS = 15 * 60_000;
-const NO_LOGIN_BLOCK = 0;
 const SESSION_ERRORS = /not logged in|notloggedon|session expired/i;
 const STEAM_GUARD_REFUSED = "Steam Guard asked for a code the shared secret could not provide";
-const LOGIN_TIMED_OUT = "no web session before the login timeout";
-const LOGIN_COOLING_DOWN = "cooling down after a refused login";
+const LOGIN_TIMED_OUT = "Steam login timed out";
+const LOGIN_PAUSED = "paused after a refused login";
+
+type WebSessionHandler = (sessionId: string, cookies: string[]) => void;
 
 type Executor<T> = (resolve: (value: T) => void, reject: (error: Error) => void) => void;
 
 export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
-    private readonly client = new SteamUser({ autoRelogin: true, dataDirectory: null });
+    private readonly client = new SteamUser({ autoRelogin: false, dataDirectory: null });
     private readonly community = new SteamCommunity();
     private readonly manager = new TradeOfferManager({
         steam: this.client,
@@ -41,15 +42,16 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
     });
     private session?: Promise<void>;
     private refuseLogin?: (error: Error) => void;
-    private blockedUntil = NO_LOGIN_BLOCK;
 
     constructor(
         private readonly login: SteamLogin,
         private readonly logger: Logger,
         private readonly retry: SteamRetry,
+        private readonly pause: SteamLoginPause,
     ) {
         this.client.on("error", (error) => this.onClientError(error));
         this.client.on("steamGuard", () => this.refuseLogin?.(new SteamLoginError(STEAM_GUARD_REFUSED)));
+        this.client.on("disconnected", () => this.forgetSession());
         this.manager.on("sessionExpired", () => this.forgetSession());
     }
 
@@ -102,30 +104,30 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
     }
 
     private ensureSession(): Promise<void> {
-        if (Date.now() < this.blockedUntil) return Promise.reject(new SteamLoginError(LOGIN_COOLING_DOWN));
+        if (this.pause.isPaused()) return Promise.reject(new SteamLoginError(LOGIN_PAUSED));
         this.session ??= this.logIn().catch((error: Error) => this.onLoginRefused(error));
         return this.session;
     }
 
     private logIn(): Promise<void> {
+        let onWebSession: WebSessionHandler = () => {};
+        let timeout: ReturnType<typeof setTimeout> | undefined;
         return this.promise<void>((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new SteamLoginError(LOGIN_TIMED_OUT)), LOGIN_TIMEOUT_MS);
-            this.refuseLogin = (error) => {
-                clearTimeout(timeout);
-                reject(error);
-            };
-            this.client.once("webSession", (_sessionId, cookies) => {
-                clearTimeout(timeout);
-                this.useCookies(cookies).then(resolve, reject);
-            });
+            timeout = setTimeout(() => reject(new Error(LOGIN_TIMED_OUT)), LOGIN_TIMEOUT_MS);
+            this.refuseLogin = reject;
+            onWebSession = (_sessionId, cookies) => this.useCookies(cookies).then(resolve, reject);
+            this.client.once("webSession", onWebSession);
             this.startLogOn();
         }).finally(() => {
+            clearTimeout(timeout);
+            this.client.removeListener("webSession", onWebSession);
             this.refuseLogin = undefined;
         });
     }
 
     private startLogOn(): void {
         if (this.client.steamID) return this.client.webLogOn();
+        this.client.logOff();
         this.client.logOn({
             accountName: this.login.accountName,
             password: this.login.password,
@@ -135,8 +137,9 @@ export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
 
     private onLoginRefused(error: Error): never {
         this.forgetSession();
-        this.blockedUntil = Date.now() + LOGIN_COOLDOWN_MS;
-        this.logger.log(`Steam login of "${this.login.accountName}" refused, pausing it: ${error.message}`);
+        this.client.logOff();
+        this.pause.pauseAfter(error);
+        this.logger.log(`Steam login of "${this.login.accountName}" failed: ${error.message}`);
         throw error instanceof SteamLoginError ? error : new SteamLoginError(error.message);
     }
 

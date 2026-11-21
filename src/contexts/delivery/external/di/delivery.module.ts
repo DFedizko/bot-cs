@@ -16,6 +16,7 @@ import { SteamCredentialsEnvAdapter } from "../credentials/steam-credentials.env
 import { SteamSessionsSteamAdapter } from "../steam/steam-sessions.steam-adapter";
 import { SteamTradeSessionSteamAdapter } from "../steam/steam-trade-session.steam-adapter";
 import { SteamRetry } from "../steam/steam-retry";
+import { SteamLoginPause } from "../steam/steam-login-pause";
 import type { SteamLogin } from "../../infrastructure/steam/steam-login";
 import {
     ACCEPT_OFFER_HANDLER,
@@ -32,6 +33,7 @@ import {
 const COMMAND_HANDLERS = [START_DELIVERY_HANDLER, ACCEPT_OFFER_HANDLER, DISPUTE_DELIVERY_HANDLER];
 const STEAM_BASE_DELAY_MS = 30_000;
 const STEAM_MAX_ATTEMPTS = 4;
+const STEAM_LOGIN_COOLDOWN_MS = 15 * 60_000;
 
 export class DeliveryModule extends ContainerModule {
     constructor() {
@@ -93,8 +95,13 @@ export class DeliveryModule extends ContainerModule {
             sleep: (ms) => Bun.sleep(ms),
         });
         return new SteamSessionsSteamAdapter(
-            (login: SteamLogin) => new SteamTradeSessionSteamAdapter(login, logger, retry),
+            (login: SteamLogin) =>
+                new SteamTradeSessionSteamAdapter(login, logger, retry, DeliveryModule.createLoginPause()),
         );
+    }
+
+    private static createLoginPause(): SteamLoginPause {
+        return new SteamLoginPause({ cooldownMs: STEAM_LOGIN_COOLDOWN_MS, now: () => Date.now() });
     }
 
     private static createAcceptOffer(
