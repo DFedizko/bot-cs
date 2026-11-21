@@ -1,5 +1,12 @@
 import type { Container } from "inversify";
-import { CLOCK, DELIVERY_TRACKERS, SCHEDULER } from "@/contexts/delivery/external/di/delivery.identifiers";
+import {
+    CLOCK,
+    DELIVERY_REPOSITORY,
+    DELIVERY_TRACKERS,
+    SCHEDULER,
+} from "@/contexts/delivery/external/di/delivery.identifiers";
+import type { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
+import { TradeId } from "@/contexts/delivery/domain/delivery/trade-id";
 import type { TrackedDelivery } from "@/contexts/delivery/application/delivery-trackers";
 import { ACCOUNT_ID, TRADE_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import type { SchedulerFakeAdapter } from "@/contexts/delivery/external/scheduling/scheduler.fake-adapter";
@@ -24,3 +31,6 @@ export const fakeClock = (container: Container): ClockFakeAdapter => container.g
 
 export const startTracking = (container: Container, delivery: TrackedDelivery = trackedDelivery()): boolean =>
     container.get(DELIVERY_TRACKERS).track(delivery);
+
+export const deliveryStatus = async (container: Container, tradeId = TRADE_ID): Promise<DeliveryStatus | undefined> =>
+    (await container.get(DELIVERY_REPOSITORY).findByTradeId(new TradeId(tradeId)))?.getStatus();
