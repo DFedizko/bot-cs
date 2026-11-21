@@ -45,6 +45,14 @@ describe("HttpErrorResponseDocs", () => {
         expect(Object.keys(response.examples ?? {})).toEqual(["fooNotFound", "fooNotFound2"]);
     });
 
+    it("Should keep every example whose code ends with a digit", () => {
+        const http2 = { summary: "Http 2", value: { code: "HTTP_2", message: "Http 2 only" } };
+
+        const response = HttpErrorResponseDocs.unprocessable(http2, http2, http2);
+
+        expect(Object.keys(response.examples ?? {})).toEqual(["http2", "http22", "http23"]);
+    });
+
     it("Should document the internal server error", () => {
         const response = HttpErrorResponseDocs.internalError();
 
