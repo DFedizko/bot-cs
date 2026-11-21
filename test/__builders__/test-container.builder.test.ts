@@ -17,7 +17,16 @@ import { CSG_DELIVERY_HTTP, STEAM_SESSIONS } from "@/contexts/delivery/external/
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
 
+import { EventEmitter } from "node:events";
+import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
+
 describe("testContainer", () => {
+    it("Should rebind the process events to a fake so tests never touch the running process", () => {
+        const events = testContainer().get(PROCESS_EVENTS);
+
+        expect(events).toBeInstanceOf(EventEmitter);
+    });
+
     it("Should rebind steam and the csgoempire delivery api to their fakes", () => {
         const container = testContainer();
 

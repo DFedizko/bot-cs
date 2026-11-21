@@ -9,6 +9,8 @@ import {
     ENV,
     ASYNC_EVENT_BUS,
     COMMAND_DISPATCHER,
+    PROCESS_EVENTS,
+    UNHANDLED_ERROR_TRAP,
     EVENT_BUS,
     HTTP_CLIENT_FACTORY,
     HTTP_ERROR_MAPPER,
@@ -24,6 +26,7 @@ import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.co
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
 import { EventBusInMemorySync } from "@/packages/external/event-bus/event-bus.in-memory-sync";
 import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
+import { UnhandledErrorTrapLoggingAdapter } from "@/packages/infrastructure/process/unhandled-error-trap.logging-adapter";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { HttpClientFactoryAdapter } from "@/packages/external/http/client/http-client.factory.adapter";
 import { CommandNotRegisteredError } from "@/packages/error/command-not-registered.error";
@@ -126,6 +129,18 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         await dispatcher.dispatch(new FooCommand(), {});
 
         expect(fooHandler.handle).toHaveBeenCalled();
+    });
+
+    it("Should bind the running process as the source of process events", () => {
+        const events = container.get(PROCESS_EVENTS);
+
+        expect(events).toBe(process);
+    });
+
+    it("Should bind an unhandled error trap that logs what slips through", () => {
+        const trap = container.get(UNHANDLED_ERROR_TRAP);
+
+        expect(trap).toBeInstanceOf(UnhandledErrorTrapLoggingAdapter);
     });
 
     it("Should bind an http error mapper that logs server errors", () => {

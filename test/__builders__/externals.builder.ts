@@ -19,6 +19,9 @@ import { ClockFakeAdapter } from "@/contexts/delivery/external/scheduling/clock.
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
 
+import { EventEmitter } from "node:events";
+import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
+
 const FAKE_WS_URL = "ws://localhost";
 
 export const fakeExternals = (container: Container): Container => {
@@ -30,5 +33,6 @@ export const fakeExternals = (container: Container): Container => {
     container.rebind(CSG_DELIVERY_HTTP).toConstantValue(new CsgDeliveryHttpFakeAdapter());
     container.rebind(SCHEDULER).toConstantValue(new SchedulerFakeAdapter());
     container.rebind(CLOCK).toConstantValue(new ClockFakeAdapter());
+    container.rebind(PROCESS_EVENTS).toConstantValue(new EventEmitter());
     return container;
 };

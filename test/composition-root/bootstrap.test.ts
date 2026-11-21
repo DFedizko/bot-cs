@@ -10,7 +10,9 @@ import {
     EVENT_LISTENER,
     HTTP_SERVER,
     LOGGER,
+    PROCESS_EVENTS,
 } from "@/packages/external/di/packages.identifiers";
+import type { EventEmitter } from "node:events";
 import {
     ACTIVE_WITHDRAWALS_CONTROLLER,
     CSG_DELIVERY_WS_CLIENT,
@@ -54,6 +56,8 @@ const WANTED_ITEM_ROUTES = [
     ["patch", WANTED_ITEM_ENABLED_PATH],
 ] as const;
 const CS_APP_ID = 730;
+const UNHANDLED_REJECTION = "unhandledRejection";
+const STRAY_FAILURE = "stray failure";
 const BIDDER_BALANCE = 10_000;
 const BIDDER_NAME = "John Doe";
 
@@ -230,5 +234,14 @@ describe("Bootstrap", () => {
             .get(AUCTION_PARTICIPATION_REPO)
             .findByAuctionId(new AuctionId(evaluateItemCommand().itemId));
         expect(participation).toBeDefined();
+    });
+
+    it("Should log an unhandled rejection that slipped past the entry points", async () => {
+        const logSpy = jest.spyOn(container.get(LOGGER), "log");
+        await new Bootstrap(container).run();
+
+        (container.get(PROCESS_EVENTS) as EventEmitter).emit(UNHANDLED_REJECTION, STRAY_FAILURE);
+
+        expect(logSpy).toHaveBeenCalledWith(`Unhandled rejection: ${STRAY_FAILURE}`);
     });
 });

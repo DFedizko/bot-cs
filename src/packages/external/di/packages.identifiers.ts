@@ -5,6 +5,8 @@ import type { EventListener } from "@/packages/application/event-listener";
 import type { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import type { CommandDispatcher } from "@/packages/infrastructure/command-bus/command-dispatcher";
+import type { ProcessEvents } from "@/packages/infrastructure/process/process-events";
+import type { UnhandledErrorTrap } from "@/packages/infrastructure/process/unhandled-error-trap";
 import type { HttpClientFactory } from "../http/client/http-client.factory";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
@@ -23,3 +25,5 @@ export const HTTP_CLIENT_FACTORY = identifier<HttpClientFactory>("HttpClientFact
 export const HTTP_ERROR_MAPPER = identifier<HttpErrorMapper>("HttpErrorMapper");
 export const HTTP_ERROR_MAPPING = identifier<HttpErrorMapping>("HttpErrorMapping");
 export const HTTP_SERVER = identifier<HttpServer>("HttpServer");
+export const PROCESS_EVENTS = identifier<ProcessEvents>("ProcessEvents");
+export const UNHANDLED_ERROR_TRAP = identifier<UnhandledErrorTrap>("UnhandledErrorTrap");

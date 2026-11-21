@@ -7,6 +7,7 @@ import {
     EVENT_BUS,
     EVENT_LISTENER,
     HTTP_SERVER,
+    UNHANDLED_ERROR_TRAP,
 } from "@/packages/external/di/packages.identifiers";
 import type { EventBus } from "@/packages/application/event-bus";
 import type { EventListener } from "@/packages/application/event-listener";
@@ -36,6 +37,7 @@ export class Bootstrap {
     constructor(private readonly container: Container) {}
 
     async run(): Promise<void> {
+        this.container.get(UNHANDLED_ERROR_TRAP).install();
         await this.subscribe(EVENT_LISTENER, EVENT_BUS);
         await this.subscribe(ASYNC_EVENT_LISTENER, ASYNC_EVENT_BUS);
         await this.startHttpServer();

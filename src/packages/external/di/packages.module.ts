@@ -4,6 +4,8 @@ import type { CommandHandler } from "@/packages/building-blocks/command-handler"
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
 import type { CommandBus } from "@/packages/application/command-bus";
+import { UnhandledErrorTrapLoggingAdapter } from "@/packages/infrastructure/process/unhandled-error-trap.logging-adapter";
+import type { ProcessEvents } from "@/packages/infrastructure/process/process-events";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "../event-bus/event-bus.in-memory-async";
 import { EventBusInMemorySync } from "../event-bus/event-bus.in-memory-sync";
@@ -25,6 +27,8 @@ import {
     HTTP_ERROR_MAPPING,
     HTTP_SERVER,
     LOGGER,
+    PROCESS_EVENTS,
+    UNHANDLED_ERROR_TRAP,
 } from "./packages.identifiers";
 
 const HTTP_CLIENT_PROVIDER = "axios";
@@ -38,6 +42,13 @@ export class PackagesModule extends ContainerModule {
         bind(ENV).toConstantValue(env);
         bind(LOGGER)
             .toResolvedValue(() => new LoggerConsoleAdapter())
+            .inSingletonScope();
+        bind(PROCESS_EVENTS).toConstantValue(process);
+        bind(UNHANDLED_ERROR_TRAP)
+            .toResolvedValue(
+                (events: ProcessEvents, logger: Logger) => new UnhandledErrorTrapLoggingAdapter(events, logger),
+                [PROCESS_EVENTS, LOGGER],
+            )
             .inSingletonScope();
         bind(EVENT_BUS)
             .toResolvedValue(() => new EventBusInMemorySync())
