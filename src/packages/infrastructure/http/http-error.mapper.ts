@@ -1,3 +1,4 @@
+import type { InvalidField } from "../validation/validation.error";
 import type { HttpResponse } from "./http-server";
 import type { HttpStatus } from "./http-status";
 
@@ -11,6 +12,7 @@ export type HttpErrorMapping = {
 export type HttpErrorBody = {
     code: string;
     message: string;
+    fields?: InvalidField[];
 };
 
 export interface HttpErrorMapper {
