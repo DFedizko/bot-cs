@@ -59,6 +59,10 @@ Shared folders have their own `CLAUDE.md`; read it before changing anything insi
 - [`src/contexts/trading/shared/CLAUDE.md`](src/contexts/trading/shared/CLAUDE.md): concepts and CSGOEmpire integration shared by the trading subdomains.
 - [`src/packages/CLAUDE.md`](src/packages/CLAUDE.md): shared infrastructure with no business meaning (building blocks, ports and adapters, shared and HTTP errors, TypeScript type helpers).
 
+## Architecture Decision Records
+
+Architecture decisions are recorded in [`adr/`](adr/README.md). Follow the accepted ones. When the user makes a new architectural decision, register it there as a new ADR, following the format and numbering in `adr/README.md`.
+
 ## Conventions
 
 ### File naming
