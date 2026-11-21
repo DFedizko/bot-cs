@@ -20,7 +20,7 @@ export class EditWantedItemHttpController implements HttpController {
         await this.commandBus.dispatch(
             new EditWantedItemCommand({
                 accountId: input.readAccountId(),
-                itemName: input.readItemName(),
+                itemName: input.readPathItemName(),
                 maxFor: input.readOptionalMaxFor(),
                 criteria: input.readCriteria(),
             }),

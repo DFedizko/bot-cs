@@ -18,7 +18,7 @@ export class RemoveWantedItemHttpController implements HttpController {
     async handle(request: HttpRequest): Promise<HttpResponse> {
         const input = new WantedItemHttpInput(request);
         await this.commandBus.dispatch(
-            new RemoveWantedItemCommand({ accountId: input.readAccountId(), itemName: input.readItemName() }),
+            new RemoveWantedItemCommand({ accountId: input.readAccountId(), itemName: input.readPathItemName() }),
         );
         return { status: HttpStatus.OK };
     }

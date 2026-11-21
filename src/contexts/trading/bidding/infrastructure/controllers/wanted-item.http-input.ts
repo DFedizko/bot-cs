@@ -16,11 +16,11 @@ export class WantedItemHttpInput {
         return Number(accountId);
     }
 
-    readItemName(): string {
+    readPathItemName(): string {
         return this.request.params.name ?? "";
     }
 
-    readName(): string {
+    readBodyItemName(): string {
         const name = this.readBody().name;
         if (typeof name !== "string") throw new BadRequestError("name must be a text");
         return name;
