@@ -9,7 +9,14 @@ import {
     HTTP_SERVER,
     LOGGER,
 } from "@/packages/external/di/packages.identifiers";
-import { DELIVERY_REPOSITORY } from "@/contexts/delivery/external/di/delivery.identifiers";
+import {
+    ACTIVE_WITHDRAWALS_CONTROLLER,
+    CSG_DELIVERY_WS_CLIENT,
+    DELIVERY_REPOSITORY,
+} from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CsgDeliveryWsClientFakeAdapter } from "@/contexts/delivery/external/ws/csgoempire/csg-delivery.ws-client.fake-adapter";
+import { tradeStatus } from "@/contexts/delivery/infrastructure/controllers/__mocks__/trade-status.mock";
+import { fakeScheduler } from "@/contexts/delivery/__builders__/tracking.builder";
 import { AcceptDeliveryOfferCommand, StartDeliveryCommand } from "@/contexts/delivery";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { TradeId } from "@/contexts/delivery/domain/delivery/trade-id";
@@ -39,6 +46,14 @@ const WANTED_ITEM_ROUTES = [
 const CS_APP_ID = 730;
 
 const flushEventBus = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
+
+const receiveSentWithdrawal = async (container: Container): Promise<void> => {
+    const wsClient = new CsgDeliveryWsClientFakeAdapter();
+    container.rebind(CSG_DELIVERY_WS_CLIENT).toConstantValue(wsClient);
+    await new Bootstrap(container).run();
+    await wsClient.receive("trade_status", tradeStatus());
+    await fakeScheduler(container).tick();
+};
 
 const startDeliveryCommand = () =>
     new StartDeliveryCommand({
@@ -84,6 +99,22 @@ describe("Bootstrap", () => {
         await new Bootstrap(container).run();
 
         expect(wsOnSpy).toHaveBeenCalledWith("new_item", expect.any(Function));
+    });
+
+    it("Should listen to trade statuses", async () => {
+        const wsOnSpy = jest.spyOn(await container.getAsync(CSG_WS_CLIENT), "on");
+
+        await new Bootstrap(container).run();
+
+        expect(wsOnSpy).toHaveBeenCalledWith("trade_status", expect.any(Function));
+    });
+
+    it("Should resume the deliveries of the csgoempire account", async () => {
+        const resumeSpy = jest.spyOn(await container.getAsync(ACTIVE_WITHDRAWALS_CONTROLLER), "resume");
+
+        await new Bootstrap(container).run();
+
+        expect(resumeSpy).toHaveBeenCalledWith(getSktMetafakeResponse.user.id);
     });
 
     it("Should start the http server on the configured port", async () => {
@@ -139,5 +170,22 @@ describe("Bootstrap", () => {
 
         const delivery = await container.get(DELIVERY_REPOSITORY).findByTradeId(new TradeId(TRADE_ID));
         expect(delivery?.getStatus()).toBe(DeliveryStatus.RECEIVED);
+    });
+
+    it("Should receive a sent withdrawal's item on a later check", async () => {
+        await receiveSentWithdrawal(container);
+
+        await flushEventBus();
+
+        const delivery = await container.get(DELIVERY_REPOSITORY).findByTradeId(new TradeId(TRADE_ID));
+        expect(delivery?.getStatus()).toBe(DeliveryStatus.RECEIVED);
+    });
+
+    it("Should stop tracking once the item is received", async () => {
+        await receiveSentWithdrawal(container);
+
+        await flushEventBus();
+
+        expect(fakeScheduler(container).activeIntervals()).toEqual([]);
     });
 });

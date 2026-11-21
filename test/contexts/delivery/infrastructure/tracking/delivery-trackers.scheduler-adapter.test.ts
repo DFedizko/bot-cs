@@ -11,8 +11,42 @@ import {
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { TradeId } from "@/contexts/delivery/domain/delivery/trade-id";
 import { TRADE_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
-import { givenDelivery } from "../../application/__builders__/delivery-scenario.builder";
-import { fakeClock, fakeScheduler, startTracking, trackedDelivery } from "../../__builders__/tracking.builder";
+import { givenDelivery, steamSession } from "../../application/__builders__/delivery-scenario.builder";
+import { awaitingDelivery } from "@/contexts/delivery/domain/__builders__/delivery.builder";
+import { OFFER_ID } from "@/contexts/delivery/domain/__builders__/received-offer.builder";
+import { CS_APP_ID } from "@/contexts/shared-kernel/domain/cs-app-id";
+import { STEAM_OFFER_STATE } from "@/contexts/delivery/infrastructure/steam/steam-trade-offer";
+import { steamEconItem, steamTradeOffer } from "../../external/steam/__mocks__/steam-trade-offer.mock";
+import {
+    fakeClock,
+    fakeScheduler,
+    SECOND_ACCOUNT_ID,
+    SECOND_ASSET_ID,
+    SECOND_STEAM_ACCOUNT,
+    SECOND_TRADE_ID,
+    SECOND_TRADE_OFFER_ID,
+    startTracking,
+    trackedDelivery,
+} from "../../__builders__/tracking.builder";
+
+const SECOND_OFFER_ID = "6745128888";
+
+const givenTwoAccounts = async (container: Container): Promise<void> => {
+    const secondOffer = steamTradeOffer({
+        id: SECOND_OFFER_ID,
+        itemsToReceive: [steamEconItem({ assetid: SECOND_ASSET_ID })],
+    });
+    await givenDelivery(container, { offers: [steamTradeOffer(), secondOffer] });
+    const second = awaitingDelivery({
+        tradeId: SECOND_TRADE_ID,
+        tradeOfferId: SECOND_TRADE_OFFER_ID,
+        accountId: SECOND_ACCOUNT_ID,
+        expectedItem: { assetId: SECOND_ASSET_ID, marketName: steamEconItem().market_hash_name, appId: CS_APP_ID },
+    });
+    await container.get(DELIVERY_REPOSITORY).save(second);
+    startTracking(container);
+    startTracking(container, trackedDelivery({ tradeId: SECOND_TRADE_ID, accountId: SECOND_ACCOUNT_ID }));
+};
 
 const RATE_LIMITED = new Error("HTTP error 429 Too Many Requests");
 const CONCURRENT_TICKS = 3;
@@ -200,5 +234,37 @@ describe("DeliveryTrackersSchedulerAdapter", () => {
             expect.arrayContaining([`Checking the offers of trade "${TRADE_ID}" failed: boom`]),
             1,
         ]);
+    });
+
+    describe("with two accounts", () => {
+        it("Should accept each account's offer in its own steam session", async () => {
+            await givenTwoAccounts(container);
+
+            await fakeScheduler(container).tick();
+
+            expect([
+                await steamSession(container).getOfferState(OFFER_ID),
+                await steamSession(container, SECOND_STEAM_ACCOUNT).getOfferState(SECOND_OFFER_ID),
+            ]).toEqual([STEAM_OFFER_STATE.ACCEPTED, STEAM_OFFER_STATE.ACCEPTED]);
+        });
+
+        it("Should never accept one account's offer from the other account", async () => {
+            await givenTwoAccounts(container);
+
+            await fakeScheduler(container).tick();
+
+            expect([
+                await steamSession(container).getOfferState(SECOND_OFFER_ID),
+                await steamSession(container, SECOND_STEAM_ACCOUNT).getOfferState(OFFER_ID),
+            ]).toEqual([STEAM_OFFER_STATE.ACTIVE, STEAM_OFFER_STATE.ACTIVE]);
+        });
+
+        it("Should keep tracking one account when the other one stops", async () => {
+            await givenTwoAccounts(container);
+
+            container.get(DELIVERY_TRACKERS).untrack(trackedDelivery());
+
+            expect(fakeScheduler(container).activeIntervals()).toHaveLength(1);
+        });
     });
 });

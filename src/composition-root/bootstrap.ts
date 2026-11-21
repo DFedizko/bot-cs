@@ -8,6 +8,10 @@ import {
     REMOVE_WANTED_ITEM_CONTROLLER,
     TOGGLE_WANTED_ITEM_CONTROLLER,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import {
+    ACTIVE_WITHDRAWALS_CONTROLLER,
+    TRADE_STATUS_CONTROLLER,
+} from "@/contexts/delivery/external/di/delivery.identifiers";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
 
 const HTTP_CONTROLLERS = [
@@ -28,11 +32,17 @@ export class Bootstrap {
         await this.container.getAsync(INIT_CSG_SESSION);
         await commandBus.dispatch(new SynchronizeAccountCommand(user.id, user.steam_name, user.balance));
         await this.container.getAsync(NEW_ITEM_CONTROLLER);
+        await this.startDeliveryTracking(user.id);
     }
 
     private async subscribeEventListeners(): Promise<void> {
         const listeners = await this.container.getAllAsync(EVENT_LISTENER, { optional: true });
         (await this.container.getAsync(EVENT_BUS)).addSubscribers(listeners);
+    }
+
+    private async startDeliveryTracking(accountId: number): Promise<void> {
+        await this.container.getAsync(TRADE_STATUS_CONTROLLER);
+        await (await this.container.getAsync(ACTIVE_WITHDRAWALS_CONTROLLER)).resume(accountId);
     }
 
     private async startHttpServer(): Promise<void> {
