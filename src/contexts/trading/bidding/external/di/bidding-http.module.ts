@@ -8,14 +8,17 @@ import type { Validator } from "@/packages/infrastructure/validation/validator";
 import { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
 import { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
 import { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import { ToggleWantedItemHttpController } from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
 import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
 import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
 import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
+import type { ToggleWantedItemInput } from "../../infrastructure/controllers/toggle-wanted-item.input";
 import { WantedItemNotFoundError } from "../../domain/wanted-item/errors/wanted-item-not-found.error";
 import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
 import { addWantedItemSchema } from "../validation/add-wanted-item.schema";
 import { editWantedItemSchema } from "../validation/edit-wanted-item.schema";
 import { removeWantedItemSchema } from "../validation/remove-wanted-item.schema";
+import { toggleWantedItemSchema } from "../validation/toggle-wanted-item.schema";
 import {
     ADD_WANTED_ITEM_CONTROLLER,
     ADD_WANTED_ITEM_VALIDATOR,
@@ -23,6 +26,8 @@ import {
     EDIT_WANTED_ITEM_VALIDATOR,
     REMOVE_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_VALIDATOR,
+    TOGGLE_WANTED_ITEM_CONTROLLER,
+    TOGGLE_WANTED_ITEM_VALIDATOR,
 } from "./bidding.identifiers";
 
 export class BiddingHttpModule extends ContainerModule {
@@ -46,6 +51,9 @@ export class BiddingHttpModule extends ContainerModule {
         bind(REMOVE_WANTED_ITEM_VALIDATOR)
             .toResolvedValue(() => new ZodValidatorAdapter(removeWantedItemSchema))
             .inSingletonScope();
+        bind(TOGGLE_WANTED_ITEM_VALIDATOR)
+            .toResolvedValue(() => new ZodValidatorAdapter(toggleWantedItemSchema))
+            .inSingletonScope();
     }
 
     private static bindControllers({ bind }: ContainerModuleLoadOptions): void {
@@ -68,6 +76,13 @@ export class BiddingHttpModule extends ContainerModule {
                 (http: HttpServer, bus: CommandBus, validator: Validator<RemoveWantedItemInput>) =>
                     new RemoveWantedItemHttpController(http, bus, validator),
                 [HTTP_SERVER, COMMAND_BUS, REMOVE_WANTED_ITEM_VALIDATOR],
+            )
+            .inSingletonScope();
+        bind(TOGGLE_WANTED_ITEM_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: CommandBus, validator: Validator<ToggleWantedItemInput>) =>
+                    new ToggleWantedItemHttpController(http, bus, validator),
+                [HTTP_SERVER, COMMAND_BUS, TOGGLE_WANTED_ITEM_VALIDATOR],
             )
             .inSingletonScope();
     }

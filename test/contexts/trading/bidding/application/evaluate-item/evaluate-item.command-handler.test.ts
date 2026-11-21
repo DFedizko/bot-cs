@@ -16,6 +16,13 @@ import {
 
 const ACCOUNT_ID = evaluateItemCommand().accountId;
 const OTHER_ACCOUNT_ID = ACCOUNT_ID + 1;
+const ITEM_NAME = evaluateItemCommand().itemName;
+
+const disabledCyberSecurity = (accountId: number) => {
+    const wantedItem = WantedItem.create({ accountId, name: ITEM_NAME, maxFor: "-4.05" });
+    wantedItem.disable();
+    return wantedItem;
+};
 
 let container: Container;
 
@@ -115,5 +122,37 @@ describe("EvaluateItemCommandHandler", () => {
         await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
 
         expect(publishSpy).not.toHaveBeenCalled();
+    });
+    describe("With a disabled wanted item", () => {
+        it("Should skip it without publishing any event", async () => {
+            await container.get(WANTED_ITEM_REPOSITORY).save(disabledCyberSecurity(ACCOUNT_ID));
+            jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
+            const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+
+            await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
+
+            expect(publishSpy).not.toHaveBeenCalled();
+        });
+        it("Should log the skip at debug level", async () => {
+            await container.get(WANTED_ITEM_REPOSITORY).save(disabledCyberSecurity(ACCOUNT_ID));
+            const debugSpy = jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
+
+            await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
+
+            expect(debugSpy).toHaveBeenCalledWith(
+                `Skipped "${ITEM_NAME}" for account ${ACCOUNT_ID}: ${WantedItem.DISABLED_FAILURE}`,
+            );
+        });
+        it("Should still approve the same item wanted by another account", async () => {
+            const repository = container.get(WANTED_ITEM_REPOSITORY);
+            await repository.save(disabledCyberSecurity(OTHER_ACCOUNT_ID));
+            jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
+            await repository.save(WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-4.05" }));
+            const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+
+            await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
+
+            expect(publishSpy).toHaveBeenCalledWith([expect.any(ItemApprovedInAuctionEvent)]);
+        });
     });
 });

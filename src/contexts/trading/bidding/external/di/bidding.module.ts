@@ -18,6 +18,7 @@ import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/c
 import { AddWantedItemCommandHandler } from "../../application/add-wanted-item/add-wanted-item.command-handler";
 import { EditWantedItemCommandHandler } from "../../application/edit-wanted-item/edit-wanted-item.command-handler";
 import { RemoveWantedItemCommandHandler } from "../../application/remove-wanted-item/remove-wanted-item.command-handler";
+import { ToggleWantedItemCommandHandler } from "../../application/toggle-wanted-item/toggle-wanted-item.command-handler";
 import { EvaluateItemCommandHandler } from "../../application/evaluate-item/evaluate-item.command-handler";
 import { SynchronizeAccountCommandHandler } from "../../application/synchronize-account/synchronize-account.command-handler";
 import { PlaceBidCommandHandler } from "../../application/place-bid/place-bid.command-handler";
@@ -53,6 +54,7 @@ import {
     PLACE_BID_HANDLER,
     REMOVE_WANTED_ITEM_HANDLER,
     SYNC_ACCOUNT_HANDLER,
+    TOGGLE_WANTED_ITEM_HANDLER,
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
 } from "./bidding.identifiers";
@@ -63,6 +65,7 @@ const COMMAND_HANDLERS = [
     ADD_WANTED_ITEM_HANDLER,
     EDIT_WANTED_ITEM_HANDLER,
     REMOVE_WANTED_ITEM_HANDLER,
+    TOGGLE_WANTED_ITEM_HANDLER,
     PLACE_BID_HANDLER,
     LEAVE_AUCTION_HANDLER,
     TRACK_AUCTION_HANDLER,
@@ -126,6 +129,12 @@ export class BiddingModule extends ContainerModule {
         bind(REMOVE_WANTED_ITEM_HANDLER)
             .toResolvedValue(
                 (repo: WantedItemRepository) => new RemoveWantedItemCommandHandler(repo),
+                [WANTED_ITEM_REPOSITORY],
+            )
+            .inSingletonScope();
+        bind(TOGGLE_WANTED_ITEM_HANDLER)
+            .toResolvedValue(
+                (repo: WantedItemRepository) => new ToggleWantedItemCommandHandler(repo),
                 [WANTED_ITEM_REPOSITORY],
             )
             .inSingletonScope();

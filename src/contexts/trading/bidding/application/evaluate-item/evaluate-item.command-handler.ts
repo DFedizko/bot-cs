@@ -8,6 +8,8 @@ import { ItemApprovedOffAuctionEvent } from "./item-approved-off-auction.event";
 import { AccountId } from "../../domain/account/account-id";
 import { ItemName } from "../../domain/wanted-item/item-name";
 
+const FAILURE_SEPARATOR = "; ";
+
 export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCommand> {
     constructor(
         private readonly wantedItemRepository: WantedItemRepository,
@@ -31,7 +33,8 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
         const wantedItem = await this.wantedItemRepository.findByName(new AccountId(accountId), new ItemName(itemName));
         if (!wantedItem) return;
         const decision = wantedItem.evaluate({ value: price, referencePrice, aboveRecommendedPercentage });
-        if (!decision.approved) return this.logger.log(decision.failures.join("; "));
+        if (decision.skipped) return this.logSkip(accountId, itemName, decision.failures);
+        if (!decision.approved) return this.logger.log(decision.failures.join(FAILURE_SEPARATOR));
         await this.eventBus.publish(
             inAuction
                 ? [
@@ -44,5 +47,9 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
                   ]
                 : [new ItemApprovedOffAuctionEvent({ itemId, accountId, value: price })],
         );
+    }
+
+    private logSkip(accountId: number, itemName: string, failures: string[]): void {
+        this.logger.debug(`Skipped "${itemName}" for account ${accountId}: ${failures.join(FAILURE_SEPARATOR)}`);
     }
 }
