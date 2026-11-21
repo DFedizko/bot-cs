@@ -1,8 +1,8 @@
-import { Command } from "@/packages/building-blocks/command";
+import { DeliveryStepCommand } from "../delivery-step.command";
 
 export type StopDeliveryTrackingProps = { tradeId: number; accountId: number; reason: string };
 
-export class StopDeliveryTrackingCommand extends Command {
+export class StopDeliveryTrackingCommand extends DeliveryStepCommand {
     static readonly COMMAND_NAME = "stop_delivery_tracking";
     readonly tradeId: number;
     readonly accountId: number;

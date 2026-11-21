@@ -22,7 +22,7 @@ export class TrackDeliveryCommandHandler implements CommandHandler<TrackDelivery
             return this.logger.log(`Not tracking trade "${command.tradeId}": it is ${delivery.getStatus()}`);
         const tradeId = delivery.getTradeId();
         const accountId = delivery.getAccountId();
-        if (this.trackers.track({ tradeId, accountId }))
+        if (this.trackers.track({ tradeId, accountId, sentAt: command.sentAt }))
             this.logger.log(`Tracking the offer of trade "${tradeId}" for account "${accountId}"`);
     }
 }

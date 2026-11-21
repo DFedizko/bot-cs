@@ -4,6 +4,7 @@ import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
     CSG_DELIVERY_WS_CLIENT,
     DELIVERY_REPOSITORY,
+    DELIVERY_TRACKERS,
     TRADE_STATUS_CONTROLLER,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
@@ -23,6 +24,8 @@ import { fakeScheduler } from "../../__builders__/tracking.builder";
 import { depositStatus, SENDING, TERMINAL_STATUSES, tradeStatus } from "./__mocks__/trade-status.mock";
 
 const TRADE_STATUS = "trade_status";
+const SENT_AT = "2026-11-21 10:15:30";
+const SENT_AT_UTC = "2026-11-21T10:15:30Z";
 
 const listenTo = async (container: Container): Promise<CsgDeliveryWsClientFakeAdapter> => {
     const wsClient = new CsgDeliveryWsClientFakeAdapter();
@@ -63,6 +66,15 @@ describe("TradeStatusWsController", () => {
             await wsClient.receive(TRADE_STATUS, tradeStatus());
 
             expect(fakeScheduler(container).activeIntervals()).toHaveLength(1);
+        });
+
+        it("Should count the max wait from when csgoempire sent the trade", async () => {
+            const wsClient = await listenTo(container);
+            const trackSpy = jest.spyOn(container.get(DELIVERY_TRACKERS), "track");
+
+            await wsClient.receive(TRADE_STATUS, tradeStatus({ updated_at: SENT_AT }));
+
+            expect(trackSpy).toHaveBeenCalledWith(expect.objectContaining({ sentAt: Date.parse(SENT_AT_UTC) }));
         });
 
         it("Should start one delivery and one tracker when the status arrives twice", async () => {

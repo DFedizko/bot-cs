@@ -10,6 +10,10 @@ export const TERMINAL_STATUSES: StatusChange[] = [
     { status: 8, status_message: "Canceled" },
     { status: 9, status_message: "Timed Out" },
     { status: 11, status_message: "Disputed" },
+    { status: -1, status_message: "Error" },
+    { status: 13, status_message: "CompletedButReversible" },
+    { status: 14, status_message: "TradeReversed" },
+    { status: 15, status_message: "TimedOutButReversible" },
 ];
 
 export const SENDING = { status: 3, status_message: "Sending" } as const;

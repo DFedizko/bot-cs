@@ -8,7 +8,20 @@ import type { TradeStatusMessage } from "../http/csgoempire/types/trade-status";
 import type { TradeWithdrawal } from "../http/csgoempire/types/trade-withdrawal";
 
 const SENT: TradeStatusMessage = "Sent";
-const TERMINAL_STATUSES: readonly TradeStatusMessage[] = ["Completed", "Declined", "Canceled", "Timed Out", "Disputed"];
+const TERMINAL_STATUSES: readonly TradeStatusMessage[] = [
+    "Completed",
+    "Declined",
+    "Canceled",
+    "Timed Out",
+    "Disputed",
+    "Error",
+    "CompletedButReversible",
+    "TradeReversed",
+    "TimedOutButReversible",
+];
+const DATE_TIME_SEPARATOR = " ";
+const ISO_SEPARATOR = "T";
+const UTC_SUFFIX = "Z";
 
 export class WithdrawalTrackingDispatcher {
     constructor(
@@ -36,13 +49,18 @@ export class WithdrawalTrackingDispatcher {
         if (assetId === undefined)
             return this.logger.log(`Not tracking trade "${withdrawal.id}": csgoempire sent no asset id to verify`);
         await this.commandBus.dispatch(this.startCommand(accountId, withdrawal, String(assetId)));
-        await this.commandBus.dispatch(new TrackDeliveryCommand(withdrawal.id));
+        await this.commandBus.dispatch(new TrackDeliveryCommand(withdrawal.id, this.sentAtOf(withdrawal)));
     }
 
     private stopTracking(accountId: number, withdrawal: TradeWithdrawal): Promise<void> {
         return this.commandBus.dispatch(
             new StopDeliveryTrackingCommand({ tradeId: withdrawal.id, accountId, reason: withdrawal.status_message }),
         );
+    }
+
+    private sentAtOf(withdrawal: TradeWithdrawal): number | undefined {
+        const sentAt = Date.parse(`${withdrawal.updated_at.replace(DATE_TIME_SEPARATOR, ISO_SEPARATOR)}${UTC_SUFFIX}`);
+        return Number.isNaN(sentAt) ? undefined : sentAt;
     }
 
     private startCommand(accountId: number, withdrawal: TradeWithdrawal, assetId: string): StartDeliveryCommand {
