@@ -10,10 +10,12 @@ import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoe
 const DRY_RUN_ENV = "development";
 const WANTED_ITEMS_PATH = "/accounts/:accountId/wanted-items";
 const WANTED_ITEM_PATH = `${WANTED_ITEMS_PATH}/:name`;
+const WANTED_ITEM_ENABLED_PATH = `${WANTED_ITEM_PATH}/enabled`;
 const WANTED_ITEM_ROUTES = [
     ["post", WANTED_ITEMS_PATH],
     ["patch", WANTED_ITEM_PATH],
     ["delete", WANTED_ITEM_PATH],
+    ["patch", WANTED_ITEM_ENABLED_PATH],
 ] as const;
 
 let container: Container;

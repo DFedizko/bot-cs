@@ -6,10 +6,16 @@ import {
     EDIT_WANTED_ITEM_CONTROLLER,
     NEW_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_CONTROLLER,
+    TOGGLE_WANTED_ITEM_CONTROLLER,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
 
-const HTTP_CONTROLLERS = [ADD_WANTED_ITEM_CONTROLLER, EDIT_WANTED_ITEM_CONTROLLER, REMOVE_WANTED_ITEM_CONTROLLER];
+const HTTP_CONTROLLERS = [
+    ADD_WANTED_ITEM_CONTROLLER,
+    EDIT_WANTED_ITEM_CONTROLLER,
+    REMOVE_WANTED_ITEM_CONTROLLER,
+    TOGGLE_WANTED_ITEM_CONTROLLER,
+];
 
 export class Bootstrap {
     constructor(private readonly container: Container) {}

@@ -8,6 +8,8 @@ import {
     EDIT_WANTED_ITEM_VALIDATOR,
     REMOVE_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_VALIDATOR,
+    TOGGLE_WANTED_ITEM_CONTROLLER,
+    TOGGLE_WANTED_ITEM_VALIDATOR,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { HTTP_ERROR_MAPPER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
@@ -15,6 +17,7 @@ import { ZodValidatorAdapter } from "@/packages/external/validation/validator.zo
 import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
 import { EditWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/edit-wanted-item.http-controller";
 import { RemoveWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/remove-wanted-item.http-controller";
+import { ToggleWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/toggle-wanted-item.http-controller";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
 
@@ -23,11 +26,13 @@ const HTTP_CONTROLLERS = [
     { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
     { identifier: EDIT_WANTED_ITEM_CONTROLLER, implementation: EditWantedItemHttpController },
     { identifier: REMOVE_WANTED_ITEM_CONTROLLER, implementation: RemoveWantedItemHttpController },
+    { identifier: TOGGLE_WANTED_ITEM_CONTROLLER, implementation: ToggleWantedItemHttpController },
 ];
 const VALIDATORS = [
     { identifier: ADD_WANTED_ITEM_VALIDATOR, name: "add" },
     { identifier: EDIT_WANTED_ITEM_VALIDATOR, name: "edit" },
     { identifier: REMOVE_WANTED_ITEM_VALIDATOR, name: "remove" },
+    { identifier: TOGGLE_WANTED_ITEM_VALIDATOR, name: "toggle" },
 ];
 const ACCOUNT_ID = 1;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
