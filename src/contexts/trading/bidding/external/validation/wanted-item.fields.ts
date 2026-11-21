@@ -2,16 +2,18 @@ import z from "zod";
 import { WANTED_ITEM_EXAMPLE } from "../../infrastructure/docs/wanted-item.example";
 
 const PLAIN_DIGITS = /^\d+$/;
+const ACCOUNT_ID_DESCRIPTION = "The CSGOEmpire user id of the account, in plain digits";
 
 export const accountIdField = z
     .string()
     .regex(PLAIN_DIGITS)
     .meta({
-        description: "The CSGOEmpire user id of the account, in plain digits",
+        description: ACCOUNT_ID_DESCRIPTION,
         examples: [WANTED_ITEM_EXAMPLE.accountId],
     })
     .transform(Number)
-    .pipe(z.number().int().positive());
+    .pipe(z.number().int().positive())
+    .meta({ description: ACCOUNT_ID_DESCRIPTION });
 
 export const itemNameField = z.string().meta({
     description: "The market name of the item, as CSGOEmpire lists it (2 to 100 characters)",

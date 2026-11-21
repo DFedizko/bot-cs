@@ -1,6 +1,7 @@
 import z from "zod";
 import {
     createDocument,
+    type ZodOpenApiObject,
     type ZodOpenApiOperationObject,
     type ZodOpenApiPathsObject,
     type ZodOpenApiResponseObject,
@@ -13,7 +14,11 @@ import { httpErrorBodySchema } from "./http-error-body.schema";
 
 const OPENAPI_VERSION = "3.1.0";
 const PATH_PARAM = /:(\w+)/g;
-const PARAM_PREFIX_LENGTH = 1;
+const PARAM_PREFIX = ":";
+const PARAM_PREFIX_LENGTH = PARAM_PREFIX.length;
+const PATH_SEPARATOR = "/";
+const WORD_SEPARATOR = "-";
+const SAME_ORIGIN = { url: "/" };
 const FIRST_ERROR_STATUS = 400;
 
 type ApiInfo = { title: string; version: string; description: string };
@@ -28,15 +33,18 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     ) {}
 
     toJson(): ApiDocumentJson {
-        this.document ??= {
-            ...createDocument({ openapi: OPENAPI_VERSION, info: this.info, paths: this.createPaths() }),
-        };
+        this.document ??= { ...createDocument(this.createObject(this.documentedRoutes())) };
         return this.document;
     }
 
-    private createPaths(): ZodOpenApiPathsObject {
-        const routes = this.catalog.routes().filter((route): route is DocumentedRoute => route.doc !== undefined);
-        return routes.reduce((paths, route) => this.addRoute(paths, route), {} as ZodOpenApiPathsObject);
+    private createObject(routes: DocumentedRoute[]): ZodOpenApiObject {
+        const tags = [...new Set(routes.flatMap(({ doc }) => doc.tags))].map((name) => ({ name }));
+        const paths = routes.reduce((all, route) => this.addRoute(all, route), {} as ZodOpenApiPathsObject);
+        return { openapi: OPENAPI_VERSION, info: this.info, servers: [SAME_ORIGIN], tags, paths };
+    }
+
+    private documentedRoutes(): DocumentedRoute[] {
+        return this.catalog.routes().filter((route): route is DocumentedRoute => route.doc !== undefined);
     }
 
     private addRoute(paths: ZodOpenApiPathsObject, route: DocumentedRoute): ZodOpenApiPathsObject {
@@ -44,18 +52,22 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
         return { ...paths, [path]: { ...paths[path], [route.method]: this.createOperation(route) } };
     }
 
-    private createOperation({ doc, input, path }: DocumentedRoute): ZodOpenApiOperationObject {
+    private createOperation({ doc, input, path, method }: DocumentedRoute): ZodOpenApiOperationObject {
         const shape = this.readShape(input);
         const params = this.readParamNames(path);
         const body = Object.entries(shape).filter(([name]) => !params.includes(name));
         const { summary, description, tags } = doc;
         return {
+            operationId: this.createOperationId(method, path),
             summary,
             description,
             tags,
             requestParams: { path: z.object(Object.fromEntries(params.map((name) => [name, shape[name]]))) },
             ...(body.length > 0 && {
-                requestBody: { content: { "application/json": { schema: z.object(Object.fromEntries(body)) } } },
+                requestBody: {
+                    description: summary,
+                    content: { "application/json": { schema: z.object(Object.fromEntries(body)) } },
+                },
             }),
             responses: Object.fromEntries(doc.responses.map((response) => this.createResponse(response))),
         };
@@ -70,6 +82,14 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
         if (status < FIRST_ERROR_STATUS) return [String(status), { description }];
         const content = { "application/json": { schema: httpErrorBodySchema, ...(examples && { examples }) } };
         return [String(status), { description, content }];
+    }
+
+    private createOperationId(method: string, path: string): string {
+        const words = path
+            .split(PATH_SEPARATOR)
+            .filter((segment) => segment && !segment.startsWith(PARAM_PREFIX))
+            .flatMap((segment) => segment.split(WORD_SEPARATOR));
+        return [method, ...words.map((word) => word.charAt(0).toUpperCase() + word.slice(1))].join("");
     }
 
     private readParamNames(path: string): string[] {

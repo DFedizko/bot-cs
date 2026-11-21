@@ -18,11 +18,18 @@ type Operation = {
     summary: string;
     description: string;
     tags: string[];
-    parameters: { name: string; schema: { examples: unknown[] } }[];
-    requestBody?: { content: Content };
+    parameters: { name: string; description?: string; schema: { examples: unknown[] } }[];
+    operationId: string;
+    requestBody?: { description: string; content: Content };
     responses: Record<string, { description: string; content?: Content }>;
 };
-type Json = { openapi: string; info: unknown; paths: Record<string, Record<string, Operation>> };
+type Json = {
+    openapi: string;
+    info: unknown;
+    servers: unknown;
+    tags: unknown;
+    paths: Record<string, Record<string, Operation>>;
+};
 
 const INFO = { title: "Foo API", version: "1.0.0", description: "Manages foos" };
 const FOO_PATH = "/foos/{fooId}";
@@ -113,6 +120,30 @@ describe("ApiDocumentZodOpenApiAdapter", () => {
         const content = addFoo().responses[HttpStatus.CONFLICT]!.content![JSON_TYPE]!;
 
         expect(content.schema).toEqual({ $ref: "#/components/schemas/HttpErrorBody" });
+    });
+
+    it("Should name every operation after its method and path", () => {
+        const ids = [addFoo().operationId, removeFoo().operationId];
+
+        expect(ids).toEqual(["postFoos", "deleteFoos"]);
+    });
+
+    it("Should declare every tag of the routes once", () => {
+        const { tags } = document();
+
+        expect(tags).toEqual([{ name: "Foos" }]);
+    });
+
+    it("Should serve the api from the document's own origin", () => {
+        const { servers } = document();
+
+        expect(servers).toEqual([{ url: "/" }]);
+    });
+
+    it("Should describe the body with the route summary", () => {
+        const { requestBody } = addFoo();
+
+        expect(requestBody?.description).toBe(addFooDoc.summary);
     });
 
     it("Should build the document once", () => {
