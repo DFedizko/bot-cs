@@ -5,7 +5,7 @@ import { ValidationError, type InvalidField } from "@/packages/infrastructure/va
 const PATH_SEPARATOR = ".";
 
 export class ValidatorZodAdapter<T> implements Validator<T> {
-    constructor(private readonly schema: z.ZodType<T>) {}
+    constructor(readonly schema: z.ZodType<T>) {}
 
     validate(input: unknown): T {
         const result = this.schema.safeParse(input);

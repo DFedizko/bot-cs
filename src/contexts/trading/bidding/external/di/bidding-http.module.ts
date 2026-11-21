@@ -1,5 +1,10 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
-import { COMMAND_BUS, HTTP_ERROR_MAPPING, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import {
+    COMMAND_BUS,
+    HTTP_CONTROLLER,
+    HTTP_ERROR_MAPPING,
+    HTTP_SERVER,
+} from "@/packages/external/di/packages.identifiers";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import type { CommandBus } from "@/packages/application/command-bus";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
@@ -19,6 +24,10 @@ import { addWantedItemSchema } from "../validation/add-wanted-item.schema";
 import { editWantedItemSchema } from "../validation/edit-wanted-item.schema";
 import { removeWantedItemSchema } from "../validation/remove-wanted-item.schema";
 import { toggleWantedItemSchema } from "../validation/toggle-wanted-item.schema";
+import { addWantedItemDoc } from "../../infrastructure/docs/add-wanted-item.route-doc";
+import { editWantedItemDoc } from "../../infrastructure/docs/edit-wanted-item.route-doc";
+import { removeWantedItemDoc } from "../../infrastructure/docs/remove-wanted-item.route-doc";
+import { toggleWantedItemDoc } from "../../infrastructure/docs/toggle-wanted-item.route-doc";
 import {
     ADD_WANTED_ITEM_CONTROLLER,
     ADD_WANTED_ITEM_VALIDATOR,
@@ -31,6 +40,12 @@ import {
 } from "./bidding.identifiers";
 
 export class BiddingHttpModule extends ContainerModule {
+    private static readonly HTTP_CONTROLLERS = [
+        ADD_WANTED_ITEM_CONTROLLER,
+        EDIT_WANTED_ITEM_CONTROLLER,
+        REMOVE_WANTED_ITEM_CONTROLLER,
+        TOGGLE_WANTED_ITEM_CONTROLLER,
+    ];
     constructor() {
         super((options) => BiddingHttpModule.bindAll(options));
     }
@@ -60,31 +75,32 @@ export class BiddingHttpModule extends ContainerModule {
         bind(ADD_WANTED_ITEM_CONTROLLER)
             .toResolvedValue(
                 (http: HttpServer, bus: CommandBus, validator: Validator<AddWantedItemInput>) =>
-                    new AddWantedItemHttpController(http, bus, validator),
+                    new AddWantedItemHttpController(http, bus, validator, addWantedItemDoc),
                 [HTTP_SERVER, COMMAND_BUS, ADD_WANTED_ITEM_VALIDATOR],
             )
             .inSingletonScope();
         bind(EDIT_WANTED_ITEM_CONTROLLER)
             .toResolvedValue(
                 (http: HttpServer, bus: CommandBus, validator: Validator<EditWantedItemInput>) =>
-                    new EditWantedItemHttpController(http, bus, validator),
+                    new EditWantedItemHttpController(http, bus, validator, editWantedItemDoc),
                 [HTTP_SERVER, COMMAND_BUS, EDIT_WANTED_ITEM_VALIDATOR],
             )
             .inSingletonScope();
         bind(REMOVE_WANTED_ITEM_CONTROLLER)
             .toResolvedValue(
                 (http: HttpServer, bus: CommandBus, validator: Validator<RemoveWantedItemInput>) =>
-                    new RemoveWantedItemHttpController(http, bus, validator),
+                    new RemoveWantedItemHttpController(http, bus, validator, removeWantedItemDoc),
                 [HTTP_SERVER, COMMAND_BUS, REMOVE_WANTED_ITEM_VALIDATOR],
             )
             .inSingletonScope();
         bind(TOGGLE_WANTED_ITEM_CONTROLLER)
             .toResolvedValue(
                 (http: HttpServer, bus: CommandBus, validator: Validator<ToggleWantedItemInput>) =>
-                    new ToggleWantedItemHttpController(http, bus, validator),
+                    new ToggleWantedItemHttpController(http, bus, validator, toggleWantedItemDoc),
                 [HTTP_SERVER, COMMAND_BUS, TOGGLE_WANTED_ITEM_VALIDATOR],
             )
             .inSingletonScope();
+        BiddingHttpModule.HTTP_CONTROLLERS.forEach((controller) => bind(HTTP_CONTROLLER).toService(controller));
     }
 
     private static bindErrorMappings({ bind }: ContainerModuleLoadOptions): void {

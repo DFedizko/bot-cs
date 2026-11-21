@@ -1,37 +1,31 @@
 import type { Container } from "inversify";
 import {
+    API_REFERENCE_CONTROLLER,
     ASYNC_EVENT_BUS,
     ASYNC_EVENT_LISTENER,
     COMMAND_BUS,
     ENV,
     EVENT_BUS,
     EVENT_LISTENER,
+    HTTP_CONTROLLER,
     HTTP_SERVER,
+    LOGGER,
     UNHANDLED_ERROR_TRAP,
 } from "@/packages/external/di/packages.identifiers";
 import type { EventBus } from "@/packages/application/event-bus";
 import type { EventListener } from "@/packages/application/event-listener";
 import type { Identifier } from "@/packages/external/di/identifier";
 import { INIT_CSG_SESSION, SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
-import {
-    ADD_WANTED_ITEM_CONTROLLER,
-    EDIT_WANTED_ITEM_CONTROLLER,
-    NEW_ITEM_CONTROLLER,
-    REMOVE_WANTED_ITEM_CONTROLLER,
-    TOGGLE_WANTED_ITEM_CONTROLLER,
-} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import { NEW_ITEM_CONTROLLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import {
     ACTIVE_WITHDRAWALS_CONTROLLER,
     TRADE_STATUS_CONTROLLER,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
 
-const HTTP_CONTROLLERS = [
-    ADD_WANTED_ITEM_CONTROLLER,
-    EDIT_WANTED_ITEM_CONTROLLER,
-    REMOVE_WANTED_ITEM_CONTROLLER,
-    TOGGLE_WANTED_ITEM_CONTROLLER,
-];
+const DOCS_MESSAGE = "Docs available at:";
+const LOCAL_ORIGIN = "http://localhost";
 
 export class Bootstrap {
     constructor(private readonly container: Container) {}
@@ -60,8 +54,16 @@ export class Bootstrap {
     }
 
     private async startHttpServer(): Promise<void> {
-        await Promise.all(HTTP_CONTROLLERS.map((controller) => this.container.getAsync(controller)));
+        await this.container.getAllAsync(HTTP_CONTROLLER);
         const httpServer = await this.container.getAsync(HTTP_SERVER);
-        httpServer.listen(this.container.get(ENV).HTTP_PORT);
+        const port = this.container.get(ENV).HTTP_PORT;
+        httpServer.listen(port);
+        this.announceApiDocs(port);
+    }
+
+    private announceApiDocs(port: number): void {
+        if (!this.container.isBound(API_REFERENCE_CONTROLLER)) return;
+        const docsUrl = `${LOCAL_ORIGIN}:${port}${ApiReferenceHttpController.PATH}`;
+        this.container.get(LOGGER).log(`${DOCS_MESSAGE} ${docsUrl}`);
     }
 }

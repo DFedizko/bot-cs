@@ -85,7 +85,8 @@ export class HttpServerBunAdapter implements HttpServer {
         this.setCookies(req, res);
         this.clearCookies(req, res);
         const init = { status: res.status ?? HttpStatus.OK, headers: res.headers };
-        return res.body === undefined ? new Response(null, init) : Response.json(res.body, init);
+        if (res.body === undefined) return new Response(null, init);
+        return typeof res.body === "string" ? new Response(res.body, init) : Response.json(res.body, init);
     }
 
     private async readBody(req: Request): Promise<unknown> {

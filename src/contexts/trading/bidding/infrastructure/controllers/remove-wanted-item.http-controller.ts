@@ -4,6 +4,7 @@ import type { HttpRequest, HttpResponse, HttpServer } from "@/packages/infrastru
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-input";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
+import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { RemoveWantedItemCommand } from "../../application/remove-wanted-item/remove-wanted-item.command";
 import type { RemoveWantedItemInput } from "./remove-wanted-item.input";
 
@@ -14,8 +15,12 @@ export class RemoveWantedItemHttpController implements HttpController {
         httpServer: HttpServer,
         private readonly commandBus: CommandBus,
         private readonly validator: Validator<RemoveWantedItemInput>,
+        doc: HttpRouteDoc,
     ) {
-        httpServer.delete(RemoveWantedItemHttpController.PATH, (request) => this.handle(request));
+        httpServer.delete(RemoveWantedItemHttpController.PATH, (request) => this.handle(request), {
+            input: validator,
+            doc,
+        });
     }
 
     async handle(request: HttpRequest): Promise<HttpResponse> {

@@ -100,6 +100,8 @@ export class HttpServerExpressAdapter implements HttpServer {
         expressResponse.status(response.status ?? HttpStatus.OK).set(response.headers ?? {});
         if (response.body === undefined) {
             expressResponse.end();
+        } else if (typeof response.body === "string") {
+            expressResponse.send(response.body);
         } else {
             expressResponse.json(response.body);
         }

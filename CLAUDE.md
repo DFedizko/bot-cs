@@ -36,6 +36,10 @@ Read this only when the task touches Steam: logging in, trade offers, mobile con
     - Docs and Q&A: the libraries' GitHub wikis and `https://dev.doctormckay.com` (rate limits, polling).
 - **Reference bot:** [`kevalane/csgoempire-bot`](https://github.com/kevalane/csgoempire-bot), a small CSGOEmpire + Steam trading bot (`src/lib/SteamBot.ts` for the Steam session and trade actions, `src/services/` for the buy/sell flows). Use it to understand behaviour only: it is procedural, single-account and untested, so never copy its structure; this repo's architecture and rules always apply.
 
+## API documentation (read on demand)
+
+Read [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) only when the task creates or changes an HTTP route: it is the standard for documenting routes in the OpenAPI document served at `/docs` in development.
+
 ## Tests
 
 **Strict TDD (Kent Beck): never write production code without a failing test written first.** Red → green → refactor.

@@ -1,8 +1,8 @@
 import type { Container } from "inversify";
 import { RootContainer } from "@/composition-root/root-container";
 import { fakeExternals } from "@/__builders__/externals.builder";
-import { COMMAND_BUS, ENV, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
-import { HttpServerBunAdapter } from "@/packages/external/http/server/http-server.bun-adapter";
+import { COMMAND_BUS, ENV, HTTP_CONTROLLER, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import { HttpServerRouteRecordingDecorator } from "@/packages/infrastructure/http/http-server.route-recording-decorator";
 import { INIT_CSG_SESSION, SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import {
     ADD_WANTED_ITEM_CONTROLLER,
@@ -14,6 +14,7 @@ import {
 import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
 import { EditWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/edit-wanted-item.http-controller";
 import { RemoveWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/remove-wanted-item.http-controller";
+import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { InitCsgSessionWsController } from "@/contexts/trading/shared/infrastructure/controllers/init-csg-session.ws-controller";
 import { NewItemWsController } from "@/contexts/trading/bidding/infrastructure/controllers/new-item.ws-controller";
@@ -59,6 +60,11 @@ const AUCTION_GATEWAYS = [
     steamOffers: unknown;
     csgTrades: unknown;
 }[];
+const API_DOCS_SERVED = [
+    { nodeEnv: "development", served: true },
+    { nodeEnv: "test", served: true },
+    { nodeEnv: "production", served: false },
+] as const satisfies { nodeEnv: AppEnv["NODE_ENV"]; served: boolean }[];
 const HTTP_CONTROLLERS = [
     { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
     { identifier: EDIT_WANTED_ITEM_CONTROLLER, implementation: EditWantedItemHttpController },
@@ -86,10 +92,10 @@ describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, ga
         expect(commandBus).toBeInstanceOf(CommandBusInMemory);
     });
 
-    it("Should resolve the bun http server", async () => {
+    it("Should resolve the route-recording http server", async () => {
         const httpServer = await container.getAsync(HTTP_SERVER);
 
-        expect(httpServer).toBeInstanceOf(HttpServerBunAdapter);
+        expect(httpServer).toBeInstanceOf(HttpServerRouteRecordingDecorator);
     });
 
     it("Should resolve the socket metadata", async () => {
@@ -138,5 +144,17 @@ describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, ga
         const tradesGateway = await container.getAsync(CSG_TRADES);
 
         expect(tradesGateway).toBeInstanceOf(csgTrades);
+    });
+});
+
+describe.each([...API_DOCS_SERVED])("RootContainer api docs in $nodeEnv", ({ nodeEnv, served }) => {
+    it(`Should ${served ? "" : "not "}serve the api reference`, async () => {
+        const root = fakeExternals(
+            new RootContainer({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
+        );
+
+        const controllers = await root.getAllAsync(HTTP_CONTROLLER);
+
+        expect(controllers.some((controller) => controller instanceof ApiReferenceHttpController)).toBe(served);
     });
 });
