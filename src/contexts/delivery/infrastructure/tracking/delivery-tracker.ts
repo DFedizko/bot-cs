@@ -34,7 +34,7 @@ export class DeliveryTracker {
         private readonly deps: DeliveryTrackerDeps,
     ) {
         this.pausedUntil = deps.clock.now();
-        this.giveUpAt = (delivery.sentAt ?? deps.clock.now()) + deps.options.maxWaitMs;
+        this.giveUpAt = Math.min(delivery.sentAt ?? deps.clock.now(), deps.clock.now()) + deps.options.maxWaitMs;
     }
 
     stop(): void {
@@ -54,14 +54,16 @@ export class DeliveryTracker {
         }
     }
 
-    private check(): Promise<void> {
-        if (this.deps.clock.now() >= this.giveUpAt) return this.giveUp();
-        return this.deps.commandBus.dispatch(new AcceptDeliveryOfferCommand(this.delivery.tradeId));
+    private async check(): Promise<void> {
+        await this.deps.commandBus.dispatch(new AcceptDeliveryOfferCommand(this.delivery.tradeId));
+        if (this.deps.clock.now() >= this.giveUpAt) await this.giveUp();
     }
 
     private async giveUp(): Promise<void> {
         const { tradeId, accountId } = this.delivery;
-        this.deps.logger.log(`No right offer for trade "${tradeId}" of account "${accountId}" in time, disputing`);
+        this.deps.logger.log(
+            `Max wait passed for trade "${tradeId}" of account "${accountId}", disputing it if its offer is still missing`,
+        );
         try {
             await this.deps.commandBus.dispatch(new DisputeDeliveryCommand(tradeId));
         } catch (error) {
