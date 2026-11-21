@@ -10,6 +10,7 @@ import type { UnhandledErrorTrap } from "@/packages/infrastructure/process/unhan
 import type { HttpClientFactory } from "../http/client/http-client.factory";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
+import type { HttpController } from "@/packages/infrastructure/http/http-controller";
 import { identifier } from "./identifier";
 
 export const ENV = identifier<AppEnv>("Env");
@@ -27,3 +28,4 @@ export const HTTP_ERROR_MAPPING = identifier<HttpErrorMapping>("HttpErrorMapping
 export const HTTP_SERVER = identifier<HttpServer>("HttpServer");
 export const PROCESS_EVENTS = identifier<ProcessEvents>("ProcessEvents");
 export const UNHANDLED_ERROR_TRAP = identifier<UnhandledErrorTrap>("UnhandledErrorTrap");
+export const HTTP_CONTROLLER = identifier<HttpController>("HttpController");

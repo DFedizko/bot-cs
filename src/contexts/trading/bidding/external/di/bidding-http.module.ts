@@ -1,5 +1,10 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
-import { COMMAND_BUS, HTTP_ERROR_MAPPING, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import {
+    COMMAND_BUS,
+    HTTP_CONTROLLER,
+    HTTP_ERROR_MAPPING,
+    HTTP_SERVER,
+} from "@/packages/external/di/packages.identifiers";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import type { CommandBus } from "@/packages/application/command-bus";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
@@ -31,6 +36,13 @@ import {
 } from "./bidding.identifiers";
 
 export class BiddingHttpModule extends ContainerModule {
+    private static readonly HTTP_CONTROLLERS = [
+        ADD_WANTED_ITEM_CONTROLLER,
+        EDIT_WANTED_ITEM_CONTROLLER,
+        REMOVE_WANTED_ITEM_CONTROLLER,
+        TOGGLE_WANTED_ITEM_CONTROLLER,
+    ];
+
     constructor() {
         super((options) => BiddingHttpModule.bindAll(options));
     }
@@ -85,6 +97,7 @@ export class BiddingHttpModule extends ContainerModule {
                 [HTTP_SERVER, COMMAND_BUS, TOGGLE_WANTED_ITEM_VALIDATOR],
             )
             .inSingletonScope();
+        BiddingHttpModule.HTTP_CONTROLLERS.forEach((controller) => bind(HTTP_CONTROLLER).toService(controller));
     }
 
     private static bindErrorMappings({ bind }: ContainerModuleLoadOptions): void {
