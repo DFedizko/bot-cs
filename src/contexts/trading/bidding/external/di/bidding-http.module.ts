@@ -62,7 +62,11 @@ export class BiddingHttpModule extends ContainerModule {
         BiddingHttpModule.bindValidators(options);
         BiddingHttpModule.bindControllers(options);
         BiddingHttpModule.bindErrorMappings(options);
-        BiddingHttpModule.ROUTE_DOCS.forEach((route) => options.bind(HTTP_ROUTE_DOC).toConstantValue(route));
+        BiddingHttpModule.bindRouteDocs(options);
+    }
+
+    private static bindRouteDocs({ bind }: ContainerModuleLoadOptions): void {
+        BiddingHttpModule.ROUTE_DOCS.forEach((route) => bind(HTTP_ROUTE_DOC).toConstantValue(route));
     }
 
     private static bindValidators({ bind }: ContainerModuleLoadOptions): void {

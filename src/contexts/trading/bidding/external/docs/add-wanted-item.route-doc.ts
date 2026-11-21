@@ -10,6 +10,7 @@ import {
     ALREADY_WANTED,
     BLANK_NAME,
     INVALID_MAX_FOR,
+    INVALID_WEAR,
     MISSING_NAME,
     NAME_OUT_OF_BOUNDS,
     UNKNOWN_CRITERION,
@@ -27,7 +28,13 @@ export const addWantedItemRoute: HttpRouteDoc<z.ZodObject> = {
         { status: HttpStatus.OK, description: "The account now wants the item" },
         HttpErrorResponseDocs.badRequest(MISSING_NAME),
         HttpErrorResponseDocs.conflict(ALREADY_WANTED),
-        HttpErrorResponseDocs.unprocessable(INVALID_MAX_FOR, UNKNOWN_CRITERION, BLANK_NAME, NAME_OUT_OF_BOUNDS),
+        HttpErrorResponseDocs.unprocessable(
+            INVALID_MAX_FOR,
+            UNKNOWN_CRITERION,
+            INVALID_WEAR,
+            BLANK_NAME,
+            NAME_OUT_OF_BOUNDS,
+        ),
         HttpErrorResponseDocs.internalError(),
     ],
 };

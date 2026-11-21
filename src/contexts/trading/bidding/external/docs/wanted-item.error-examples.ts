@@ -63,3 +63,8 @@ export const ENABLED_NOT_BOOLEAN = {
         fields: [{ path: "enabled", message: "Invalid input: expected boolean, received string" }],
     },
 };
+
+export const INVALID_WEAR = {
+    summary: "The wear is not a CS2 wear name",
+    value: { code: "DOMAIN_ERROR", message: 'Invalid wear name: "Brand New"' },
+};
