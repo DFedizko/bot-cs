@@ -1,4 +1,9 @@
-import express, { type Express, type Request as ExpressRequest, type Response as ExpressResponse } from "express";
+import express, {
+    type ErrorRequestHandler,
+    type Express,
+    type Request as ExpressRequest,
+    type Response as ExpressResponse,
+} from "express";
 import type { Callback, HttpRequest, HttpResponse, HttpServer } from "../../../infrastructure/http/http-server";
 import { HttpStatus } from "../../../infrastructure/http/http-status";
 import { HttpMethod } from "../../../infrastructure/http/http-method";
@@ -7,8 +12,10 @@ import cookieParser from "cookie-parser";
 import type { HttpHeaders } from "@/packages/infrastructure/http/http-headers";
 import type { HttpErrorMapper } from "../../../infrastructure/http/http-error.mapper";
 import { HttpErrorMapperByErrorClass } from "../../../infrastructure/http/http-error.mapper.by-error-class";
+import { MalformedBodyError } from "../../../infrastructure/http/errors/malformed-body.error";
 
 const ONE_SECOND_IN_MS = 1000;
+const BODY_PARSE_FAILED = "entity.parse.failed";
 
 export class HttpServerExpressAdapter implements HttpServer {
     private readonly app: Express;
@@ -19,6 +26,7 @@ export class HttpServerExpressAdapter implements HttpServer {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cookieParser());
+        this.app.use(this.answerBodyError);
         this.http = createServer(this.app);
     }
 
@@ -70,6 +78,11 @@ export class HttpServerExpressAdapter implements HttpServer {
             this.respond(this.errorMapper.map(error), expressResponse);
         }
     }
+
+    private readonly answerBodyError: ErrorRequestHandler = (error, _expressRequest, expressResponse, next) => {
+        if (error?.type !== BODY_PARSE_FAILED) return next(error);
+        this.respond(this.errorMapper.map(new MalformedBodyError()), expressResponse);
+    };
 
     private toHttpRequest(expressRequest: ExpressRequest): HttpRequest {
         return {

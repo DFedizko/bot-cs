@@ -3,6 +3,7 @@ import type { Callback, HttpRequest, HttpResponse, HttpServer } from "../../../i
 import { HttpStatus } from "../../../infrastructure/http/http-status";
 import type { HttpErrorMapper } from "../../../infrastructure/http/http-error.mapper";
 import { HttpErrorMapperByErrorClass } from "../../../infrastructure/http/http-error.mapper.by-error-class";
+import { MalformedBodyError } from "../../../infrastructure/http/errors/malformed-body.error";
 
 type BunCallback = (req: Bun.BunRequest) => Promise<Response>;
 
@@ -90,9 +91,17 @@ export class HttpServerBunAdapter implements HttpServer {
     private async readBody(req: Request): Promise<unknown> {
         if (!req.body) return undefined;
         const type = req.headers.get("content-type") ?? "";
-        if (type.includes("application/json")) return req.json();
+        if (type.includes("application/json")) return this.readJson(req);
         if (type.includes("form")) return Object.fromEntries(await req.formData());
         return req.text();
+    }
+
+    private async readJson(req: Request): Promise<unknown> {
+        try {
+            return await req.json();
+        } catch {
+            throw new MalformedBodyError();
+        }
     }
 
     private setCookies(req: Bun.BunRequest, res: HttpResponse): void {

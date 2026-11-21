@@ -8,11 +8,18 @@ import { freePort } from "./__builders__/free-port.builder";
 import { HTTP_SERVERS } from "./__builders__/http-servers.builder";
 
 const PATH = "/foo";
+const MALFORMED_JSON = "{ not json";
 
 let httpServer: HttpServer;
 
 const requestFoo = async (port: number) => {
     const response = await fetch(`http://localhost:${port}${PATH}`, { method: "POST" });
+    return { status: response.status, body: await response.json() };
+};
+
+const postMalformedJson = async (port: number) => {
+    const init = { method: "POST", headers: { "content-type": "application/json" }, body: MALFORMED_JSON };
+    const response = await fetch(`http://localhost:${port}${PATH}`, init);
     return { status: response.status, body: await response.json() };
 };
 
@@ -70,6 +77,19 @@ describe.each(HTTP_SERVERS)("HttpServer%sAdapter", (_name, createServer) => {
             expect(response).toEqual({
                 status: HttpStatus.INTERNAL_SERVER_ERROR,
                 body: { code: "INTERNAL_SERVER_ERROR", message: "Internal server error" },
+            });
+        });
+
+        it("Should answer a malformed json body with bad request and its code", async () => {
+            httpServer = createServer();
+            httpServer.post(PATH, () => ({}));
+            const port = listenOnFreePort(httpServer);
+
+            const response = await postMalformedJson(port);
+
+            expect(response).toEqual({
+                status: HttpStatus.BAD_REQUEST,
+                body: { code: "MALFORMED_BODY", message: "The request body is not valid JSON" },
             });
         });
 
