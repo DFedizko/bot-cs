@@ -4,6 +4,9 @@ import { InternalServerError } from "@/packages/infrastructure/http/errors/inter
 
 const API_KEY = "api-key";
 const HTTP_PORT = "3000";
+const CHECK_INTERVAL_SECONDS = "60";
+const MAX_WAIT_MINUTES = "90";
+const TOO_SHORT_INTERVAL = "5";
 const RUNTIME_ENV = { NODE_ENV: "production", CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT };
 
 let env: Env;
@@ -44,6 +47,32 @@ describe("Env", () => {
         const result = env.parse({ ...RUNTIME_ENV, STEAM_ACCOUNTS: "[]" });
 
         expect(result.STEAM_ACCOUNTS).toBe("[]");
+    });
+    it("Should parse the delivery tracking settings as numbers", () => {
+        const result = env.parse({
+            ...RUNTIME_ENV,
+            DELIVERY_CHECK_INTERVAL_SECONDS: CHECK_INTERVAL_SECONDS,
+            DELIVERY_MAX_WAIT_MINUTES: MAX_WAIT_MINUTES,
+        });
+
+        expect([result.DELIVERY_CHECK_INTERVAL_SECONDS, result.DELIVERY_MAX_WAIT_MINUTES]).toEqual([
+            Number(CHECK_INTERVAL_SECONDS),
+            Number(MAX_WAIT_MINUTES),
+        ]);
+    });
+    it("Should refuse a check interval that would hammer steam", () => {
+        const parse = () => env.parse({ ...RUNTIME_ENV, DELIVERY_CHECK_INTERVAL_SECONDS: TOO_SHORT_INTERVAL });
+
+        expect(parse).toThrow(
+            new InternalServerError('Missing value(s) to enviroment key(s): "DELIVERY_CHECK_INTERVAL_SECONDS"'),
+        );
+    });
+    it("Should refuse a max wait that is not a positive number of minutes", () => {
+        const parse = () => env.parse({ ...RUNTIME_ENV, DELIVERY_MAX_WAIT_MINUTES: "0" });
+
+        expect(parse).toThrow(
+            new InternalServerError('Missing value(s) to enviroment key(s): "DELIVERY_MAX_WAIT_MINUTES"'),
+        );
     });
     it("Should load the enviroment variables from the runtime", () => {
         const result = env.load();
