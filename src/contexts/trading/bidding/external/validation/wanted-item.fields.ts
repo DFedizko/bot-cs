@@ -1,6 +1,8 @@
 import z from "zod";
 
-export const accountIdField = z.coerce.number().int().positive();
+const PLAIN_DIGITS = /^\d+$/;
+
+export const accountIdField = z.string().regex(PLAIN_DIGITS).transform(Number).pipe(z.number().int().positive());
 
 export const itemNameField = z.string();
 

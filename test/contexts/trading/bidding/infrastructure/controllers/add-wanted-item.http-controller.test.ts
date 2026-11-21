@@ -98,6 +98,17 @@ describe("AddWantedItemHttpController", () => {
         expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
 
+    it.each(["0x1", "1e0", " 1", "+1", "1.0"])(
+        "Should answer bad request when the account id %p is not written as plain digits",
+        async (accountId) => {
+            const api = await startWantedItemsApi(container);
+
+            const response = await api.send(POST, itemsPath(accountId), asiimov);
+
+            expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+        },
+    );
+
     it("Should answer bad request when the body is not json", async () => {
         const api = await startWantedItemsApi(container);
 
