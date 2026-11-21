@@ -10,6 +10,6 @@ test("Should build a criterion from your type and value", () =>
     ]));
 
 test("Should reject a criterion of an unknown type", () =>
-    expect(() =>
-        CriteriaFactory.create([{ type: "IsShiny" as ItemCriterionType, value: WearName.FIELD_TESTED }]),
-    ).toThrow(UnknownCriterionError));
+    expect(() => CriteriaFactory.create([{ type: "IsShiny", value: WearName.FIELD_TESTED }])).toThrow(
+        UnknownCriterionError,
+    ));
