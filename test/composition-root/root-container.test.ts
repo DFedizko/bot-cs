@@ -21,13 +21,44 @@ import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastr
 import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
 import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
+import {
+    ACCEPT_OFFER_HANDLER,
+    CSG_TRADES,
+    STEAM_TRADE_OFFERS,
+} from "@/contexts/delivery/external/di/delivery.identifiers";
+import { AcceptDeliveryOfferCommandHandler } from "@/contexts/delivery/application/accept-delivery-offer/accept-delivery-offer.command-handler";
+import { SteamTradeOffersGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.dry-run-adapter";
+import { SteamTradeOffersGatewayAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.adapter";
+import { CsgTradesGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/csg-trades.gateway.dry-run-adapter";
+import { CsgTradesGatewayAdapter } from "@/contexts/delivery/infrastructure/gateways/csg-trades.gateway.adapter";
+
 const API_KEY = "api-key";
 const ANY_FREE_PORT = 0;
 const AUCTION_GATEWAYS = [
-    { nodeEnv: "development", gateway: AuctionGatewayDryRunAdapter },
-    { nodeEnv: "test", gateway: AuctionGatewayDryRunAdapter },
-    { nodeEnv: "production", gateway: AuctionGatewayCsgoempireAdapter },
-] as const satisfies { nodeEnv: AppEnv["NODE_ENV"]; gateway: unknown }[];
+    {
+        nodeEnv: "development",
+        gateway: AuctionGatewayDryRunAdapter,
+        steamOffers: SteamTradeOffersGatewayDryRunAdapter,
+        csgTrades: CsgTradesGatewayDryRunAdapter,
+    },
+    {
+        nodeEnv: "test",
+        gateway: AuctionGatewayDryRunAdapter,
+        steamOffers: SteamTradeOffersGatewayDryRunAdapter,
+        csgTrades: CsgTradesGatewayDryRunAdapter,
+    },
+    {
+        nodeEnv: "production",
+        gateway: AuctionGatewayCsgoempireAdapter,
+        steamOffers: SteamTradeOffersGatewayAdapter,
+        csgTrades: CsgTradesGatewayAdapter,
+    },
+] as const satisfies {
+    nodeEnv: AppEnv["NODE_ENV"];
+    gateway: unknown;
+    steamOffers: unknown;
+    csgTrades: unknown;
+}[];
 const HTTP_CONTROLLERS = [
     { identifier: ADD_WANTED_ITEM_CONTROLLER, implementation: AddWantedItemHttpController },
     { identifier: EDIT_WANTED_ITEM_CONTROLLER, implementation: EditWantedItemHttpController },
@@ -36,7 +67,7 @@ const HTTP_CONTROLLERS = [
 
 let container: Container;
 
-describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, gateway }) => {
+describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, gateway, steamOffers, csgTrades }) => {
     beforeEach(() => {
         container = fakeExternals(
             new RootContainer({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
@@ -89,5 +120,23 @@ describe.each([...AUCTION_GATEWAYS])("RootContainer in $nodeEnv", ({ nodeEnv, ga
         const auctionGateway = await container.getAsync(AUCTION_GATEWAY);
 
         expect(auctionGateway).toBeInstanceOf(gateway);
+    });
+
+    it("Should resolve the delivery offer handler", async () => {
+        const handler = await container.getAsync(ACCEPT_OFFER_HANDLER);
+
+        expect(handler).toBeInstanceOf(AcceptDeliveryOfferCommandHandler);
+    });
+
+    it("Should resolve the steam offers gateway of the enviroment", async () => {
+        const steamOffersGateway = await container.getAsync(STEAM_TRADE_OFFERS);
+
+        expect(steamOffersGateway).toBeInstanceOf(steamOffers);
+    });
+
+    it("Should resolve the csgoempire trades gateway of the enviroment", async () => {
+        const tradesGateway = await container.getAsync(CSG_TRADES);
+
+        expect(tradesGateway).toBeInstanceOf(csgTrades);
     });
 });

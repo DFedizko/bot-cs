@@ -3,6 +3,7 @@ import { PackagesModule } from "@/packages/external/di/packages.module";
 import { TradingSharedModule } from "@/contexts/trading/shared/external/di/trading-shared.module";
 import { BiddingModule } from "@/contexts/trading/bidding/external/di/bidding.module";
 import { BiddingHttpModule } from "@/contexts/trading/bidding/external/di/bidding-http.module";
+import { DeliveryModule } from "@/contexts/delivery/external/di/delivery.module";
 import { ENVIRONMENT_MODULES } from "./environment-modules";
 
 export class RootContainer extends Container {
@@ -13,6 +14,7 @@ export class RootContainer extends Container {
             new TradingSharedModule(),
             new BiddingModule(),
             new BiddingHttpModule(),
+            new DeliveryModule(),
             ...ENVIRONMENT_MODULES[env.NODE_ENV](),
         );
     }
