@@ -1,6 +1,6 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { ASYNC_EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { CSG_DELIVERY_HTTP, MARK_RECEIVED_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { MarkDeliveryReceivedCommand } from "@/contexts/delivery/application/mark-delivery-received/mark-delivery-received.command";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
@@ -48,7 +48,7 @@ describe("MarkDeliveryReceivedCommandHandler", () => {
 
     it("Should publish the delivery received event", async () => {
         await givenDelivery(container, { tracked: confirmedDelivery(OFFER_ID) });
-        const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
+        const publishSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "publish");
 
         await markDeliveryReceived(container);
 

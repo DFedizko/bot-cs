@@ -3,8 +3,8 @@ import {
     COMMAND_BUS,
     COMMAND_HANDLER,
     ENV,
-    EVENT_BUS,
-    EVENT_LISTENER,
+    ASYNC_EVENT_BUS,
+    ASYNC_EVENT_LISTENER,
     LOGGER,
 } from "@/packages/external/di/packages.identifiers";
 import type { CommandBus } from "@/packages/application/command-bus";
@@ -95,14 +95,14 @@ export class DeliveryTrackingModule extends ContainerModule {
             .toResolvedValue(
                 (trackers: DeliveryTrackers, bus: EventBus, logger: Logger) =>
                     new StopDeliveryTrackingCommandHandler(trackers, bus, logger),
-                [DELIVERY_TRACKERS, EVENT_BUS, LOGGER],
+                [DELIVERY_TRACKERS, ASYNC_EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
     }
 
     private static bindListeners({ bind }: ContainerModuleLoadOptions): void {
         DELIVERY_ENDING_EVENTS.forEach((eventName) =>
-            bind(EVENT_LISTENER)
+            bind(ASYNC_EVENT_LISTENER)
                 .toResolvedValue(
                     (commandBus: CommandBus) => new OnDeliveryEndedStopTracking(eventName, commandBus),
                     [DELIVERY_COMMAND_BUS],

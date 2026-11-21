@@ -2,6 +2,8 @@ import type { Container } from "inversify";
 import { Bootstrap } from "@/composition-root/bootstrap";
 import { testContainer } from "@/__builders__/test-container.builder";
 import {
+    ASYNC_EVENT_BUS,
+    ASYNC_EVENT_LISTENER,
     COMMAND_BUS,
     ENV,
     EVENT_BUS,
@@ -29,8 +31,16 @@ import {
     TRADE_OFFER_ID,
 } from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
-import { ACCOUNT_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
+import {
+    ACCOUNT_REPOSITORY,
+    AUCTION_PARTICIPATION_REPO,
+    WANTED_ITEM_REPOSITORY,
+} from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { Account } from "@/contexts/trading/bidding/domain/account/account";
+import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
+import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
+import { evaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/__mocks__/evaluate-item.command.mock";
 import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
 const DRY_RUN_ENV = "development";
@@ -44,6 +54,18 @@ const WANTED_ITEM_ROUTES = [
     ["patch", WANTED_ITEM_ENABLED_PATH],
 ] as const;
 const CS_APP_ID = 730;
+const BIDDER_BALANCE = 10_000;
+const BIDDER_NAME = "John Doe";
+
+const approvedInAuctionItem = async (container: Container): Promise<void> => {
+    const { accountId, itemName, aboveRecommendedPercentage } = evaluateItemCommand();
+    await container
+        .get(ACCOUNT_REPOSITORY)
+        .save(Account.sync({ id: accountId, name: BIDDER_NAME, totalAmount: BIDDER_BALANCE }));
+    await container
+        .get(WANTED_ITEM_REPOSITORY)
+        .save(WantedItem.create({ accountId, name: itemName, maxFor: aboveRecommendedPercentage }));
+};
 
 const flushEventBus = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
 
@@ -160,6 +182,14 @@ describe("Bootstrap", () => {
         expect(subscribeSpy).toHaveBeenCalledWith(await container.getAllAsync(EVENT_LISTENER));
     });
 
+    it("Should subscribe the side-effect event listeners to the async event bus", async () => {
+        const subscribeSpy = jest.spyOn(container.get(ASYNC_EVENT_BUS), "addSubscribers");
+
+        await new Bootstrap(container).run();
+
+        expect(subscribeSpy).toHaveBeenCalledWith(await container.getAllAsync(ASYNC_EVENT_LISTENER));
+    });
+
     it("Should drive an accepted delivery offer to a received delivery through events", async () => {
         await new Bootstrap(container).run();
         const commandBus = await container.getAsync(COMMAND_BUS);
@@ -187,5 +217,18 @@ describe("Bootstrap", () => {
         await flushEventBus();
 
         expect(fakeScheduler(container).activeIntervals()).toEqual([]);
+    });
+
+    it("Should place the bid of an approved auction item before the evaluation resolves", async () => {
+        await new Bootstrap(container).run();
+        await approvedInAuctionItem(container);
+        const commandBus = await container.getAsync(COMMAND_BUS);
+
+        await commandBus.dispatch(evaluateItemCommand());
+
+        const participation = await container
+            .get(AUCTION_PARTICIPATION_REPO)
+            .findByAuctionId(new AuctionId(evaluateItemCommand().itemId));
+        expect(participation).toBeDefined();
     });
 });

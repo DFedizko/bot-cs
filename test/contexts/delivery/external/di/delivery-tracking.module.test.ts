@@ -1,6 +1,6 @@
 import type { Container } from "inversify";
 import { fakeExternals } from "@/__builders__/externals.builder";
-import { COMMAND_HANDLER, EVENT_LISTENER } from "@/packages/external/di/packages.identifiers";
+import { COMMAND_HANDLER, ASYNC_EVENT_LISTENER } from "@/packages/external/di/packages.identifiers";
 import {
     CLOCK,
     DELIVERY_TRACKERS,
@@ -102,7 +102,7 @@ describe.each(ENVIRONMENTS)("DeliveryTrackingModule in %s", (nodeEnv) => {
     });
 
     it("Should stop tracking on every event that ends a delivery", async () => {
-        const listeners = await fakeExternals(container).getAllAsync(EVENT_LISTENER);
+        const listeners = await fakeExternals(container).getAllAsync(ASYNC_EVENT_LISTENER);
 
         const stopping = listeners.filter((listener) => listener instanceof OnDeliveryEndedStopTracking);
         expect(stopping.map((listener) => listener.subscribedTo())).toEqual(DELIVERY_ENDING_EVENTS);

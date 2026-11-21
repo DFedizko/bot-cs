@@ -4,6 +4,7 @@ import type { CommandHandler } from "@/packages/building-blocks/command-handler"
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "../event-bus/event-bus.in-memory-async";
+import { EventBusInMemorySync } from "../event-bus/event-bus.in-memory-sync";
 import { HttpClientFactoryAdapter } from "../http/client/http-client.factory.adapter";
 import { HttpServerBunAdapter } from "../http/server/http-server.bun-adapter";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
@@ -11,6 +12,7 @@ import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http
 import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
 import type { Logger } from "@/packages/application/logger";
 import {
+    ASYNC_EVENT_BUS,
     COMMAND_BUS,
     COMMAND_HANDLER,
     ENV,
@@ -35,6 +37,9 @@ export class PackagesModule extends ContainerModule {
             .toResolvedValue(() => new LoggerConsoleAdapter())
             .inSingletonScope();
         bind(EVENT_BUS)
+            .toResolvedValue(() => new EventBusInMemorySync())
+            .inSingletonScope();
+        bind(ASYNC_EVENT_BUS)
             .toResolvedValue(() => new EventBusInMemoryAsync())
             .inSingletonScope();
         bind(HTTP_CLIENT_FACTORY)

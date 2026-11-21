@@ -1,6 +1,6 @@
 import type { Container } from "inversify";
 import { fakeExternals } from "@/__builders__/externals.builder";
-import { COMMAND_HANDLER, EVENT_LISTENER } from "@/packages/external/di/packages.identifiers";
+import { ASYNC_EVENT_LISTENER, COMMAND_HANDLER, EVENT_LISTENER } from "@/packages/external/di/packages.identifiers";
 import {
     ACCEPT_OFFER_HANDLER,
     CANCEL_OFFER_HANDLER,
@@ -103,11 +103,17 @@ describe.each(ENVIRONMENTS)("DeliveryModule in %s", (nodeEnv) => {
     });
 
     it("Should register the delivery event listeners", async () => {
-        const listeners = await fakeExternals(container).getAllAsync(EVENT_LISTENER);
+        const listeners = await fakeExternals(container).getAllAsync(ASYNC_EVENT_LISTENER);
 
         expect(listeners).toEqual(
             expect.arrayContaining(EVENT_LISTENERS.map(({ implementation }) => expect.any(implementation))),
         );
+    });
+
+    it("Should keep the delivery event listeners out of the core event bus", async () => {
+        const listeners = await fakeExternals(container).getAllAsync(EVENT_LISTENER, { optional: true });
+
+        expect(listeners).toEqual([]);
     });
 
     it.each([

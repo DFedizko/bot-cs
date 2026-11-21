@@ -1,5 +1,5 @@
 import { ContainerModule } from "inversify";
-import { LOGGER } from "@/packages/external/di/packages.identifiers";
+import { EVENT_LISTENER, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { SOCKET_METADATA } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import type { GetSocketMetadataIO } from "@/contexts/trading/shared/infrastructure/csgoempire/http/socket-metadata.http";
 import type { Logger } from "@/packages/application/logger";
@@ -7,7 +7,9 @@ import type { AuctionGateway } from "../../application/place-bid/auction.gateway
 import type { CsgoempireAuctionHttp } from "../../infrastructure/http/csgoempire/csgoempire-auction.http";
 import { AuctionGatewayCsgoempireAdapter } from "../../infrastructure/gateways/auction.gateway.csgoempire-adapter";
 import { AuctionGatewayDryRunAdapter } from "../../infrastructure/gateways/auction.gateway.dry-run-adapter";
-import { AUCTION_GATEWAY, CSGOEMPIRE_AUCTION_HTTP } from "./bidding.identifiers";
+import { AUCTION_GATEWAY, CSGOEMPIRE_AUCTION_HTTP, ON_APPROVED_IN_AUCTION, ON_OUTBID } from "./bidding.identifiers";
+
+const CORE_EVENT_LISTENERS = [ON_APPROVED_IN_AUCTION, ON_OUTBID];
 
 export class BiddingDevModule extends ContainerModule {
     constructor() {
@@ -19,6 +21,7 @@ export class BiddingDevModule extends ContainerModule {
                     SOCKET_METADATA,
                 ])
                 .inSingletonScope();
+            CORE_EVENT_LISTENERS.forEach((listener) => bind(EVENT_LISTENER).toService(listener));
         });
     }
 

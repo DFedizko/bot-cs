@@ -7,6 +7,7 @@ import {
     COMMAND_BUS,
     COMMAND_HANDLER,
     ENV,
+    ASYNC_EVENT_BUS,
     EVENT_BUS,
     HTTP_CLIENT_FACTORY,
     HTTP_ERROR_MAPPER,
@@ -20,6 +21,7 @@ import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { FooNotFoundError } from "@/packages/infrastructure/http/__stubs__/foo.errors";
 import { LoggerConsoleAdapter } from "@/packages/infrastructure/logger/logger.console-adapter";
 import { EventBusInMemoryAsync } from "@/packages/external/event-bus/event-bus.in-memory-async";
+import { EventBusInMemorySync } from "@/packages/external/event-bus/event-bus.in-memory-sync";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
 import { HttpClientFactoryAdapter } from "@/packages/external/http/client/http-client.factory.adapter";
 import { CommandNotRegisteredError } from "@/packages/error/command-not-registered.error";
@@ -52,10 +54,28 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         expect(logger).toBeInstanceOf(LoggerConsoleAdapter);
     });
 
-    it("Should bind the async in-memory event bus", () => {
+    it("Should bind the sync in-memory event bus for the core flow", () => {
         const eventBus = container.get(EVENT_BUS);
 
+        expect(eventBus).toBeInstanceOf(EventBusInMemorySync);
+    });
+
+    it("Should bind one core event bus", () => {
+        const eventBus = container.get(EVENT_BUS);
+
+        expect(container.get(EVENT_BUS)).toBe(eventBus);
+    });
+
+    it("Should bind the async in-memory event bus for side effects", () => {
+        const eventBus = container.get(ASYNC_EVENT_BUS);
+
         expect(eventBus).toBeInstanceOf(EventBusInMemoryAsync);
+    });
+
+    it("Should bind one async event bus", () => {
+        const eventBus = container.get(ASYNC_EVENT_BUS);
+
+        expect(container.get(ASYNC_EVENT_BUS)).toBe(eventBus);
     });
 
     it("Should bind the http client factory", () => {
