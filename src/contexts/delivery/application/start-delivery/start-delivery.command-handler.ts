@@ -4,7 +4,6 @@ import type { Logger } from "@/packages/application/logger";
 import { Delivery } from "../../domain/delivery/delivery";
 import { TradeId } from "../../domain/delivery/trade-id";
 import type { DeliveryRepository } from "../delivery.repository";
-import { DeliveryStartedEvent } from "./delivery-started.event";
 import { StartDeliveryCommand } from "./start-delivery.command";
 
 export class StartDeliveryCommandHandler implements CommandHandler<StartDeliveryCommand> {
@@ -23,9 +22,7 @@ export class StartDeliveryCommandHandler implements CommandHandler<StartDelivery
             return this.logger.log(`Delivery of trade "${command.tradeId}" is already tracked`);
         const delivery = this.startDelivery(command);
         await this.repository.save(delivery);
-        await this.eventBus.publish([
-            new DeliveryStartedEvent({ tradeId: delivery.getTradeId(), accountId: delivery.getAccountId() }),
-        ]);
+        await this.eventBus.publish(delivery.pullDomainEvents());
         this.logger.log(`Awaiting the offer of trade "${command.tradeId}" for account "${command.accountId}"`);
     }
 

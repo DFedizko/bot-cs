@@ -41,7 +41,7 @@ describe("Env", () => {
         );
     });
     it("Should keep the optional steam accounts", () => {
-        const result = env.parse({ NODE_ENV: "production", CSGOEMPIRE_API_KEY: API_KEY, STEAM_ACCOUNTS: "[]" });
+        const result = env.parse({ ...RUNTIME_ENV, STEAM_ACCOUNTS: "[]" });
 
         expect(result.STEAM_ACCOUNTS).toBe("[]");
     });

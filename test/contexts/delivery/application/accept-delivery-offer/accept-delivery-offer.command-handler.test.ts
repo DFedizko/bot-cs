@@ -1,17 +1,17 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
-import { CSGOEMPIRE_DELIVERY_HTTP } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { ACCEPT_OFFER_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { AcceptDeliveryOfferCommand } from "@/contexts/delivery/application/accept-delivery-offer/accept-delivery-offer.command";
+import { DeliveryOfferNotFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-offer-not-found.event";
+import { ScamOfferFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/scam-offer-found.event";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { DeliveryNotFoundError } from "@/contexts/delivery/domain/delivery/errors/delivery-not-found.error";
-import { TradeOfferAcceptedEvent } from "@/contexts/delivery/application/accept-delivery-offer/trade-offer-accepted.event";
-import { DeliveryReceivedEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-received.event";
-import { TradeOfferCancelledEvent } from "@/contexts/delivery/application/accept-delivery-offer/trade-offer-cancelled.event";
-import { DeliveryOfferNotFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-offer-not-found.event";
-import { DeliveryFailedEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-failed.event";
+import { TradeOfferAcceptedEvent } from "@/contexts/delivery/domain/delivery/events/trade-offer-accepted.event";
+import { DeliveryFailedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-failed.event";
 import {
     ACCOUNT_ID,
-    delivery,
+    acceptedDelivery,
     TRADE_ID,
     TRADE_OFFER_ID,
 } from "@/contexts/delivery/domain/__builders__/delivery.builder";
@@ -22,13 +22,12 @@ import {
     steamEconItem,
     steamTradeOffer,
 } from "../../external/steam/__mocks__/steam-trade-offer.mock";
-import { acceptDeliveryOffer, givenDelivery, steamSession } from "./__builders__/accept-offer-scenario.builder";
+import { givenDelivery, publishedNames, steamSession } from "../__builders__/delivery-scenario.builder";
 
 const WRONG_ASSET_ID = "11111111111";
-const CANCEL_FAILED = "HTTP error 500";
 
-const publishedNames = (spy: { mock: { calls: unknown[][] } }): string[] =>
-    spy.mock.calls.flatMap(([events]) => (events as { name: string }[]).map((event) => event.name));
+const acceptDeliveryOffer = (container: Container): Promise<void> =>
+    container.get(ACCEPT_OFFER_HANDLER).handle(new AcceptDeliveryOfferCommand(TRADE_ID));
 
 let container: Container;
 
@@ -48,49 +47,39 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
             expect(acceptSpy).toHaveBeenCalledWith(OFFER_ID);
         });
 
-        it("Should mark the trade as received on csgoempire", async () => {
-            await givenDelivery(container);
-            const markSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived");
-
-            await acceptDeliveryOffer(container);
-
-            expect(markSpy).toHaveBeenCalledWith({ tradeoffer_id: TRADE_OFFER_ID });
-        });
-
-        it("Should record the delivery as received", async () => {
+        it("Should record the accepted offer on the delivery", async () => {
             const tracked = await givenDelivery(container);
 
             await acceptDeliveryOffer(container);
 
             expect(tracked.toPrimitives()).toMatchObject({
-                status: DeliveryStatus.RECEIVED,
+                status: DeliveryStatus.OFFER_ACCEPTED,
                 acceptedOfferId: OFFER_ID,
             });
         });
 
-        it("Should publish the accepted offer and the received delivery", async () => {
-            await givenDelivery(container);
+        it("Should publish the trade offer accepted event the delivery recorded", async () => {
+            await givenDelivery(container, { steam: { confirmationRequired: true } });
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
             await acceptDeliveryOffer(container);
 
-            expect(publishedNames(publishSpy)).toEqual([
-                TradeOfferAcceptedEvent.EVENT_NAME,
-                DeliveryReceivedEvent.EVENT_NAME,
+            expect(publishSpy).toHaveBeenCalledWith([
+                expect.objectContaining({
+                    name: TradeOfferAcceptedEvent.EVENT_NAME,
+                    payload: {
+                        tradeId: TRADE_ID,
+                        tradeOfferId: TRADE_OFFER_ID,
+                        accountId: ACCOUNT_ID,
+                        offerId: OFFER_ID,
+                        needsConfirmation: true,
+                    },
+                }),
             ]);
         });
 
-        it("Should confirm the offer with the mobile authenticator when steam asks", async () => {
+        it("Should leave confirming and marking received to other commands", async () => {
             await givenDelivery(container, { steam: { confirmationRequired: true } });
-            const confirmSpy = jest.spyOn(steamSession(container), "confirmOffer");
-
-            await acceptDeliveryOffer(container);
-
-            expect(confirmSpy).toHaveBeenCalledWith(OFFER_ID);
-        });
-
-        it("Should not ask for a confirmation steam doesn't need", async () => {
-            await givenDelivery(container);
             const confirmSpy = jest.spyOn(steamSession(container), "confirmOffer");
 
             await acceptDeliveryOffer(container);
@@ -111,15 +100,6 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
     });
 
     describe("Scam offers", () => {
-        it("Should cancel an offer that asks for our items", async () => {
-            await givenDelivery(container, { offers: [scamOfferAskingOurItems()] });
-            const cancelSpy = jest.spyOn(steamSession(container), "cancelOffer");
-
-            await acceptDeliveryOffer(container);
-
-            expect(cancelSpy).toHaveBeenCalledWith(OTHER_OFFER_ID);
-        });
-
         it("Should never accept an offer that asks for our items", async () => {
             await givenDelivery(container, { offers: [scamOfferAskingOurItems()] });
             const acceptSpy = jest.spyOn(steamSession(container), "acceptOffer");
@@ -129,17 +109,23 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
             expect(acceptSpy).not.toHaveBeenCalled();
         });
 
-        it("Should publish the cancelled offer with its reason", async () => {
+        it("Should report the scam offer so it gets cancelled", async () => {
             await givenDelivery(container, { offers: [scamOfferAskingOurItems()] });
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
             await acceptDeliveryOffer(container);
 
-            const [[event]] = publishSpy.mock.calls[0];
-            expect(event).toMatchObject({
-                name: TradeOfferCancelledEvent.EVENT_NAME,
-                payload: { tradeId: TRADE_ID, offerId: OTHER_OFFER_ID, reasons: ["asks_for_our_items"] },
-            });
+            expect(publishSpy).toHaveBeenCalledWith([
+                expect.objectContaining({
+                    name: ScamOfferFoundEvent.EVENT_NAME,
+                    payload: {
+                        tradeId: TRADE_ID,
+                        accountId: ACCOUNT_ID,
+                        offerId: OTHER_OFFER_ID,
+                        reasons: ["asks_for_our_items"],
+                    },
+                }),
+            ]);
         });
 
         it("Should still accept the right offer next to a scam", async () => {
@@ -147,16 +133,7 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
 
             await acceptDeliveryOffer(container);
 
-            expect(tracked.getStatus()).toBe(DeliveryStatus.RECEIVED);
-        });
-
-        it("Should still accept the right offer when cancelling a scam fails", async () => {
-            const tracked = await givenDelivery(container, { offers: [scamOfferAskingOurItems(), steamTradeOffer()] });
-            jest.spyOn(steamSession(container), "cancelOffer").mockRejectedValue(new Error(CANCEL_FAILED));
-
-            await acceptDeliveryOffer(container);
-
-            expect(tracked.getStatus()).toBe(DeliveryStatus.RECEIVED);
+            expect(tracked.getStatus()).toBe(DeliveryStatus.OFFER_ACCEPTED);
         });
 
         it("Should ignore a look-alike offer from another account", async () => {
@@ -210,19 +187,17 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
     });
 
     describe("When steam puts the accepted offer on hold", () => {
-        it("Should fail the delivery without marking it received", async () => {
+        it("Should fail the delivery", async () => {
             const tracked = await givenDelivery(container);
             jest.spyOn(steamSession(container), "acceptOffer").mockResolvedValue("escrow");
-            const markSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived");
 
             await acceptDeliveryOffer(container);
 
             expect(tracked.getStatus()).toBe(DeliveryStatus.FAILED);
-            expect(markSpy).not.toHaveBeenCalled();
         });
 
-        it("Should publish the failed delivery", async () => {
-            await givenDelivery(container, { offers: [steamTradeOffer()] });
+        it("Should publish only the failed delivery", async () => {
+            await givenDelivery(container);
             jest.spyOn(steamSession(container), "acceptOffer").mockResolvedValue("escrow");
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
@@ -232,44 +207,13 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
         });
     });
 
-    describe("Resuming after a failure", () => {
-        it("Should only confirm an offer it accepted but couldn't confirm", async () => {
-            const accepted = delivery();
-            accepted.acceptOffer(OFFER_ID);
-            await givenDelivery(container, { tracked: accepted, steam: { confirmationRequired: true } });
-            await steamSession(container).acceptOffer(OFFER_ID);
-            const confirmSpy = jest.spyOn(steamSession(container), "confirmOffer");
+    it("Should do nothing for a delivery whose offer was already accepted", async () => {
+        await givenDelivery(container, { tracked: acceptedDelivery(OFFER_ID, false) });
+        const listSpy = jest.spyOn(steamSession(container), "getReceivedActiveOffers");
 
-            await acceptDeliveryOffer(container);
+        await acceptDeliveryOffer(container);
 
-            expect(confirmSpy).toHaveBeenCalledWith(OFFER_ID);
-        });
-
-        it("Should only mark as received a delivery already confirmed", async () => {
-            const confirmed = delivery();
-            confirmed.acceptOffer(OFFER_ID);
-            confirmed.confirm();
-            await givenDelivery(container, { tracked: confirmed });
-            const listSpy = jest.spyOn(steamSession(container), "getReceivedActiveOffers");
-
-            await acceptDeliveryOffer(container);
-
-            expect(listSpy).not.toHaveBeenCalled();
-            expect(confirmed.getStatus()).toBe(DeliveryStatus.RECEIVED);
-        });
-
-        it("Should do nothing for a delivery already received", async () => {
-            const received = delivery();
-            received.acceptOffer(OFFER_ID);
-            received.confirm();
-            received.markReceived();
-            await givenDelivery(container, { tracked: received });
-            const markSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived");
-
-            await acceptDeliveryOffer(container);
-
-            expect(markSpy).not.toHaveBeenCalled();
-        });
+        expect(listSpy).not.toHaveBeenCalled();
     });
 
     it("Should fail for an unknown delivery", async () => {

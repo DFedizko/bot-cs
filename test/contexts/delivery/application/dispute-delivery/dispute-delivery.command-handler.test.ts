@@ -7,10 +7,10 @@ import {
     DISPUTE_DELIVERY_HANDLER,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { DisputeDeliveryCommand } from "@/contexts/delivery/application/dispute-delivery/dispute-delivery.command";
-import { DeliveryDisputedEvent } from "@/contexts/delivery/application/dispute-delivery/delivery-disputed.event";
+import { DeliveryDisputedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-disputed.event";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { DeliveryNotFoundError } from "@/contexts/delivery/domain/delivery/errors/delivery-not-found.error";
-import { ACCOUNT_ID, delivery, TRADE_ID, TRADE_OFFER_ID } from "../../domain/__builders__/delivery.builder";
+import { ACCOUNT_ID, awaitingDelivery, TRADE_ID, TRADE_OFFER_ID } from "../../domain/__builders__/delivery.builder";
 import { OFFER_ID } from "../../domain/__builders__/received-offer.builder";
 
 let container: Container;
@@ -22,7 +22,7 @@ describe("DisputeDeliveryCommandHandler", () => {
     });
 
     it("Should dispute the trade on csgoempire", async () => {
-        await container.get(DELIVERY_REPOSITORY).save(delivery());
+        await container.get(DELIVERY_REPOSITORY).save(awaitingDelivery());
         const disputeSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "disputeTrade");
 
         await container.get(DISPUTE_DELIVERY_HANDLER).handle(new DisputeDeliveryCommand(TRADE_ID));
@@ -31,7 +31,7 @@ describe("DisputeDeliveryCommandHandler", () => {
     });
 
     it("Should record the dispute on the delivery", async () => {
-        const awaiting = delivery();
+        const awaiting = awaitingDelivery();
         await container.get(DELIVERY_REPOSITORY).save(awaiting);
 
         await container.get(DISPUTE_DELIVERY_HANDLER).handle(new DisputeDeliveryCommand(TRADE_ID));
@@ -40,7 +40,7 @@ describe("DisputeDeliveryCommandHandler", () => {
     });
 
     it("Should publish that the delivery was disputed", async () => {
-        await container.get(DELIVERY_REPOSITORY).save(delivery());
+        await container.get(DELIVERY_REPOSITORY).save(awaitingDelivery());
         const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
         await container.get(DISPUTE_DELIVERY_HANDLER).handle(new DisputeDeliveryCommand(TRADE_ID));
@@ -53,7 +53,7 @@ describe("DisputeDeliveryCommandHandler", () => {
     });
 
     it("Should log the dispute", async () => {
-        await container.get(DELIVERY_REPOSITORY).save(delivery());
+        await container.get(DELIVERY_REPOSITORY).save(awaitingDelivery());
         const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
 
         await container.get(DISPUTE_DELIVERY_HANDLER).handle(new DisputeDeliveryCommand(TRADE_ID));
@@ -62,8 +62,8 @@ describe("DisputeDeliveryCommandHandler", () => {
     });
 
     it("Should not dispute a delivery whose offer was already accepted", async () => {
-        const accepted = delivery();
-        accepted.acceptOffer(OFFER_ID);
+        const accepted = awaitingDelivery();
+        accepted.acceptOffer(OFFER_ID, false);
         await container.get(DELIVERY_REPOSITORY).save(accepted);
         const disputeSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "disputeTrade");
 
@@ -73,7 +73,7 @@ describe("DisputeDeliveryCommandHandler", () => {
     });
 
     it("Should leave the delivery awaiting its offer when csgoempire refuses the dispute", async () => {
-        const awaiting = delivery();
+        const awaiting = awaitingDelivery();
         await container.get(DELIVERY_REPOSITORY).save(awaiting);
         jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "disputeTrade").mockRejectedValue(new Error());
 

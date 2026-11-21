@@ -6,6 +6,7 @@ import { DeliveryDevModule } from "@/contexts/delivery/external/di/delivery.dev-
 import { DeliveryProdModule } from "@/contexts/delivery/external/di/delivery.prod-module";
 
 const API_KEY = "api-key";
+const ANY_FREE_PORT = 0;
 
 export type DeliveryEnv = Exclude<AppEnv["NODE_ENV"], "test">;
 
@@ -17,7 +18,7 @@ const DELIVERY_ENV_MODULES: Record<DeliveryEnv, () => ContainerModule> = {
 export const deliveryContainer = (nodeEnv: DeliveryEnv): Container => {
     const container = new Container();
     container.load(
-        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY }),
+        new PackagesModule({ NODE_ENV: nodeEnv, CSGOEMPIRE_API_KEY: API_KEY, HTTP_PORT: ANY_FREE_PORT }),
         new TradingSharedModule(),
         new DeliveryModule(),
         DELIVERY_ENV_MODULES[nodeEnv](),

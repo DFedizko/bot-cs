@@ -3,7 +3,7 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { DELIVERY_REPOSITORY, START_DELIVERY_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { StartDeliveryCommand } from "@/contexts/delivery/application/start-delivery/start-delivery.command";
-import { DeliveryStartedEvent } from "@/contexts/delivery/application/start-delivery/delivery-started.event";
+import { DeliveryStartedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-started.event";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { TradeId } from "@/contexts/delivery/domain/delivery/trade-id";
 import {

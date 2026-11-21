@@ -4,7 +4,6 @@ import type { Logger } from "@/packages/application/logger";
 import type { CsgoempireTradesGateway } from "../csgoempire-trades.gateway";
 import type { DeliveryRepository } from "../delivery.repository";
 import { loadDelivery } from "../load-delivery";
-import { DeliveryDisputedEvent } from "./delivery-disputed.event";
 import { DisputeDeliveryCommand } from "./dispute-delivery.command";
 
 export class DisputeDeliveryCommandHandler implements CommandHandler<DisputeDeliveryCommand> {
@@ -26,9 +25,7 @@ export class DisputeDeliveryCommandHandler implements CommandHandler<DisputeDeli
         await this.csgoempireTrades.dispute(delivery.getTradeOfferId());
         delivery.dispute();
         await this.repository.save(delivery);
-        await this.eventBus.publish([
-            new DeliveryDisputedEvent({ tradeId: delivery.getTradeId(), accountId: delivery.getAccountId() }),
-        ]);
+        await this.eventBus.publish(delivery.pullDomainEvents());
         this.logger.log(`Disputed trade "${delivery.getTradeId()}" of account "${delivery.getAccountId()}"`);
     }
 }

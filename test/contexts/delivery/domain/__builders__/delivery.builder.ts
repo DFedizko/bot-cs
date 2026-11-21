@@ -18,3 +18,30 @@ export const deliveryProps = (overrides: Partial<DeliveryProps> = {}): DeliveryP
 });
 
 export const delivery = (overrides: Partial<DeliveryProps> = {}): Delivery => Delivery.start(deliveryProps(overrides));
+
+export const awaitingDelivery = (overrides: Partial<DeliveryProps> = {}): Delivery => {
+    const started = delivery(overrides);
+    started.pullDomainEvents();
+    return started;
+};
+
+export const acceptedDelivery = (offerId: string, needsConfirmation: boolean): Delivery => {
+    const accepted = awaitingDelivery();
+    accepted.acceptOffer(offerId, needsConfirmation);
+    accepted.pullDomainEvents();
+    return accepted;
+};
+
+export const confirmedDelivery = (offerId: string): Delivery => {
+    const confirmed = acceptedDelivery(offerId, false);
+    confirmed.confirm();
+    confirmed.pullDomainEvents();
+    return confirmed;
+};
+
+export const receivedDelivery = (offerId: string): Delivery => {
+    const received = confirmedDelivery(offerId);
+    received.markReceived();
+    received.pullDomainEvents();
+    return received;
+};

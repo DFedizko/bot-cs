@@ -1,7 +1,26 @@
 import type { Container } from "inversify";
 import { Bootstrap } from "@/composition-root/bootstrap";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { COMMAND_BUS, ENV, HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    COMMAND_BUS,
+    ENV,
+    EVENT_BUS,
+    EVENT_LISTENER,
+    HTTP_SERVER,
+    LOGGER,
+} from "@/packages/external/di/packages.identifiers";
+import { DELIVERY_REPOSITORY } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { AcceptDeliveryOfferCommand, StartDeliveryCommand } from "@/contexts/delivery";
+import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
+import { TradeId } from "@/contexts/delivery/domain/delivery/trade-id";
+import {
+    ACCOUNT_ID,
+    ASSET_ID,
+    MARKET_NAME,
+    SELLER_STEAM_ID,
+    TRADE_ID,
+    TRADE_OFFER_ID,
+} from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import { ACCOUNT_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
@@ -15,6 +34,20 @@ const WANTED_ITEM_ROUTES = [
     ["patch", WANTED_ITEM_PATH],
     ["delete", WANTED_ITEM_PATH],
 ] as const;
+const CS_APP_ID = 730;
+
+const flushEventBus = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
+
+const startDeliveryCommand = () =>
+    new StartDeliveryCommand({
+        tradeId: TRADE_ID,
+        tradeOfferId: TRADE_OFFER_ID,
+        accountId: ACCOUNT_ID,
+        assetId: ASSET_ID,
+        marketName: MARKET_NAME,
+        appId: CS_APP_ID,
+        sellerSteamId: SELLER_STEAM_ID,
+    });
 
 let container: Container;
 
@@ -84,5 +117,25 @@ describe("Bootstrap", () => {
         await new Bootstrap(container).run();
 
         expect(listenSpy.mock.invocationCallOrder[0]).toBeLessThan(dispatchSpy.mock.invocationCallOrder[0]!);
+    });
+
+    it("Should subscribe the event listeners to the event bus", async () => {
+        const subscribeSpy = jest.spyOn(container.get(EVENT_BUS), "addSubscribers");
+
+        await new Bootstrap(container).run();
+
+        expect(subscribeSpy).toHaveBeenCalledWith(await container.getAllAsync(EVENT_LISTENER));
+    });
+
+    it("Should drive an accepted delivery offer to a received delivery through events", async () => {
+        await new Bootstrap(container).run();
+        const commandBus = await container.getAsync(COMMAND_BUS);
+        await commandBus.dispatch(startDeliveryCommand());
+        await commandBus.dispatch(new AcceptDeliveryOfferCommand(TRADE_ID));
+
+        await flushEventBus();
+
+        const delivery = await container.get(DELIVERY_REPOSITORY).findByTradeId(new TradeId(TRADE_ID));
+        expect(delivery?.getStatus()).toBe(DeliveryStatus.RECEIVED);
     });
 });

@@ -4,7 +4,7 @@ import {
     type AcceptOutcome,
     type SteamTradeOffersGateway,
     type TradeOfferDTO,
-} from "../../application/accept-delivery-offer/steam-trade-offers.gateway";
+} from "../../application/steam-trade-offers.gateway";
 
 const DRY_RUN_OUTCOME: AcceptOutcome = ACCEPT_OUTCOME.ACCEPTED;
 

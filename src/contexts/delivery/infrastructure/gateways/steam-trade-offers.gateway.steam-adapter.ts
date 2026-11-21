@@ -4,7 +4,7 @@ import {
     type OfferItemDTO,
     type SteamTradeOffersGateway,
     type TradeOfferDTO,
-} from "../../application/accept-delivery-offer/steam-trade-offers.gateway";
+} from "../../application/steam-trade-offers.gateway";
 import type { SteamCredentials } from "../../application/steam-credentials";
 import type { SteamSessions } from "../steam/steam-sessions";
 import {

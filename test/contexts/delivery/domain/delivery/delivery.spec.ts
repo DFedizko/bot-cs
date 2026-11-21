@@ -1,54 +1,64 @@
 import { Delivery } from "@/contexts/delivery/domain/delivery/delivery";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
+import { DeliveryFailureReason } from "@/contexts/delivery/domain/delivery/delivery-failure-reason";
 import { InvalidDeliveryTransitionError } from "@/contexts/delivery/domain/delivery/errors/invalid-delivery-transition.error";
+import { DeliveryStartedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-started.event";
+import { TradeOfferAcceptedEvent } from "@/contexts/delivery/domain/delivery/events/trade-offer-accepted.event";
+import { DeliveryConfirmedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-confirmed.event";
+import { DeliveryReceivedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-received.event";
+import { DeliveryDisputedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-disputed.event";
+import { DeliveryFailedEvent } from "@/contexts/delivery/domain/delivery/events/delivery-failed.event";
+import { DeliveryCancelledEvent } from "@/contexts/delivery/domain/delivery/events/delivery-cancelled.event";
 import { DomainError } from "@/packages/error/domain-error";
 import {
+    acceptedDelivery,
     ACCOUNT_ID,
     ASSET_ID,
+    awaitingDelivery,
+    confirmedDelivery,
     delivery,
     deliveryProps,
     MARKET_NAME,
+    receivedDelivery,
     TRADE_ID,
     TRADE_OFFER_ID,
 } from "../__builders__/delivery.builder";
 import { OFFER_ID } from "../__builders__/received-offer.builder";
 
-const confirmedDelivery = (): Delivery => {
-    const confirmed = delivery();
-    confirmed.acceptOffer(OFFER_ID);
-    confirmed.confirm();
-    return confirmed;
-};
+const NEEDS_CONFIRMATION = true;
+const IDENTITY = { tradeId: TRADE_ID, tradeOfferId: TRADE_OFFER_ID, accountId: ACCOUNT_ID };
+
+const awaiting = (): Delivery => awaitingDelivery();
+const accepted = (needsConfirmation = NEEDS_CONFIRMATION): Delivery => acceptedDelivery(OFFER_ID, needsConfirmation);
+const confirmed = (): Delivery => confirmedDelivery(OFFER_ID);
+const received = (): Delivery => receivedDelivery(OFFER_ID);
 
 describe("Delivery", () => {
     describe("start", () => {
         it("Should start awaiting the trade offer", () => {
-            const started = delivery();
-
-            expect(started.getStatus()).toBe(DeliveryStatus.AWAITING_OFFER);
+            expect(delivery().getStatus()).toBe(DeliveryStatus.AWAITING_OFFER);
         });
 
         it("Should keep the trade, account and expected item", () => {
-            const started = delivery();
-
-            expect(started.toPrimitives()).toMatchObject({
-                tradeId: TRADE_ID,
-                tradeOfferId: TRADE_OFFER_ID,
-                accountId: ACCOUNT_ID,
+            expect(delivery().toPrimitives()).toMatchObject({
+                ...IDENTITY,
                 expectedItem: { assetId: ASSET_ID, marketName: MARKET_NAME },
             });
         });
 
-        it("Should start without a seller when the marketplace hides it", () => {
-            const started = delivery({ sellerSteamId: undefined });
+        it("Should record that the delivery started", () => {
+            const [event] = delivery().pullDomainEvents();
 
-            expect(started.getSellerSteamId()).toBeUndefined();
+            expect(event).toBeInstanceOf(DeliveryStartedEvent);
+            expect(event.payload).toEqual(IDENTITY);
+        });
+
+        it("Should start without a seller when the marketplace hides it", () => {
+            expect(delivery({ sellerSteamId: undefined }).getSellerSteamId()).toBeUndefined();
         });
 
         it("Should reject a seller steam id that isn't a steam id 64", () => {
-            const start = () => delivery({ sellerSteamId: "seller" });
-
-            expect(start).toThrow(DomainError);
+            expect(() => delivery({ sellerSteamId: "seller" })).toThrow(DomainError);
         });
 
         it("Should reject an empty asset id", () => {
@@ -60,137 +70,156 @@ describe("Delivery", () => {
     });
 
     describe("acceptOffer", () => {
-        it("Should record the accepted offer", () => {
-            const awaiting = delivery();
+        it("Should record the accepted offer and whether it needs a confirmation", () => {
+            const subject = awaiting();
 
-            awaiting.acceptOffer(OFFER_ID);
+            subject.acceptOffer(OFFER_ID, NEEDS_CONFIRMATION);
 
-            expect(awaiting.toPrimitives()).toMatchObject({
+            expect(subject.toPrimitives()).toMatchObject({
                 status: DeliveryStatus.OFFER_ACCEPTED,
                 acceptedOfferId: OFFER_ID,
+                needsConfirmation: NEEDS_CONFIRMATION,
             });
         });
 
+        it("Should record a trade offer accepted event", () => {
+            const subject = awaiting();
+            subject.acceptOffer(OFFER_ID, NEEDS_CONFIRMATION);
+
+            const [event] = subject.pullDomainEvents();
+
+            expect(event).toBeInstanceOf(TradeOfferAcceptedEvent);
+            expect(event.payload).toEqual({ ...IDENTITY, offerId: OFFER_ID, needsConfirmation: NEEDS_CONFIRMATION });
+        });
+
         it("Should accept a late offer while disputed", () => {
-            const disputed = delivery();
+            const disputed = awaiting();
             disputed.dispute();
 
-            disputed.acceptOffer(OFFER_ID);
+            disputed.acceptOffer(OFFER_ID, NEEDS_CONFIRMATION);
 
             expect(disputed.getStatus()).toBe(DeliveryStatus.OFFER_ACCEPTED);
         });
 
         it("Should never accept a second offer", () => {
-            const accepted = delivery();
-            accepted.acceptOffer(OFFER_ID);
+            expect(() => accepted().acceptOffer(OFFER_ID, NEEDS_CONFIRMATION)).toThrow(InvalidDeliveryTransitionError);
+        });
+    });
 
-            expect(() => accepted.acceptOffer(OFFER_ID)).toThrow(InvalidDeliveryTransitionError);
+    describe("holdOffer", () => {
+        it("Should fail the delivery when the accepted offer went on hold", () => {
+            const subject = awaiting();
+
+            subject.holdOffer(OFFER_ID);
+
+            expect(subject.getStatus()).toBe(DeliveryStatus.FAILED);
+        });
+
+        it("Should record why the delivery failed", () => {
+            const subject = awaiting();
+            subject.holdOffer(OFFER_ID);
+
+            const [event] = subject.pullDomainEvents();
+
+            expect(event).toBeInstanceOf(DeliveryFailedEvent);
+            expect(event.payload).toEqual({ ...IDENTITY, offerId: OFFER_ID, reason: DeliveryFailureReason.TRADE_HOLD });
         });
     });
 
     describe("confirm", () => {
-        it("Should confirm an accepted offer", () => {
-            const accepted = delivery();
-            accepted.acceptOffer(OFFER_ID);
+        it("Should confirm an accepted offer and record it", () => {
+            const subject = accepted();
+            subject.confirm();
 
-            accepted.confirm();
+            const [event] = subject.pullDomainEvents();
 
-            expect(accepted.getStatus()).toBe(DeliveryStatus.CONFIRMED);
+            expect(subject.getStatus()).toBe(DeliveryStatus.CONFIRMED);
+            expect(event).toBeInstanceOf(DeliveryConfirmedEvent);
+            expect(event.payload).toEqual({ ...IDENTITY, offerId: OFFER_ID });
         });
 
         it("Should not confirm before an offer was accepted", () => {
-            const awaiting = delivery();
-
-            expect(() => awaiting.confirm()).toThrow(InvalidDeliveryTransitionError);
+            expect(() => awaiting().confirm()).toThrow(InvalidDeliveryTransitionError);
         });
     });
 
     describe("markReceived", () => {
-        it("Should be received once confirmed", () => {
-            const confirmed = confirmedDelivery();
+        it("Should be received once confirmed and record it", () => {
+            const subject = confirmed();
+            subject.markReceived();
 
-            confirmed.markReceived();
+            const [event] = subject.pullDomainEvents();
 
-            expect(confirmed.getStatus()).toBe(DeliveryStatus.RECEIVED);
+            expect(subject.getStatus()).toBe(DeliveryStatus.RECEIVED);
+            expect(event).toBeInstanceOf(DeliveryReceivedEvent);
+            expect(event.payload).toEqual({ ...IDENTITY, offerId: OFFER_ID });
         });
 
         it("Should not be received before the offer was confirmed", () => {
-            const accepted = delivery();
-            accepted.acceptOffer(OFFER_ID);
-
-            expect(() => accepted.markReceived()).toThrow(InvalidDeliveryTransitionError);
+            expect(() => accepted().markReceived()).toThrow(InvalidDeliveryTransitionError);
         });
     });
 
     describe("dispute", () => {
-        it("Should dispute a delivery still awaiting its offer", () => {
-            const awaiting = delivery();
+        it("Should dispute a delivery still awaiting its offer and record it", () => {
+            const subject = awaiting();
+            subject.dispute();
 
-            awaiting.dispute();
+            const [event] = subject.pullDomainEvents();
 
-            expect(awaiting.getStatus()).toBe(DeliveryStatus.DISPUTED);
+            expect(subject.getStatus()).toBe(DeliveryStatus.DISPUTED);
+            expect(event).toBeInstanceOf(DeliveryDisputedEvent);
+            expect(event.payload).toEqual(IDENTITY);
         });
 
         it("Should not dispute a delivery whose offer was accepted", () => {
-            const confirmed = confirmedDelivery();
-
-            expect(() => confirmed.dispute()).toThrow(InvalidDeliveryTransitionError);
+            expect(() => confirmed().dispute()).toThrow(InvalidDeliveryTransitionError);
         });
     });
 
     describe("fail", () => {
-        it("Should fail an accepted offer that went on hold", () => {
-            const accepted = delivery();
-            accepted.acceptOffer(OFFER_ID);
-
-            accepted.fail();
-
-            expect(accepted.getStatus()).toBe(DeliveryStatus.FAILED);
-        });
-
         it("Should not fail a received delivery", () => {
-            const received = confirmedDelivery();
-            received.markReceived();
-
-            expect(() => received.fail()).toThrow(InvalidDeliveryTransitionError);
+            expect(() => received().fail(DeliveryFailureReason.TRADE_HOLD)).toThrow(InvalidDeliveryTransitionError);
         });
     });
 
     describe("cancel", () => {
-        it("Should cancel a delivery awaiting its offer", () => {
-            const awaiting = delivery();
+        it("Should cancel a delivery awaiting its offer and record it", () => {
+            const subject = awaiting();
+            subject.cancel();
 
-            awaiting.cancel();
+            const [event] = subject.pullDomainEvents();
 
-            expect(awaiting.getStatus()).toBe(DeliveryStatus.CANCELLED);
+            expect(subject.getStatus()).toBe(DeliveryStatus.CANCELLED);
+            expect(event).toBeInstanceOf(DeliveryCancelledEvent);
         });
 
         it("Should not cancel a confirmed delivery", () => {
-            const confirmed = confirmedDelivery();
-
-            expect(() => confirmed.cancel()).toThrow(InvalidDeliveryTransitionError);
+            expect(() => confirmed().cancel()).toThrow(InvalidDeliveryTransitionError);
         });
     });
 
-    describe("canTakeOffers", () => {
-        it.each([
-            { status: "awaiting", build: () => delivery(), expected: true },
-            { status: "confirmed", build: confirmedDelivery, expected: false },
-        ])("Should be $expected when $status", ({ build, expected }) => {
-            const subject = build();
+    it("Should not record anything when a transition is refused", () => {
+        const subject = confirmed();
 
-            expect(subject.canTakeOffers()).toBe(expected);
-        });
+        expect(() => subject.dispute()).toThrow(InvalidDeliveryTransitionError);
+        expect(subject.pullDomainEvents()).toEqual([]);
     });
 
-    describe("canBeDisputed", () => {
-        it.each([
-            { status: "awaiting", build: () => delivery(), expected: true },
-            { status: "confirmed", build: confirmedDelivery, expected: false },
-        ])("Should be $expected when $status", ({ build, expected }) => {
-            const subject = build();
-
-            expect(subject.canBeDisputed()).toBe(expected);
+    describe.each([
+        { query: "canTakeOffers", build: awaiting, expected: true },
+        { query: "canTakeOffers", build: confirmed, expected: false },
+        { query: "canBeDisputed", build: awaiting, expected: true },
+        { query: "canBeDisputed", build: confirmed, expected: false },
+        { query: "canBeConfirmed", build: accepted, expected: true },
+        { query: "canBeConfirmed", build: confirmed, expected: false },
+        { query: "canBeMarkedReceived", build: confirmed, expected: true },
+        { query: "canBeMarkedReceived", build: received, expected: false },
+        { query: "needsConfirmation", build: () => accepted(true), expected: true },
+        { query: "needsConfirmation", build: () => accepted(false), expected: false },
+    ] as const)("$query", ({ query, build, expected }) => {
+        it(`Should be ${expected}`, () => {
+            expect(build()[query]()).toBe(expected);
         });
     });
 });
