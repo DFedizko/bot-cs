@@ -1,9 +1,9 @@
 import type { Logger } from "@/packages/application/logger";
-import type { CsgoempireTradesGateway, TradeStatusDTO } from "../../application/csgoempire-trades.gateway";
+import type { CsgTradesGateway, TradeStatusDTO } from "../../application/csg-trades.gateway";
 
-export class CsgoempireTradesGatewayDryRunAdapter implements CsgoempireTradesGateway {
+export class CsgTradesGatewayDryRunAdapter implements CsgTradesGateway {
     constructor(
-        private readonly gateway: CsgoempireTradesGateway,
+        private readonly gateway: CsgTradesGateway,
         private readonly logger: Logger,
     ) {}
 

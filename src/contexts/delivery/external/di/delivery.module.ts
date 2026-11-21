@@ -13,7 +13,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import type { Logger } from "@/packages/application/logger";
 import type { HttpClient } from "@/packages/infrastructure/http/http-client";
 import type { DeliveryRepository } from "../../application/delivery.repository";
-import type { CsgoempireTradesGateway } from "../../application/csgoempire-trades.gateway";
+import type { CsgTradesGateway } from "../../application/csg-trades.gateway";
 import type { SteamTradeOffersGateway } from "../../application/steam-trade-offers.gateway";
 import { StartDeliveryCommandHandler } from "../../application/start-delivery/start-delivery.command-handler";
 import { AcceptDeliveryOfferCommandHandler } from "../../application/accept-delivery-offer/accept-delivery-offer.command-handler";
@@ -26,10 +26,10 @@ import { DeliveryStepDispatcher } from "../../application/delivery-step-dispatch
 import { OnTradeOfferAcceptedConfirm } from "../../application/confirm-trade-offer/on-trade-offer-accepted-confirm";
 import { OnDeliveryConfirmedMarkReceived } from "../../application/mark-delivery-received/on-delivery-confirmed-mark-received";
 import { DeliveryRepositoryInMemory } from "../../infrastructure/repositories/delivery.repository.in-memory";
-import { CsgoempireDeliveryHttpAdapter } from "../http/csgoempire/csgoempire-delivery.http.adapter";
+import { CsgDeliveryHttpAdapter } from "../http/csgoempire/csg-delivery.http.adapter";
 import { SteamCredentialsEnvAdapter } from "../credentials/steam-credentials.env-adapter";
-import { SteamSessionsSteamAdapter } from "../steam/steam-sessions.steam-adapter";
-import { SteamTradeSessionSteamAdapter } from "../steam/steam-trade-session.steam-adapter";
+import { SteamSessionsAdapter } from "../steam/steam-sessions.adapter";
+import { SteamTradeSessionAdapter } from "../steam/steam-trade-session.adapter";
 import { SteamRetry } from "../steam/steam-retry";
 import { SteamLoginPause } from "../steam/steam-login-pause";
 import type { SteamLogin } from "../../infrastructure/steam/steam-login";
@@ -37,8 +37,8 @@ import {
     ACCEPT_OFFER_HANDLER,
     CANCEL_OFFER_HANDLER,
     CONFIRM_OFFER_HANDLER,
-    CSGOEMPIRE_DELIVERY_HTTP,
-    CSGOEMPIRE_TRADES,
+    CSG_DELIVERY_HTTP,
+    CSG_TRADES,
     DELIVERY_REPOSITORY,
     DELIVERY_STEP_DISPATCHER,
     DISPUTE_DELIVERY_HANDLER,
@@ -80,11 +80,8 @@ export class DeliveryModule extends ContainerModule {
     }
 
     private static bindExternals({ bind }: ContainerModuleLoadOptions): void {
-        bind(CSGOEMPIRE_DELIVERY_HTTP)
-            .toResolvedValue(
-                (client: HttpClient) => new CsgoempireDeliveryHttpAdapter(client),
-                [CSGOEMPIRE_HTTP_CLIENT],
-            )
+        bind(CSG_DELIVERY_HTTP)
+            .toResolvedValue((client: HttpClient) => new CsgDeliveryHttpAdapter(client), [CSGOEMPIRE_HTTP_CLIENT])
             .inSingletonScope();
         bind(STEAM_SESSIONS).toResolvedValue(DeliveryModule.createSteamSessions, [LOGGER]).inSingletonScope();
         bind(STEAM_CREDENTIALS)
@@ -112,9 +109,9 @@ export class DeliveryModule extends ContainerModule {
             .inSingletonScope();
         bind(DISPUTE_DELIVERY_HANDLER)
             .toResolvedValue(
-                (repo: DeliveryRepository, trades: CsgoempireTradesGateway, bus: EventBus, logger: Logger) =>
+                (repo: DeliveryRepository, trades: CsgTradesGateway, bus: EventBus, logger: Logger) =>
                     new DisputeDeliveryCommandHandler(repo, trades, bus, logger),
-                [DELIVERY_REPOSITORY, CSGOEMPIRE_TRADES, EVENT_BUS, LOGGER],
+                [DELIVERY_REPOSITORY, CSG_TRADES, EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
     }
@@ -136,9 +133,9 @@ export class DeliveryModule extends ContainerModule {
             .inSingletonScope();
         bind(MARK_RECEIVED_HANDLER)
             .toResolvedValue(
-                (repo: DeliveryRepository, trades: CsgoempireTradesGateway, bus: EventBus, logger: Logger) =>
+                (repo: DeliveryRepository, trades: CsgTradesGateway, bus: EventBus, logger: Logger) =>
                     new MarkDeliveryReceivedCommandHandler(repo, trades, bus, logger),
-                [DELIVERY_REPOSITORY, CSGOEMPIRE_TRADES, EVENT_BUS, LOGGER],
+                [DELIVERY_REPOSITORY, CSG_TRADES, EVENT_BUS, LOGGER],
             )
             .inSingletonScope();
     }
@@ -171,15 +168,15 @@ export class DeliveryModule extends ContainerModule {
             .inSingletonScope();
     }
 
-    private static createSteamSessions(logger: Logger): SteamSessionsSteamAdapter {
+    private static createSteamSessions(logger: Logger): SteamSessionsAdapter {
         const retry = new SteamRetry({
             baseDelayMs: STEAM_BASE_DELAY_MS,
             maxAttempts: STEAM_MAX_ATTEMPTS,
             sleep: (ms) => Bun.sleep(ms),
         });
-        return new SteamSessionsSteamAdapter(
+        return new SteamSessionsAdapter(
             (login: SteamLogin) =>
-                new SteamTradeSessionSteamAdapter(login, logger, retry, DeliveryModule.createLoginPause()),
+                new SteamTradeSessionAdapter(login, logger, retry, DeliveryModule.createLoginPause()),
         );
     }
 

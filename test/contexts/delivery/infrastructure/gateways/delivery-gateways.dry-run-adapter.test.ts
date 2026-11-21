@@ -2,8 +2,8 @@ import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
-    CSGOEMPIRE_DELIVERY_HTTP,
-    CSGOEMPIRE_TRADES,
+    CSG_DELIVERY_HTTP,
+    CSG_TRADES,
     STEAM_SESSIONS,
     STEAM_TRADE_OFFERS,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
@@ -55,16 +55,16 @@ describe("Delivery dry-run gateways", () => {
     });
 
     it.each(["markAsReceived", "dispute"] as const)("Should never %s on csgoempire", async (action) => {
-        const http = container.get(CSGOEMPIRE_DELIVERY_HTTP);
+        const http = container.get(CSG_DELIVERY_HTTP);
         const spies = [jest.spyOn(http, "markAsReceived"), jest.spyOn(http, "disputeTrade")];
 
-        await container.get(CSGOEMPIRE_TRADES)[action](TRADE_OFFER_ID);
+        await container.get(CSG_TRADES)[action](TRADE_OFFER_ID);
 
         spies.forEach((spy) => expect(spy).not.toHaveBeenCalled());
     });
 
     it("Should still read the real trade status", async () => {
-        const status = await container.get(CSGOEMPIRE_TRADES).getTradeStatus(TRADE_ID);
+        const status = await container.get(CSG_TRADES).getTradeStatus(TRADE_ID);
 
         expect(status.status).toBe("Sent");
     });

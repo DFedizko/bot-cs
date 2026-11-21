@@ -13,20 +13,17 @@ import { CsgWsClientFakeAdapter } from "@/contexts/trading/shared/external/csgoe
 import { AuctionGatewayCsgoempireAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.csgoempire-adapter";
 import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.dry-run-adapter";
 
-import { CSGOEMPIRE_DELIVERY_HTTP, STEAM_SESSIONS } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CSG_DELIVERY_HTTP, STEAM_SESSIONS } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
-import { CsgoempireDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csgoempire-delivery.http.fake-adapter";
+import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
 
 describe("testContainer", () => {
     it("Should rebind steam and the csgoempire delivery api to their fakes", () => {
         const container = testContainer();
 
-        const externals = [container.get(STEAM_SESSIONS), container.get(CSGOEMPIRE_DELIVERY_HTTP)];
+        const externals = [container.get(STEAM_SESSIONS), container.get(CSG_DELIVERY_HTTP)];
 
-        expect(externals).toEqual([
-            expect.any(SteamSessionsFakeAdapter),
-            expect.any(CsgoempireDeliveryHttpFakeAdapter),
-        ]);
+        expect(externals).toEqual([expect.any(SteamSessionsFakeAdapter), expect.any(CsgDeliveryHttpFakeAdapter)]);
     });
 
     it("Should rebind the csgoempire apis to their fakes", async () => {

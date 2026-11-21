@@ -1,13 +1,13 @@
 import type { Container } from "inversify";
 import { CSGOEMPIRE_HTTP_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
-import { CSGOEMPIRE_DELIVERY_HTTP } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CSG_DELIVERY_HTTP } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { TRADE_ID, TRADE_OFFER_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import { deliveryContainer } from "../../di/__builders__/delivery-container.builder";
 import { disputeTradeSuccess, markAsReceivedSuccess, sentWithdrawal } from "./__mocks__/trade.mock";
 
 let container: Container;
 
-describe("CsgoempireDeliveryHttpAdapter", () => {
+describe("CsgDeliveryHttpAdapter", () => {
     beforeEach(() => {
         container = deliveryContainer("production");
     });
@@ -17,7 +17,7 @@ describe("CsgoempireDeliveryHttpAdapter", () => {
             .spyOn(container.get(CSGOEMPIRE_HTTP_CLIENT), "post")
             .mockResolvedValue(markAsReceivedSuccess);
 
-        await container.get(CSGOEMPIRE_DELIVERY_HTTP).markAsReceived({ tradeoffer_id: TRADE_OFFER_ID });
+        await container.get(CSG_DELIVERY_HTTP).markAsReceived({ tradeoffer_id: TRADE_OFFER_ID });
 
         expect(postSpy).toHaveBeenCalledWith(`/trading/deposit/${TRADE_OFFER_ID}/received`);
     });
@@ -27,7 +27,7 @@ describe("CsgoempireDeliveryHttpAdapter", () => {
             .spyOn(container.get(CSGOEMPIRE_HTTP_CLIENT), "post")
             .mockResolvedValue(disputeTradeSuccess);
 
-        await container.get(CSGOEMPIRE_DELIVERY_HTTP).disputeTrade({ tradeoffer_id: TRADE_OFFER_ID });
+        await container.get(CSG_DELIVERY_HTTP).disputeTrade({ tradeoffer_id: TRADE_OFFER_ID });
 
         expect(postSpy).toHaveBeenCalledWith(`/trading/deposit/${TRADE_OFFER_ID}/dispute`);
     });
@@ -37,7 +37,7 @@ describe("CsgoempireDeliveryHttpAdapter", () => {
             .spyOn(container.get(CSGOEMPIRE_HTTP_CLIENT), "get")
             .mockResolvedValue({ success: true, data: sentWithdrawal() });
 
-        await container.get(CSGOEMPIRE_DELIVERY_HTTP).getTrade({ depositId: TRADE_ID, type: "withdrawal" });
+        await container.get(CSG_DELIVERY_HTTP).getTrade({ depositId: TRADE_ID, type: "withdrawal" });
 
         expect(getSpy).toHaveBeenCalledWith(`/trading/user/trade/${TRADE_ID}/withdrawal`);
     });

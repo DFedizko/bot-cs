@@ -29,7 +29,7 @@ type WebSessionHandler = (sessionId: string, cookies: string[]) => void;
 
 type Executor<T> = (resolve: (value: T) => void, reject: (error: Error) => void) => void;
 
-export class SteamTradeSessionSteamAdapter implements SteamTradeSession {
+export class SteamTradeSessionAdapter implements SteamTradeSession {
     private readonly client = new SteamUser({ autoRelogin: false, dataDirectory: null });
     private readonly community = new SteamCommunity();
     private readonly manager = new TradeOfferManager({

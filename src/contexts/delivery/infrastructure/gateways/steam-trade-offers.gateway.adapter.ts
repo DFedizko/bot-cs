@@ -27,7 +27,7 @@ const ACCEPT_OUTCOMES: Record<SteamAcceptStatus, AcceptOutcome> = {
     escrow: ACCEPT_OUTCOME.ON_HOLD,
 };
 
-export class SteamTradeOffersGatewaySteamAdapter implements SteamTradeOffersGateway {
+export class SteamTradeOffersGatewayAdapter implements SteamTradeOffersGateway {
     constructor(
         private readonly sessions: SteamSessions,
         private readonly credentials: SteamCredentials,

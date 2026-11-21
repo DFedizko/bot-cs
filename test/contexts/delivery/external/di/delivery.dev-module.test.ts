@@ -1,8 +1,8 @@
 import type { Container } from "inversify";
 import { fakeExternals } from "@/__builders__/externals.builder";
-import { CSGOEMPIRE_TRADES, STEAM_TRADE_OFFERS } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CSG_TRADES, STEAM_TRADE_OFFERS } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { SteamTradeOffersGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/steam-trade-offers.gateway.dry-run-adapter";
-import { CsgoempireTradesGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/csgoempire-trades.gateway.dry-run-adapter";
+import { CsgTradesGatewayDryRunAdapter } from "@/contexts/delivery/infrastructure/gateways/csg-trades.gateway.dry-run-adapter";
 import { deliveryContainer } from "./__builders__/delivery-container.builder";
 
 let container: Container;
@@ -19,8 +19,8 @@ describe("DeliveryDevModule", () => {
     });
 
     it("Should bind the dry-run csgoempire gateway", () => {
-        const gateway = container.get(CSGOEMPIRE_TRADES);
+        const gateway = container.get(CSG_TRADES);
 
-        expect(gateway).toBeInstanceOf(CsgoempireTradesGatewayDryRunAdapter);
+        expect(gateway).toBeInstanceOf(CsgTradesGatewayDryRunAdapter);
     });
 });

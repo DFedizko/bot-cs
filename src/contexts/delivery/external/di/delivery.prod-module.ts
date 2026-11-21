@@ -1,12 +1,12 @@
 import { ContainerModule } from "inversify";
 import type { SteamCredentials } from "../../application/steam-credentials";
-import type { CsgoempireDeliveryHttp } from "../../infrastructure/http/csgoempire/csgoempire-delivery.http";
+import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
-import { CsgoempireTradesGatewayCsgoempireAdapter } from "../../infrastructure/gateways/csgoempire-trades.gateway.csgoempire-adapter";
-import { SteamTradeOffersGatewaySteamAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.steam-adapter";
+import { CsgTradesGatewayAdapter } from "../../infrastructure/gateways/csg-trades.gateway.adapter";
+import { SteamTradeOffersGatewayAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.adapter";
 import {
-    CSGOEMPIRE_DELIVERY_HTTP,
-    CSGOEMPIRE_TRADES,
+    CSG_DELIVERY_HTTP,
+    CSG_TRADES,
     STEAM_CREDENTIALS,
     STEAM_SESSIONS,
     STEAM_TRADE_OFFERS,
@@ -18,15 +18,12 @@ export class DeliveryProdModule extends ContainerModule {
             bind(STEAM_TRADE_OFFERS)
                 .toResolvedValue(
                     (sessions: SteamSessions, credentials: SteamCredentials) =>
-                        new SteamTradeOffersGatewaySteamAdapter(sessions, credentials),
+                        new SteamTradeOffersGatewayAdapter(sessions, credentials),
                     [STEAM_SESSIONS, STEAM_CREDENTIALS],
                 )
                 .inSingletonScope();
-            bind(CSGOEMPIRE_TRADES)
-                .toResolvedValue(
-                    (http: CsgoempireDeliveryHttp) => new CsgoempireTradesGatewayCsgoempireAdapter(http),
-                    [CSGOEMPIRE_DELIVERY_HTTP],
-                )
+            bind(CSG_TRADES)
+                .toResolvedValue((http: CsgDeliveryHttp) => new CsgTradesGatewayAdapter(http), [CSG_DELIVERY_HTTP])
                 .inSingletonScope();
         });
     }

@@ -1,5 +1,5 @@
 // Docs: https://docs.csgoempire.com/reference/mark-as-received.md, dispute-trade.md, get-trade.md, checked 2026-11-20.
-import type { CsgoempireDeliveryHttp } from "@/contexts/delivery/infrastructure/http/csgoempire/csgoempire-delivery.http";
+import type { CsgDeliveryHttp } from "@/contexts/delivery/infrastructure/http/csgoempire/csg-delivery.http";
 import type { DisputeTrade } from "@/contexts/delivery/infrastructure/http/csgoempire/dispute-trade";
 import type { GetTrade, GetTradeWithdrawal } from "@/contexts/delivery/infrastructure/http/csgoempire/get-trade";
 import type { MarkAsReceived } from "@/contexts/delivery/infrastructure/http/csgoempire/mark-as-received";
@@ -11,7 +11,7 @@ const DISPUTED = { status: 11, status_message: "Disputed" } as const;
 
 type TradeStatusChange = Pick<GetTradeWithdrawal, "status" | "status_message">;
 
-export class CsgoempireDeliveryHttpFakeAdapter implements CsgoempireDeliveryHttp {
+export class CsgDeliveryHttpFakeAdapter implements CsgDeliveryHttp {
     private readonly store: Map<number, GetTradeWithdrawal>;
 
     constructor(withdrawals: readonly GetTradeWithdrawal[] = [sentWithdrawal()]) {

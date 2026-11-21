@@ -43,4 +43,4 @@ export {
 export { DeliveryFailureReason } from "./domain/delivery/delivery-failure-reason";
 
 export type { TradeOfferDTO, OfferItemDTO, AcceptOutcome } from "./application/steam-trade-offers.gateway";
-export type { TradeStatusDTO } from "./application/csgoempire-trades.gateway";
+export type { TradeStatusDTO } from "./application/csg-trades.gateway";

@@ -4,7 +4,7 @@ import type { SteamTradeSession } from "../../infrastructure/steam/steam-trade-s
 
 export type SteamSessionFactory = (login: SteamLogin) => SteamTradeSession;
 
-export class SteamSessionsSteamAdapter implements SteamSessions {
+export class SteamSessionsAdapter implements SteamSessions {
     private readonly sessions = new Map<string, SteamTradeSession>();
 
     constructor(private readonly createSession: SteamSessionFactory) {}

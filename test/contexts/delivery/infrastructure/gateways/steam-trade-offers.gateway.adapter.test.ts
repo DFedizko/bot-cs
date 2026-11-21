@@ -14,7 +14,7 @@ const TIMED_OUT = "ETIMEDOUT";
 
 let container: Container;
 
-describe("SteamTradeOffersGatewaySteamAdapter", () => {
+describe("SteamTradeOffersGatewayAdapter", () => {
     beforeEach(() => {
         container = testContainer();
     });

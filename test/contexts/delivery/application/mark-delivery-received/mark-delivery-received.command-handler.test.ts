@@ -1,7 +1,7 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
-import { CSGOEMPIRE_DELIVERY_HTTP, MARK_RECEIVED_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CSG_DELIVERY_HTTP, MARK_RECEIVED_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { MarkDeliveryReceivedCommand } from "@/contexts/delivery/application/mark-delivery-received/mark-delivery-received.command";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { DeliveryNotFoundError } from "@/contexts/delivery/domain/delivery/errors/delivery-not-found.error";
@@ -31,7 +31,7 @@ describe("MarkDeliveryReceivedCommandHandler", () => {
 
     it("Should mark the trade offer as received on csgoempire", async () => {
         await givenDelivery(container, { tracked: confirmedDelivery(OFFER_ID) });
-        const markSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived");
+        const markSpy = jest.spyOn(container.get(CSG_DELIVERY_HTTP), "markAsReceived");
 
         await markDeliveryReceived(container);
 
@@ -66,9 +66,7 @@ describe("MarkDeliveryReceivedCommandHandler", () => {
 
     it("Should mark as received on a second run after a failed one", async () => {
         const tracked = await givenDelivery(container, { tracked: confirmedDelivery(OFFER_ID) });
-        jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived").mockRejectedValueOnce(
-            new Error(EMPIRE_DOWN),
-        );
+        jest.spyOn(container.get(CSG_DELIVERY_HTTP), "markAsReceived").mockRejectedValueOnce(new Error(EMPIRE_DOWN));
         await expect(markDeliveryReceived(container)).rejects.toThrow(EMPIRE_DOWN);
 
         await markDeliveryReceived(container);
@@ -81,7 +79,7 @@ describe("MarkDeliveryReceivedCommandHandler", () => {
         { status: "already received", build: () => receivedDelivery(OFFER_ID) },
     ])("Should not mark a delivery $status", async ({ build }) => {
         await givenDelivery(container, { tracked: build() });
-        const markSpy = jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived");
+        const markSpy = jest.spyOn(container.get(CSG_DELIVERY_HTTP), "markAsReceived");
 
         await markDeliveryReceived(container);
 

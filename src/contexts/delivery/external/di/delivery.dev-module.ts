@@ -2,15 +2,15 @@ import { ContainerModule } from "inversify";
 import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import type { Logger } from "@/packages/application/logger";
 import type { SteamCredentials } from "../../application/steam-credentials";
-import type { CsgoempireDeliveryHttp } from "../../infrastructure/http/csgoempire/csgoempire-delivery.http";
+import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
-import { CsgoempireTradesGatewayCsgoempireAdapter } from "../../infrastructure/gateways/csgoempire-trades.gateway.csgoempire-adapter";
-import { CsgoempireTradesGatewayDryRunAdapter } from "../../infrastructure/gateways/csgoempire-trades.gateway.dry-run-adapter";
-import { SteamTradeOffersGatewaySteamAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.steam-adapter";
+import { CsgTradesGatewayAdapter } from "../../infrastructure/gateways/csg-trades.gateway.adapter";
+import { CsgTradesGatewayDryRunAdapter } from "../../infrastructure/gateways/csg-trades.gateway.dry-run-adapter";
+import { SteamTradeOffersGatewayAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.adapter";
 import { SteamTradeOffersGatewayDryRunAdapter } from "../../infrastructure/gateways/steam-trade-offers.gateway.dry-run-adapter";
 import {
-    CSGOEMPIRE_DELIVERY_HTTP,
-    CSGOEMPIRE_TRADES,
+    CSG_DELIVERY_HTTP,
+    CSG_TRADES,
     STEAM_CREDENTIALS,
     STEAM_SESSIONS,
     STEAM_TRADE_OFFERS,
@@ -22,8 +22,8 @@ export class DeliveryDevModule extends ContainerModule {
             bind(STEAM_TRADE_OFFERS)
                 .toResolvedValue(DeliveryDevModule.createSteamOffers, [STEAM_SESSIONS, STEAM_CREDENTIALS, LOGGER])
                 .inSingletonScope();
-            bind(CSGOEMPIRE_TRADES)
-                .toResolvedValue(DeliveryDevModule.createCsgoempireTrades, [CSGOEMPIRE_DELIVERY_HTTP, LOGGER])
+            bind(CSG_TRADES)
+                .toResolvedValue(DeliveryDevModule.createCsgTrades, [CSG_DELIVERY_HTTP, LOGGER])
                 .inSingletonScope();
         });
     }
@@ -34,15 +34,12 @@ export class DeliveryDevModule extends ContainerModule {
         logger: Logger,
     ): SteamTradeOffersGatewayDryRunAdapter {
         return new SteamTradeOffersGatewayDryRunAdapter(
-            new SteamTradeOffersGatewaySteamAdapter(sessions, credentials),
+            new SteamTradeOffersGatewayAdapter(sessions, credentials),
             logger,
         );
     }
 
-    private static createCsgoempireTrades(
-        http: CsgoempireDeliveryHttp,
-        logger: Logger,
-    ): CsgoempireTradesGatewayDryRunAdapter {
-        return new CsgoempireTradesGatewayDryRunAdapter(new CsgoempireTradesGatewayCsgoempireAdapter(http), logger);
+    private static createCsgTrades(http: CsgDeliveryHttp, logger: Logger): CsgTradesGatewayDryRunAdapter {
+        return new CsgTradesGatewayDryRunAdapter(new CsgTradesGatewayAdapter(http), logger);
     }
 }

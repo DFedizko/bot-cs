@@ -2,7 +2,7 @@ import { identifier } from "@/packages/external/di/identifier";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import type { EventListener } from "@/packages/application/event-listener";
 import type { DeliveryRepository } from "../../application/delivery.repository";
-import type { CsgoempireTradesGateway } from "../../application/csgoempire-trades.gateway";
+import type { CsgTradesGateway } from "../../application/csg-trades.gateway";
 import type { SteamCredentials } from "../../application/steam-credentials";
 import type { SteamTradeOffersGateway } from "../../application/steam-trade-offers.gateway";
 import type { StartDeliveryCommand } from "../../application/start-delivery/start-delivery.command";
@@ -15,14 +15,14 @@ import type { MarkDeliveryReceivedCommand } from "../../application/mark-deliver
 import type { DisputeDeliveryCommand } from "../../application/dispute-delivery/dispute-delivery.command";
 import type { TradeOfferAcceptedEvent } from "../../domain/delivery/events/trade-offer-accepted.event";
 import type { DeliveryConfirmedEvent } from "../../domain/delivery/events/delivery-confirmed.event";
-import type { CsgoempireDeliveryHttp } from "../../infrastructure/http/csgoempire/csgoempire-delivery.http";
+import type { CsgDeliveryHttp } from "../../infrastructure/http/csgoempire/csg-delivery.http";
 import type { SteamSessions } from "../../infrastructure/steam/steam-sessions";
 
-export const CSGOEMPIRE_DELIVERY_HTTP = identifier<CsgoempireDeliveryHttp>("CsgoempireDeliveryHttp");
+export const CSG_DELIVERY_HTTP = identifier<CsgDeliveryHttp>("CsgDeliveryHttp");
 export const STEAM_SESSIONS = identifier<SteamSessions>("SteamSessions");
 export const STEAM_CREDENTIALS = identifier<SteamCredentials>("SteamCredentials");
 export const STEAM_TRADE_OFFERS = identifier<SteamTradeOffersGateway>("SteamTradeOffersGateway");
-export const CSGOEMPIRE_TRADES = identifier<CsgoempireTradesGateway>("CsgoempireTradesGateway");
+export const CSG_TRADES = identifier<CsgTradesGateway>("CsgTradesGateway");
 export const DELIVERY_REPOSITORY = identifier<DeliveryRepository>("DeliveryRepository");
 
 export const START_DELIVERY_HANDLER = identifier<CommandHandler<StartDeliveryCommand>>("StartDeliveryHandler");

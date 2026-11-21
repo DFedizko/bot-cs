@@ -5,7 +5,7 @@ import {
     ACCEPT_OFFER_HANDLER,
     CANCEL_OFFER_HANDLER,
     CONFIRM_OFFER_HANDLER,
-    CSGOEMPIRE_DELIVERY_HTTP,
+    CSG_DELIVERY_HTTP,
     DELIVERY_REPOSITORY,
     DISPUTE_DELIVERY_HANDLER,
     MARK_RECEIVED_HANDLER,
@@ -16,8 +16,8 @@ import {
     STEAM_CREDENTIALS,
     STEAM_SESSIONS,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
-import { CsgoempireDeliveryHttpAdapter } from "@/contexts/delivery/external/http/csgoempire/csgoempire-delivery.http.adapter";
-import { SteamSessionsSteamAdapter } from "@/contexts/delivery/external/steam/steam-sessions.steam-adapter";
+import { CsgDeliveryHttpAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.adapter";
+import { SteamSessionsAdapter } from "@/contexts/delivery/external/steam/steam-sessions.adapter";
 import { SteamCredentialsEnvAdapter } from "@/contexts/delivery/external/credentials/steam-credentials.env-adapter";
 import { DeliveryRepositoryInMemory } from "@/contexts/delivery/infrastructure/repositories/delivery.repository.in-memory";
 import { StartDeliveryCommandHandler } from "@/contexts/delivery/application/start-delivery/start-delivery.command-handler";
@@ -54,15 +54,15 @@ describe.each(ENVIRONMENTS)("DeliveryModule in %s", (nodeEnv) => {
     });
 
     it("Should bind the csgoempire delivery http adapter", () => {
-        const http = container.get(CSGOEMPIRE_DELIVERY_HTTP);
+        const http = container.get(CSG_DELIVERY_HTTP);
 
-        expect(http).toBeInstanceOf(CsgoempireDeliveryHttpAdapter);
+        expect(http).toBeInstanceOf(CsgDeliveryHttpAdapter);
     });
 
     it("Should bind the steam sessions adapter", () => {
         const sessions = container.get(STEAM_SESSIONS);
 
-        expect(sessions).toBeInstanceOf(SteamSessionsSteamAdapter);
+        expect(sessions).toBeInstanceOf(SteamSessionsAdapter);
     });
 
     it("Should bind the steam credentials read from the env", () => {

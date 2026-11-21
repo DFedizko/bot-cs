@@ -1,11 +1,11 @@
-import type { CsgoempireTradesGateway, TradeStatusDTO } from "../../application/csgoempire-trades.gateway";
+import type { CsgTradesGateway, TradeStatusDTO } from "../../application/csg-trades.gateway";
 import { TradeNotFoundError } from "../../application/trade-not-found.error";
-import type { CsgoempireDeliveryHttp } from "../http/csgoempire/csgoempire-delivery.http";
+import type { CsgDeliveryHttp } from "../http/csgoempire/csg-delivery.http";
 
 const WITHDRAWAL = "withdrawal";
 
-export class CsgoempireTradesGatewayCsgoempireAdapter implements CsgoempireTradesGateway {
-    constructor(private readonly http: CsgoempireDeliveryHttp) {}
+export class CsgTradesGatewayAdapter implements CsgTradesGateway {
+    constructor(private readonly http: CsgDeliveryHttp) {}
 
     async markAsReceived(tradeOfferId: number): Promise<void> {
         await this.http.markAsReceived({ tradeoffer_id: tradeOfferId });
