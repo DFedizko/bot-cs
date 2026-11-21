@@ -72,8 +72,8 @@ describe("AuctionUpdateWsController", () => {
 
         container.get(AUCTION_UPDATE_CONTROLLER);
 
-        expect(await logged).toBe(
-            `Command "${TrackAuctionUpdateCommand.COMMAND_NAME}" failed (auctionId=${FAILING_AUCTION!.id}, accountId=${csgWsClient.accountId}): ${FAILURE}`,
+        expect(await logged).toStartWith(
+            `Command "${TrackAuctionUpdateCommand.COMMAND_NAME}" failed (auctionId=${FAILING_AUCTION!.id}, accountId=${csgWsClient.accountId}): Error: ${FAILURE}`,
         );
         expect(dispatchSpy).toHaveBeenCalledTimes(auctionUpdate.length);
     });

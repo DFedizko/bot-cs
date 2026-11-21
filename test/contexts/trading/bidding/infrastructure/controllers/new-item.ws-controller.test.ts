@@ -4,11 +4,10 @@ import type { WsServer } from "@/packages/infrastructure/web-socket/ws-server";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import { WsServerSocketIoAdapter } from "@/packages/external/web-socket/server/ws-server.socket-io-adapter";
 import { HttpServerExpressAdapter } from "@/packages/external/http/server/http-server.express-adapter";
-import type { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
+import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import { CsgWsClientFakeAdapter } from "@/contexts/trading/shared/external/csgoempire/csg-ws-client.fake-adapter";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { COMMAND_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
-import { EvaluateItemCommand as EvaluateItem } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import { NEW_ITEM_CONTROLLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 
@@ -80,8 +79,8 @@ describe("NewItemWsController", () => {
 
         container.get(NEW_ITEM_CONTROLLER);
 
-        expect(await logged).toBe(
-            `Command "${EvaluateItem.COMMAND_NAME}" failed (itemId=${FAILING_ITEM!.id}, accountId=${csgWsClient.accountId}): ${FAILURE}`,
+        expect(await logged).toStartWith(
+            `Command "${EvaluateItemCommand.COMMAND_NAME}" failed (itemId=${FAILING_ITEM!.id}, accountId=${csgWsClient.accountId}): Error: ${FAILURE}`,
         );
         expect(dispatchSpy).toHaveBeenCalledTimes(newItem.length);
     });

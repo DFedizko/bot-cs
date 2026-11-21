@@ -276,7 +276,9 @@ describe("Bootstrap", () => {
         await receiveItemsWithFailingFirstBid(container);
 
         expect(logSpy).toHaveBeenCalledWith(
-            `Command "${EvaluateItemCommand.COMMAND_NAME}" failed (itemId=${FAILING_AUCTION_ID}, accountId=${evaluateItemCommand().accountId}): ${BID_FAILURE}`,
+            expect.stringContaining(
+                `Command "${EvaluateItemCommand.COMMAND_NAME}" failed (itemId=${FAILING_AUCTION_ID}, accountId=${evaluateItemCommand().accountId}): Error: ${BID_FAILURE}`,
+            ),
         );
     });
 

@@ -1,3 +1,5 @@
+import { EventEmitter } from "node:events";
+import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
 import { testContainer } from "./test-container.builder";
 import {
     AUCTION_GATEWAY,
@@ -16,9 +18,6 @@ import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastr
 import { CSG_DELIVERY_HTTP, STEAM_SESSIONS } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
-
-import { EventEmitter } from "node:events";
-import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
 
 describe("testContainer", () => {
     it("Should rebind the process events to a fake so tests never touch the running process", () => {

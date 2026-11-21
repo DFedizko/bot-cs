@@ -1,3 +1,5 @@
+import { EventEmitter } from "node:events";
+import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
 import type { Container } from "inversify";
 import { CSG_WS_CLIENT, SOCKET_METADATA_HTTP } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 import {
@@ -18,9 +20,6 @@ import { SchedulerFakeAdapter } from "@/contexts/delivery/external/scheduling/sc
 import { ClockFakeAdapter } from "@/contexts/delivery/external/scheduling/clock.fake-adapter";
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
-
-import { EventEmitter } from "node:events";
-import { PROCESS_EVENTS } from "@/packages/external/di/packages.identifiers";
 
 const FAKE_WS_URL = "ws://localhost";
 

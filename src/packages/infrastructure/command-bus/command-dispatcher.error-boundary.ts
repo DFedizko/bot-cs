@@ -30,6 +30,6 @@ export class CommandDispatcherErrorBoundary implements CommandDispatcher {
     }
 
     private reasonOf(error: unknown): string {
-        return error instanceof Error ? error.message : String(error);
+        return error instanceof Error ? (error.stack ?? error.message) : String(error);
     }
 }

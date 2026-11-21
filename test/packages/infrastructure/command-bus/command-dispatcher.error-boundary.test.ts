@@ -41,16 +41,17 @@ describe("CommandDispatcherErrorBoundary", () => {
         await expect(dispatching).resolves.toBeUndefined();
     });
 
-    it("Should log the failed command with its name, context and error", async () => {
+    it("Should log the failed command with its name, context and error stack", async () => {
         const logger = silentLogger();
+        const error = new Error(FAILURE);
         const commandBus = new CommandBusInMemory();
-        commandBus.register(failingHandler());
+        commandBus.register(fooHandler(() => Promise.reject(error)));
         const dispatcher = new CommandDispatcherErrorBoundary(commandBus, logger);
 
         await dispatcher.dispatch(new FooCommand(), CONTEXT);
 
         expect(logger.log).toHaveBeenCalledWith(
-            `Command "${FooCommand.COMMAND_NAME}" failed (itemId=${ITEM_ID}, accountId=${ACCOUNT_ID}): ${FAILURE}`,
+            `Command "${FooCommand.COMMAND_NAME}" failed (itemId=${ITEM_ID}, accountId=${ACCOUNT_ID}): ${error.stack}`,
         );
     });
 
