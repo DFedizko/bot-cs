@@ -13,9 +13,11 @@ export {
     type DeliveryOfferNotFoundPayload,
 } from "./application/accept-delivery-offer/delivery-offer-not-found.event";
 export {
-    ScamOfferFoundEvent,
-    type ScamOfferFoundPayload,
-} from "./application/accept-delivery-offer/scam-offer-found.event";
+    ScamOffersFoundEvent,
+    type ScamOffersFoundPayload,
+    type ScamOffer,
+} from "./application/accept-delivery-offer/scam-offers-found.event";
+export { DeliveryStepFailedEvent, type DeliveryStepFailedPayload } from "./application/delivery-step-failed.event";
 export {
     TradeOfferCancelledEvent,
     type TradeOfferCancelledPayload,

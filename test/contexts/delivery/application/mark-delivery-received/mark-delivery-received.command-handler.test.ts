@@ -19,6 +19,8 @@ import { givenDelivery, publishedNames } from "../__builders__/delivery-scenario
 const markDeliveryReceived = (container: Container): Promise<void> =>
     container.get(MARK_RECEIVED_HANDLER).handle(new MarkDeliveryReceivedCommand(TRADE_ID));
 
+const EMPIRE_DOWN = "HTTP error 503";
+
 let container: Container;
 
 describe("MarkDeliveryReceivedCommandHandler", () => {
@@ -60,6 +62,18 @@ describe("MarkDeliveryReceivedCommandHandler", () => {
         await markDeliveryReceived(container);
 
         expect(loggerSpy).toHaveBeenCalledWith(`Marked trade "${TRADE_ID}" as received`);
+    });
+
+    it("Should mark as received on a second run after a failed one", async () => {
+        const tracked = await givenDelivery(container, { tracked: confirmedDelivery(OFFER_ID) });
+        jest.spyOn(container.get(CSGOEMPIRE_DELIVERY_HTTP), "markAsReceived").mockRejectedValueOnce(
+            new Error(EMPIRE_DOWN),
+        );
+        await expect(markDeliveryReceived(container)).rejects.toThrow(EMPIRE_DOWN);
+
+        await markDeliveryReceived(container);
+
+        expect(tracked.getStatus()).toBe(DeliveryStatus.RECEIVED);
     });
 
     it.each([

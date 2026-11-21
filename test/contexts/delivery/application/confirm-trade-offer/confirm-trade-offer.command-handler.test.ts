@@ -17,6 +17,7 @@ import { givenDelivery, publishedNames, steamSession } from "../__builders__/del
 
 const NEEDS_CONFIRMATION = true;
 const NO_CONFIRMATION = false;
+const STEAM_DOWN = "HTTP error 429";
 
 const confirmTradeOffer = (container: Container): Promise<void> =>
     container.get(CONFIRM_OFFER_HANDLER).handle(new ConfirmTradeOfferCommand(TRADE_ID));
@@ -80,6 +81,16 @@ describe("ConfirmTradeOfferCommandHandler", () => {
         await expect(confirmTradeOffer(container)).rejects.toThrow();
 
         expect(tracked.getStatus()).toBe(DeliveryStatus.OFFER_ACCEPTED);
+    });
+
+    it("Should confirm on a second run after a failed one", async () => {
+        const tracked = await givenPendingOffer(container);
+        jest.spyOn(steamSession(container), "confirmOffer").mockRejectedValueOnce(new Error(STEAM_DOWN));
+        await expect(confirmTradeOffer(container)).rejects.toThrow(STEAM_DOWN);
+
+        await confirmTradeOffer(container);
+
+        expect(tracked.getStatus()).toBe(DeliveryStatus.CONFIRMED);
     });
 
     it.each([

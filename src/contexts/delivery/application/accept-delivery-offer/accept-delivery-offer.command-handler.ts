@@ -10,7 +10,7 @@ import { loadDelivery } from "../load-delivery";
 import { ACCEPT_OUTCOME, type AcceptOutcome, type SteamTradeOffersGateway } from "../steam-trade-offers.gateway";
 import { AcceptDeliveryOfferCommand } from "./accept-delivery-offer.command";
 import { DeliveryOfferNotFoundEvent } from "./delivery-offer-not-found.event";
-import { ScamOfferFoundEvent } from "./scam-offer-found.event";
+import { ScamOffersFoundEvent } from "./scam-offers-found.event";
 
 const SINGLE_MATCH = 1;
 
@@ -48,16 +48,14 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
 
     private async reportScamOffers(delivery: Delivery, verdicts: OfferVerdict[]): Promise<void> {
         const scams = verdicts.filter((verdict) => verdict.shouldBeCancelled());
-        if (scams.length > 0) await this.eventBus.publish(scams.map((verdict) => this.scamFound(delivery, verdict)));
-    }
-
-    private scamFound(delivery: Delivery, verdict: OfferVerdict): ScamOfferFoundEvent {
-        return new ScamOfferFoundEvent({
-            tradeId: delivery.getTradeId(),
-            accountId: delivery.getAccountId(),
-            offerId: verdict.getOfferId(),
-            reasons: [...verdict.getReasons()],
-        });
+        if (scams.length === 0) return;
+        await this.eventBus.publish([
+            new ScamOffersFoundEvent({
+                tradeId: delivery.getTradeId(),
+                accountId: delivery.getAccountId(),
+                offers: scams.map((verdict) => ({ offerId: verdict.getOfferId(), reasons: [...verdict.getReasons()] })),
+            }),
+        ]);
     }
 
     private logRejection(delivery: Delivery, verdict: OfferVerdict): void {

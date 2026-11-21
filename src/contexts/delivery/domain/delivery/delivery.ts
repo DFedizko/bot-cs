@@ -122,13 +122,17 @@ export class Delivery extends AggregateRoot<TradeId> {
     }
 
     confirm(): void {
+        this.ensureCanMoveTo(DeliveryStatus.CONFIRMED);
+        const offerId = this.offerId();
         this.moveTo(DeliveryStatus.CONFIRMED);
-        this.record(new DeliveryConfirmedEvent(this.id, { ...this.identify(), offerId: this.offerId() }));
+        this.record(new DeliveryConfirmedEvent(this.id, { ...this.identify(), offerId }));
     }
 
     markReceived(): void {
+        this.ensureCanMoveTo(DeliveryStatus.RECEIVED);
+        const offerId = this.offerId();
         this.moveTo(DeliveryStatus.RECEIVED);
-        this.record(new DeliveryReceivedEvent(this.id, { ...this.identify(), offerId: this.offerId() }));
+        this.record(new DeliveryReceivedEvent(this.id, { ...this.identify(), offerId }));
     }
 
     dispute(): void {
@@ -171,8 +175,12 @@ export class Delivery extends AggregateRoot<TradeId> {
     }
 
     private moveTo(next: DeliveryStatus): void {
+        this.ensureCanMoveTo(next);
+        this.status = next;
+    }
+
+    private ensureCanMoveTo(next: DeliveryStatus): void {
         if (!ALLOWED_TRANSITIONS[this.status].includes(next))
             throw new InvalidDeliveryTransitionError(this.status, next);
-        this.status = next;
     }
 }

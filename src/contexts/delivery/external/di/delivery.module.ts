@@ -21,7 +21,8 @@ import { DisputeDeliveryCommandHandler } from "../../application/dispute-deliver
 import { CancelTradeOfferCommandHandler } from "../../application/cancel-trade-offer/cancel-trade-offer.command-handler";
 import { ConfirmTradeOfferCommandHandler } from "../../application/confirm-trade-offer/confirm-trade-offer.command-handler";
 import { MarkDeliveryReceivedCommandHandler } from "../../application/mark-delivery-received/mark-delivery-received.command-handler";
-import { OnScamOfferFoundCancelOffer } from "../../application/cancel-trade-offer/on-scam-offer-found-cancel-offer";
+import { OnScamOffersFoundCancelOffers } from "../../application/cancel-trade-offer/on-scam-offers-found-cancel-offers";
+import { DeliveryStepDispatcher } from "../../application/delivery-step-dispatcher";
 import { OnTradeOfferAcceptedConfirm } from "../../application/confirm-trade-offer/on-trade-offer-accepted-confirm";
 import { OnDeliveryConfirmedMarkReceived } from "../../application/mark-delivery-received/on-delivery-confirmed-mark-received";
 import { DeliveryRepositoryInMemory } from "../../infrastructure/repositories/delivery.repository.in-memory";
@@ -39,11 +40,12 @@ import {
     CSGOEMPIRE_DELIVERY_HTTP,
     CSGOEMPIRE_TRADES,
     DELIVERY_REPOSITORY,
+    DELIVERY_STEP_DISPATCHER,
     DISPUTE_DELIVERY_HANDLER,
     MARK_RECEIVED_HANDLER,
     ON_DELIVERY_CONFIRMED,
     ON_OFFER_ACCEPTED,
-    ON_SCAM_OFFER_FOUND,
+    ON_SCAM_OFFERS_FOUND,
     START_DELIVERY_HANDLER,
     STEAM_CREDENTIALS,
     STEAM_SESSIONS,
@@ -58,7 +60,7 @@ const COMMAND_HANDLERS = [
     MARK_RECEIVED_HANDLER,
     DISPUTE_DELIVERY_HANDLER,
 ];
-const EVENT_LISTENERS = [ON_SCAM_OFFER_FOUND, ON_OFFER_ACCEPTED, ON_DELIVERY_CONFIRMED];
+const EVENT_LISTENERS = [ON_SCAM_OFFERS_FOUND, ON_OFFER_ACCEPTED, ON_DELIVERY_CONFIRMED];
 const STEAM_BASE_DELAY_MS = 30_000;
 const STEAM_MAX_ATTEMPTS = 4;
 const STEAM_LOGIN_COOLDOWN_MS = 15 * 60_000;
@@ -142,22 +144,29 @@ export class DeliveryModule extends ContainerModule {
     }
 
     private static bindListeners({ bind }: ContainerModuleLoadOptions): void {
-        bind(ON_SCAM_OFFER_FOUND)
+        bind(DELIVERY_STEP_DISPATCHER)
             .toResolvedValue(
-                (bus: CommandBus, logger: Logger) => new OnScamOfferFoundCancelOffer(bus, logger),
-                [COMMAND_BUS, LOGGER],
+                (commandBus: CommandBus, eventBus: EventBus, logger: Logger) =>
+                    new DeliveryStepDispatcher(commandBus, eventBus, logger),
+                [COMMAND_BUS, EVENT_BUS, LOGGER],
+            )
+            .inSingletonScope();
+        bind(ON_SCAM_OFFERS_FOUND)
+            .toResolvedValue(
+                (steps: DeliveryStepDispatcher) => new OnScamOffersFoundCancelOffers(steps),
+                [DELIVERY_STEP_DISPATCHER],
             )
             .inSingletonScope();
         bind(ON_OFFER_ACCEPTED)
             .toResolvedValue(
-                (bus: CommandBus, logger: Logger) => new OnTradeOfferAcceptedConfirm(bus, logger),
-                [COMMAND_BUS, LOGGER],
+                (steps: DeliveryStepDispatcher) => new OnTradeOfferAcceptedConfirm(steps),
+                [DELIVERY_STEP_DISPATCHER],
             )
             .inSingletonScope();
         bind(ON_DELIVERY_CONFIRMED)
             .toResolvedValue(
-                (bus: CommandBus, logger: Logger) => new OnDeliveryConfirmedMarkReceived(bus, logger),
-                [COMMAND_BUS, LOGGER],
+                (steps: DeliveryStepDispatcher) => new OnDeliveryConfirmedMarkReceived(steps),
+                [DELIVERY_STEP_DISPATCHER],
             )
             .inSingletonScope();
     }

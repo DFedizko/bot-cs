@@ -11,7 +11,7 @@ import {
     MARK_RECEIVED_HANDLER,
     ON_DELIVERY_CONFIRMED,
     ON_OFFER_ACCEPTED,
-    ON_SCAM_OFFER_FOUND,
+    ON_SCAM_OFFERS_FOUND,
     START_DELIVERY_HANDLER,
     STEAM_CREDENTIALS,
     STEAM_SESSIONS,
@@ -26,7 +26,7 @@ import { DisputeDeliveryCommandHandler } from "@/contexts/delivery/application/d
 import { CancelTradeOfferCommandHandler } from "@/contexts/delivery/application/cancel-trade-offer/cancel-trade-offer.command-handler";
 import { ConfirmTradeOfferCommandHandler } from "@/contexts/delivery/application/confirm-trade-offer/confirm-trade-offer.command-handler";
 import { MarkDeliveryReceivedCommandHandler } from "@/contexts/delivery/application/mark-delivery-received/mark-delivery-received.command-handler";
-import { OnScamOfferFoundCancelOffer } from "@/contexts/delivery/application/cancel-trade-offer/on-scam-offer-found-cancel-offer";
+import { OnScamOffersFoundCancelOffers } from "@/contexts/delivery/application/cancel-trade-offer/on-scam-offers-found-cancel-offers";
 import { OnTradeOfferAcceptedConfirm } from "@/contexts/delivery/application/confirm-trade-offer/on-trade-offer-accepted-confirm";
 import { OnDeliveryConfirmedMarkReceived } from "@/contexts/delivery/application/mark-delivery-received/on-delivery-confirmed-mark-received";
 import { deliveryContainer, type DeliveryEnv } from "./__builders__/delivery-container.builder";
@@ -41,7 +41,7 @@ const COMMAND_HANDLERS = [
     { identifier: DISPUTE_DELIVERY_HANDLER, implementation: DisputeDeliveryCommandHandler },
 ];
 const EVENT_LISTENERS = [
-    { identifier: ON_SCAM_OFFER_FOUND, implementation: OnScamOfferFoundCancelOffer },
+    { identifier: ON_SCAM_OFFERS_FOUND, implementation: OnScamOffersFoundCancelOffers },
     { identifier: ON_OFFER_ACCEPTED, implementation: OnTradeOfferAcceptedConfirm },
     { identifier: ON_DELIVERY_CONFIRMED, implementation: OnDeliveryConfirmedMarkReceived },
 ];

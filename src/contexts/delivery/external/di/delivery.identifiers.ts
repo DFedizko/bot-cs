@@ -7,7 +7,8 @@ import type { SteamCredentials } from "../../application/steam-credentials";
 import type { SteamTradeOffersGateway } from "../../application/steam-trade-offers.gateway";
 import type { StartDeliveryCommand } from "../../application/start-delivery/start-delivery.command";
 import type { AcceptDeliveryOfferCommand } from "../../application/accept-delivery-offer/accept-delivery-offer.command";
-import type { ScamOfferFoundEvent } from "../../application/accept-delivery-offer/scam-offer-found.event";
+import type { ScamOffersFoundEvent } from "../../application/accept-delivery-offer/scam-offers-found.event";
+import type { DeliveryStepDispatcher } from "../../application/delivery-step-dispatcher";
 import type { CancelTradeOfferCommand } from "../../application/cancel-trade-offer/cancel-trade-offer.command";
 import type { ConfirmTradeOfferCommand } from "../../application/confirm-trade-offer/confirm-trade-offer.command";
 import type { MarkDeliveryReceivedCommand } from "../../application/mark-delivery-received/mark-delivery-received.command";
@@ -33,7 +34,8 @@ export const MARK_RECEIVED_HANDLER =
     identifier<CommandHandler<MarkDeliveryReceivedCommand>>("MarkDeliveryReceivedHandler");
 export const DISPUTE_DELIVERY_HANDLER = identifier<CommandHandler<DisputeDeliveryCommand>>("DisputeDeliveryHandler");
 
-export const ON_SCAM_OFFER_FOUND = identifier<EventListener<ScamOfferFoundEvent>>("OnScamOfferFoundCancelOffer");
+export const DELIVERY_STEP_DISPATCHER = identifier<DeliveryStepDispatcher>("DeliveryStepDispatcher");
+export const ON_SCAM_OFFERS_FOUND = identifier<EventListener<ScamOffersFoundEvent>>("OnScamOffersFoundCancelOffers");
 export const ON_OFFER_ACCEPTED = identifier<EventListener<TradeOfferAcceptedEvent>>("OnTradeOfferAcceptedConfirm");
 export const ON_DELIVERY_CONFIRMED = identifier<EventListener<DeliveryConfirmedEvent>>(
     "OnDeliveryConfirmedMarkReceived",

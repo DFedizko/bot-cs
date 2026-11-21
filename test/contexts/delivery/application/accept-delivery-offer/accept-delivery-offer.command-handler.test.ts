@@ -4,7 +4,7 @@ import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { ACCEPT_OFFER_HANDLER } from "@/contexts/delivery/external/di/delivery.identifiers";
 import { AcceptDeliveryOfferCommand } from "@/contexts/delivery/application/accept-delivery-offer/accept-delivery-offer.command";
 import { DeliveryOfferNotFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/delivery-offer-not-found.event";
-import { ScamOfferFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/scam-offer-found.event";
+import { ScamOffersFoundEvent } from "@/contexts/delivery/application/accept-delivery-offer/scam-offers-found.event";
 import { DeliveryStatus } from "@/contexts/delivery/domain/delivery/delivery-status";
 import { DeliveryNotFoundError } from "@/contexts/delivery/domain/delivery/errors/delivery-not-found.error";
 import { TradeOfferAcceptedEvent } from "@/contexts/delivery/domain/delivery/events/trade-offer-accepted.event";
@@ -117,12 +117,11 @@ describe("AcceptDeliveryOfferCommandHandler", () => {
 
             expect(publishSpy).toHaveBeenCalledWith([
                 expect.objectContaining({
-                    name: ScamOfferFoundEvent.EVENT_NAME,
+                    name: ScamOffersFoundEvent.EVENT_NAME,
                     payload: {
                         tradeId: TRADE_ID,
                         accountId: ACCOUNT_ID,
-                        offerId: OTHER_OFFER_ID,
-                        reasons: ["asks_for_our_items"],
+                        offers: [{ offerId: OTHER_OFFER_ID, reasons: ["asks_for_our_items"] }],
                     },
                 }),
             ]);
