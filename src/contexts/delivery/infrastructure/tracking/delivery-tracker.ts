@@ -24,6 +24,7 @@ const MS_IN_SECOND = 1000;
 
 export class DeliveryTracker {
     private checking = false;
+    private stopped = false;
     private rateLimits = NO_RATE_LIMITS;
     private pausedUntil: number;
     private readonly giveUpAt: number;
@@ -33,17 +34,21 @@ export class DeliveryTracker {
         private readonly deps: DeliveryTrackerDeps,
     ) {
         this.pausedUntil = deps.clock.now();
-        this.giveUpAt = deps.clock.now() + deps.options.maxWaitMs;
+        this.giveUpAt = (delivery.sentAt ?? deps.clock.now()) + deps.options.maxWaitMs;
+    }
+
+    stop(): void {
+        this.stopped = true;
     }
 
     async tick(): Promise<void> {
-        if (this.checking || this.isPaused()) return;
+        if (this.stopped || this.checking || this.isPaused()) return;
         this.checking = true;
         try {
             await this.check();
             this.rateLimits = NO_RATE_LIMITS;
         } catch (error) {
-            this.onFailedCheck(error instanceof Error ? error.message : String(error));
+            this.onFailedCheck(this.reasonOf(error));
         } finally {
             this.checking = false;
         }
@@ -57,10 +62,19 @@ export class DeliveryTracker {
     private async giveUp(): Promise<void> {
         const { tradeId, accountId } = this.delivery;
         this.deps.logger.log(`No right offer for trade "${tradeId}" of account "${accountId}" in time, disputing`);
-        await this.deps.commandBus.dispatch(new DisputeDeliveryCommand(tradeId));
-        await this.deps.commandBus.dispatch(
-            new StopDeliveryTrackingCommand({ tradeId, accountId, reason: MAX_WAIT_PASSED }),
-        );
+        try {
+            await this.deps.commandBus.dispatch(new DisputeDeliveryCommand(tradeId));
+        } catch (error) {
+            this.deps.logger.log(`Disputing trade "${tradeId}" failed: ${this.reasonOf(error)}, dispute it by hand`);
+        } finally {
+            await this.deps.commandBus.dispatch(
+                new StopDeliveryTrackingCommand({ tradeId, accountId, reason: MAX_WAIT_PASSED }),
+            );
+        }
+    }
+
+    private reasonOf(error: unknown): string {
+        return error instanceof Error ? error.message : String(error);
     }
 
     private onFailedCheck(reason: string): void {

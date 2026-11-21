@@ -1,9 +1,11 @@
 import type { DeliveryTrackers, TrackedDelivery } from "../../application/delivery-trackers";
-import type { DeliveryTrackerFactory } from "./delivery-tracker";
+import type { DeliveryTracker, DeliveryTrackerFactory } from "./delivery-tracker";
 import type { ScheduledTask, Scheduler } from "./scheduler";
 
+type RunningTracker = { tracker: DeliveryTracker; task: ScheduledTask };
+
 export class DeliveryTrackersSchedulerAdapter implements DeliveryTrackers {
-    private readonly running = new Map<string, ScheduledTask>();
+    private readonly running = new Map<string, RunningTracker>();
 
     constructor(
         private readonly scheduler: Scheduler,
@@ -15,18 +17,16 @@ export class DeliveryTrackersSchedulerAdapter implements DeliveryTrackers {
         const key = this.keyOf(delivery);
         if (this.running.has(key)) return false;
         const tracker = this.createTracker(delivery);
-        this.running.set(
-            key,
-            this.scheduler.every(this.checkIntervalMs, () => tracker.tick()),
-        );
+        this.running.set(key, { tracker, task: this.scheduler.every(this.checkIntervalMs, () => tracker.tick()) });
         return true;
     }
 
     untrack(delivery: TrackedDelivery): boolean {
         const key = this.keyOf(delivery);
-        const task = this.running.get(key);
-        if (!task) return false;
-        task.cancel();
+        const running = this.running.get(key);
+        if (!running) return false;
+        running.task.cancel();
+        running.tracker.stop();
         return this.running.delete(key);
     }
 

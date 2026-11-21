@@ -17,6 +17,13 @@ export class SchedulerFakeAdapter implements Scheduler {
         await Promise.all(this.activeTasks().flatMap((task) => Array.from({ length: concurrentRuns }, task.run)));
     }
 
+    captureTick(): () => Promise<void> {
+        const tasks = this.activeTasks();
+        return async () => {
+            await Promise.all(tasks.map((task) => task.run()));
+        };
+    }
+
     activeIntervals(): number[] {
         return this.activeTasks().map((task) => task.intervalMs);
     }

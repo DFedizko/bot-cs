@@ -2,6 +2,7 @@ import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
+    CSG_DELIVERY_HTTP,
     DELIVERY_REPOSITORY,
     DELIVERY_TRACKERS,
     OFFER_ACCEPTANCE_GATEWAY,
@@ -48,6 +49,7 @@ const givenTwoAccounts = async (container: Container): Promise<void> => {
     startTracking(container, trackedDelivery({ tradeId: SECOND_TRADE_ID, accountId: SECOND_ACCOUNT_ID }));
 };
 
+const DISPUTE_REFUSED = new Error("HTTP error 400");
 const RATE_LIMITED = new Error("HTTP error 429 Too Many Requests");
 const CONCURRENT_TICKS = 3;
 const ONE_MS = 1;
@@ -120,6 +122,18 @@ describe("DeliveryTrackersSchedulerAdapter", () => {
         expect(untracked).toBe(false);
     });
 
+    it("Should not check a delivery untracked before its tick ran", async () => {
+        await givenDelivery(container);
+        const listSpy = jest.spyOn(container.get(RECEIVED_OFFERS_GATEWAY), "listReceivedActive");
+        startTracking(container);
+        const capturedTick = fakeScheduler(container).captureTick();
+        container.get(DELIVERY_TRACKERS).untrack(trackedDelivery());
+
+        await capturedTick();
+
+        expect(listSpy).not.toHaveBeenCalled();
+    });
+
     it("Should never accept twice under concurrent ticks", async () => {
         await givenDelivery(container);
         const acceptSpy = jest.spyOn(container.get(OFFER_ACCEPTANCE_GATEWAY), "accept");
@@ -149,6 +163,41 @@ describe("DeliveryTrackersSchedulerAdapter", () => {
             await fakeScheduler(container).tick();
 
             expect(fakeScheduler(container).activeIntervals()).toEqual([]);
+        });
+
+        it("Should stop tracking even when the dispute fails, so it is never retried forever", async () => {
+            await givenDelivery(container, { offers: [] });
+            jest.spyOn(container.get(CSG_DELIVERY_HTTP), "disputeTrade").mockRejectedValue(DISPUTE_REFUSED);
+            startTracking(container);
+            fakeClock(container).advance(container.get(TRACKING_OPTIONS).maxWaitMs);
+
+            await fakeScheduler(container).tick();
+
+            expect(fakeScheduler(container).activeIntervals()).toEqual([]);
+        });
+
+        it("Should log a failed dispute so it can be done by hand", async () => {
+            await givenDelivery(container, { offers: [] });
+            jest.spyOn(container.get(CSG_DELIVERY_HTTP), "disputeTrade").mockRejectedValue(DISPUTE_REFUSED);
+            const loggerSpy = jest.spyOn(container.get(LOGGER), "log");
+            startTracking(container);
+            fakeClock(container).advance(container.get(TRACKING_OPTIONS).maxWaitMs);
+
+            await fakeScheduler(container).tick();
+
+            expect(loggerSpy).toHaveBeenCalledWith(
+                expect.stringContaining(`Disputing trade "${TRADE_ID}" failed: ${DISPUTE_REFUSED.message}`),
+            );
+        });
+
+        it("Should count the max wait from when csgoempire sent the trade", async () => {
+            await givenDelivery(container, { offers: [] });
+            const { maxWaitMs } = container.get(TRACKING_OPTIONS);
+            startTracking(container, trackedDelivery({ sentAt: fakeClock(container).now() - maxWaitMs }));
+
+            await fakeScheduler(container).tick();
+
+            expect(await statusOf(container)).toBe(DeliveryStatus.DISPUTED);
         });
 
         it("Should not dispute before the max wait", async () => {

@@ -35,6 +35,7 @@ import {
     CSG_DELIVERY_HTTP,
     CLOCK,
     CSG_DELIVERY_WS_CLIENT,
+    DELIVERY_COMMAND_BUS,
     TRADE_STATUS_CONTROLLER,
     WITHDRAWAL_DISPATCHER,
     DELIVERY_REPOSITORY,
@@ -104,7 +105,7 @@ export class DeliveryTrackingModule extends ContainerModule {
             bind(EVENT_LISTENER)
                 .toResolvedValue(
                     (commandBus: CommandBus) => new OnDeliveryEndedStopTracking(eventName, commandBus),
-                    [COMMAND_BUS],
+                    [DELIVERY_COMMAND_BUS],
                 )
                 .inSingletonScope(),
         );
