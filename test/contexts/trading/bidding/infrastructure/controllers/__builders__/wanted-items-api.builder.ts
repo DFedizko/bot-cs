@@ -12,6 +12,7 @@ type ApiResponse = { status: number; body: string };
 
 export type WantedItemsApi = {
     send(method: string, path: string, body?: unknown): Promise<ApiResponse>;
+    sendRaw(method: string, path: string, rawBody: string): Promise<ApiResponse>;
 };
 
 const WANTED_ITEM_CONTROLLERS = [
@@ -36,12 +37,16 @@ export const startWantedItemsApi = async (container: Container): Promise<WantedI
     await Promise.all(WANTED_ITEM_CONTROLLERS.map((id) => container.getAsync(id)));
     const port = freePort();
     container.get(HTTP_SERVER).listen(port);
+    const request = async (path: string, init: RequestInit): Promise<ApiResponse> => {
+        const response = await fetch(`http://localhost:${port}${path}`, init);
+        return { status: response.status, body: await response.text() };
+    };
     return {
-        send: async (method, path, body) => {
-            const init =
-                body === undefined ? { method } : { method, headers: JSON_HEADERS, body: JSON.stringify(body) };
-            const response = await fetch(`http://localhost:${port}${path}`, init);
-            return { status: response.status, body: await response.text() };
-        },
+        send: (method, path, body) =>
+            request(
+                path,
+                body === undefined ? { method } : { method, headers: JSON_HEADERS, body: JSON.stringify(body) },
+            ),
+        sendRaw: (method, path, rawBody) => request(path, { method, headers: JSON_HEADERS, body: rawBody }),
     };
 };
