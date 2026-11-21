@@ -1,5 +1,5 @@
 import z from "zod";
-import { WANTED_ITEM_EXAMPLE } from "./wanted-item.example";
+import { WANTED_ITEM_EXAMPLE } from "../../infrastructure/docs/wanted-item.example";
 
 const PLAIN_DIGITS = /^\d+$/;
 

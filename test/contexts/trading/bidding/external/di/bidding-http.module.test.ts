@@ -11,7 +11,7 @@ import {
     TOGGLE_WANTED_ITEM_CONTROLLER,
     TOGGLE_WANTED_ITEM_VALIDATOR,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { HTTP_CONTROLLER, HTTP_ERROR_MAPPER, HTTP_ROUTE_DOC } from "@/packages/external/di/packages.identifiers";
+import { HTTP_CONTROLLER, HTTP_ERROR_MAPPER, HTTP_ROUTE_CATALOG } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import { AddWantedItemHttpController } from "@/contexts/trading/bidding/infrastructure/controllers/add-wanted-item.http-controller";
@@ -22,10 +22,10 @@ import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wante
 import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
 
 const DOCUMENTED_ROUTES = [
-    ["post", AddWantedItemHttpController.PATH],
-    ["patch", EditWantedItemHttpController.PATH],
-    ["delete", RemoveWantedItemHttpController.PATH],
-    ["patch", ToggleWantedItemHttpController.PATH],
+    { method: "post", path: AddWantedItemHttpController.PATH, validator: ADD_WANTED_ITEM_VALIDATOR },
+    { method: "patch", path: EditWantedItemHttpController.PATH, validator: EDIT_WANTED_ITEM_VALIDATOR },
+    { method: "delete", path: RemoveWantedItemHttpController.PATH, validator: REMOVE_WANTED_ITEM_VALIDATOR },
+    { method: "patch", path: ToggleWantedItemHttpController.PATH, validator: TOGGLE_WANTED_ITEM_VALIDATOR },
 ];
 const ENVIRONMENTS: ("development" | "production")[] = ["development", "production"];
 const HTTP_CONTROLLERS = [
@@ -68,11 +68,30 @@ describe.each(ENVIRONMENTS)("BiddingHttpModule in %s", (nodeEnv) => {
         expect(controllers).toContain(await externals.getAsync(identifier));
     });
 
-    it("Should document every wanted item route", () => {
-        const routes = container.getAll(HTTP_ROUTE_DOC);
+    it.each(DOCUMENTED_ROUTES)("Should register $method $path with its doc", async ({ method, path }) => {
+        await fakeExternals(container).getAllAsync(HTTP_CONTROLLER);
 
-        expect(routes.map(({ method, path }) => [method, path])).toEqual(DOCUMENTED_ROUTES);
+        const route = container
+            .get(HTTP_ROUTE_CATALOG)
+            .routes()
+            .find((r) => r.method === method && r.path === path);
+
+        expect(route?.doc?.summary).toBeString();
     });
+
+    it.each(DOCUMENTED_ROUTES)(
+        "Should register $method $path with its validator as input",
+        async ({ method, path, validator }) => {
+            await fakeExternals(container).getAllAsync(HTTP_CONTROLLER);
+
+            const route = container
+                .get(HTTP_ROUTE_CATALOG)
+                .routes()
+                .find((r) => r.method === method && r.path === path);
+
+            expect(route?.input).toBe(container.get(validator));
+        },
+    );
 
     it.each(VALIDATORS)("Should bind the zod validator of the $name wanted item input", ({ identifier }) => {
         const validator = container.get(identifier);

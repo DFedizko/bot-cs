@@ -4,6 +4,7 @@ import type { HttpRequest, HttpResponse, HttpServer } from "@/packages/infrastru
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-input";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
+import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
 import type { AddWantedItemInput } from "./add-wanted-item.input";
 
@@ -14,8 +15,9 @@ export class AddWantedItemHttpController implements HttpController {
         httpServer: HttpServer,
         private readonly commandBus: CommandBus,
         private readonly validator: Validator<AddWantedItemInput>,
+        doc: HttpRouteDoc,
     ) {
-        httpServer.post(AddWantedItemHttpController.PATH, (request) => this.handle(request));
+        httpServer.post(AddWantedItemHttpController.PATH, (request) => this.handle(request), { input: validator, doc });
     }
 
     async handle(request: HttpRequest): Promise<HttpResponse> {

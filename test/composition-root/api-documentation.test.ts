@@ -70,7 +70,7 @@ describe("Api documentation", () => {
 
         const params = api.documented.flatMap(({ operation }) => operation.parameters);
 
-        expect(params.filter(({ example }) => example === undefined)).toEqual([]);
+        expect(params.filter(({ schema }) => schema.examples === undefined)).toEqual([]);
     });
 
     it("Should document a success and the internal error of every route", async () => {

@@ -4,6 +4,7 @@ import type { HttpRequest, HttpResponse, HttpServer } from "@/packages/infrastru
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-input";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
+import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { ToggleWantedItemCommand } from "../../application/toggle-wanted-item/toggle-wanted-item.command";
 import type { ToggleWantedItemInput } from "./toggle-wanted-item.input";
 
@@ -14,8 +15,12 @@ export class ToggleWantedItemHttpController implements HttpController {
         httpServer: HttpServer,
         private readonly commandBus: CommandBus,
         private readonly validator: Validator<ToggleWantedItemInput>,
+        doc: HttpRouteDoc,
     ) {
-        httpServer.patch(ToggleWantedItemHttpController.PATH, (request) => this.handle(request));
+        httpServer.patch(ToggleWantedItemHttpController.PATH, (request) => this.handle(request), {
+            input: validator,
+            doc,
+        });
     }
 
     async handle(request: HttpRequest): Promise<HttpResponse> {

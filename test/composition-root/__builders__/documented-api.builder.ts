@@ -1,11 +1,24 @@
 import type { Container } from "inversify";
-import { COMMAND_BUS, HTTP_CONTROLLER, HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers";
+import {
+    COMMAND_BUS,
+    HTTP_CONTROLLER,
+    HTTP_ROUTE_CATALOG,
+    HTTP_SERVER,
+    LOGGER,
+} from "@/packages/external/di/packages.identifiers";
 import { freePort } from "@/packages/external/http/__builders__/free-port.builder";
 import { ApiDocumentHttpController } from "@/packages/infrastructure/http/docs/api-document.http-controller";
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
-import type { OpenApiDocument, OpenApiOperation } from "@/packages/external/openapi/openapi-document";
 
-const HTTP_METHODS = ["get", "post", "patch", "put", "delete"] as const;
+type JsonSchema = { properties?: Record<string, unknown>; required?: string[] };
+type OpenApiParameter = { name: string; example?: unknown; schema: { examples?: unknown[] } };
+type OpenApiOperation = {
+    parameters: OpenApiParameter[];
+    requestBody?: { content: Record<string, { schema: JsonSchema; example?: unknown }> };
+    responses: Record<string, unknown>;
+};
+type OpenApiDocument = { paths: Record<string, Record<string, OpenApiOperation>> };
+
 const DOCS_PATHS = [ApiDocumentHttpController.PATH, ApiReferenceHttpController.PATH];
 const JSON_TYPE = "application/json";
 const PATH_PARAM = /:(\w+)/g;
@@ -23,24 +36,20 @@ export type DocumentedApi = {
 export const toOpenApiPath = (path: string): string => path.replace(PATH_PARAM, (_match, name) => `{${name}}`);
 
 export const exampleBody = (route: DocumentedRoute): Record<string, unknown> | undefined =>
-    route.operation.requestBody?.content[JSON_TYPE].example as Record<string, unknown> | undefined;
+    exampleOf(route.operation.requestBody?.content[JSON_TYPE]?.schema);
 
-export const bodyFields = (route: DocumentedRoute): { names: string[]; required: string[] } => {
-    const schema = route.operation.requestBody?.content[JSON_TYPE].schema;
-    return { names: Object.keys(schema?.properties ?? {}), required: (schema?.required as string[]) ?? [] };
+const exampleOf = (schema?: JsonSchema): Record<string, unknown> | undefined => {
+    if (!schema) return undefined;
+    const fields = Object.entries(schema.properties ?? {}).map(([name, field]) => [
+        name,
+        (field as { examples?: unknown[] }).examples?.[0],
+    ]);
+    return Object.fromEntries(fields.filter(([, example]) => example !== undefined));
 };
 
-const recordRoutes = (container: Container): Route[] => {
-    const routes: Route[] = [];
-    const httpServer = container.get(HTTP_SERVER);
-    HTTP_METHODS.forEach((method) => {
-        const register = httpServer[method].bind(httpServer);
-        jest.spyOn(httpServer, method).mockImplementation((path, callback) => {
-            routes.push({ method, path });
-            register(path, callback);
-        });
-    });
-    return routes;
+export const bodyFields = (route: DocumentedRoute): { names: string[]; required: string[] } => {
+    const schema = route.operation.requestBody?.content[JSON_TYPE]?.schema;
+    return { names: Object.keys(schema?.properties ?? {}), required: schema?.required ?? [] };
 };
 
 const listOperations = (document: OpenApiDocument): DocumentedRoute[] =>
@@ -50,7 +59,7 @@ const listOperations = (document: OpenApiDocument): DocumentedRoute[] =>
 
 const fillPath = (route: DocumentedRoute): string =>
     route.operation.parameters.reduce(
-        (path, { name, example }) => path.replace(`{${name}}`, encodeURIComponent(String(example))),
+        (path, { name, schema }) => path.replace(`{${name}}`, encodeURIComponent(String(schema.examples?.[0]))),
         route.path,
     );
 
@@ -63,14 +72,14 @@ const readFields = async (response: Response): Promise<string[]> => {
 export const startDocumentedApi = async (container: Container): Promise<DocumentedApi> => {
     jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
     jest.spyOn(await container.getAsync(COMMAND_BUS), "dispatch").mockResolvedValue();
-    const routes = recordRoutes(container);
     await container.getAllAsync(HTTP_CONTROLLER);
+    const routes = container.get(HTTP_ROUTE_CATALOG).routes();
     const port = freePort();
     container.get(HTTP_SERVER).listen(port);
     const url = `http://localhost:${port}`;
     const document = (await (await fetch(`${url}${ApiDocumentHttpController.PATH}`)).json()) as OpenApiDocument;
     return {
-        served: routes.filter(({ path }) => !DOCS_PATHS.includes(path)),
+        served: routes.filter(({ path }) => !DOCS_PATHS.includes(path)).map(({ method, path }) => ({ method, path })),
         documented: listOperations(document),
         send: async (route, body) => {
             const init = body && { headers: { "content-type": JSON_TYPE }, body: JSON.stringify(body) };

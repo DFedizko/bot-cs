@@ -181,7 +181,7 @@ describe("Bootstrap", () => {
 
         await new Bootstrap(container).run();
 
-        expect(routeSpy).toHaveBeenCalledWith(path, expect.any(Function));
+        expect(routeSpy).toHaveBeenCalledWith(path, expect.any(Function), expect.anything());
     });
 
     it("Should register the routes before listening", async () => {
