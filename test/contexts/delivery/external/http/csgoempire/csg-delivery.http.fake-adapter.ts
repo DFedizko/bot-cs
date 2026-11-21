@@ -1,9 +1,13 @@
-// Docs: https://docs.csgoempire.com/reference/mark-as-received.md, dispute-trade.md, get-trade.md, checked 2026-11-20.
+// Docs: https://docs.csgoempire.com/reference/mark-as-received.md, dispute-trade.md, get-trade.md, checked 2026-11-20;
+// get-active-trades.md checked 2026-11-21.
 import type { CsgDeliveryHttp } from "@/contexts/delivery/infrastructure/http/csgoempire/csg-delivery.http";
 import type { DisputeTrade } from "@/contexts/delivery/infrastructure/http/csgoempire/dispute-trade";
 import type { GetTrade, GetTradeWithdrawal } from "@/contexts/delivery/infrastructure/http/csgoempire/get-trade";
+import type { GetActiveTrades } from "@/contexts/delivery/infrastructure/http/csgoempire/get-active-trades";
+import type { TradeWithdrawal } from "@/contexts/delivery/infrastructure/http/csgoempire/types/trade-withdrawal";
 import type { MarkAsReceived } from "@/contexts/delivery/infrastructure/http/csgoempire/mark-as-received";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
+import { activeTrades } from "./__mocks__/trade-withdrawal.mock";
 import { disputeTradeSuccess, markAsReceivedSuccess, sentWithdrawal, tradeNotFound } from "./__mocks__/trade.mock";
 
 const COMPLETED = { status: 6, status_message: "Completed" } as const;
@@ -14,7 +18,10 @@ type TradeStatusChange = Pick<GetTradeWithdrawal, "status" | "status_message">;
 export class CsgDeliveryHttpFakeAdapter implements CsgDeliveryHttp {
     private readonly store: Map<number, GetTradeWithdrawal>;
 
-    constructor(withdrawals: readonly GetTradeWithdrawal[] = [sentWithdrawal()]) {
+    constructor(
+        withdrawals: readonly GetTradeWithdrawal[] = [sentWithdrawal()],
+        private readonly activeWithdrawals: readonly TradeWithdrawal[] = [],
+    ) {
         this.store = new Map(withdrawals.map((withdrawal) => [withdrawal.id, { ...withdrawal }]));
     }
 
@@ -26,6 +33,10 @@ export class CsgDeliveryHttpFakeAdapter implements CsgDeliveryHttp {
     async disputeTrade(request: DisputeTrade.Request): Promise<DisputeTrade.Response> {
         this.updateByOffer(request.tradeoffer_id, DISPUTED);
         return { ...disputeTradeSuccess };
+    }
+
+    async getActiveTrades(): Promise<GetActiveTrades.Response> {
+        return activeTrades(structuredClone([...this.activeWithdrawals]));
     }
 
     async getTrade(request: GetTrade.Request): Promise<GetTrade.Response | GetTrade.NotFoundResponse> {

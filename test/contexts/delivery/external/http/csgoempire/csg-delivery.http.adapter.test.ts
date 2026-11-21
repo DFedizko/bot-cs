@@ -4,6 +4,7 @@ import { CSG_DELIVERY_HTTP } from "@/contexts/delivery/external/di/delivery.iden
 import { TRADE_ID, TRADE_OFFER_ID } from "@/contexts/delivery/domain/__builders__/delivery.builder";
 import { deliveryContainer } from "../../di/__builders__/delivery-container.builder";
 import { disputeTradeSuccess, markAsReceivedSuccess, sentWithdrawal } from "./__mocks__/trade.mock";
+import { activeTrades } from "./__mocks__/trade-withdrawal.mock";
 
 let container: Container;
 
@@ -30,6 +31,14 @@ describe("CsgDeliveryHttpAdapter", () => {
         await container.get(CSG_DELIVERY_HTTP).disputeTrade({ tradeoffer_id: TRADE_OFFER_ID });
 
         expect(postSpy).toHaveBeenCalledWith(`/trading/deposit/${TRADE_OFFER_ID}/dispute`);
+    });
+
+    it("Should get the active trades from the documented path", async () => {
+        const getSpy = jest.spyOn(container.get(CSGOEMPIRE_HTTP_CLIENT), "get").mockResolvedValue(activeTrades());
+
+        await container.get(CSG_DELIVERY_HTTP).getActiveTrades();
+
+        expect(getSpy).toHaveBeenCalledWith("/trading/user/trades");
     });
 
     it("Should get the withdrawal from the documented path", async () => {
