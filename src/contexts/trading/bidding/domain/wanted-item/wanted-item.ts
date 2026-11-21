@@ -22,11 +22,15 @@ export type WantedItemChanges = {
 
 type BidDecision = {
     approved: boolean;
+    skipped: boolean;
     maxPrice: number;
     failures: string[];
 };
 
 export class WantedItem extends AggregateRoot<ItemName> {
+    static readonly DISABLED_FAILURE = "Disabled";
+    private enabled = true;
+
     private constructor(
         id: ItemName,
         private readonly accountId: AccountId,
@@ -53,17 +57,22 @@ export class WantedItem extends AggregateRoot<ItemName> {
         this.criteria = criteria;
     }
 
+    enable(): void {
+        this.enabled = true;
+    }
+
+    disable(): void {
+        this.enabled = false;
+    }
+
+    isEnabled(): boolean {
+        return this.enabled;
+    }
+
     evaluate(candidateProps: CandidatePrimitives): BidDecision {
-        const candidate = new BidCandidate(candidateProps);
-        const failures: string[] = [];
         const maxPrice = CoinCent(candidateProps.referencePrice).applyPercentage(this.maxFor).getAmount();
-        if (candidate.getAboveRecommendedPercentage().isGreaterThan(this.maxFor)) {
-            failures.push(`AboveRecommendedPercentage(${this.maxFor.toString()})`);
-        }
-        this.criteria.forEach(
-            (criterion) => criterion.not().isSatisfiedBy(candidate) && failures.push(criterion.describe()),
-        );
-        return { approved: !failures.length, maxPrice, failures };
+        const failures = this.findFailures(new BidCandidate(candidateProps));
+        return { approved: !failures.length, skipped: !this.enabled, maxPrice, failures };
     }
 
     getId(): string {
@@ -84,6 +93,22 @@ export class WantedItem extends AggregateRoot<ItemName> {
 
     getCriteria(): string[] {
         return this.criteria.map((criterion) => criterion.type);
+    }
+
+    private findFailures(candidate: BidCandidate): string[] {
+        if (!this.enabled) return [WantedItem.DISABLED_FAILURE];
+        return [...this.findPriceFailures(candidate), ...this.findCriteriaFailures(candidate)];
+    }
+
+    private findPriceFailures(candidate: BidCandidate): string[] {
+        const isAboveMax = candidate.getAboveRecommendedPercentage().isGreaterThan(this.maxFor);
+        return isAboveMax ? [`AboveRecommendedPercentage(${this.maxFor.toString()})`] : [];
+    }
+
+    private findCriteriaFailures(candidate: BidCandidate): string[] {
+        return this.criteria
+            .filter((criterion) => criterion.not().isSatisfiedBy(candidate))
+            .map((criterion) => criterion.describe());
     }
 
     private rejectEmptyChanges({ maxFor, criteria }: WantedItemChanges): void {

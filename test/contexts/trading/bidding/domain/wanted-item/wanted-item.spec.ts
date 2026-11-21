@@ -9,6 +9,13 @@ const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 const FIELD_TESTED = { type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED };
 const WELL_WORN = { type: ItemCriterionType.IS_WEAR, value: WearName.WELL_WORN };
 
+const MATCHING_CANDIDATE = {
+    value: 19400,
+    referencePrice: 20000,
+    aboveRecommendedPercentage: "-3",
+    wearName: WearName.FIELD_TESTED,
+};
+
 const asiimov = () =>
     WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-3", criteria: [FIELD_TESTED] });
 
@@ -92,6 +99,74 @@ describe("Wanted Item", () => {
 
             expect(edit).toThrow(DomainError);
             expect(wantedItem.getMaxFor()).toBe("-3");
+        });
+    });
+    describe("Should be switched", () => {
+        it("On by default", () => {
+            const wantedItem = asiimov();
+
+            expect(wantedItem.isEnabled()).toBe(true);
+        });
+        it("Off when disabled", () => {
+            const wantedItem = asiimov();
+
+            wantedItem.disable();
+
+            expect(wantedItem.isEnabled()).toBe(false);
+        });
+        it("Off when disabled twice", () => {
+            const wantedItem = asiimov();
+            wantedItem.disable();
+
+            wantedItem.disable();
+
+            expect(wantedItem.isEnabled()).toBe(false);
+        });
+        it("Back on when enabled after being disabled", () => {
+            const wantedItem = asiimov();
+            wantedItem.disable();
+
+            wantedItem.enable();
+
+            expect(wantedItem.isEnabled()).toBe(true);
+        });
+        it("On when enabled twice", () => {
+            const wantedItem = asiimov();
+            wantedItem.enable();
+
+            wantedItem.enable();
+
+            expect(wantedItem.isEnabled()).toBe(true);
+        });
+        it("Off keeping its settings", () => {
+            const wantedItem = asiimov();
+
+            wantedItem.disable();
+
+            expect([wantedItem.getMaxFor(), wantedItem.getCriteria()]).toEqual(["-3", ["IsWear"]]);
+        });
+    });
+    describe("Should skip evaluating an item when disabled", () => {
+        it("Rejecting it only because it is disabled", () => {
+            const wantedItem = asiimov();
+            wantedItem.disable();
+
+            const decision = wantedItem.evaluate(MATCHING_CANDIDATE);
+
+            expect(decision).toMatchObject({
+                approved: false,
+                skipped: true,
+                failures: [WantedItem.DISABLED_FAILURE],
+            });
+        });
+        it("Evaluating it again once enabled", () => {
+            const wantedItem = asiimov();
+            wantedItem.disable();
+            wantedItem.enable();
+
+            const decision = wantedItem.evaluate(MATCHING_CANDIDATE);
+
+            expect(decision).toMatchObject({ approved: true, skipped: false, failures: [] });
         });
     });
     describe("Should evaluate an item and approve", () => {
