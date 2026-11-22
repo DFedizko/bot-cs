@@ -7,7 +7,7 @@ const SAME_FEATURE = "{{ from.element.captured.feature }}";
 const ANY_MODULE = { origin: ["external", "core"] };
 const REACT_AND_TANSTACK = ["react", "react-dom", "@tanstack/*"];
 const STATE_LIBRARIES = ["zustand", "jotai", "valtio", "redux", "@reduxjs/*", "mobx"];
-const ALL_BUT_SHARED_LIB = [
+const ALL_BUT_SHARED_ADAPTERS = [
     "app",
     "routes",
     "pages",
@@ -16,7 +16,7 @@ const ALL_BUT_SHARED_LIB = [
     ...FEATURE_LAYERS,
     "shared-ui",
     "shared-api",
-    "shared-adapters",
+    "shared-lib",
 ];
 
 const featureLayer = (layer) => ({
@@ -66,9 +66,9 @@ const MODULE_POLICIES = [
         "view/ receives server state through its props: query in view-model/, not in the view",
     ),
     ...disallowModules(
-        ALL_BUT_SHARED_LIB,
+        ALL_BUT_SHARED_ADAPTERS,
         STATE_LIBRARIES,
-        "State libraries stay behind the Store port: add an adapter in shared/lib/store/, use useStoreState elsewhere",
+        "State libraries stay behind the Store port: implement it in shared/adapters/, read stores with useStoreState",
     ),
 ];
 

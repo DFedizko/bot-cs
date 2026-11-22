@@ -1,4 +1,4 @@
-import type { StateUpdate, Store, StoreListener } from "./store";
+import type { StateUpdate, Store, StoreListener } from "@/shared/lib/store/store";
 
 export function createMemoryStore<TState>(initial: TState): Store<TState> {
     let state = initial;

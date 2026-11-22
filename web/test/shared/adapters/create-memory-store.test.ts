@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from "bun:test";
-import { createMemoryStore } from "@/shared/lib/store/create-memory-store";
+import { createMemoryStore } from "@/shared/adapters/create-memory-store";
 
 type Counter = { count: number };
 
