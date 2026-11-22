@@ -15,14 +15,14 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 
 **What is shared lives in `shared/`; what only one feature uses lives inside that feature.** When something inside a feature becomes useful to another feature, move it to `shared/` instead of importing across features or copying it.
 
-| What                                                                         | Used by one feature           | Shared                                                 |
-| ---------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
-| Components                                                                   | `<feature>/view/components/`  | `shared/ui/` (buttons, dialogs, inputs, design system) |
-| Layouts that frame pages                                                     | —                             | `shared/ui/layouts/`                                   |
-| Custom hooks                                                                 | `<feature>/view-model/hooks/` | `shared/hooks/` (`useLocalStorage`, `useDebounce`)     |
-| Business logic: value objects (`Email`, `Phone`, `CoinCent`) and their rules | `<feature>/model/`            | `shared/model/`                                        |
-| Contracts and generic helpers                                                | `<feature>/ports/`            | `shared/lib/`                                          |
-| Implementations that touch the outside world                                 | `<feature>/adapters/`         | `shared/adapters/`                                     |
+| What                                                                         | Used by one feature           | Shared                                                                            |
+| ---------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------- |
+| Components                                                                   | `<feature>/view/components/`  | `shared/ui/components/`, both installed from a library (shadcn) and written by us |
+| Layouts that frame pages                                                     | —                             | `shared/ui/layouts/`                                                              |
+| Custom hooks                                                                 | `<feature>/view-model/hooks/` | `shared/hooks/` (`useLocalStorage`, `useDebounce`)                                |
+| Business logic: value objects (`Email`, `Phone`, `CoinCent`) and their rules | `<feature>/model/`            | `shared/model/`                                                                   |
+| Contracts and generic helpers                                                | `<feature>/ports/`            | `shared/lib/`                                                                     |
+| Implementations that touch the outside world                                 | `<feature>/adapters/`         | `shared/adapters/`                                                                |
 
 - `shared/model/` follows the same rules as a feature's `model/`: plain TypeScript, no React, no libraries. A value object is a branded type in its own file (`email/email.ts` → `Email`), plus one function per file to create and check it (`email/create-email.ts` → `createEmail`, which validates and returns an `Email`), grouped in a folder per concept.
 - Shared hooks still respect the boundaries: a hook that needs the outside world (`useLocalStorage`) reaches it through a port with its adapter in `shared/adapters/`, never by calling the browser API directly.
@@ -48,7 +48,7 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 | Screen                 | `wanted-items.screen.tsx`                         | `WantedItemsScreen`                              |
 | Page                   | `pages/account.page.tsx`                          | `AccountPage`                                    |
 | Layout                 | `shared/ui/layouts/root.layout.tsx`               | `RootLayout`                                     |
-| Shared UI component    | `shared/ui/button.tsx`                            | `Button`                                         |
+| Shared component       | `shared/ui/components/button.tsx`                 | `Button`                                         |
 | Value object           | `shared/model/email/email.ts`, `create-email.ts`  | `Email`, `createEmail`                           |
 | Constant               | `app-name.ts`                                     | `APP_NAME`                                       |
 | Route                  | TanStack Router names (`accounts.$accountId.tsx`) | only `Route`                                     |
@@ -60,7 +60,7 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 
 ## Imports
 
-Use the `@/` alias (`@/shared/ui/button`, `@/features/wanted-items`) for anything outside the current feature; relative imports inside it. Use `import type` for interfaces and types. A feature never imports another feature; routes and `app/` use a feature only through its `index.ts`.
+Use the `@/` alias (`@/shared/ui/components/button`, `@/features/wanted-items`) for anything outside the current feature; relative imports inside it. Use `import type` for interfaces and types. A feature never imports another feature; routes and `app/` use a feature only through its `index.ts`.
 
 ## Frontend code rules
 
@@ -68,9 +68,9 @@ Use the `@/` alias (`@/shared/ui/button`, `@/features/wanted-items`) for anythin
 - **Functions, not classes.** Function components, hooks and plain functions; no OOP.
 - **SOLID.** One responsibility per component, hook and function; small focused ports and props; extend by adding adapters, not by editing view-models.
 - **No generator functions** (`function*`, `yield`) unless there's no reasonable alternative.
-- **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in a feature's `adapters/` and in `shared/adapters/`, which also creates the framework objects (the router, the `QueryClient`, devtools), like the bot's `external/`. `shared/lib/` holds only contracts and helpers that touch no outside world. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/`.
+- **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in a feature's `adapters/` and in `shared/adapters/`, which also creates the framework objects (the router, the `QueryClient`, devtools), like the bot's `external/`. `shared/lib/` holds only contracts and helpers that touch no outside world. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/components/`.
 - **Props in, JSX out** in `view/`: no fetching, no ports, no stores, no TanStack Query.
-- **Styling:** Tailwind classes; reusable look and feel goes into `shared/ui/`, never copied between features.
+- **Styling:** Tailwind classes; reusable look and feel goes into `shared/ui/components/`, never copied between features.
 - **No unnecessary elements.** Never wrap an element in a `div` (or any element) that adds no layout, style or meaning; use a fragment (`<>...</>`) when JSX needs a single root.
 - **Semantic tags first:** `main`, `header`, `nav`, `section`, `article`, `aside`, `footer`, `ul`/`li`, `form`, `fieldset`, `label`, `button`, `table`. Use a `div` or `span` only when no semantic element fits. Users and tests then find things by role and label.
 

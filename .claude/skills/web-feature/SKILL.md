@@ -53,7 +53,7 @@ Give it a hook integration test: `renderHook` with a wrapper providing a fresh Q
 
 ## 7. View (`view/`)
 
-Components whose props are the view-model's return type (`import type`) or a part of it. Its parts go in `view/components/`; reuse `shared/ui/` (and move a part there once another feature needs it). Only local UI state, `shared/ui` components and Tailwind, with semantic markup and no needless wrappers. No component test: the page's UI integration test covers them through what the user sees and does.
+Components whose props are the view-model's return type (`import type`) or a part of it. Its parts go in `view/components/`; reuse `shared/ui/components/` (and move a part there once another feature needs it). Only local UI state, `shared/ui/components/` and Tailwind, with semantic markup and no needless wrappers. No component test: the page's UI integration test covers them through what the user sees and does.
 
 ## 8. Screen and index
 

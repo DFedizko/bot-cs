@@ -21,7 +21,8 @@ web/src/
     <feature>.screen.tsx the container: calls the view-model and renders the view
     index.ts             what routes and app may use: screens, providers, query options, types
   shared/
-    ui/                  design system and base components (buttons, dialogs, inputs, shadcn copies)
+    ui/
+      components/        shared components, installed from a library (shadcn) or written by us
       layouts/           page frames shared between pages (<name>.layout.tsx): navigation, outlet
     hooks/               custom hooks shared by features (useLocalStorage, useDebounce)
     model/               business logic shared by features: value objects (Email, Phone) and their rules
@@ -47,7 +48,7 @@ A folder's name says what the user can do (`features/wanted-items/`), never whic
 | `view/`       | Props typed by the view-model, `shared/ui`     | Ports, adapters, TanStack Query, the view-model |
 | screen        | Its own feature's layers                       | Other features                                  |
 
-- The **view** is pure presentation: everything it shows and every action it can trigger arrives through props, typed by the view-model's types (`import type`). It may keep local UI state (`useState` for an open menu) and use `shared/ui`. Render it in tests with plain objects.
+- The **view** is pure presentation: everything it shows and every action it can trigger arrives through props, typed by the view-model's types (`import type`). It may keep local UI state (`useState` for an open menu) and use `shared/ui/components/`. Render it in tests with plain objects.
 - The **view-model** is a hook that turns server state (TanStack Query) and the model's rules into exactly what the view needs. It reaches the outside world only through ports.
 - The **model** holds the UI rules as plain functions and types, so they're tested without React.
 - The **screen** (`<feature>.screen.tsx`) wires one view-model to one view. Pages render screens.
@@ -98,7 +99,7 @@ The state manager is a dependency like the API, so it is inverted the same way:
 
 ## Communication between features
 
-Features never import each other. A page composes them. **What is shared lives in `shared/`, what one feature uses lives inside it**: when a component, hook, value object or rule inside a feature becomes useful to another, move it to the matching `shared/` folder (`view/components/` → `shared/ui/`, `view-model/hooks/` → `shared/hooks/`, `model/` → `shared/model/`) instead of importing across features or copying it. Routes, pages and `app/` use a feature only through its `index.ts`. `shared/model/` follows the rules of a feature's `model/`: plain TypeScript, no React, no libraries.
+Features never import each other. A page composes them. **What is shared lives in `shared/`, what one feature uses lives inside it**: when a component, hook, value object or rule inside a feature becomes useful to another, move it to the matching `shared/` folder (`view/components/` → `shared/ui/components/`, `view-model/hooks/` → `shared/hooks/`, `model/` → `shared/model/`) instead of importing across features or copying it. Routes, pages and `app/` use a feature only through its `index.ts`. `shared/model/` follows the rules of a feature's `model/`: plain TypeScript, no React, no libraries.
 
 ## Enforcement
 
