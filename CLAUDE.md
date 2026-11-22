@@ -18,7 +18,7 @@ Each folder's `CLAUDE.md` loads when you work in it, so this file holds only wha
 ## Rules for both apps
 
 - **Strict TDD (Kent Beck): never write production code without a failing test written first.** Red → green → refactor. A bug fix starts with a test that reproduces it.
-- **Architecture decisions** are recorded in [`adr/`](adr/README.md). Follow the accepted ones. When the user makes a new architectural decision, register it there as a new ADR, following the format and numbering in `adr/README.md`.
+- **Architecture decisions** are recorded per app: the bot's in [`adr/`](adr/README.md), the frontend's in [`web/adr/`](web/adr/README.md), each with its own numbering. Follow the accepted ones. When the user makes a new architectural decision, register it as a new ADR in the folder of the app it concerns, following the format in its `README.md`.
 - **Architecture boundaries are enforced by `bun run lint`** in each app. When it reports a boundary error, fix the dependency; never loosen the lint config to silence it.
 - **Bun everywhere:** `bun install`, `bun run <script>`, `bun test`, `bunx <tool>`; never npm, yarn, pnpm or node.
 

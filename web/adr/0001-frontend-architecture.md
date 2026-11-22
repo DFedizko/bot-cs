@@ -1,4 +1,4 @@
-# ADR-0004: Frontend architecture
+# ADR-0001: Frontend architecture
 
 - **Date:** 2026-11-22
 - **Status:** Accepted
@@ -6,7 +6,7 @@
 
 ## Context
 
-The bot needs a user interface to manage wanted items, accounts and trades. The bot already exposes an HTTP API documented with OpenAPI (ADR-0003), and its business rules live in the backend. One developer works on both sides, mostly through AI agents that take one task per branch, so a change to the API and its screen should fit in one task, and the agents' context must stay small. The user wants the UI kept apart from state, UI rules and business rules, with dependency inversion where it makes testing easier.
+The bot needs a user interface to manage wanted items, accounts and trades. The bot already exposes an HTTP API documented with OpenAPI (the bot's ADR-0003, `adr/0003-api-docs-from-validator-schemas.md`), and its business rules live in the backend. One developer works on both sides, mostly through AI agents that take one task per branch, so a change to the API and its screen should fit in one task, and the agents' context must stay small. The user wants the UI kept apart from state, UI rules and business rules, with dependency inversion where it makes testing easier.
 
 ## Decision
 

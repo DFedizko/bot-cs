@@ -5,6 +5,7 @@ React 19 single-page app built with Vite, TanStack Router (file routes) and TanS
 ## Read before you change
 
 - **Architecture:** [`web/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a feature, a route, a port, a store or an adapter. It covers the folders, MVVM per feature, where dependencies are inverted, server and client state, and tests.
+- **Decisions:** the frontend's ADRs in [`web/adr/`](adr/README.md), separate from the bot's. Follow the accepted ones, and record new frontend decisions there.
 - **Skill:** `web-feature` when creating a feature or adding a port, store, adapter or view-model to one.
 
 Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Routes are thin and compose screens; `app/` is the composition root; `shared/` holds what features share. `bun run lint` enforces these boundaries.

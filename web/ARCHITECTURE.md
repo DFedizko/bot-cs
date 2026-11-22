@@ -1,6 +1,6 @@
 # Frontend architecture
 
-The frontend is a single-page app that manages the bot (wanted items, accounts, bids, deliveries) through the bot's HTTP API. It holds no business rules: the bot decides, the frontend shows state, collects input and applies **UI rules** (validation messages, formatting, what can be clicked). The decisions behind this design are in [ADR-0004](../adr/0004-frontend-architecture.md).
+The frontend is a single-page app that manages the bot (wanted items, accounts, bids, deliveries) through the bot's HTTP API. It holds no business rules: the bot decides, the frontend shows state, collects input and applies **UI rules** (validation messages, formatting, what can be clicked). The decisions behind this design are in [ADR-0001](adr/0001-frontend-architecture.md).
 
 ## Folders
 
