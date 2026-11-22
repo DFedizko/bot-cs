@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { render, screen } from "@testing-library/react";
-import { definePort } from "./define-port";
+import { definePort } from "@/shared/lib/define-port";
 
 type Greeter = { greet: () => string };
 
