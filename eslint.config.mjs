@@ -11,7 +11,7 @@ const { default: tseslint } = await import("typescript-eslint");
 
 export default defineConfig([
     {
-        ignores: ["node_modules/", "dist/", "build/"],
+        ignores: ["node_modules/", "dist/", "build/", "web/"],
     },
 
     {
