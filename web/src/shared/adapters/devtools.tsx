@@ -2,8 +2,8 @@ import type { AnyRouter } from "@tanstack/react-router";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { SHOW_DEVTOOLS } from "./show-devtools";
 
+const SHOW_DEVTOOLS = import.meta.env.DEV === true;
 const DEVTOOLS_CONFIG = { position: "bottom-right" } as const;
 
 type DevtoolsProps = { router: AnyRouter };
