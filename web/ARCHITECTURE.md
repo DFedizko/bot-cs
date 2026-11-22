@@ -21,10 +21,11 @@ web/src/
     index.ts             what routes and app may use: screens, providers, query options, types
   shared/
     ui/                  design system and base components (buttons, dialogs, inputs, shadcn copies)
-    lib/                 generic helpers with no feature meaning (definePort, formatters)
-      store/             the Store<T> contract, useStoreState and its adapters (memory, Zustand)
+    lib/                 contracts and generic helpers that touch no outside world (definePort, formatters)
+      store/             the Store<T> contract and useStoreState
     api/                 the client generated from the bot's OpenAPI document
-    adapters/            framework drivers, like the bot's external/: the router, the QueryClient, devtools
+    adapters/            like the bot's external/: framework and library objects (router, QueryClient,
+                         devtools) and the implementations of shared contracts (memory and Zustand stores)
 web/test/                mirror of src/ with the tests (see web/test/CLAUDE.md)
 web/e2e/                 Playwright end-to-end tests (see web/e2e/CLAUDE.md)
 ```
@@ -81,7 +82,7 @@ Three kinds of state, three homes:
 The state manager is a dependency like the API, so it is inverted the same way:
 
 - `shared/lib/store/store.ts` holds the generic contract, `Store<TState>` (`getState`, `setState(update)`, `subscribe`), and `useStoreState.ts` the hook that reads a slice of any store (`useStoreState(store, selectAccountId)`), built on React's `useSyncExternalStore`.
-- The adapters are generic too and live beside the contract: `create-memory-store.ts` (`createMemoryStore`, no dependencies) and, when we adopt it, `create-zustand-store.ts` (`createZustandStore`, Zustand's vanilla store). They are the only files allowed to import a state library.
+- Its implementations are generic too and live in `shared/adapters/`, like every implementation that may touch a library: `create-memory-store.ts` (`createMemoryStore`, no dependencies) and, when we adopt it, `create-zustand-store.ts` (`createZustandStore`, Zustand's vanilla store). Only `shared/adapters/` may import a state library, and only `app/` may import `shared/adapters/`.
 - Each feature declares its own typed store port in `ports/` (`selected-account.store.ts`: `type SelectedAccountStore = Store<SelectedAccount>` plus its `definePort` binding). The view-model reads it with `useStoreState` and changes it with `setState`; it never knows which library is underneath.
 - `app/` chooses the adapter when it binds each store. Switching to Zustand means adding its adapter and changing those bindings; features don't change. Tests bind `createMemoryStore`.
 
@@ -97,7 +98,7 @@ Features never import each other. A page composes them; anything two features ne
 
 ## Enforcement
 
-`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries only in `shared/lib/store/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
+`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries only in `shared/adapters/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
 
 ## Tests
 

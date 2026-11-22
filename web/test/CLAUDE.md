@@ -43,7 +43,7 @@ They live next to the test that uses them, in these folders:
 | A response of the bot's API                        | An MSW handler typed by the OpenAPI document, in `<endpoint>.mock.ts` (`list-wanted-items.mock.ts` → `listWantedItemsMock`) | `__mocks__/`                       |
 | A payload (request or response body)               | A function returning it, typed with `satisfies`, in `<name>.mock.ts`                                                        | `__mocks__/`                       |
 | A port that isn't HTTP (clock, storage, WebSocket) | A fake implementing the port with in-memory state (`create-fake-clock.ts` → `createFakeClock`)                              | `__fakes__/`                       |
-| Shared client state                                | `createMemoryStore` from `shared/lib/store/`, seeded per test                                                               | Inside the test                    |
+| Shared client state                                | `createMemoryStore` from `shared/adapters/`, seeded per test                                                                | Inside the test                    |
 | Objects with defaults                              | A builder taking `overrides` (`wanted-item.builder.ts` → `wantedItemBuilder`)                                               | `__builders__/`                    |
 | Rendering the whole app at a path                  | `renderApp(path)` (fresh QueryClient without retries, memory history)                                                       | `test/__builders__/render-app.tsx` |
 

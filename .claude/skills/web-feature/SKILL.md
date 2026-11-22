@@ -39,7 +39,7 @@ export const { Provider: SelectedAccountStoreProvider, usePort: useSelectedAccou
     definePort<SelectedAccountStore>("SelectedAccountStore");
 ```
 
-The view-model reads it with `useStoreState(store, select...)` and changes it with `store.setState(update)`. Never import a state library: the adapter is chosen in `app/` (`createMemoryStore` from `shared/lib/store/`).
+The view-model reads it with `useStoreState(store, select...)` and changes it with `store.setState(update)`. Never import a state library: the adapter is chosen in `app/` (`createMemoryStore` from `shared/adapters/`).
 
 ## 5. Adapter (`adapters/`)
 
