@@ -16,6 +16,7 @@ const ALL_BUT_SHARED_LIB = [
     ...FEATURE_LAYERS,
     "shared-ui",
     "shared-api",
+    "shared-adapters",
 ];
 
 const featureLayer = (layer) => ({
@@ -35,6 +36,7 @@ const ELEMENTS = [
     { type: "shared-ui", pattern: "src/shared/ui", partialMatch: false },
     { type: "shared-lib", pattern: "src/shared/lib", partialMatch: false },
     { type: "shared-api", pattern: "src/shared/api", partialMatch: false },
+    { type: "shared-adapters", pattern: "src/shared/adapters", partialMatch: false },
 ];
 
 const ownFeature = (types) => ({ to: { element: { types, captured: { feature: SAME_FEATURE } } } });
@@ -88,6 +90,7 @@ const LOCAL_POLICIES = [
     ...allowFrom("shared-ui", [toTypes(["shared-ui", "shared-lib"])]),
     ...allowFrom("shared-lib", [toTypes(["shared-lib"])]),
     ...allowFrom("shared-api", [toTypes(["shared-api", "shared-lib"])]),
+    ...allowFrom("shared-adapters", [toTypes(["shared-adapters", "shared-lib"])]),
 ];
 
 export const architectureBoundaries = {

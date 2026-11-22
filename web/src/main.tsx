@@ -1,8 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/app";
-import { createQueryClient } from "./app/create-query-client";
-import { createAppRouter } from "./app/create-app-router";
+import { createQueryClient } from "./shared/adapters/create-query-client";
+import { createAppRouter } from "./shared/adapters/create-app-router";
 import "./styles.css";
 
 const ROOT_ELEMENT_ID = "app";
