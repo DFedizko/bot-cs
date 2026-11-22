@@ -1,6 +1,11 @@
-# API documentation standard
+---
+name: http-route-docs
+description: The standard for documenting the bot's HTTP routes in its OpenAPI document (zod-openapi + Scalar at /docs). Use it whenever a task creates or changes an HTTP route, a controller, a route's validator or zod fields, its responses or its errors — the route's docs must change with it, and a guard test fails otherwise.
+---
 
-Every HTTP route documents itself when it registers, as on Fastify: the controller passes its validator and its route doc to the `HttpServer` ([ADR-0003](adr/0003-api-docs-from-validator-schemas.md)). In development, the app turns every registered route into one OpenAPI 3.1 document with [`zod-openapi`](https://github.com/samchungy/zod-openapi), serves it at `GET /openapi.json`, and serves the [Scalar](https://scalar.com) reference with a "Try it" client at `GET /docs`.
+# Documenting HTTP routes
+
+Every HTTP route documents itself when it registers, as on Fastify: the controller passes its validator and its route doc to the `HttpServer` (ADR-0003, `adr/0003-api-docs-from-validator-schemas.md`). In development, the app turns every registered route into one OpenAPI 3.1 document with [`zod-openapi`](https://github.com/samchungy/zod-openapi), serves it at `GET /openapi.json`, and serves the [Scalar](https://scalar.com) reference with a "Try it" client at `GET /docs`.
 
 Follow this standard whenever you create or change an HTTP route.
 

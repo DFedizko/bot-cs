@@ -1,10 +1,10 @@
 # Architecture Decision Records
 
-This folder records the significant architecture decisions of `bot-cs`, one decision per file, following Michael Nygard's ADR format.
+This folder records the significant architecture decisions of the bot (`src/`), one decision per file, following Michael Nygard's ADR format.
 
 ## Conventions
 
-- File name: `NNNN-short-title-in-kebab-case.md`, numbered in sequence (`0001`, `0002`, ...). Numbers are never reused.
+- File name: `NNNN-short-title-in-kebab-case.md`, numbered in sequence (`0001`, `0002`, ...). Numbers are never reused. The frontend keeps its own records in `web/adr/`.
 - An ADR is immutable once accepted. To change a decision, write a new ADR that supersedes it, and set the old one's status to `Superseded by ADR-NNNN`.
 - Dates use ISO 8601 (`YYYY-MM-DD`): the day the decision was made.
 
