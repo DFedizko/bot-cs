@@ -1,25 +1,54 @@
 # The frontend (`web/`)
 
-React 19 single-page app built with Vite, TanStack Router (file routes) and TanStack Query, styled with Tailwind CSS. It manages the bot through the bot's HTTP API and never imports code from `src/`. The rules of the root `CLAUDE.md` apply here too.
+React 19 single-page app built with Vite, TanStack Router (file routes) and TanStack Query, styled with Tailwind CSS. It manages the bot (wanted items, accounts, bids, deliveries) through the bot's HTTP API and never imports code from `src/`. It holds no business rules: the bot decides; the frontend shows state, collects input and applies UI rules. The code rules of the root `CLAUDE.md` apply here too.
 
 ## Read before you change
 
-- [`web/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a feature, a route, a port or an adapter: folders, MVVM per feature, where to invert dependencies, server state and tests.
-- The `web-feature` skill when creating a new feature.
+- **Architecture:** [`web/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a feature, a route, a port, a store or an adapter. It covers the folders, MVVM per feature, where dependencies are inverted, server and client state, and tests.
+- **Skill:** `web-feature` when creating a feature or adding a port, store, adapter or view-model to one.
 
-In short: `features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks with TanStack Query) and `view/` (components that only receive props), wired by `<feature>-screen.tsx` and exposed through `index.ts`. Routes are thin and compose screens; `app/` is the composition root; `shared/ui` and `shared/lib` hold what features share. `bun run lint` enforces these boundaries.
+Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Routes are thin and compose screens; `app/` is the composition root; `shared/` holds what features share. `bun run lint` enforces these boundaries.
+
+## File naming
+
+kebab-case, `<name>.<role>[.<implementation>].ts(x)`:
+
+| Kind                  | Pattern                                  | Example                                                                    |
+| --------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
+| Model type / UI rules | `<concept>.ts` / `<concept>.rules.ts`    | `wanted-item.ts`, `wanted-item.rules.ts`                                   |
+| Port                  | `<name>.gateway.ts`, `<name>.store.ts`   | `wanted-items.gateway.ts`, `selected-account.store.ts`                     |
+| Port implementation   | `<port>.<implementation>.ts`             | `wanted-items.gateway.http-adapter.ts`, `selected-account.store.memory.ts` |
+| Fake (tests only)     | `<port>.fake.ts`                         | `wanted-items.gateway.fake.ts`                                             |
+| View-model            | `<name>.view-model.ts`                   | `wanted-items.view-model.ts` exporting `useWantedItemsViewModel`           |
+| Query options         | `<name>.queries.ts`                      | `wanted-items.queries.ts` exporting `wantedItemsQuery`                     |
+| View                  | `<name>.view.tsx`, parts as `<name>.tsx` | `wanted-items.view.tsx`, `wanted-item-row.tsx`                             |
+| Screen                | `<feature>.screen.tsx`                   | `wanted-items.screen.tsx`                                                  |
+| Route                 | TanStack Router file route names         | `routes/accounts.$accountId.wanted-items.tsx`                              |
+| Shared UI component   | `<name>.tsx` in `shared/ui/`             | `button.tsx`, `dialog.tsx`                                                 |
+| Test                  | `<file>.test.ts(x)` beside the file      | `wanted-items.view.test.tsx`                                               |
+
+Exports follow the file name in PascalCase for components and types (`WantedItemsView`, `WantedItemsGateway`) and camelCase for functions and hooks (`useWantedItemsViewModel`, `wantedItemsQuery`). Named exports only, except the `Route` export TanStack Router requires.
+
+## Imports
+
+Use the `@/` alias (`@/shared/ui/button`, `@/features/wanted-items`) for anything outside the current feature; relative imports inside it. Use `import type` for interfaces and types. A feature never imports another feature; routes and `app/` use a feature only through its `index.ts`.
 
 ## Frontend code rules
 
-- **Function components and hooks**, no classes. Named exports only, except the `Route` export TanStack Router requires.
-- **Props in, JSX out** in `view/`: no data fetching, no ports, no TanStack Query.
-- **Invert I/O only** (API, WebSocket, storage, time) through ports bound with `definePort`; don't wrap React's own hooks or TanStack's.
-- **Tailwind classes** for styling; reusable look and feel goes into `shared/ui`, never copied between features.
-- **Accessible markup:** real elements (`button`, `label`, `nav`), so tests can find them by role and label.
-- **Imports:** `@/` for anything outside the current folder group (`@/shared/ui/button`), relative imports inside a feature. `import type` for types.
-- **Files:** kebab-case named after their main export (`wanted-item-list.tsx` exports `WantedItemList`; hooks `use-wanted-items-view-model.ts`); tests beside them as `<file>.test.ts(x)`.
-- **Never edit `src/routeTree.gen.ts`**: the router plugin and `bun run routes` generate it.
+- **Dependency inversion at the boundaries.** View-models reach the API, the WebSocket, storage, time and shared client state only through ports (`definePort`) and stores (`Store<T>`), never through an adapter. Only the composition root (`src/app/`) binds concrete implementations; tests bind fakes.
+- **Functions, not classes.** Function components, hooks and plain functions; no OOP.
+- **SOLID.** One responsibility per component, hook and function; small focused ports and props; extend by adding adapters, not by editing view-models.
+- **No generator functions** (`function*`, `yield`) unless there's no reasonable alternative.
+- **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in `adapters/` and `shared/lib/store/`. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/`.
+- **Props in, JSX out** in `view/`: no fetching, no ports, no stores, no TanStack Query.
+- **Styling:** Tailwind classes; reusable look and feel goes into `shared/ui/`, never copied between features.
+- **Accessible markup:** real elements (`button`, `label`, `nav`), so users and tests find things by role and label.
 
-## Commands (run in `web/`)
+Generated files (`src/routeTree.gen.ts`, the API client in `shared/api/`) are never edited by hand: the router plugin, `bun run routes` and the client generator rebuild them.
 
-`bun run dev` (port 3000), `bun run test`, `bun run typecheck`, `bun run lint`, `bun run format`, and `bun run check` for all of them.
+## Bun
+
+- Bun installs, runs scripts and tests: `bun install`, `bun run <script>`, `bun run test`. Vite serves and builds the app (`bun run dev` on port 3000, `bun run build`).
+- Tests use Bun's runner with happy-dom and Testing Library preloaded (`test/setup/`). Import `describe`, `it`, `expect` and `jest` from `bun:test`.
+- Read configuration (`import.meta.env`) only in `src/app/`, and pass it on through ports.
+- Commands: `bun run test`, `bun run typecheck`, `bun run lint`, `bun run format`, and `bun run check` for all of them.
