@@ -49,7 +49,7 @@ Use the `@/` alias (`@/shared/ui/button`, `@/features/wanted-items`) for anythin
 - **Functions, not classes.** Function components, hooks and plain functions; no OOP.
 - **SOLID.** One responsibility per component, hook and function; small focused ports and props; extend by adding adapters, not by editing view-models.
 - **No generator functions** (`function*`, `yield`) unless there's no reasonable alternative.
-- **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in `adapters/` and `shared/lib/store/`. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/`.
+- **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in `adapters/` and `shared/lib/store/`, and framework objects (the router, the `QueryClient`) are created only in `shared/adapters/`, like the bot's `external/`. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/`.
 - **Props in, JSX out** in `view/`: no fetching, no ports, no stores, no TanStack Query.
 - **Styling:** Tailwind classes; reusable look and feel goes into `shared/ui/`, never copied between features.
 - **No unnecessary elements.** Never wrap an element in a `div` (or any element) that adds no layout, style or meaning; use a fragment (`<>...</>`) when JSX needs a single root.

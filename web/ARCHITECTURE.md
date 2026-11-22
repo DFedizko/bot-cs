@@ -7,7 +7,7 @@ The frontend is a single-page app that manages the bot (wanted items, accounts, 
 ```
 web/src/
   main.tsx               entry: builds the QueryClient and the router, renders <App>
-  app/                   composition root: providers, router, query client, port bindings
+  app/                   composition root: providers and port bindings, using what shared/adapters builds
   routes/                TanStack Router file routes: only the Route definition (path, params, loader)
   pages/                 one component per page (<name>.page.tsx): composes feature screens
   layouts/               shared page frames (<name>.layout.tsx): navigation, outlet, devtools
@@ -24,6 +24,7 @@ web/src/
     lib/                 generic helpers with no feature meaning (definePort, formatters)
       store/             the Store<T> contract, useStoreState and its adapters (memory, Zustand)
     api/                 the client generated from the bot's OpenAPI document
+    adapters/            framework drivers, like the bot's external/: create the router and the QueryClient
 web/test/                mirror of src/ with the tests (see web/test/CLAUDE.md)
 web/e2e/                 Playwright end-to-end tests (see web/e2e/CLAUDE.md)
 ```
@@ -45,6 +46,10 @@ A folder's name says what the user can do (`features/wanted-items/`), never whic
 - The **view-model** is a hook that turns server state (TanStack Query) and the model's rules into exactly what the view needs. It reaches the outside world only through ports.
 - The **model** holds the UI rules as plain functions and types, so they're tested without React.
 - The **screen** (`<feature>.screen.tsx`) wires one view-model to one view. Pages render screens.
+
+## Framework drivers in `shared/adapters/`
+
+Objects that come from the frameworks (the TanStack router, the `QueryClient`) are created only in `shared/adapters/` (`create-app-router.ts`, `create-query-client.ts`), the frontend's counterpart of the bot's `external/` layer. Only `app/` and the entry point (`main.tsx`) use them, and the test builders; features, pages and layouts never build framework objects. Changing how the router or the cache is configured touches only this folder.
 
 ## Dependency inversion at the boundaries
 
@@ -92,7 +97,7 @@ Features never import each other. A page composes them; anything two features ne
 
 ## Enforcement
 
-`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, and state libraries only in `shared/lib/store/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
+`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries only in `shared/lib/store/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
 
 ## Tests
 
