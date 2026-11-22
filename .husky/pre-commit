@@ -1,4 +1,5 @@
 bun tsc --noEmit
 bun test
+if git diff --cached --name-only | grep -q '^web/'; then (cd web && bun run typecheck && bun run test); fi
 prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
 git update-index --again
