@@ -7,7 +7,16 @@ const SAME_FEATURE = "{{ from.element.captured.feature }}";
 const ANY_MODULE = { origin: ["external", "core"] };
 const REACT_AND_TANSTACK = ["react", "react-dom", "@tanstack/*"];
 const STATE_LIBRARIES = ["zustand", "jotai", "valtio", "redux", "@reduxjs/*", "mobx"];
-const ALL_BUT_SHARED_LIB = ["app", "routes", "feature", ...FEATURE_LAYERS, "shared-ui", "shared-api"];
+const ALL_BUT_SHARED_LIB = [
+    "app",
+    "routes",
+    "pages",
+    "layouts",
+    "feature",
+    ...FEATURE_LAYERS,
+    "shared-ui",
+    "shared-api",
+];
 
 const featureLayer = (layer) => ({
     type: layer,
@@ -19,6 +28,8 @@ const featureLayer = (layer) => ({
 const ELEMENTS = [
     { type: "app", pattern: "src/app", partialMatch: false },
     { type: "routes", pattern: "src/routes", partialMatch: false },
+    { type: "pages", pattern: "src/pages", partialMatch: false },
+    { type: "layouts", pattern: "src/layouts", partialMatch: false },
     ...FEATURE_LAYERS.map(featureLayer),
     { type: "feature", pattern: "src/features/*", capture: ["feature"], partialMatch: false },
     { type: "shared-ui", pattern: "src/shared/ui", partialMatch: false },
@@ -48,7 +59,7 @@ const MODULE_POLICIES = [
     },
     ...disallowModules(["adapters"], REACT_AND_TANSTACK, "adapters/ talk to the outside world only, without React"),
     ...disallowModules(
-        ["view"],
+        ["view", "pages", "layouts"],
         ["@tanstack/react-query"],
         "view/ receives server state through its props: query in view-model/, not in the view",
     ),
@@ -61,7 +72,9 @@ const MODULE_POLICIES = [
 
 const LOCAL_POLICIES = [
     { from: { element: { type: "app" } }, allow: toTypes("*") },
-    ...allowFrom("routes", [toTypes(["app", "feature", "shared-ui", "shared-lib"])]),
+    ...allowFrom("routes", [toTypes(["app", "pages", "layouts", "feature", "shared-lib"])]),
+    ...allowFrom("pages", [toTypes(["feature", "shared-ui", "shared-lib"])]),
+    ...allowFrom("layouts", [toTypes(["app", "feature", "shared-ui", "shared-lib"])]),
     ...allowFrom("feature", [ownFeature(FEATURE_LAYERS)]),
     ...allowFrom("model", [ownFeature(["model"]), toTypes(["shared-lib"])]),
     ...allowFrom("ports", [ownFeature(["model", "ports"]), toTypes(["shared-lib"])]),

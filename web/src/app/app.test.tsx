@@ -2,9 +2,9 @@ import { describe, expect, it } from "bun:test";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import { App } from "./app";
-import { APP_NAME } from "./app-name";
-import { createQueryClient } from "./query-client";
-import { createAppRouter } from "./router";
+import { APP_NAME } from "@/shared/lib/app-name";
+import { createQueryClient } from "./create-query-client";
+import { createAppRouter } from "./create-app-router";
 
 const HOME_PATH = "/";
 
