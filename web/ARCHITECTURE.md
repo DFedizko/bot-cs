@@ -10,17 +10,21 @@ web/src/
   app/                   composition root: providers and port bindings, using what shared/adapters builds
   routes/                TanStack Router file routes: only the Route definition (path, params, loader)
   pages/                 one component per page (<name>.page.tsx): composes feature screens
-  layouts/               shared page frames (<name>.layout.tsx): navigation, the router's outlet
   features/<feature>/    one folder per feature (a capability the user has: wanted-items, accounts...)
-    model/               plain TypeScript: types and UI rules (no React, no libraries)
+    model/               plain TypeScript: types, value objects and UI rules only this feature uses
     ports/               interfaces the view-model needs (gateways, stores), each bound through definePort()
     adapters/            implementations of the ports (API client, storage, clock)
     view-model/          use<Name>ViewModel(): TanStack Query + model + ports → state and actions
-    view/                components: state and actions in through props, JSX out
+      hooks/             custom hooks only this feature uses
+    view/                <name>.view.tsx: state and actions in through props, JSX out
+      components/        components only this feature uses
     <feature>.screen.tsx the container: calls the view-model and renders the view
     index.ts             what routes and app may use: screens, providers, query options, types
   shared/
     ui/                  design system and base components (buttons, dialogs, inputs, shadcn copies)
+      layouts/           page frames shared between pages (<name>.layout.tsx): navigation, outlet
+    hooks/               custom hooks shared by features (useLocalStorage, useDebounce)
+    model/               business logic shared by features: value objects (Email, Phone) and their rules
     lib/                 contracts and generic helpers that touch no outside world (definePort, formatters)
       store/             the Store<T> contract and useStoreState
     api/                 the client generated from the bot's OpenAPI document
@@ -90,11 +94,11 @@ The state manager is a dependency like the API, so it is inverted the same way:
 
 - **Route files** (`routes/`) hold only the `Route` definition: path, params and search validation, and an optional loader that prefetches with the router's `context.queryClient` and a feature's query options. Their `component` comes from `pages/` or `layouts/`. TanStack Router dictates their file names, which is why components never live in them.
 - **Pages** (`pages/<name>.page.tsx` → `<Name>Page`) compose feature screens and shared UI into one page. No UI rules, no API calls, no TanStack Query.
-- **Layouts** (`layouts/<name>.layout.tsx` → `<Name>Layout`) frame pages: navigation and the router's `Outlet`.
+- **Layouts** (`shared/ui/layouts/<name>.layout.tsx` → `<Name>Layout`) frame the pages that share them: navigation and the router's `Outlet`.
 
 ## Communication between features
 
-Features never import each other. A page composes them; anything two features need moves to `shared/`. Routes, pages, layouts and `app/` use a feature only through its `index.ts`.
+Features never import each other. A page composes them. **What is shared lives in `shared/`, what one feature uses lives inside it**: when a component, hook, value object or rule inside a feature becomes useful to another, move it to the matching `shared/` folder (`view/components/` → `shared/ui/`, `view-model/hooks/` → `shared/hooks/`, `model/` → `shared/model/`) instead of importing across features or copying it. Routes, pages and `app/` use a feature only through its `index.ts`. `shared/model/` follows the rules of a feature's `model/`: plain TypeScript, no React, no libraries.
 
 ## Enforcement
 

@@ -9,7 +9,23 @@ React 19 single-page app built with Vite, TanStack Router (file routes) and TanS
 - **Decisions:** the frontend's ADRs in [`web/adr/`](adr/README.md), separate from the bot's. Follow the accepted ones, and record new frontend decisions there.
 - **Skill:** `web-feature` when creating a feature or adding a port, store, adapter or view-model to one.
 
-Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Route files only define routes, pages compose feature screens, layouts frame pages; `app/` is the composition root; `shared/` holds what features share. `bun run lint` enforces these boundaries.
+Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Route files only define routes, pages compose feature screens, shared layouts frame pages; `app/` is the composition root; `shared/` holds what more than one feature uses. `bun run lint` enforces these boundaries.
+
+## Shared or inside a feature?
+
+**What is shared lives in `shared/`; what only one feature uses lives inside that feature.** When something inside a feature becomes useful to another feature, move it to `shared/` instead of importing across features or copying it.
+
+| What                                                                         | Used by one feature           | Shared                                                 |
+| ---------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
+| Components                                                                   | `<feature>/view/components/`  | `shared/ui/` (buttons, dialogs, inputs, design system) |
+| Layouts that frame pages                                                     | —                             | `shared/ui/layouts/`                                   |
+| Custom hooks                                                                 | `<feature>/view-model/hooks/` | `shared/hooks/` (`useLocalStorage`, `useDebounce`)     |
+| Business logic: value objects (`Email`, `Phone`, `CoinCent`) and their rules | `<feature>/model/`            | `shared/model/`                                        |
+| Contracts and generic helpers                                                | `<feature>/ports/`            | `shared/lib/`                                          |
+| Implementations that touch the outside world                                 | `<feature>/adapters/`         | `shared/adapters/`                                     |
+
+- `shared/model/` follows the same rules as a feature's `model/`: plain TypeScript, no React, no libraries. A value object is a branded type in its own file (`email/email.ts` → `Email`), plus one function per file to create and check it (`email/create-email.ts` → `createEmail`, which validates and returns an `Email`), grouped in a folder per concept.
+- Shared hooks still respect the boundaries: a hook that needs the outside world (`useLocalStorage`) reaches it through a port with its adapter in `shared/adapters/`, never by calling the browser API directly.
 
 ## File naming
 
@@ -24,18 +40,21 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 | Port implementation    | `create-http-wanted-items-gateway.ts`             | `createHttpWantedItemsGateway`                   |
 | Fake (tests only)      | `create-fake-wanted-items-gateway.ts`             | `createFakeWantedItemsGateway`                   |
 | View-model             | `useWantedItemsViewModel.ts`                      | `useWantedItemsViewModel`                        |
-| Any other hook         | `useStoreState.ts`                                | `useStoreState`                                  |
+| Feature hook           | `view-model/hooks/useWantedItemFilters.ts`        | `useWantedItemFilters`                           |
+| Shared hook            | `shared/hooks/useLocalStorage.ts`                 | `useLocalStorage`                                |
 | Query options          | `wanted-items-query.ts`                           | `wantedItemsQuery`                               |
-| View, and its parts    | `wanted-items.view.tsx`, `wanted-item-row.tsx`    | `WantedItemsView`, `WantedItemRow`               |
+| View                   | `view/wanted-items.view.tsx`                      | `WantedItemsView`                                |
+| Feature component      | `view/components/wanted-item-row.tsx`             | `WantedItemRow`                                  |
 | Screen                 | `wanted-items.screen.tsx`                         | `WantedItemsScreen`                              |
 | Page                   | `pages/account.page.tsx`                          | `AccountPage`                                    |
-| Layout                 | `layouts/root.layout.tsx`                         | `RootLayout`                                     |
+| Layout                 | `shared/ui/layouts/root.layout.tsx`               | `RootLayout`                                     |
 | Shared UI component    | `shared/ui/button.tsx`                            | `Button`                                         |
+| Value object           | `shared/model/email/email.ts`, `create-email.ts`  | `Email`, `createEmail`                           |
 | Constant               | `app-name.ts`                                     | `APP_NAME`                                       |
 | Route                  | TanStack Router names (`accounts.$accountId.tsx`) | only `Route`                                     |
-| Test                   | `<file>.test.ts(x)` beside the file               | —                                                |
+| Test                   | `test/<same path>/<file>.test.ts(x)`              | —                                                |
 
-- **Route files hold only the `Route` definition** (path, params, loader), with its `component` imported from `pages/` or `layouts/`: the router dictates their names, so no component can be named after them.
+- **Route files hold only the `Route` definition** (path, params, loader), with its `component` imported from `pages/` or `shared/ui/layouts/`: the router dictates their names, so no component can be named after them.
 - **One exported function per file.** Export a second one only when they truly can't live apart (e.g. a port's `Provider` and `use<Port>` hook from `definePort`). Types may sit beside the function that uses them.
 - Named exports only, except the `Route` export TanStack Router requires.
 
