@@ -24,7 +24,8 @@ web/src/
     lib/                 generic helpers with no feature meaning (definePort, formatters)
       store/             the Store<T> contract, useStoreState and its adapters (memory, Zustand)
     api/                 the client generated from the bot's OpenAPI document
-web/test/setup/          test preloads (happy-dom, Testing Library)
+web/test/                mirror of src/ with the tests (see web/test/CLAUDE.md)
+web/e2e/                 Playwright end-to-end tests (see web/e2e/CLAUDE.md)
 ```
 
 A folder's name says what the user can do (`features/wanted-items/`), never which technology it uses.
@@ -95,14 +96,4 @@ Features never import each other. A page composes them; anything two features ne
 
 ## Tests
 
-`bun run test` (Bun's runner, with happy-dom and Testing Library preloaded). Tests sit next to the file they test (`wanted-items.view.test.tsx` beside `wanted-items.view.tsx`), so a feature moves or dies as one folder.
-
-| Subject     | How                                                                                                             |
-| ----------- | --------------------------------------------------------------------------------------------------------------- |
-| model       | Plain unit tests: input, output                                                                                 |
-| view        | `render(<View {...props} />)` with plain objects; assert what the user sees and can do                          |
-| view-model  | `renderHook` inside the ports' `Provider`s bound to fakes and memory stores, with a fresh `createQueryClient()` |
-| adapters    | Against a fake HTTP server or the generated client's fake fetch; never the real bot                             |
-| screen/page | Render `<App>` with a memory history (see `app/app.test.tsx`)                                                   |
-
-Query the DOM the way users find things (`getByRole`, `getByLabelText`), and drive it with `@testing-library/user-event`.
+Tests live in `web/test/`, a mirror of `src/`, with UI integration tests (Testing Library, the bot's API answered by MSW with handlers typed by its OpenAPI document), hook integration tests and logic tests; components and visuals are never unit tested. Playwright covers the happy path of each main feature in `web/e2e/`. The rules are in [`web/test/CLAUDE.md`](test/CLAUDE.md) and [`web/e2e/CLAUDE.md`](e2e/CLAUDE.md), and the decision in [ADR-0002](adr/0002-testing-strategy.md).

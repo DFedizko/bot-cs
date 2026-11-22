@@ -43,6 +43,7 @@ Each folder's `CLAUDE.md` loads when you work in it, so this file holds only wha
 | Install     | `bun install`                            | `bun install`       |
 | Run         | `bun src/main.ts`                        | `bun run dev`       |
 | Tests       | `bun test` (`bun test <filter>`)         | `bun run test`      |
+| E2E tests   | —                                        | `bun run test:e2e`  |
 | Types       | `bunx tsc --noEmit`                      | `bun run typecheck` |
 | Lint        | `bun run lint` / `bun run lint:fix`      | `bun run lint`      |
 | Format      | `bun run format` (Prettier on src, test) | `bun run format`    |

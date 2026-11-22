@@ -35,3 +35,4 @@ This folder records the significant architecture decisions of the frontend (`web
 | ADR                                   | Title                 | Date       | Status   |
 | ------------------------------------- | --------------------- | ---------- | -------- |
 | [0001](0001-frontend-architecture.md) | Frontend architecture | 2026-11-22 | Accepted |
+| [0002](0002-testing-strategy.md)      | Testing strategy      | 2026-11-22 | Accepted |

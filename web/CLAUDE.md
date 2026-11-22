@@ -4,7 +4,8 @@ React 19 single-page app built with Vite, TanStack Router (file routes) and TanS
 
 ## Read before you change
 
-- **Architecture:** [`web/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a feature, a route, a port, a store or an adapter. It covers the folders, MVVM per feature, where dependencies are inverted, server and client state, and tests.
+- **Architecture:** [`web/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a feature, a route, a port, a store or an adapter. It covers the folders, MVVM per feature, where dependencies are inverted, and server and client state.
+- **Tests:** [`web/test/CLAUDE.md`](test/CLAUDE.md) before writing or changing any test (UI and hook integration tests, MSW mocks typed by the bot's OpenAPI document); [`web/e2e/CLAUDE.md`](e2e/CLAUDE.md) for Playwright end-to-end tests.
 - **Decisions:** the frontend's ADRs in [`web/adr/`](adr/README.md), separate from the bot's. Follow the accepted ones, and record new frontend decisions there.
 - **Skill:** `web-feature` when creating a feature or adding a port, store, adapter or view-model to one.
 
@@ -58,7 +59,7 @@ Generated files (`src/routeTree.gen.ts`, the API client in `shared/api/`) are ne
 
 ## Bun
 
-- Bun installs, runs scripts and tests: `bun install`, `bun run <script>`, `bun run test`. Vite serves and builds the app (`bun run dev` on port 3000, `bun run build`).
-- Tests use Bun's runner with happy-dom and Testing Library preloaded (`test/setup/`). Import `describe`, `it`, `expect` and `jest` from `bun:test`.
+- Bun installs, runs scripts and tests: `bun install`, `bun run <script>`, `bun run test`. Vite serves and builds the app (`bun run dev` on port 5173, beside the bot on 3000; `bun run build`).
+- Tests use Bun's runner with happy-dom, Testing Library and MSW preloaded (`test/__setup__/`); import `describe`, `it`, `expect` and `jest` from `bun:test`. End-to-end tests use Playwright (`bun run test:e2e`).
 - Read configuration (`import.meta.env`) only in `src/app/`, and pass it on through ports.
-- Commands: `bun run test`, `bun run typecheck`, `bun run lint`, `bun run format`, and `bun run check` for all of them.
+- Commands: `bun run test`, `bun run test:e2e`, `bun run typecheck`, `bun run lint`, `bun run format`, `bun run check` (all but e2e), and `bun run api:types` to regenerate the bot's API types (bot running in development).
