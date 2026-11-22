@@ -5,7 +5,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import { BidPlacedEvent } from "./bid-placed.event";
 import type { AccountRepository } from "../account.repository";
 import { AccountId } from "../../domain/account/account-id";
-import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
+import { AccountNotFoundError } from "../../domain/account/errors/account-not-found.error";
 import type { Logger } from "@/packages/application/logger";
 import type { AuctionParticipationRepository } from "../auction-participation.repository";
 import { AuctionParticipation } from "../../domain/auction-participation/auction-participation";
@@ -27,7 +27,7 @@ export class PlaceBidCommandHandler implements CommandHandler<PlaceBidCommand> {
     async handle(command: PlaceBidCommand): Promise<void> {
         const account = await this.accountRepository.findById(new AccountId(command.accountId));
         // TODO change this infrastructure level error
-        if (!account) throw new NotFoundError(`Account not found by the id "${command.accountId}"`);
+        if (!account) throw new AccountNotFoundError(command.accountId);
         if (!account.covers(command.bidValue)) {
             this.logger.log(
                 `Couldn't place bid on auction "${command.auctionId}" because the "${account.getName()}" account has insufficient balance`,

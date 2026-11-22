@@ -11,7 +11,7 @@ import {
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
+import { AccountNotFoundError } from "@/contexts/trading/bidding/domain/account/errors/account-not-found.error";
 import { AuctionParticipation } from "@/contexts/trading/bidding/domain/auction-participation/auction-participation";
 import { ReservationAlreadyExistsError } from "@/contexts/trading/bidding/domain/account/errors/reservation-already-exists.error";
 
@@ -117,7 +117,7 @@ describe("PlaceBidCommandHandler", () => {
         const handler = container.get(PLACE_BID_HANDLER);
         const placeBidCommand = new PlaceBidCommand({ auctionId: 11204, accountId: 1, bidValue: 227, maxBid: 231 });
 
-        await expect(handler.handle(placeBidCommand)).rejects.toThrow(NotFoundError);
+        await expect(handler.handle(placeBidCommand)).rejects.toThrow(AccountNotFoundError);
     });
     it("Shouldn't call the gateway when a dispatch a second command for an auction that's already reserved", async () => {
         await container.get(ACCOUNT_REPOSITORY).save(Account.sync({ id: 1, name: "John Doe", totalAmount: 459 }));
