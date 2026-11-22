@@ -5,6 +5,7 @@ import js from "@eslint/js";
 import globals from "globals";
 import { defineConfig } from "eslint/config";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import { architectureBoundaries } from "./eslint.boundaries.mjs";
 
 const { default: tseslint } = await import("typescript-eslint");
 
@@ -24,6 +25,8 @@ export default defineConfig([
             },
         },
     },
+
+    architectureBoundaries,
 
     {
         files: ["src/contexts/**/infrastructure/**/*.ts"],
