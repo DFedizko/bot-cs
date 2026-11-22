@@ -10,7 +10,7 @@ web/src/
   app/                   composition root: providers and port bindings, using what shared/adapters builds
   routes/                TanStack Router file routes: only the Route definition (path, params, loader)
   pages/                 one component per page (<name>.page.tsx): composes feature screens
-  layouts/               shared page frames (<name>.layout.tsx): navigation, outlet, devtools
+  layouts/               shared page frames (<name>.layout.tsx): navigation, the router's outlet
   features/<feature>/    one folder per feature (a capability the user has: wanted-items, accounts...)
     model/               plain TypeScript: types and UI rules (no React, no libraries)
     ports/               interfaces the view-model needs (gateways, stores), each bound through definePort()
@@ -24,7 +24,7 @@ web/src/
     lib/                 generic helpers with no feature meaning (definePort, formatters)
       store/             the Store<T> contract, useStoreState and its adapters (memory, Zustand)
     api/                 the client generated from the bot's OpenAPI document
-    adapters/            framework drivers, like the bot's external/: create the router and the QueryClient
+    adapters/            framework drivers, like the bot's external/: the router, the QueryClient, devtools
 web/test/                mirror of src/ with the tests (see web/test/CLAUDE.md)
 web/e2e/                 Playwright end-to-end tests (see web/e2e/CLAUDE.md)
 ```
@@ -49,7 +49,7 @@ A folder's name says what the user can do (`features/wanted-items/`), never whic
 
 ## Framework drivers in `shared/adapters/`
 
-Objects that come from the frameworks (the TanStack router, the `QueryClient`) are created only in `shared/adapters/` (`create-app-router.ts`, `create-query-client.ts`), the frontend's counterpart of the bot's `external/` layer. Only `app/` and the entry point (`main.tsx`) use them, and the test builders; features, pages and layouts never build framework objects. Changing how the router or the cache is configured touches only this folder.
+Objects that come from the frameworks (the TanStack router, the `QueryClient`, the TanStack devtools shown only on the dev server) are created only in `shared/adapters/` (`create-app-router.ts`, `create-query-client.ts`, `devtools.tsx`), the frontend's counterpart of the bot's `external/` layer. Only `app/` and the entry point (`main.tsx`) use them, and the test builders; features, pages and layouts never build framework objects. Changing how the router or the cache is configured touches only this folder.
 
 ## Dependency inversion at the boundaries
 
@@ -89,7 +89,7 @@ The state manager is a dependency like the API, so it is inverted the same way:
 
 - **Route files** (`routes/`) hold only the `Route` definition: path, params and search validation, and an optional loader that prefetches with the router's `context.queryClient` and a feature's query options. Their `component` comes from `pages/` or `layouts/`. TanStack Router dictates their file names, which is why components never live in them.
 - **Pages** (`pages/<name>.page.tsx` → `<Name>Page`) compose feature screens and shared UI into one page. No UI rules, no API calls, no TanStack Query.
-- **Layouts** (`layouts/<name>.layout.tsx` → `<Name>Layout`) frame pages: navigation, the router's `Outlet`, devtools in development.
+- **Layouts** (`layouts/<name>.layout.tsx` → `<Name>Layout`) frame pages: navigation and the router's `Outlet`.
 
 ## Communication between features
 
