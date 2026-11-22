@@ -8,32 +8,34 @@ React 19 single-page app built with Vite, TanStack Router (file routes) and TanS
 - **Decisions:** the frontend's ADRs in [`web/adr/`](adr/README.md), separate from the bot's. Follow the accepted ones, and record new frontend decisions there.
 - **Skill:** `web-feature` when creating a feature or adding a port, store, adapter or view-model to one.
 
-Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Routes are thin and compose screens; `app/` is the composition root; `shared/` holds what features share. `bun run lint` enforces these boundaries.
+Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Route files only define routes, pages compose feature screens, layouts frame pages; `app/` is the composition root; `shared/` holds what features share. `bun run lint` enforces these boundaries.
 
 ## File naming
 
-kebab-case, `<name>.<role>[.<implementation>].ts(x)`, except hooks:
+**Every hook, component, page, layout, function, type and constant is named after its file**: the file name, without dots and dashes, in camelCase for hooks and functions, PascalCase for components, pages, layouts and types, and `UPPER_SNAKE_CASE` for constants. Files are kebab-case, except hooks, whose files are camelCase like the hook.
 
-| Kind                | Pattern                                  | Example                                                                    |
-| ------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
-| Model type          | `<concept>.ts`                           | `wanted-item.ts`                                                           |
-| UI rule             | `<rule>.ts`, one rule per file           | `can-save-wanted-item.ts`                                                  |
-| Port                | `<name>.gateway.ts`, `<name>.store.ts`   | `wanted-items.gateway.ts`, `selected-account.store.ts`                     |
-| Port implementation | `<port>.<implementation>.ts`             | `wanted-items.gateway.http-adapter.ts`, `selected-account.store.memory.ts` |
-| Fake (tests only)   | `<port>.fake.ts`                         | `wanted-items.gateway.fake.ts`                                             |
-| View-model          | `use<Name>ViewModel.ts` (camelCase)      | `useWantedItemsViewModel.ts`                                               |
-| Any other hook      | `use<Name>.ts` (camelCase)               | `useStoreState.ts`                                                         |
-| Query options       | `<name>.queries.ts`                      | `wanted-items.queries.ts` exporting `wantedItemsQuery`                     |
-| View                | `<name>.view.tsx`, parts as `<name>.tsx` | `wanted-items.view.tsx`, `wanted-item-row.tsx`                             |
-| Screen              | `<feature>.screen.tsx`                   | `wanted-items.screen.tsx`                                                  |
-| Route               | TanStack Router file route names         | `routes/accounts.$accountId.wanted-items.tsx`                              |
-| Shared UI component | `<name>.tsx` in `shared/ui/`             | `button.tsx`, `dialog.tsx`                                                 |
-| Test                | `<file>.test.ts(x)` beside the file      | `wanted-items.view.test.tsx`                                               |
+| Kind                   | File                                              | Export                                           |
+| ---------------------- | ------------------------------------------------- | ------------------------------------------------ |
+| Model type             | `wanted-item.ts`                                  | `WantedItem`                                     |
+| UI rule (one per file) | `can-save-wanted-item.ts`                         | `canSaveWantedItem`                              |
+| Port                   | `wanted-items.gateway.ts`                         | `WantedItemsGateway` (+ its `definePort` pair)   |
+| Store port             | `selected-account.store.ts`                       | `SelectedAccountStore` (+ its `definePort` pair) |
+| Port implementation    | `create-http-wanted-items-gateway.ts`             | `createHttpWantedItemsGateway`                   |
+| Fake (tests only)      | `create-fake-wanted-items-gateway.ts`             | `createFakeWantedItemsGateway`                   |
+| View-model             | `useWantedItemsViewModel.ts`                      | `useWantedItemsViewModel`                        |
+| Any other hook         | `useStoreState.ts`                                | `useStoreState`                                  |
+| Query options          | `wanted-items-query.ts`                           | `wantedItemsQuery`                               |
+| View, and its parts    | `wanted-items.view.tsx`, `wanted-item-row.tsx`    | `WantedItemsView`, `WantedItemRow`               |
+| Screen                 | `wanted-items.screen.tsx`                         | `WantedItemsScreen`                              |
+| Page                   | `pages/account.page.tsx`                          | `AccountPage`                                    |
+| Layout                 | `layouts/root.layout.tsx`                         | `RootLayout`                                     |
+| Shared UI component    | `shared/ui/button.tsx`                            | `Button`                                         |
+| Constant               | `app-name.ts`                                     | `APP_NAME`                                       |
+| Route                  | TanStack Router names (`accounts.$accountId.tsx`) | only `Route`                                     |
+| Test                   | `<file>.test.ts(x)` beside the file               | —                                                |
 
-- **Hooks:** camelCase for both the file and the function (`useWantedItemsViewModel.ts` exports `useWantedItemsViewModel`).
-- **Components:** kebab-case files, PascalCase functions (`wanted-items.view.tsx` exports `WantedItemsView`).
-- **Other functions** are camelCase in kebab-case files (`wanted-items.queries.ts` exports `wantedItemsQuery`); types and interfaces are PascalCase.
-- **One exported function per file.** Export a second one only when they truly can't live apart (e.g. `definePort` returning a provider and its hook as one unit). Types may sit beside the function that uses them.
+- **Route files hold only the `Route` definition** (path, params, loader), with its `component` imported from `pages/` or `layouts/`: the router dictates their names, so no component can be named after them.
+- **One exported function per file.** Export a second one only when they truly can't live apart (e.g. a port's `Provider` and `use<Port>` hook from `definePort`). Types may sit beside the function that uses them.
 - Named exports only, except the `Route` export TanStack Router requires.
 
 ## Imports

@@ -43,7 +43,7 @@ The view-model reads it with `useStoreState(store, select...)` and changes it wi
 
 ## 5. Adapter (`adapters/`)
 
-Implements the port with the client from `shared/api`, mapping the API's types to the model's. Test it without the real bot (fake fetch or a fake server). Also write a fake (`<port>.fake.ts`) with in-memory state for the view-model tests.
+Implements the port with the client from `shared/api`, mapping the API's types to the model's. Test it without the real bot (fake fetch or a fake server). Name the adapter after its factory (`create-http-wanted-items-gateway.ts` → `createHttpWantedItemsGateway`). Also write a fake (`create-fake-wanted-items-gateway.ts`) with in-memory state for the view-model tests.
 
 ## 6. View-model (`view-model/`)
 
@@ -63,7 +63,7 @@ Components whose props are the view-model's return type (`import type`) or a par
 ## 9. Wire it
 
 - Bind each adapter and store in `app/` by wrapping the app in the ports' `Provider`s.
-- Render the screen from a thin route in `routes/` (`bun run routes` regenerates the route tree).
+- Render the screen from a page (`pages/<name>.page.tsx` → `<Name>Page`), and point a route file in `routes/` at that page (`bun run routes` regenerates the route tree).
 - Add or extend an `App`-level test with a memory history for the page.
 
 ## 10. Check

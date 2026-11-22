@@ -8,7 +8,9 @@ The frontend is a single-page app that manages the bot (wanted items, accounts, 
 web/src/
   main.tsx               entry: builds the QueryClient and the router, renders <App>
   app/                   composition root: providers, router, query client, port bindings
-  routes/                TanStack Router file routes: thin pages that compose features
+  routes/                TanStack Router file routes: only the Route definition (path, params, loader)
+  pages/                 one component per page (<name>.page.tsx): composes feature screens
+  layouts/               shared page frames (<name>.layout.tsx): navigation, outlet, devtools
   features/<feature>/    one folder per feature (a capability the user has: wanted-items, accounts...)
     model/               plain TypeScript: types and UI rules (no React, no libraries)
     ports/               interfaces the view-model needs (gateways, stores), each bound through definePort()
@@ -41,7 +43,7 @@ A folder's name says what the user can do (`features/wanted-items/`), never whic
 - The **view** is pure presentation: everything it shows and every action it can trigger arrives through props, typed by the view-model's types (`import type`). It may keep local UI state (`useState` for an open menu) and use `shared/ui`. Render it in tests with plain objects.
 - The **view-model** is a hook that turns server state (TanStack Query) and the model's rules into exactly what the view needs. It reaches the outside world only through ports.
 - The **model** holds the UI rules as plain functions and types, so they're tested without React.
-- The **screen** (`<feature>.screen.tsx`) wires one view-model to one view. Routes render screens.
+- The **screen** (`<feature>.screen.tsx`) wires one view-model to one view. Pages render screens.
 
 ## Dependency inversion at the boundaries
 
@@ -73,17 +75,19 @@ Three kinds of state, three homes:
 The state manager is a dependency like the API, so it is inverted the same way:
 
 - `shared/lib/store/store.ts` holds the generic contract, `Store<TState>` (`getState`, `setState(update)`, `subscribe`), and `useStoreState.ts` the hook that reads a slice of any store (`useStoreState(store, selectAccountId)`), built on React's `useSyncExternalStore`.
-- The adapters are generic too and live beside the contract: `store.memory.ts` (`createMemoryStore`, no dependencies) and, when we adopt it, `store.zustand.ts` (`createZustandStore`, Zustand's vanilla store). They are the only files allowed to import a state library.
+- The adapters are generic too and live beside the contract: `create-memory-store.ts` (`createMemoryStore`, no dependencies) and, when we adopt it, `create-zustand-store.ts` (`createZustandStore`, Zustand's vanilla store). They are the only files allowed to import a state library.
 - Each feature declares its own typed store port in `ports/` (`selected-account.store.ts`: `type SelectedAccountStore = Store<SelectedAccount>` plus its `definePort` binding). The view-model reads it with `useStoreState` and changes it with `setState`; it never knows which library is underneath.
 - `app/` chooses the adapter when it binds each store. Switching to Zustand means adding its adapter and changing those bindings; features don't change. Tests bind `createMemoryStore`.
 
-## Routes
+## Routes, pages and layouts
 
-Route files are thin: read params and search params, optionally prefetch with the router's `context.queryClient`, and render a feature's screen. No UI rules and no API calls in routes. A page that shows several features composes their screens.
+- **Route files** (`routes/`) hold only the `Route` definition: path, params and search validation, and an optional loader that prefetches with the router's `context.queryClient` and a feature's query options. Their `component` comes from `pages/` or `layouts/`. TanStack Router dictates their file names, which is why components never live in them.
+- **Pages** (`pages/<name>.page.tsx` → `<Name>Page`) compose feature screens and shared UI into one page. No UI rules, no API calls, no TanStack Query.
+- **Layouts** (`layouts/<name>.layout.tsx` → `<Name>Layout`) frame pages: navigation, the router's `Outlet`, devtools in development.
 
 ## Communication between features
 
-Features never import each other. A route composes them; anything two features need moves to `shared/`. Routes and `app/` use a feature only through its `index.ts`.
+Features never import each other. A page composes them; anything two features need moves to `shared/`. Routes, pages, layouts and `app/` use a feature only through its `index.ts`.
 
 ## Enforcement
 
