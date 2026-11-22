@@ -72,7 +72,7 @@ Three kinds of state, three homes:
 
 The state manager is a dependency like the API, so it is inverted the same way:
 
-- `shared/lib/store/store.ts` holds the generic contract, `Store<TState>` (`getState`, `setState(update)`, `subscribe`), and `use-store-state.ts` the hook that reads a slice of any store (`useStoreState(store, selectAccountId)`), built on React's `useSyncExternalStore`.
+- `shared/lib/store/store.ts` holds the generic contract, `Store<TState>` (`getState`, `setState(update)`, `subscribe`), and `useStoreState.ts` the hook that reads a slice of any store (`useStoreState(store, selectAccountId)`), built on React's `useSyncExternalStore`.
 - The adapters are generic too and live beside the contract: `store.memory.ts` (`createMemoryStore`, no dependencies) and, when we adopt it, `store.zustand.ts` (`createZustandStore`, Zustand's vanilla store). They are the only files allowed to import a state library.
 - Each feature declares its own typed store port in `ports/` (`selected-account.store.ts`: `type SelectedAccountStore = Store<SelectedAccount>` plus its `definePort` binding). The view-model reads it with `useStoreState` and changes it with `setState`; it never knows which library is underneath.
 - `app/` chooses the adapter when it binds each store. Switching to Zustand means adding its adapter and changing those bindings; features don't change. Tests bind `createMemoryStore`.

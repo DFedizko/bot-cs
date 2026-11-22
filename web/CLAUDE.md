@@ -11,23 +11,29 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 
 ## File naming
 
-kebab-case, `<name>.<role>[.<implementation>].ts(x)`:
+kebab-case, `<name>.<role>[.<implementation>].ts(x)`, except hooks:
 
-| Kind                  | Pattern                                  | Example                                                                    |
-| --------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
-| Model type / UI rules | `<concept>.ts` / `<concept>.rules.ts`    | `wanted-item.ts`, `wanted-item.rules.ts`                                   |
-| Port                  | `<name>.gateway.ts`, `<name>.store.ts`   | `wanted-items.gateway.ts`, `selected-account.store.ts`                     |
-| Port implementation   | `<port>.<implementation>.ts`             | `wanted-items.gateway.http-adapter.ts`, `selected-account.store.memory.ts` |
-| Fake (tests only)     | `<port>.fake.ts`                         | `wanted-items.gateway.fake.ts`                                             |
-| View-model            | `<name>.view-model.ts`                   | `wanted-items.view-model.ts` exporting `useWantedItemsViewModel`           |
-| Query options         | `<name>.queries.ts`                      | `wanted-items.queries.ts` exporting `wantedItemsQuery`                     |
-| View                  | `<name>.view.tsx`, parts as `<name>.tsx` | `wanted-items.view.tsx`, `wanted-item-row.tsx`                             |
-| Screen                | `<feature>.screen.tsx`                   | `wanted-items.screen.tsx`                                                  |
-| Route                 | TanStack Router file route names         | `routes/accounts.$accountId.wanted-items.tsx`                              |
-| Shared UI component   | `<name>.tsx` in `shared/ui/`             | `button.tsx`, `dialog.tsx`                                                 |
-| Test                  | `<file>.test.ts(x)` beside the file      | `wanted-items.view.test.tsx`                                               |
+| Kind                | Pattern                                  | Example                                                                    |
+| ------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
+| Model type          | `<concept>.ts`                           | `wanted-item.ts`                                                           |
+| UI rule             | `<rule>.ts`, one rule per file           | `can-save-wanted-item.ts`                                                  |
+| Port                | `<name>.gateway.ts`, `<name>.store.ts`   | `wanted-items.gateway.ts`, `selected-account.store.ts`                     |
+| Port implementation | `<port>.<implementation>.ts`             | `wanted-items.gateway.http-adapter.ts`, `selected-account.store.memory.ts` |
+| Fake (tests only)   | `<port>.fake.ts`                         | `wanted-items.gateway.fake.ts`                                             |
+| View-model          | `use<Name>ViewModel.ts` (camelCase)      | `useWantedItemsViewModel.ts`                                               |
+| Any other hook      | `use<Name>.ts` (camelCase)               | `useStoreState.ts`                                                         |
+| Query options       | `<name>.queries.ts`                      | `wanted-items.queries.ts` exporting `wantedItemsQuery`                     |
+| View                | `<name>.view.tsx`, parts as `<name>.tsx` | `wanted-items.view.tsx`, `wanted-item-row.tsx`                             |
+| Screen              | `<feature>.screen.tsx`                   | `wanted-items.screen.tsx`                                                  |
+| Route               | TanStack Router file route names         | `routes/accounts.$accountId.wanted-items.tsx`                              |
+| Shared UI component | `<name>.tsx` in `shared/ui/`             | `button.tsx`, `dialog.tsx`                                                 |
+| Test                | `<file>.test.ts(x)` beside the file      | `wanted-items.view.test.tsx`                                               |
 
-Exports follow the file name in PascalCase for components and types (`WantedItemsView`, `WantedItemsGateway`) and camelCase for functions and hooks (`useWantedItemsViewModel`, `wantedItemsQuery`). Named exports only, except the `Route` export TanStack Router requires.
+- **Hooks:** camelCase for both the file and the function (`useWantedItemsViewModel.ts` exports `useWantedItemsViewModel`).
+- **Components:** kebab-case files, PascalCase functions (`wanted-items.view.tsx` exports `WantedItemsView`).
+- **Other functions** are camelCase in kebab-case files (`wanted-items.queries.ts` exports `wantedItemsQuery`); types and interfaces are PascalCase.
+- **One exported function per file.** Export a second one only when they truly can't live apart (e.g. `definePort` returning a provider and its hook as one unit). Types may sit beside the function that uses them.
+- Named exports only, except the `Route` export TanStack Router requires.
 
 ## Imports
 
@@ -42,7 +48,8 @@ Use the `@/` alias (`@/shared/ui/button`, `@/features/wanted-items`) for anythin
 - **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in `adapters/` and `shared/lib/store/`. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/`.
 - **Props in, JSX out** in `view/`: no fetching, no ports, no stores, no TanStack Query.
 - **Styling:** Tailwind classes; reusable look and feel goes into `shared/ui/`, never copied between features.
-- **Accessible markup:** real elements (`button`, `label`, `nav`), so users and tests find things by role and label.
+- **No unnecessary elements.** Never wrap an element in a `div` (or any element) that adds no layout, style or meaning; use a fragment (`<>...</>`) when JSX needs a single root.
+- **Semantic tags first:** `main`, `header`, `nav`, `section`, `article`, `aside`, `footer`, `ul`/`li`, `form`, `fieldset`, `label`, `button`, `table`. Use a `div` or `span` only when no semantic element fits. Users and tests then find things by role and label.
 
 Generated files (`src/routeTree.gen.ts`, the API client in `shared/api/`) are never edited by hand: the router plugin, `bun run routes` and the client generator rebuild them.
 

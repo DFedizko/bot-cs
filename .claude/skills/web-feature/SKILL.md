@@ -13,7 +13,7 @@ The folder is what the user can do, in kebab-case: `features/wanted-items/`, `fe
 
 ## 2. Model (`model/`)
 
-Types the view works with and the UI rules as plain functions (`canSaveWantedItem(draft)`, `formatCoins(cents)`). No React, no libraries. Unit-test each rule.
+Types the view works with and the UI rules as plain functions, one per file (`can-save-wanted-item.ts` exports `canSaveWantedItem`). No React, no libraries. Unit-test each rule.
 
 ## 3. Port (`ports/`)
 
