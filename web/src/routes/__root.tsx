@@ -2,6 +2,7 @@ import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { SHOW_DEVTOOLS } from "@/app/environment";
 import type { RouterContext } from "@/app/router-context";
 
 const DEVTOOLS_PLUGINS = [
@@ -17,7 +18,7 @@ function RootLayout() {
     return (
         <>
             <Outlet />
-            <TanStackDevtools config={{ position: "bottom-right" }} plugins={DEVTOOLS_PLUGINS} />
+            {SHOW_DEVTOOLS && <TanStackDevtools config={{ position: "bottom-right" }} plugins={DEVTOOLS_PLUGINS} />}
         </>
     );
 }
