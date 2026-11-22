@@ -17,6 +17,6 @@ Code shared by the **subdomains of the trading bounded context** (today `bidding
 
 - A concept moves here only when a second trading subdomain uses it with the same meaning. Concepts shared with other bounded contexts go to `src/contexts/shared-kernel/`; generic ones go to `src/packages/`.
 - Never import from a trading subdomain (`bidding/`, ...). Subdomains depend on `shared/`, not the reverse.
-- The same layer rules apply as in a subdomain (see `ARCHITECTURE.md`): `domain/` stays pure, contracts live in `infrastructure/`, libraries only in `external/`.
-- Contract types for CSGOEmpire follow `test/CLAUDE.md` ("External API contracts, mocks and fakes") and come from the docs listed in the root `CLAUDE.md`.
+- The same layer rules apply as in a subdomain (see `src/ARCHITECTURE.md`): `domain/` stays pure, contracts live in `infrastructure/`, libraries only in `external/`.
+- Contract types for CSGOEmpire follow the `external-api-contract` skill and come from the docs it points to.
 - Every trading subdomain depends on this folder: run the whole test suite (`bun test`) after changing it.

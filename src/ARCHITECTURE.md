@@ -1,6 +1,6 @@
-# Architecture
+# Backend architecture
 
-`bot-cs` trades CS2 skins on CSGOEmpire: it watches new items and auction updates over WebSocket, evaluates items against the user's wanted items, and bids in auctions within the user's limits.
+The bot (`src/`) trades CS2 skins on CSGOEmpire: it watches new items and auction updates over WebSocket, evaluates items against the user's wanted items, and bids in auctions within the user's limits.
 
 The architecture combines four ideas, each at its own level:
 
@@ -66,6 +66,8 @@ Each folder of a bounded context is one layer of Clean Architecture:
 
 Source code dependencies point inward only: `external → infrastructure → application → domain`. No layer knows about a library or the outside world except `external/`, and no inner layer knows about an outer one. Dependency inversion makes this possible everywhere an inner layer needs something done by an outer one.
 
+`bun run lint` enforces this rule, the barrel rule below and where libraries may be imported (`eslint.boundaries.mjs`). When it reports a boundary error, fix the dependency; never loosen the config to silence it.
+
 ### The interface belongs to whoever uses it
 
 A contract (interface) lives in the layer that **uses** it; its implementation lives in the next layer out. This is a rule for every kind of dependency: repositories, gateways, HTTP/WS clients, databases, communication protocols, integrations, loggers.
@@ -87,7 +89,7 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
     - Gateways adapt a provider's model to the port's DTOs (`AuctionGatewayCsgoempireAdapter` maps `ActiveAuction` to `AuctionDTO`).
     - Repositories adapt aggregates to a storage format.
     - Controllers adapt protocol input into a command and dispatch it on the `CommandBus`; no business rules.
-    - It declares the contracts `external/` must implement, typed exactly as the provider documents them (see `test/CLAUDE.md`).
+    - It declares the contracts `external/` must implement, typed exactly as the provider documents them (see the `external-api-contract` skill).
 - **External (frameworks and drivers)** is the only layer that imports a library, a runtime API or talks to the outside world. It implements the infrastructure contracts and contains no business rules and no mapping to the domain. Swapping fetch for axios, Express for Bun, or a provider for a fake means replacing only this layer.
 - **Composition roots** (`src/main.ts`, each context's wiring) are the only places that instantiate concrete classes. Everything else receives its collaborators through the constructor, typed by a contract.
 
@@ -150,7 +152,7 @@ Reads have no side effects and don't go through the command bus. A client that n
 ### Events announce what happened
 
 - An event is a fact in the past tense (`BidPlacedEvent`, `OutbidEvent`, `ItemApprovedInAuctionEvent`). It has a `static readonly EVENT_NAME` in snake_case, a typed payload of primitives, an `eventId` and an `ocurredAt`.
-- Events are published with `EventBus.publish([...])`. Which bus carries them is decided in [ADR-0002](adr/0002-synchronous-buses-for-the-core.md).
+- Events are published with `EventBus.publish([...])`. Which bus carries them is decided in [ADR-0002](../adr/0002-synchronous-buses-for-the-core.md).
 
 There are two kinds of events, and where an event is produced depends on its kind.
 

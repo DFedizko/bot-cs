@@ -1,8 +1,8 @@
 # Testing guide
 
-Tests run with `bun test`. The runner's globals are described in the root [`CLAUDE.md`](../CLAUDE.md#test-runner).
+Tests of the bot run with `bun test` from the repository root. The runner's globals are described in [`src/CLAUDE.md`](../src/CLAUDE.md#bun-apis).
 
-Every rule from the root `CLAUDE.md` applies to test code too: at most 300 lines per file, no magic values, no comments, no `for` / `while` loops.
+Every code rule of the root `CLAUDE.md` and `src/CLAUDE.md` applies to test code too: at most 300 lines per file, no magic values, no comments, no `for` / `while` loops.
 
 ## TDD: no production code without a failing test first
 
@@ -105,63 +105,4 @@ Each test has three blocks in this order, separated by a blank line, with no com
 
 ## External API contracts, mocks and fakes
 
-Never call a third-party API (e.g. CSGOEmpire) in tests. Every integration is built in three pieces, in this order, and all three come from the provider's **latest official documentation** (for CSGOEmpire, see "Marketplace API docs" in the root [`CLAUDE.md`](../CLAUDE.md#marketplace-api-docs-read-on-demand)). Never guess a field, a type or an error from memory.
-
-### 1. Contract types (`src/.../infrastructure/http/<provider>/`)
-
-One file per endpoint (`place-bid.ts`, `get-active-auctions.ts`), exporting a namespace named after the endpoint in PascalCase:
-
-```ts
-export namespace PlaceBid {
-    export interface Request {
-        deposit_id: string;
-        bid_value: number;
-    }
-    export interface Response {
-        success: true;
-        auction_data: PlaceBidAuctionData;
-        invoice: PlaceBidInvoice;
-    }
-    export type ErrorResponse = { success: false; message: string };
-}
-```
-
-- `Request` (body or query), `Response` (success) and `ErrorResponse` (the documented error body) for every endpoint. Omit `Request` only when the endpoint takes nothing.
-- Mirror the docs exactly: the provider's `snake_case` field names, literal types where the value is fixed (`success: true`), `| null` only where the docs say nullable, `?` only where the docs say optional, unions for enumerated values (or the existing types in `shared/infrastructure/<provider>/types`). No `any`, no `unknown` placeholders, no `Record<string, never>` for a body the docs describe.
-- Nested objects are interfaces in the same file, prefixed with the endpoint name (`PlaceBidInvoice`). Export them only when a mock, fake or another contract needs them; move them to `shared/infrastructure/<provider>/types/` when two endpoints share them.
-- WebSocket payloads follow the same rules in `shared/infrastructure/<provider>/ws-events/<event>.ts`.
-- The interface the external client implements (`csgoempire-auction.http.ts`) uses only these types: `placeBid(request: PlaceBid.Request): Promise<PlaceBid.Response>`.
-
-### 2. Mocks (`test/.../external/http/<provider>/__mocks__/<endpoint>.mock.ts`)
-
-Mocks are the payloads the docs show, typed by the contract:
-
-```ts
-export const placeBidRequest = { deposit_id: "28396506", bid_value: 64 } satisfies PlaceBid.Request;
-export const placeBidSuccess = { success: true, auction_data, invoice } satisfies PlaceBid.Response;
-export const placeBidNotEnoughCoins = { success: false, message: "..." } satisfies PlaceBid.ErrorResponse;
-```
-
-- Use `satisfies`, never `as` or a type annotation: `satisfies` keeps the literal values and rejects missing or extra fields, so a mock that drifts from the contract stops compiling.
-- Copy the values from the docs' examples, so the mock looks like a real response. Name every export after the scenario: `<endpoint><Scenario>` (`placeBidSuccess`, `placeBidAuctionEnded`).
-- One mock per documented error, not only the success case.
-- Mocks that take parameters are functions returning the payload (`activeAuction({ id })`), built over a complete documented example.
-
-### 3. Fakes (`test/.../external/http/<provider>/<contract>.fake-adapter.ts`)
-
-A fake implements the same contract interface as the real adapter (`CsgoempireAuctionHttpFakeAdapter implements CsgoempireAuctionHttp`) and behaves like the provider, without the network:
-
-- Keeps in-memory state seeded from the mocks (e.g. a `store` of active auctions), so calls affect later calls the way they would on the real API (a bid raises `auction_highest_bid`, adds to `auction_number_of_bids`).
-- Fails the way the real adapter fails for each documented error: throw the same errors from `packages/infrastructure/http/errors` (`NotFoundError` for an unknown `deposit_id`) carrying the documented `ErrorResponse`.
-- Scenarios are chosen through the constructor (`new CsgoempireAuctionHttpFakeAdapter(highestBidderId)`), never by editing the fake inside a test.
-- Returns new objects built from the contract types, never a shared mock instance a test could mutate.
-- A short comment naming the docs URL and the date you checked them is allowed at the top of the fake, as it records a decision.
-
-### Contract tests
-
-Each contract has a `<contract>.test.ts` next to its fake, proving the fake honours the contract for every endpoint and documented error:
-
-- `expectTypeOf(response).toEqualTypeOf<PlaceBid.Response>()` for the shape.
-- Assertions on the behaviour (state changes, the error thrown for each documented failure).
-
-Gateways and command handlers then test against these fakes (the test container binds them in place of the real clients), so the whole chain is checked against the documented API.
+Never call a third-party API (e.g. CSGOEmpire) in tests. Its contract types, mocks, fakes and contract tests follow the `external-api-contract` skill: load it whenever a test or adapter touches a provider's API.
