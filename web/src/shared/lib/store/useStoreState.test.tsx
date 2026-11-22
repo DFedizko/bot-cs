@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
 import { createMemoryStore } from "./store.memory";
-import { useStoreState } from "./use-store-state";
+import { useStoreState } from "./useStoreState";
 
 type Filters = { search: string; page: number };
 
