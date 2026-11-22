@@ -61,5 +61,5 @@ Generated files (`src/routeTree.gen.ts`, the API client in `shared/api/`) are ne
 
 - Bun installs, runs scripts and tests: `bun install`, `bun run <script>`, `bun run test`. Vite serves and builds the app (`bun run dev` on port 5173, beside the bot on 3000; `bun run build`).
 - Tests use Bun's runner with happy-dom, Testing Library and MSW preloaded (`test/__setup__/`); import `describe`, `it`, `expect` and `jest` from `bun:test`. End-to-end tests use Playwright (`bun run test:e2e`).
-- Read configuration (`import.meta.env`) only in `src/app/`, and pass it on through ports.
+- Read Vite's environment (`import.meta.env`) only in `shared/adapters/`, the way the bot reads `.env` only through its `Env` adapter, and pass values on through ports. Configuration the app needs (e.g. the bot's API URL) becomes a port in `shared/lib/` with its adapter in `shared/adapters/`.
 - Commands: `bun run test`, `bun run test:e2e`, `bun run typecheck`, `bun run lint`, `bun run format`, `bun run check` (all but e2e), and `bun run api:types` to regenerate the bot's API types (bot running in development).
