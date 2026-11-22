@@ -11,12 +11,13 @@ const ALL_BUT_SHARED_ADAPTERS = [
     "app",
     "routes",
     "pages",
-    "layouts",
     "feature",
     ...FEATURE_LAYERS,
     "shared-ui",
-    "shared-api",
+    "shared-hooks",
+    "shared-model",
     "shared-lib",
+    "shared-api",
 ];
 
 const featureLayer = (layer) => ({
@@ -30,10 +31,11 @@ const ELEMENTS = [
     { type: "app", pattern: "src/app", partialMatch: false },
     { type: "routes", pattern: "src/routes", partialMatch: false },
     { type: "pages", pattern: "src/pages", partialMatch: false },
-    { type: "layouts", pattern: "src/layouts", partialMatch: false },
     ...FEATURE_LAYERS.map(featureLayer),
     { type: "feature", pattern: "src/features/*", capture: ["feature"], partialMatch: false },
     { type: "shared-ui", pattern: "src/shared/ui", partialMatch: false },
+    { type: "shared-hooks", pattern: "src/shared/hooks", partialMatch: false },
+    { type: "shared-model", pattern: "src/shared/model", partialMatch: false },
     { type: "shared-lib", pattern: "src/shared/lib", partialMatch: false },
     { type: "shared-api", pattern: "src/shared/api", partialMatch: false },
     { type: "shared-adapters", pattern: "src/shared/adapters", partialMatch: false },
@@ -55,15 +57,16 @@ const disallowModules = (types, sources, message) =>
 const MODULE_POLICIES = [
     { allow: { to: { module: ANY_MODULE } } },
     {
-        from: { element: { types: ["model", "ports"] } },
+        from: { element: { types: ["model", "ports", "shared-model"] } },
         disallow: { to: { module: ANY_MODULE } },
-        message: "model/ and ports/ are plain TypeScript: no libraries, no React. See web/ARCHITECTURE.md",
+        message:
+            "model/, ports/ and shared/model/ are plain TypeScript: no libraries, no React. See web/ARCHITECTURE.md",
     },
     ...disallowModules(["adapters"], REACT_AND_TANSTACK, "adapters/ talk to the outside world only, without React"),
     ...disallowModules(
-        ["view", "pages", "layouts"],
+        ["view", "pages", "shared-ui"],
         ["@tanstack/react-query"],
-        "view/ receives server state through its props: query in view-model/, not in the view",
+        "Views, pages and shared UI receive server state through props: query in view-model/",
     ),
     ...disallowModules(
         ALL_BUT_SHARED_ADAPTERS,
@@ -72,25 +75,34 @@ const MODULE_POLICIES = [
     ),
 ];
 
+const SHARED_FOR_UI = ["shared-ui", "shared-hooks", "shared-model", "shared-lib"];
+
 const LOCAL_POLICIES = [
     { from: { element: { type: "app" } }, allow: toTypes("*") },
-    ...allowFrom("routes", [toTypes(["app", "pages", "layouts", "feature", "shared-lib"])]),
-    ...allowFrom("pages", [toTypes(["feature", "shared-ui", "shared-lib"])]),
-    ...allowFrom("layouts", [toTypes(["app", "feature", "shared-ui", "shared-lib"])]),
+    ...allowFrom("routes", [toTypes(["app", "pages", "feature", "shared-ui", "shared-lib"])]),
+    ...allowFrom("pages", [toTypes(["feature", ...SHARED_FOR_UI])]),
     ...allowFrom("feature", [ownFeature(FEATURE_LAYERS)]),
-    ...allowFrom("model", [ownFeature(["model"]), toTypes(["shared-lib"])]),
-    ...allowFrom("ports", [ownFeature(["model", "ports"]), toTypes(["shared-lib"])]),
-    ...allowFrom("adapters", [ownFeature(["model", "ports", "adapters"]), toTypes(["shared-lib", "shared-api"])]),
-    ...allowFrom("view-model", [ownFeature(["model", "ports", "view-model"]), toTypes(["shared-lib"])]),
+    ...allowFrom("model", [ownFeature(["model"]), toTypes(["shared-model", "shared-lib"])]),
+    ...allowFrom("ports", [ownFeature(["model", "ports"]), toTypes(["shared-model", "shared-lib"])]),
+    ...allowFrom("adapters", [
+        ownFeature(["model", "ports", "adapters"]),
+        toTypes(["shared-model", "shared-lib", "shared-api"]),
+    ]),
+    ...allowFrom("view-model", [
+        ownFeature(["model", "ports", "view-model"]),
+        toTypes(["shared-hooks", "shared-model", "shared-lib"]),
+    ]),
     ...allowFrom("view", [
         ownFeature(["model", "view"]),
         { ...ownFeature(["view-model"]), dependency: { kind: "type" } },
-        toTypes(["shared-ui", "shared-lib"]),
+        toTypes(SHARED_FOR_UI),
     ]),
-    ...allowFrom("shared-ui", [toTypes(["shared-ui", "shared-lib"])]),
-    ...allowFrom("shared-lib", [toTypes(["shared-lib"])]),
+    ...allowFrom("shared-ui", [toTypes(SHARED_FOR_UI)]),
+    ...allowFrom("shared-hooks", [toTypes(["shared-hooks", "shared-model", "shared-lib"])]),
+    ...allowFrom("shared-model", [toTypes(["shared-model"])]),
+    ...allowFrom("shared-lib", [toTypes(["shared-lib", "shared-model"])]),
     ...allowFrom("shared-api", [toTypes(["shared-api", "shared-lib"])]),
-    ...allowFrom("shared-adapters", [toTypes(["shared-adapters", "shared-lib"])]),
+    ...allowFrom("shared-adapters", [toTypes(["shared-adapters", "shared-model", "shared-lib", "shared-api"])]),
 ];
 
 export const architectureBoundaries = {
