@@ -1,6 +1,6 @@
 # trading/bidding
 
-The **bidding** bounded context decides **what to buy and how much to pay**. It watches the items listed on the marketplace, checks each one against the wanted items of an account, and bids in auctions within the max price the user set. **Bidding is the core bounded context: the reason the bot exists.** In Strategic DDD terms it implements the core subdomain; everything else (delivery, account sync with the marketplace, the HTTP API, the frontend) supports it. Its edge over other buyers is speed, so changes here weigh latency first.
+The **bidding** bounded context decides **what to buy and how much to pay**. It watches the items listed on the marketplace, checks each one against the wanted items of an account, and bids in auctions within the max price the user set. **Bidding is the core bounded context: the reason the bot exists.** In Strategic DDD terms it implements the core subdomain; everything else (delivery, the marketplace session, the HTTP API, the frontend) supports it. Its edge over other buyers is speed, so changes here weigh latency first.
 
 ## Responsibilities
 
@@ -44,14 +44,14 @@ The chain from a `new_item` on the WebSocket to a placed bid, a counter bid or l
 - `OnOutbidCounterBid` computes the next bid with the bid incrementer and leaves the auction (`LeaveAuctionCommand` removes the participation) when it exceeds the max bid.
 - `SynchronizeAccountCommand` is dispatched at startup: it rebuilds the account from the marketplace's balance and reserves what the account already has in active auctions and active trades.
 
-The chain is defined in `application/`; which steps actually run depends on the listeners the DI modules subscribe to the event bus and the controllers `src/composition-root/bootstrap.ts` starts. Check both before relying on a step.
+The chain is defined in `application/`; which steps actually run depends on the listeners bound as `EVENT_LISTENER` in the environment's DI module (which `Bootstrap` subscribes to the event bus) and on the controllers `src/composition-root/bootstrap.ts` resolves. Check both before relying on a step.
 
 ## Folders
 
 - `domain/account/`: the `Account` aggregate, its balance, reservations and errors.
 - `domain/wanted-item/`: the `WantedItem` aggregate, the bid candidate, prices and percentages, `criteria/` (one specification per criterion type and the factory) and `errors/`.
 - `domain/auction-participation/`: the `AuctionParticipation` aggregate and its max bid.
-- `domain/` root: rules used across aggregates, such as the `BidIncrementer`.
+- `domain/` root: domain rules that belong to no aggregate (`BidIncrementer` and its `Below50Cent` specification).
 - `application/<use-case>/`: one folder per intention (add, edit, remove and toggle a wanted item, evaluate item, place bid, track auction update, leave auction, synchronize account, withdraw item), holding its command, handler, the application events it produces, the listeners that trigger it and the ports it owns (e.g. `active-trades.gateway.ts`).
 - `application/`: repository ports shared by several use cases live at its root (`account.repository.ts`, `wanted-item.repository.ts`, `auction-participation.repository.ts`).
 - `infrastructure/`: WebSocket and HTTP controllers, gateway adapters (CSGOEmpire and dry run), in-memory repositories ([ADR-0001](../../../../adr/0001-keep-in-memory-repositories.md)), the CSGOEmpire HTTP contracts `external/` implements (`http/csgoempire/`) and the route docs.
@@ -63,4 +63,4 @@ The chain is defined in `application/`; which steps actually run depends on the 
 - Never bid more than the account can pay: a bid is placed only when the available balance covers it, and only after reserving it. Being outbid and a failed placement each refund the bid's reservation.
 - Never bid above the max bid of the auction participation; leave the auction instead.
 - Development never places real bids: the development module wraps the auction gateway in the dry-run adapter, which logs each bid instead of sending it. Only the production module binds the real gateway.
-- Other contexts use bidding only through its barrel (`index.ts`, contracts only; bidding has none, so create it when another context first needs bidding), and bidding uses other contexts only through theirs, except in its DI modules. See "Communication between bounded contexts" in [`src/ARCHITECTURE.md`](../../../ARCHITECTURE.md).
+- Other contexts use bidding only through its barrel (`index.ts`, contracts only; bidding has none, so create it when another context first needs bidding), and bidding uses other contexts only through theirs, except in its DI modules. The shared kernels (`trading/shared`, `shared-kernel`) are imported directly. See "Communication between bounded contexts" in [`src/ARCHITECTURE.md`](../../../ARCHITECTURE.md).
