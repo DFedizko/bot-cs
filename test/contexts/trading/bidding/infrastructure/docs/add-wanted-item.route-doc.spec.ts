@@ -1,8 +1,10 @@
 import { addWantedItemDoc } from "@/contexts/trading/bidding/infrastructure/docs/add-wanted-item.route-doc";
 import {
     BLANK_NAME,
+    INVALID_MAX_PERCENTAGE,
     INVALID_WEAR,
     NAME_OUT_OF_BOUNDS,
+    NON_POSITIVE_MAX_VALUE,
 } from "@/contexts/trading/bidding/infrastructure/docs/wanted-item.error-examples";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 
@@ -16,6 +18,8 @@ describe("addWantedItemDoc", () => {
         ["a blank item name", BLANK_NAME],
         ["an item name out of bounds", NAME_OUT_OF_BOUNDS],
         ["an invalid wear", INVALID_WEAR],
+        ["an invalid max percentage", INVALID_MAX_PERCENTAGE],
+        ["a max value not above zero", NON_POSITIVE_MAX_VALUE],
     ])("Should document the domain error of %s", (_name, example) => {
         const examples = unprocessableExamples();
 

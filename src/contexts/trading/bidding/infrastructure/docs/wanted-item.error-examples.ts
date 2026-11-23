@@ -12,9 +12,14 @@ export const NOT_WANTED = {
     value: { code: "WANTED_ITEM_NOT_FOUND", message: `The account ${accountId} doesn't want "${name}"` },
 };
 
-export const INVALID_MAX_FOR = {
-    summary: "The max for is not a percentage",
+export const INVALID_MAX_PERCENTAGE = {
+    summary: "The max percentage is not a number",
     value: { code: "INVALID_VALUE", message: 'Invalid percentage/fraction: "a lot"' },
+};
+
+export const NON_POSITIVE_MAX_VALUE = {
+    summary: "The max value is not above zero",
+    value: { code: "NON_POSITIVE_MAX_VALUE", message: 'The max value "0" must be above zero coin cents' },
 };
 
 export const UNKNOWN_CRITERION = {

@@ -1,4 +1,5 @@
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
@@ -9,7 +10,8 @@ const ACCOUNT_ID = 1;
 const OTHER_ACCOUNT_ID = 2;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 
-const asiimov = (accountId: number, maxFor = "-3") => WantedItem.create({ accountId, name: ITEM_NAME, maxFor });
+const asiimov = (accountId: number, maxFor = "-3") =>
+    WantedItem.create({ accountId, name: ITEM_NAME, maxFor: maxForPercentage(maxFor) });
 
 let container: Container;
 
@@ -43,7 +45,7 @@ describe("WantedItemRepositoryInMemory", () => {
 
         const wantedItem = await repository.findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
 
-        expect(wantedItem?.getMaxFor()).toBe("-3");
+        expect(wantedItem?.getMaxFor()).toEqual(maxForPercentage("-3"));
     });
 
     it("Should remove only the wanted item of the given account", async () => {

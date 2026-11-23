@@ -1,4 +1,5 @@
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
@@ -23,7 +24,7 @@ describe("ToggleWantedItemHttpController", () => {
         container = testContainer();
         await container
             .get(WANTED_ITEM_REPOSITORY)
-            .save(WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-3" }));
+            .save(WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-3") }));
     });
 
     afterEach(async () => {

@@ -3,6 +3,7 @@ import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { EmptyWantedItemChangesError } from "@/contexts/trading/bidding/domain/wanted-item/errors/empty-wanted-item-changes.error";
 import { DomainError } from "@/packages/error/domain-error";
+import { maxForPercentage } from "./__builders__/max-for.builder";
 
 const ACCOUNT_ID = 1;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
@@ -17,18 +18,23 @@ const MATCHING_CANDIDATE = {
 };
 
 const asiimov = () =>
-    WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-3", criteria: [FIELD_TESTED] });
+    WantedItem.create({
+        accountId: ACCOUNT_ID,
+        name: ITEM_NAME,
+        maxFor: maxForPercentage("-3"),
+        criteria: [FIELD_TESTED],
+    });
 
 describe("Wanted Item", () => {
     it("Should create a wanted item", () => {
         const wantedItem = WantedItem.create({
             accountId: ACCOUNT_ID,
             name: "AWP | Asiimov (Field-Tested)",
-            maxFor: "-3",
+            maxFor: maxForPercentage("-3"),
             criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
         });
         expect(wantedItem.getName()).toBe("AWP | Asiimov (Field-Tested)");
-        expect(wantedItem.getMaxFor()).toBe("-3");
+        expect(wantedItem.getMaxFor()).toEqual(maxForPercentage("-3"));
         expect(wantedItem.getCriteria()).toEqual(["IsWear"]);
     });
     it("Should belong to the account that wants it", () => {
@@ -37,7 +43,7 @@ describe("Wanted Item", () => {
         expect(wantedItem.getAccountId()).toBe(ACCOUNT_ID);
     });
     it("Should reject an invalid account", () => {
-        const create = () => WantedItem.create({ accountId: -1, name: ITEM_NAME, maxFor: "-3" });
+        const create = () => WantedItem.create({ accountId: -1, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
 
         expect(create).toThrow(DomainError);
     });
@@ -45,9 +51,9 @@ describe("Wanted Item", () => {
         it("With a new max for", () => {
             const wantedItem = asiimov();
 
-            wantedItem.edit({ maxFor: "-5" });
+            wantedItem.edit({ maxFor: maxForPercentage("-5") });
 
-            expect(wantedItem.getMaxFor()).toBe("-5");
+            expect(wantedItem.getMaxFor()).toEqual(maxForPercentage("-5"));
         });
         it("With new criteria replacing the old ones", () => {
             const wantedItem = asiimov();
@@ -61,7 +67,7 @@ describe("Wanted Item", () => {
 
             wantedItem.edit({ criteria: [WELL_WORN] });
 
-            expect(wantedItem.getMaxFor()).toBe("-3");
+            expect(wantedItem.getMaxFor()).toEqual(maxForPercentage("-3"));
         });
         it("Evaluating with the replaced criteria", () => {
             const wantedItem = asiimov();
@@ -88,17 +94,18 @@ describe("Wanted Item", () => {
         it("With an invalid max for", () => {
             const wantedItem = asiimov();
 
-            const edit = () => wantedItem.edit({ maxFor: "a lot" });
+            const edit = () => wantedItem.edit({ maxFor: maxForPercentage("a lot") });
 
             expect(edit).toThrow(DomainError);
         });
         it("Without changing anything when one of the changes is invalid", () => {
             const wantedItem = asiimov();
 
-            const edit = () => wantedItem.edit({ maxFor: "-5", criteria: [{ ...WELL_WORN, value: "Brand New" }] });
+            const edit = () =>
+                wantedItem.edit({ maxFor: maxForPercentage("-5"), criteria: [{ ...WELL_WORN, value: "Brand New" }] });
 
             expect(edit).toThrow(DomainError);
-            expect(wantedItem.getMaxFor()).toBe("-3");
+            expect(wantedItem.getMaxFor()).toEqual(maxForPercentage("-3"));
         });
     });
     describe("Should be switched", () => {
@@ -143,7 +150,7 @@ describe("Wanted Item", () => {
 
             wantedItem.disable();
 
-            expect([wantedItem.getMaxFor(), wantedItem.getCriteria()]).toEqual(["-3", ["IsWear"]]);
+            expect([wantedItem.getMaxFor(), wantedItem.getCriteria()]).toEqual([maxForPercentage("-3"), ["IsWear"]]);
         });
     });
     describe("Should skip evaluating an item when disabled", () => {
@@ -174,7 +181,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
-                maxFor: "-3",
+                maxFor: maxForPercentage("-3"),
             });
             expect(
                 wantedItem.evaluate({ value: 19400, referencePrice: 20000, aboveRecommendedPercentage: "-3" }),
@@ -188,7 +195,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
-                maxFor: "-3",
+                maxFor: maxForPercentage("-3"),
                 criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
             });
             expect(
@@ -208,7 +215,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
-                maxFor: "3",
+                maxFor: maxForPercentage("3"),
             });
             expect(
                 wantedItem.evaluate({ value: 20000, referencePrice: 20000, aboveRecommendedPercentage: "0" }),
@@ -224,7 +231,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
-                maxFor: "-3",
+                maxFor: maxForPercentage("-3"),
             });
             expect(
                 wantedItem.evaluate({ value: 19600, referencePrice: 20000, aboveRecommendedPercentage: "-2" }),
@@ -238,7 +245,7 @@ describe("Wanted Item", () => {
             const wantedItem = WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
-                maxFor: "-3",
+                maxFor: maxForPercentage("-3"),
                 criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
             });
             expect(

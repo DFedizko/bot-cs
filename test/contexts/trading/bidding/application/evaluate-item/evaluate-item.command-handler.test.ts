@@ -1,4 +1,5 @@
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { evaluateItemCommand } from "./__mocks__/evaluate-item.command.mock";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-off-auction.event";
@@ -19,7 +20,7 @@ const OTHER_ACCOUNT_ID = ACCOUNT_ID + 1;
 const ITEM_NAME = evaluateItemCommand().itemName;
 
 const disabledCyberSecurity = (accountId: number) => {
-    const wantedItem = WantedItem.create({ accountId, name: ITEM_NAME, maxFor: "-4.05" });
+    const wantedItem = WantedItem.create({ accountId, name: ITEM_NAME, maxFor: maxForPercentage("-4.05") });
     wantedItem.disable();
     return wantedItem;
 };
@@ -37,7 +38,7 @@ describe("EvaluateItemCommandHandler", () => {
             WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.05",
+                maxFor: maxForPercentage("-4.05"),
             }),
         );
         const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
@@ -64,7 +65,7 @@ describe("EvaluateItemCommandHandler", () => {
             WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.05",
+                maxFor: maxForPercentage("-4.05"),
             }),
         );
         const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
@@ -91,7 +92,7 @@ describe("EvaluateItemCommandHandler", () => {
             WantedItem.create({
                 accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.06",
+                maxFor: maxForPercentage("-4.06"),
                 criteria: [criterion],
             }),
         );
@@ -114,7 +115,7 @@ describe("EvaluateItemCommandHandler", () => {
             WantedItem.create({
                 accountId: OTHER_ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.05",
+                maxFor: maxForPercentage("-4.05"),
             }),
         );
         const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
@@ -147,7 +148,9 @@ describe("EvaluateItemCommandHandler", () => {
             const repository = container.get(WANTED_ITEM_REPOSITORY);
             await repository.save(disabledCyberSecurity(OTHER_ACCOUNT_ID));
             jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
-            await repository.save(WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-4.05" }));
+            await repository.save(
+                WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-4.05") }),
+            );
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
             await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());
