@@ -3,6 +3,7 @@ export namespace PlaceBid {
         deposit_id: string;
         bid_value: number;
     }
+    export type Body = Pick<Request, "bid_value">;
     export interface Response {
         success: true;
         auction_data: PlaceBidAuctionData;
