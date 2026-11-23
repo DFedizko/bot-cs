@@ -1,15 +1,10 @@
 @import "tailwindcss";
-
-* {
-    box-sizing: border-box;
-}
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./shared/ui/styles/design-system.css";
 
 html,
 body,
 #app {
     min-height: 100%;
-}
-
-body {
-    margin: 0;
 }
