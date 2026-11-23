@@ -3,6 +3,8 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { AUCTION_GATEWAY, CSGOEMPIRE_AUCTION_HTTP } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { BidRejectedError } from "@/contexts/trading/bidding/application/place-bid/bid-rejected.error";
 import { BidOutcomeUnknownError } from "@/contexts/trading/bidding/application/place-bid/bid-outcome-unknown.error";
+import { HttpError } from "@/packages/infrastructure/http/errors/http.error";
+import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import {
     CsgoempireAuctionHttpFakeAdapter,
     type PlaceBidFailure,
@@ -68,6 +70,16 @@ describe("AuctionGatewayCsgoempireAdapter", () => {
 
     it("Should report an unknown outcome for an error that isn't an HTTP answer", async () => {
         jest.spyOn(container.get(CSGOEMPIRE_AUCTION_HTTP), "placeBid").mockRejectedValue(new Error());
+
+        const placing = container.get(AUCTION_GATEWAY).placeBid(AUCTION_ID, BID_VALUE);
+
+        await expect(placing).rejects.toBeInstanceOf(BidOutcomeUnknownError);
+    });
+
+    it("Should report an unknown outcome for an undocumented client error", async () => {
+        jest.spyOn(container.get(CSGOEMPIRE_AUCTION_HTTP), "placeBid").mockRejectedValue(
+            new HttpError({ status: HttpStatus.CONFLICT }),
+        );
 
         const placing = container.get(AUCTION_GATEWAY).placeBid(AUCTION_ID, BID_VALUE);
 

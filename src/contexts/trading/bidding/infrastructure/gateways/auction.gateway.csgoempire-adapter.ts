@@ -8,6 +8,7 @@ import { HttpError } from "@/packages/infrastructure/http/errors/http.error";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 
 const UNKNOWN_REASON = "unknown error";
+const BID_REFUSAL_STATUSES: readonly HttpStatus[] = [HttpStatus.BAD_REQUEST, HttpStatus.TOO_MANY_REQUESTS];
 
 export class AuctionGatewayCsgoempireAdapter implements AuctionGateway {
     constructor(private readonly csgoempireAuctionHttp: CsgoempireAuctionHttp) {}
@@ -38,11 +39,7 @@ export class AuctionGatewayCsgoempireAdapter implements AuctionGateway {
     }
 
     private isRefusedRequest(error: unknown): boolean {
-        return (
-            error instanceof HttpError &&
-            error.httpStatus >= HttpStatus.BAD_REQUEST &&
-            error.httpStatus < HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        return error instanceof HttpError && BID_REFUSAL_STATUSES.includes(error.httpStatus);
     }
 
     private mapToDto(
