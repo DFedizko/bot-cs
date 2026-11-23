@@ -1,4 +1,5 @@
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { RemoveWantedItemCommand } from "@/contexts/trading/bidding/application/remove-wanted-item/remove-wanted-item.command";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
@@ -14,7 +15,8 @@ const ACCOUNT_ID = 1;
 const OTHER_ACCOUNT_ID = 2;
 const ITEM_NAME = "Foo Wanted Item";
 
-const fooWantedItem = (accountId: number) => WantedItem.create({ accountId, name: ITEM_NAME, maxFor: "10" });
+const fooWantedItem = (accountId: number) =>
+    WantedItem.create({ accountId, name: ITEM_NAME, maxFor: maxForPercentage("10") });
 
 let container: Container;
 

@@ -1,4 +1,5 @@
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { Bootstrap } from "@/composition-root/bootstrap";
 import { testContainer } from "@/__builders__/test-container.builder";
 import {
@@ -93,7 +94,7 @@ const approvedInAuctionItem = async (container: Container): Promise<void> => {
         .save(Account.sync({ id: accountId, name: BIDDER_NAME, totalAmount: BIDDER_BALANCE }));
     await container
         .get(WANTED_ITEM_REPOSITORY)
-        .save(WantedItem.create({ accountId, name: itemName, maxFor: aboveRecommendedPercentage }));
+        .save(WantedItem.create({ accountId, name: itemName, maxFor: maxForPercentage(aboveRecommendedPercentage) }));
 };
 
 const flushEventBus = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
