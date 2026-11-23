@@ -1,5 +1,5 @@
 import type { CsgTradesGateway, TradeStatusDTO } from "../../application/csg-trades.gateway";
-import { TradeNotFoundError } from "../../application/trade-not-found.error";
+import { TradeNotFoundError } from "./errors/trade-not-found.error";
 import type { CsgDeliveryHttp } from "../http/csgoempire/csg-delivery.http";
 
 const WITHDRAWAL = "withdrawal";

@@ -1,7 +1,7 @@
 import z, { type ZodError } from "zod";
 import type { SteamCredentials, SteamCredentialsDTO } from "../../application/steam-credentials";
-import { SteamCredentialsNotFoundError } from "../../application/steam-credentials-not-found.error";
-import { InvalidSteamAccountsError } from "./invalid-steam-accounts.error";
+import { SteamCredentialsNotFoundError } from "./errors/steam-credentials-not-found.error";
+import { InvalidSteamAccountsError } from "./errors/invalid-steam-accounts.error";
 
 const NO_ACCOUNTS = "[]";
 const NOT_JSON = '"not valid JSON"';

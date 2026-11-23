@@ -1,6 +1,6 @@
 import { SteamCredentialsEnvAdapter } from "@/contexts/delivery/external/credentials/steam-credentials.env-adapter";
-import { InvalidSteamAccountsError } from "@/contexts/delivery/external/credentials/invalid-steam-accounts.error";
-import { SteamCredentialsNotFoundError } from "@/contexts/delivery/application/steam-credentials-not-found.error";
+import { InvalidSteamAccountsError } from "@/contexts/delivery/external/credentials/errors/invalid-steam-accounts.error";
+import { SteamCredentialsNotFoundError } from "@/contexts/delivery/external/credentials/errors/steam-credentials-not-found.error";
 
 const ACCOUNT_ID = 303119;
 const PASSWORD = "hunter2-secret";

@@ -1,4 +1,4 @@
-import { SteamLoginError } from "./steam-login.error";
+import { SteamLoginError } from "./errors/steam-login.error";
 
 export type SteamLoginPauseOptions = { cooldownMs: number; now: () => number };
 

@@ -1,5 +1,5 @@
 import { SteamLoginPause } from "@/contexts/delivery/external/steam/steam-login-pause";
-import { SteamLoginError } from "@/contexts/delivery/external/steam/steam-login.error";
+import { SteamLoginError } from "@/contexts/delivery/external/steam/errors/steam-login.error";
 
 const COOLDOWN_MS = 900_000;
 const START_MS = 1_000_000;

@@ -1,6 +1,6 @@
 import type { SteamTradeOffer } from "@/contexts/delivery/infrastructure/steam/steam-trade-offer";
 import { STEAM_OFFER_STATE } from "@/contexts/delivery/infrastructure/steam/steam-trade-offer";
-import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/steam-trade.error";
+import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/errors/steam-trade.error";
 import type { SteamLogin } from "@/contexts/delivery/infrastructure/steam/steam-login";
 import { SteamSessionsFakeAdapter } from "./steam-sessions.fake-adapter";
 import { scamOfferAskingOurItems, steamTradeOffer } from "./__mocks__/steam-trade-offer.mock";

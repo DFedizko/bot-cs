@@ -3,7 +3,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import type { Logger } from "@/packages/application/logger";
 import type { Delivery } from "../../domain/delivery/delivery";
 import type { DeliveryRepository } from "../delivery.repository";
-import { loadDelivery } from "../load-delivery";
+import { TradeId } from "../../domain/delivery/trade-id";
 import type { OfferConfirmationGateway } from "./offer-confirmation.gateway";
 import { ConfirmTradeOfferCommand } from "./confirm-trade-offer.command";
 
@@ -20,7 +20,7 @@ export class ConfirmTradeOfferCommandHandler implements CommandHandler<ConfirmTr
     }
 
     async handle(command: ConfirmTradeOfferCommand): Promise<void> {
-        const delivery = await loadDelivery(this.repository, command.tradeId);
+        const delivery = await this.repository.getByTradeId(new TradeId(command.tradeId));
         const offerId = delivery.getAcceptedOfferId();
         if (!delivery.canBeConfirmed() || offerId === undefined)
             return this.logger.log(
