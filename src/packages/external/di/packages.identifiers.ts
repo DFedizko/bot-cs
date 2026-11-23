@@ -17,6 +17,8 @@ import type { ApiDocument } from "@/packages/infrastructure/http/docs/api-docume
 import type { ApiReferencePage } from "@/packages/infrastructure/http/docs/api-reference.page";
 import type { ApiDocumentHttpController } from "@/packages/infrastructure/http/docs/api-document.http-controller";
 import type { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
+import type { ApiDocumentExporter } from "@/packages/infrastructure/http/docs/api-document.exporter";
+import type { FileWriter } from "@/packages/infrastructure/file/file-writer";
 import { identifier } from "./identifier";
 
 export const ENV = identifier<AppEnv>("Env");
@@ -41,3 +43,5 @@ export const API_DOCUMENT = identifier<ApiDocument>("ApiDocument");
 export const API_REFERENCE_PAGE = identifier<ApiReferencePage>("ApiReferencePage");
 export const API_DOCUMENT_CONTROLLER = identifier<ApiDocumentHttpController>("ApiDocumentHttpController");
 export const API_REFERENCE_CONTROLLER = identifier<ApiReferenceHttpController>("ApiReferenceHttpController");
+export const FILE_WRITER = identifier<FileWriter>("FileWriter");
+export const API_DOCUMENT_EXPORTER = identifier<ApiDocumentExporter>("ApiDocumentExporter");
