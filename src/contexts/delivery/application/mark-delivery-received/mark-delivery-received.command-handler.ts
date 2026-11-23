@@ -3,7 +3,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import type { Logger } from "@/packages/application/logger";
 import type { CsgTradesGateway } from "../csg-trades.gateway";
 import type { DeliveryRepository } from "../delivery.repository";
-import { loadDelivery } from "../load-delivery";
+import { TradeId } from "../../domain/delivery/trade-id";
 import { MarkDeliveryReceivedCommand } from "./mark-delivery-received.command";
 
 export class MarkDeliveryReceivedCommandHandler implements CommandHandler<MarkDeliveryReceivedCommand> {
@@ -19,7 +19,7 @@ export class MarkDeliveryReceivedCommandHandler implements CommandHandler<MarkDe
     }
 
     async handle(command: MarkDeliveryReceivedCommand): Promise<void> {
-        const delivery = await loadDelivery(this.repository, command.tradeId);
+        const delivery = await this.repository.getByTradeId(new TradeId(command.tradeId));
         if (!delivery.canBeMarkedReceived())
             return this.logger.log(`Delivery of trade "${command.tradeId}" is ${delivery.getStatus()}, not marking it`);
         await this.csgTrades.markAsReceived(delivery.getTradeOfferId());
