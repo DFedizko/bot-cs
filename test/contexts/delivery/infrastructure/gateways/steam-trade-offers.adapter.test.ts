@@ -1,8 +1,8 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { STEAM_SESSIONS, STEAM_TRADE_OFFERS } from "@/contexts/delivery/external/di/delivery.identifiers";
-import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/steam-trade.error";
-import { SteamCredentialsNotFoundError } from "@/contexts/delivery/application/steam-credentials-not-found.error";
+import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/errors/steam-trade.error";
+import { SteamCredentialsNotFoundError } from "@/contexts/delivery/external/credentials/errors/steam-credentials-not-found.error";
 import { SteamSessionsFakeAdapter } from "../../external/steam/steam-sessions.fake-adapter";
 import { scamOfferAskingOurItems, steamTradeOffer } from "../../external/steam/__mocks__/steam-trade-offer.mock";
 import { ACCOUNT_ID, ASSET_ID, SELLER_STEAM_ID } from "../../domain/__builders__/delivery.builder";

@@ -13,7 +13,7 @@ import type {
     SteamOfferState,
     SteamTradeOffer,
 } from "../../infrastructure/steam/steam-trade-offer";
-import { SteamLoginError } from "./steam-login.error";
+import { SteamLoginError } from "./errors/steam-login.error";
 import type { SteamLoginPause } from "./steam-login-pause";
 import type { SteamRetry } from "./steam-retry";
 

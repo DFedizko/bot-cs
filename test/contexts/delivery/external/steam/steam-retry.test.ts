@@ -1,5 +1,5 @@
 import { SteamRetry } from "@/contexts/delivery/external/steam/steam-retry";
-import { SteamLoginError } from "@/contexts/delivery/external/steam/steam-login.error";
+import { SteamLoginError } from "@/contexts/delivery/external/steam/errors/steam-login.error";
 
 const RATE_LIMITED = new Error("HTTP error 429");
 const BASE_DELAY_MS = 1000;
