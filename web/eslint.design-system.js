@@ -24,18 +24,9 @@ const SPACING_UTILITIES = [
 const DOOP_STEPS = ["0", "px", "1", "2", "3", "4", "6", "8", "auto", "full", "reverse", "\\d+/\\d+"].join("|");
 const OFF_SCALE_SPACING = `${VARIANTS}-?(?:${SPACING_UTILITIES})-(?!(?:${DOOP_STEPS})${IMPORTANT})[\\w.]+${IMPORTANT}`;
 const MUTED_BACKGROUND = `${VARIANTS}bg-muted(?:/.*)?${IMPORTANT}`;
-const INTERACTIONS = [
-    "hover",
-    "focus",
-    "focus-visible",
-    "active",
-    "data-highlighted",
-    "data-popup-open",
-    "data-selected",
-    "aria-expanded",
-    "aria-selected",
-].join("|");
-const ACCENT_INTERACTION = `^(?:.*:)?(?:${INTERACTIONS}):(?:.*:)?bg-accent(?:/.*)?${IMPORTANT}`;
+const BREAKPOINT = "(?:sm|md|lg|xl|2xl):";
+const ACCENT_STATE = `^(?!(?:${BREAKPOINT})+bg-accent)(?:.+:)bg-accent(?:/.*)?${IMPORTANT}`;
+const OPEN_TYPE_SCALE = `${VARIANTS}(?:leading|tracking)-.+${IMPORTANT}`;
 
 const RESTRICTED_CLASSES = [
     {
@@ -53,9 +44,13 @@ const RESTRICTED_CLASSES = [
             '"$0" is off doop\'s spacing scale (1, 2, 3, 4, 6, 8): use one of its steps, or add the step on the canvas first.',
     },
     {
-        pattern: ACCENT_INTERACTION,
+        pattern: ACCENT_STATE,
         message:
-            '"$0": accent is doop\'s blue for the primary action. Hover, focus and highlighted rows use bg-surface-2 or bg-surface-3.',
+            '"$0": accent is doop\'s blue for the primary action. Hover, focus, open, checked and highlighted states use bg-surface-2 or bg-surface-3.',
+    },
+    {
+        pattern: OPEN_TYPE_SCALE,
+        message: '"$0": line height and letter spacing come with the text styles (text-body, text-page-title...).',
     },
     {
         pattern: MUTED_BACKGROUND,
