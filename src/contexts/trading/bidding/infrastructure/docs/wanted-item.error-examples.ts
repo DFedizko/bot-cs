@@ -13,7 +13,7 @@ export const NOT_WANTED = {
 };
 
 export const INVALID_MAX_PERCENTAGE = {
-    summary: "The max percentage is not a percentage",
+    summary: "The max percentage is not a number",
     value: { code: "INVALID_VALUE", message: 'Invalid percentage/fraction: "a lot"' },
 };
 
