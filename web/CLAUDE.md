@@ -31,10 +31,10 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 
 The source of the design is the doop canvas **`CIuc1lzmCL`** ("bot-cs — Wanted items"); the decision is [ADR-0003](adr/0003-design-system-from-doop.md). Its CSS lives in `src/shared/ui/styles/` (tokens, frame values, shadcn theme mapping, typography, effects, base), imported once from `src/styles.css`.
 
-- **Theme classes and typography utilities only:** `bg-surface`, `text-muted`, `border-line`, `rounded-md`, `p-4`, `text-page-title`, `text-body`, `text-figure`... No hex, no arbitrary values (`p-[13px]`), no inline styles for design values. Tailwind's default palette, radii, spacing and font sizes don't exist here, and `bun run lint` rejects unknown classes.
+- **Theme classes and typography utilities only:** `bg-surface`, `text-muted`, `border-line`, `rounded-md`, `p-4`, `text-page-title`, `text-body`, `text-figure`... No hex, no arbitrary values (`p-[13px]`), no inline styles for design values. Tailwind's default palette, radii, font sizes and shadows don't exist here; spacing accepts only doop's steps (1, 2, 3, 4, 6, 8) and sizes whole 4px steps. `bun run lint` rejects anything else.
 - **Dark only.** There is no light theme.
 - **Tokens follow doop:** `tokens.css` mirrors `doop-tokens.json` (the canvas's `get_tokens` export), and a test keeps them equal. A new value goes on the canvas first.
-- **Components:** add shadcn components with `bunx --bun shadcn@latest add <name> -c web` (they land in `shared/ui/components/`), import `cn` from `@/shared/lib/cn`, and map their classes to the tokens until lint passes.
+- **Components:** add shadcn components with `bunx --bun shadcn@latest add <name> -c web` (they land in `shared/ui/components/`), import `cn` from `@/shared/lib/cn`, and map their classes to the tokens until lint passes. Remove any `:root` or `.dark` block the CLI writes into `src/styles.css`.
 
 ## File naming
 
