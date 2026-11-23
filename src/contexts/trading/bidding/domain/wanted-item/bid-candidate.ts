@@ -31,6 +31,10 @@ export class BidCandidate extends ValueObject<{
         return this.value.value;
     }
 
+    getReferencePrice(): ReferencePrice {
+        return this.value.referencePrice;
+    }
+
     getAboveRecommendedPercentage(): AboveRecommendedPercentage {
         return this.value.aboveRecommendedPercentage;
     }
