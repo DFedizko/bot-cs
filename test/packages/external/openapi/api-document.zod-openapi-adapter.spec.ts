@@ -6,6 +6,7 @@ import {
     addFooRoute,
     fooCatalog,
     fooConflict,
+    listFoosRoute,
     removeFooRoute,
     undocumentedRoute,
 } from "./__stubs__/foo.route-doc";
@@ -60,6 +61,15 @@ describe("ApiDocumentZodOpenApiAdapter", () => {
         const methods = Object.keys(document().paths[FOO_PATH]!);
 
         expect(methods).toEqual(["post", "delete"]);
+    });
+
+    it("Should write the same document whatever order the routes were registered in", () => {
+        const registered = [removeFooRoute, addFooRoute, listFoosRoute];
+        const expected = new ApiDocumentZodOpenApiAdapter(fooCatalog(registered), INFO).toJson();
+
+        const reversed = new ApiDocumentZodOpenApiAdapter(fooCatalog(registered.toReversed()), INFO).toJson();
+
+        expect(JSON.stringify(reversed)).toBe(JSON.stringify(expected));
     });
 
     it("Should document the summary, description and tags of the route", () => {

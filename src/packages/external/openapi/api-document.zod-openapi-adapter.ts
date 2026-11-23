@@ -9,6 +9,7 @@ import {
 import type { ApiDocument, ApiDocumentJson } from "@/packages/infrastructure/http/docs/api-document";
 import type { HttpRouteCatalog } from "@/packages/infrastructure/http/docs/http-route.catalog";
 import type { HttpResponseDoc, HttpRoute, HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
+import { HttpMethod } from "@/packages/infrastructure/http/http-method";
 import { ValidatorZodAdapter } from "../validation/validator.zod-adapter";
 import { httpErrorBodySchema } from "./http-error-body.schema";
 
@@ -20,6 +21,9 @@ const PATH_SEPARATOR = "/";
 const WORD_SEPARATOR = "-";
 const SAME_ORIGIN = { url: "/" };
 const FIRST_ERROR_STATUS = 400;
+const BEFORE = -1;
+const AFTER = 1;
+const METHOD_ORDER: string[] = Object.values(HttpMethod);
 
 type ApiInfo = { title: string; version: string; description: string };
 type DocumentedRoute = HttpRoute & { doc: HttpRouteDoc };
@@ -44,7 +48,15 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     }
 
     private documentedRoutes(): DocumentedRoute[] {
-        return this.catalog.routes().filter((route): route is DocumentedRoute => route.doc !== undefined);
+        return this.catalog
+            .routes()
+            .filter((route): route is DocumentedRoute => route.doc !== undefined)
+            .toSorted((first, second) => this.compareRoutes(first, second));
+    }
+
+    private compareRoutes(first: HttpRoute, second: HttpRoute): number {
+        if (first.path !== second.path) return first.path < second.path ? BEFORE : AFTER;
+        return METHOD_ORDER.indexOf(first.method) - METHOD_ORDER.indexOf(second.method);
     }
 
     private addRoute(paths: ZodOpenApiPathsObject, route: DocumentedRoute): ZodOpenApiPathsObject {
