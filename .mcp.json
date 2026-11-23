@@ -3,6 +3,10 @@
         "scalar-api": {
             "type": "http",
             "url": "https://mcp.scalar.com/"
+        },
+        "shadcn": {
+            "command": "bunx",
+            "args": ["--bun", "shadcn@latest", "mcp", "--cwd", "web"]
         }
     }
 }
