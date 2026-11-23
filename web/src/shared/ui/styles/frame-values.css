@@ -1,6 +1,7 @@
 @theme static {
     --spacing: 4px;
 
+    --shadow-*: initial;
     --shadow-modal: 0 30px 80px rgb(0 0 0 / 0.6);
     --shadow-popover: 0 24px 60px rgb(0 0 0 / 0.55);
 
