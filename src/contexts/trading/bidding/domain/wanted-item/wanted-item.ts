@@ -2,8 +2,8 @@ import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
 import { ItemName } from "./item-name";
 import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
 import type { ItemCriterion } from "./criteria/item-criterion";
-import { AboveRecommendedPercentage } from "./above-recommended-percentage";
-import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
+import type { MaxFor, MaxForPrimitives } from "./max-for/max-for";
+import { MaxForFactory } from "./max-for/max-for.factory";
 import { CriteriaFactory, type CriteriaPrimitives } from "./criteria/criteria.factory";
 import { AccountId } from "../account/account-id";
 import { EmptyWantedItemChangesError } from "./errors/empty-wanted-item-changes.error";
@@ -11,12 +11,12 @@ import { EmptyWantedItemChangesError } from "./errors/empty-wanted-item-changes.
 type CreateWantedSkinProps = {
     accountId: number;
     name: string;
-    maxFor: string;
+    maxFor: MaxForPrimitives;
     criteria?: CriteriaPrimitives;
 };
 
 export type WantedItemChanges = {
-    maxFor?: string;
+    maxFor?: MaxForPrimitives;
     criteria?: CriteriaPrimitives;
 };
 
@@ -34,7 +34,7 @@ export class WantedItem extends AggregateRoot<ItemName> {
     private constructor(
         id: ItemName,
         private readonly accountId: AccountId,
-        private maxFor: AboveRecommendedPercentage,
+        private maxFor: MaxFor,
         private criteria: ItemCriterion[],
     ) {
         super(id);
@@ -44,7 +44,7 @@ export class WantedItem extends AggregateRoot<ItemName> {
         return new WantedItem(
             new ItemName(props.name),
             new AccountId(props.accountId),
-            AboveRecommendedPercentage.fromPercent(props.maxFor),
+            MaxForFactory.create(props.maxFor),
             CriteriaFactory.create(props.criteria ?? []),
         );
     }
@@ -70,8 +70,9 @@ export class WantedItem extends AggregateRoot<ItemName> {
     }
 
     evaluate(candidateProps: CandidatePrimitives): BidDecision {
-        const maxPrice = CoinCent(candidateProps.referencePrice).applyPercentage(this.maxFor).getAmount();
-        const failures = this.findFailures(new BidCandidate(candidateProps));
+        const candidate = new BidCandidate(candidateProps);
+        const maxPrice = this.maxFor.maxPriceFor(candidate).getAmount();
+        const failures = this.findFailures(candidate);
         return { approved: !failures.length, skipped: !this.enabled, maxPrice, failures };
     }
 
@@ -83,8 +84,8 @@ export class WantedItem extends AggregateRoot<ItemName> {
         return this.accountId.getValue();
     }
 
-    getMaxFor(): string {
-        return this.maxFor.toPercentString();
+    getMaxFor(): MaxForPrimitives {
+        return this.maxFor.toPrimitives();
     }
 
     getName(): string {
@@ -101,8 +102,7 @@ export class WantedItem extends AggregateRoot<ItemName> {
     }
 
     private findPriceFailures(candidate: BidCandidate): string[] {
-        const isAboveMax = candidate.getAboveRecommendedPercentage().isGreaterThan(this.maxFor);
-        return isAboveMax ? [`AboveRecommendedPercentage(${this.maxFor.toString()})`] : [];
+        return this.maxFor.isSatisfiedBy(candidate) ? [] : [this.maxFor.describe()];
     }
 
     private findCriteriaFailures(candidate: BidCandidate): string[] {
@@ -115,8 +115,8 @@ export class WantedItem extends AggregateRoot<ItemName> {
         if (maxFor === undefined && criteria === undefined) throw new EmptyWantedItemChangesError();
     }
 
-    private parseMaxFor(maxFor?: string): AboveRecommendedPercentage {
-        return maxFor === undefined ? this.maxFor : AboveRecommendedPercentage.fromPercent(maxFor);
+    private parseMaxFor(maxFor?: MaxForPrimitives): MaxFor {
+        return maxFor === undefined ? this.maxFor : MaxForFactory.create(maxFor);
     }
 
     private parseCriteria(criteria?: CriteriaPrimitives): ItemCriterion[] {
