@@ -3,6 +3,9 @@
 @import "shadcn/tailwind.css";
 @import "./shared/ui/styles/design-system.css";
 
+@source not "../eslint.design-system.js";
+@source not "../adr";
+
 html,
 body,
 #app {
