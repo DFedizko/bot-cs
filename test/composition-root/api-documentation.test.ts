@@ -11,6 +11,8 @@ import {
 } from "./__builders__/documented-api.builder";
 
 const DOCS_ENV = "development";
+const READ_METHOD = "get";
+const JSON_TYPE = "application/json";
 
 const toKey = ({ method, path }: { method: string; path: string }): string => `${method} ${path}`;
 const nullFields = (route: DocumentedRoute): Record<string, null> =>
@@ -79,6 +81,14 @@ describe("Api documentation", () => {
         const params = api.documented.flatMap(({ operation }) => operation.parameters);
 
         expect(params.filter(({ description }) => description === undefined).map(({ name }) => name)).toEqual([]);
+    });
+
+    it("Should document the body every route that reads answers with", async () => {
+        const api = await startDocumentedApi(container);
+
+        const reads = api.documented.filter(({ method }) => method === READ_METHOD);
+
+        expect(reads.filter(({ operation }) => !operation.responses["200"]?.content?.[JSON_TYPE]?.schema)).toEqual([]);
     });
 
     it("Should document a success and the internal error of every route", async () => {

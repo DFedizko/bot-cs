@@ -97,15 +97,25 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
         return isZodObject ? input.schema.shape : {};
     }
 
-    private createResponse({ status, description, examples }: HttpResponseDoc): [string, ZodOpenApiResponseObject] {
+    private createResponse({
+        status,
+        description,
+        examples,
+        body,
+    }: HttpResponseDoc): [string, ZodOpenApiResponseObject] {
         if (status < FIRST_ERROR_STATUS)
-            return [String(status), { description, ...this.createSuccessContent(examples) }];
+            return [String(status), { description, ...this.createSuccessContent(examples, body) }];
         const content = { [JSON_TYPE]: { schema: httpErrorBodySchema, ...(examples && { examples }) } };
         return [String(status), { description, content }];
     }
 
-    private createSuccessContent(examples: HttpResponseDoc["examples"]): Pick<ZodOpenApiResponseObject, "content"> {
-        return examples ? { content: { [JSON_TYPE]: { examples } } } : {};
+    private createSuccessContent(
+        examples: HttpResponseDoc["examples"],
+        body: HttpResponseDoc["body"],
+    ): Pick<ZodOpenApiResponseObject, "content"> {
+        const schema = body instanceof ValidatorZodAdapter ? body.schema : undefined;
+        if (!examples && !schema) return {};
+        return { content: { [JSON_TYPE]: { ...(schema && { schema }), ...(examples && { examples }) } } };
     }
 
     private createOperationId(method: string, path: string): string {

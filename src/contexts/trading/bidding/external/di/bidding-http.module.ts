@@ -19,6 +19,7 @@ import { ToggleWantedItemHttpController } from "../../infrastructure/controllers
 import { ListWantedItemsHttpController } from "../../infrastructure/controllers/list-wanted-items.http-controller";
 import type { ListWantedItemsInput } from "../../infrastructure/controllers/list-wanted-items.input";
 import { listWantedItemsSchema } from "../validation/list-wanted-items.schema";
+import { listWantedItemsResponseSchema } from "../validation/list-wanted-items.response-schema";
 import { listWantedItemsDoc } from "../../infrastructure/docs/list-wanted-items.route-doc";
 import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
 import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
@@ -55,6 +56,10 @@ export class BiddingHttpModule extends ContainerModule {
         TOGGLE_WANTED_ITEM_CONTROLLER,
         LIST_WANTED_ITEMS_CONTROLLER,
     ];
+    private static readonly LIST_WANTED_ITEMS_DOC = listWantedItemsDoc(
+        new ValidatorZodAdapter(listWantedItemsResponseSchema),
+    );
+
     constructor() {
         super((options) => BiddingHttpModule.bindAll(options));
     }
@@ -120,7 +125,7 @@ export class BiddingHttpModule extends ContainerModule {
         bind(LIST_WANTED_ITEMS_CONTROLLER)
             .toResolvedValue(
                 (http: HttpServer, bus: QueryBus, validator: Validator<ListWantedItemsInput>) =>
-                    new ListWantedItemsHttpController(http, bus, validator, listWantedItemsDoc),
+                    new ListWantedItemsHttpController(http, bus, validator, BiddingHttpModule.LIST_WANTED_ITEMS_DOC),
                 [HTTP_SERVER, QUERY_BUS, LIST_WANTED_ITEMS_VALIDATOR],
             )
             .inSingletonScope();

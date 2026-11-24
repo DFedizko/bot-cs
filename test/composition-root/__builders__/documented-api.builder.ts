@@ -21,7 +21,7 @@ type OpenApiParameter = {
 type OpenApiOperation = {
     parameters: OpenApiParameter[];
     requestBody?: { content: Record<string, { schema: JsonSchema; example?: unknown }> };
-    responses: Record<string, unknown>;
+    responses: Record<string, { content?: Record<string, { schema?: JsonSchema }> }>;
 };
 type OpenApiDocument = { paths: Record<string, Record<string, OpenApiOperation>> };
 

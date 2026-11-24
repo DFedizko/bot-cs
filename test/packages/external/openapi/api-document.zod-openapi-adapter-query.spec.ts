@@ -2,10 +2,11 @@ import { ApiDocumentZodOpenApiAdapter } from "@/packages/external/openapi/api-do
 import { FOO_FOUND, fooCatalog, searchFoosRoute } from "./__stubs__/foo.route-doc";
 
 type Parameter = { name: string; in: string; required?: boolean };
+type Schema = { type?: string; properties?: Record<string, unknown>; required?: string[] };
 type Operation = {
     parameters: Parameter[];
     requestBody?: unknown;
-    responses: Record<string, { content?: Record<string, { examples?: unknown }> }>;
+    responses: Record<string, { content?: Record<string, { examples?: unknown; schema?: Schema }> }>;
 };
 type Json = { paths: Record<string, Record<string, Operation>> };
 
@@ -47,5 +48,16 @@ describe("ApiDocumentZodOpenApiAdapter for a route that reads", () => {
         expect(responses["200"]?.content?.[JSON_TYPE]?.examples).toEqual({
             fooFound: { summary: "One foo found", value: FOO_FOUND },
         });
+    });
+
+    it("Should document the body of the success response", () => {
+        const { responses } = searchFoos();
+
+        const schema = responses["200"]?.content?.[JSON_TYPE]?.schema;
+
+        expect([Object.keys(schema?.properties ?? {}), schema?.required]).toEqual([
+            ["items", "total"],
+            ["items", "total"],
+        ]);
     });
 });

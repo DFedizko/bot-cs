@@ -96,6 +96,12 @@ export const searchFoosRoute: HttpRoute = {
             {
                 status: HttpStatus.OK,
                 description: "The foos found",
+                body: new ValidatorZodAdapter(
+                    z.object({
+                        items: z.array(z.object({ fooId: z.string(), name: z.string() })),
+                        total: z.number().int(),
+                    }),
+                ),
                 examples: { fooFound: { summary: "One foo found", value: FOO_FOUND } },
             },
         ],
