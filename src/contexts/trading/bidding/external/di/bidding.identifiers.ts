@@ -13,6 +13,7 @@ import type { EvaluateItemCommand } from "../../application/evaluate-item/evalua
 import type { ItemApprovedInAuctionEvent } from "../../application/evaluate-item/item-approved-in-auction.event";
 import type { ItemApprovedOffAuctionEvent } from "../../application/evaluate-item/item-approved-off-auction.event";
 import type { LeaveAuctionCommand } from "../../application/leave-auction/leave-auction.command";
+import type { WithdrawItemCommand } from "../../application/withdraw-item/withdraw-item.command";
 import type { PlaceBidCommand } from "../../application/place-bid/place-bid.command";
 import type { RemoveWantedItemCommand } from "../../application/remove-wanted-item/remove-wanted-item.command";
 import type { ToggleWantedItemCommand } from "../../application/toggle-wanted-item/toggle-wanted-item.command";
@@ -65,6 +66,7 @@ export const TOGGLE_WANTED_ITEM_HANDLER =
 export const EVALUATE_ITEM_HANDLER = identifier<CommandHandler<EvaluateItemCommand>>("EvaluateItemHandler");
 export const SYNC_ACCOUNT_HANDLER = identifier<CommandHandler<SynchronizeAccountCommand>>("SyncAccountHandler");
 export const PLACE_BID_HANDLER = identifier<CommandHandler<PlaceBidCommand>>("PlaceBidHandler");
+export const WITHDRAW_ITEM_HANDLER = identifier<CommandHandler<WithdrawItemCommand>>("WithdrawItemHandler");
 export const LEAVE_AUCTION_HANDLER = identifier<CommandHandler<LeaveAuctionCommand>>("LeaveAuctionHandler");
 export const TRACK_AUCTION_HANDLER = identifier<CommandHandler<TrackAuctionUpdateCommand>>("TrackAuctionUpdateHandler");
 

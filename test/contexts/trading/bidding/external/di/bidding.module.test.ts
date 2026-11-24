@@ -22,6 +22,7 @@ import {
     TOGGLE_WANTED_ITEM_HANDLER,
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
+    WITHDRAW_ITEM_HANDLER,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { COMMAND_BUS, COMMAND_HANDLER } from "@/packages/external/di/packages.identifiers";
 import { CsgoempireAuctionHttpAdapter } from "@/contexts/trading/bidding/external/http/csgoempire/csgoempire-auction.http.adapter";
@@ -38,6 +39,7 @@ import { EditWantedItemCommandHandler } from "@/contexts/trading/bidding/applica
 import { RemoveWantedItemCommandHandler } from "@/contexts/trading/bidding/application/remove-wanted-item/remove-wanted-item.command-handler";
 import { ToggleWantedItemCommandHandler } from "@/contexts/trading/bidding/application/toggle-wanted-item/toggle-wanted-item.command-handler";
 import { PlaceBidCommandHandler } from "@/contexts/trading/bidding/application/place-bid/place-bid.command-handler";
+import { WithdrawItemCommandHandler } from "@/contexts/trading/bidding/application/withdraw-item/withdraw-item.command-handler";
 import { LeaveAuctionCommandHandler } from "@/contexts/trading/bidding/application/leave-auction/leave-auction.command-handler";
 import { TrackAuctionUpdateCommandHandler } from "@/contexts/trading/bidding/application/track-auction-update/track-auction-update.command-handler";
 import { OnItemApprovedInAuctionPlaceBid } from "@/contexts/trading/bidding/application/place-bid/on-item-approved-in-auction-place-bid";
@@ -57,6 +59,7 @@ const COMMAND_HANDLERS = [
     { identifier: PLACE_BID_HANDLER, implementation: PlaceBidCommandHandler },
     { identifier: LEAVE_AUCTION_HANDLER, implementation: LeaveAuctionCommandHandler },
     { identifier: TRACK_AUCTION_HANDLER, implementation: TrackAuctionUpdateCommandHandler },
+    { identifier: WITHDRAW_ITEM_HANDLER, implementation: WithdrawItemCommandHandler },
 ];
 const EVENT_LISTENERS = [
     { identifier: ON_APPROVED_IN_AUCTION, implementation: OnItemApprovedInAuctionPlaceBid },
