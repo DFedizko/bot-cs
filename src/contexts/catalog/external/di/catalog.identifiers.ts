@@ -1,0 +1,26 @@
+import { identifier } from "@/packages/external/di/identifier";
+import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import type { QueryHandler } from "@/packages/building-blocks/query-handler";
+import type { HttpClient } from "@/packages/infrastructure/http/http-client";
+import type { Validator } from "@/packages/infrastructure/validation/validator";
+import type { CatalogSource } from "../../application/load-catalog/catalog.source";
+import type { CatalogRepository } from "../../application/load-catalog/catalog.repository";
+import type { LoadCatalogCommand } from "../../application/load-catalog/load-catalog.command";
+import type { CatalogItemsDao } from "../../application/search-catalog-items/catalog-items.dao";
+import type { SearchCatalogItemsQuery } from "../../application/search-catalog-items/search-catalog-items.query";
+import type { SearchCatalogItemsResponse } from "../../application/search-catalog-items/search-catalog-items.response";
+import type { CatalogStoreInMemory } from "../../infrastructure/stores/catalog.store.in-memory";
+import type { ByMykelSkinsHttp } from "../../infrastructure/http/bymykel/bymykel-skins.http";
+import type { ByMykelCatalogEntry } from "../../infrastructure/http/bymykel/types/bymykel-catalog-entry";
+
+export const BYMYKEL_HTTP_CLIENT = identifier<HttpClient>("ByMykelHttpClient");
+export const BYMYKEL_SKINS_HTTP = identifier<ByMykelSkinsHttp>("ByMykelSkinsHttp");
+export const CATALOG_ENTRY_VALIDATOR = identifier<Validator<ByMykelCatalogEntry>>("CatalogEntryValidator");
+export const CATALOG_SOURCE = identifier<CatalogSource>("CatalogSource");
+export const CATALOG_STORE = identifier<CatalogStoreInMemory>("CatalogStore");
+export const CATALOG_REPOSITORY = identifier<CatalogRepository>("CatalogRepository");
+export const CATALOG_ITEMS_DAO = identifier<CatalogItemsDao>("CatalogItemsDao");
+
+export const LOAD_CATALOG_HANDLER = identifier<CommandHandler<LoadCatalogCommand>>("LoadCatalogHandler");
+export const SEARCH_CATALOG_ITEMS_HANDLER =
+    identifier<QueryHandler<SearchCatalogItemsQuery, SearchCatalogItemsResponse>>("SearchCatalogItemsHandler");

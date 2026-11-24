@@ -58,7 +58,9 @@ describe("CatalogSearch", () => {
         });
 
         it("Should list each group alphabetically", () => {
-            const found = new CatalogSearch("awp").find(named(DRAGON_LORE, STATTRAK_ASIIMOV, ASIIMOV_WELL_WORN, ASIIMOV));
+            const found = new CatalogSearch("awp").find(
+                named(DRAGON_LORE, STATTRAK_ASIIMOV, ASIIMOV_WELL_WORN, ASIIMOV),
+            );
 
             expect(namesOf(found)).toEqual([ASIIMOV, ASIIMOV_WELL_WORN, DRAGON_LORE, STATTRAK_ASIIMOV]);
         });
