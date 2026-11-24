@@ -5,6 +5,7 @@ import type { AccountRepository } from "../../application/account.repository";
 import type { AuctionParticipationRepository } from "../../application/auction-participation.repository";
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
+import type { WithdrawalGateway } from "../../application/withdraw-item/withdrawal.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
 import type { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
 import type { EditWantedItemCommand } from "../../application/edit-wanted-item/edit-wanted-item.command";
@@ -12,6 +13,7 @@ import type { EvaluateItemCommand } from "../../application/evaluate-item/evalua
 import type { ItemApprovedInAuctionEvent } from "../../application/evaluate-item/item-approved-in-auction.event";
 import type { ItemApprovedOffAuctionEvent } from "../../application/evaluate-item/item-approved-off-auction.event";
 import type { LeaveAuctionCommand } from "../../application/leave-auction/leave-auction.command";
+import type { WithdrawItemCommand } from "../../application/withdraw-item/withdraw-item.command";
 import type { PlaceBidCommand } from "../../application/place-bid/place-bid.command";
 import type { RemoveWantedItemCommand } from "../../application/remove-wanted-item/remove-wanted-item.command";
 import type { ToggleWantedItemCommand } from "../../application/toggle-wanted-item/toggle-wanted-item.command";
@@ -35,6 +37,7 @@ import type { AuctionUpdateWsController } from "../../infrastructure/controllers
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");
 export const CSGOEMPIRE_TRADE_HTTP = identifier<CsgoempireTradeHttp>("CsgoempireTradeHttp");
 export const AUCTION_GATEWAY = identifier<AuctionGateway>("AuctionGateway");
+export const WITHDRAWAL_GATEWAY = identifier<WithdrawalGateway>("WithdrawalGateway");
 export const ACTIVE_TRADES_GATEWAY = identifier<ActiveTradesGateway>("ActiveTradesGateway");
 export const ACCOUNT_REPOSITORY = identifier<AccountRepository>("AccountRepository");
 export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedItemRepository");
@@ -63,6 +66,7 @@ export const TOGGLE_WANTED_ITEM_HANDLER =
 export const EVALUATE_ITEM_HANDLER = identifier<CommandHandler<EvaluateItemCommand>>("EvaluateItemHandler");
 export const SYNC_ACCOUNT_HANDLER = identifier<CommandHandler<SynchronizeAccountCommand>>("SyncAccountHandler");
 export const PLACE_BID_HANDLER = identifier<CommandHandler<PlaceBidCommand>>("PlaceBidHandler");
+export const WITHDRAW_ITEM_HANDLER = identifier<CommandHandler<WithdrawItemCommand>>("WithdrawItemHandler");
 export const LEAVE_AUCTION_HANDLER = identifier<CommandHandler<LeaveAuctionCommand>>("LeaveAuctionHandler");
 export const TRACK_AUCTION_HANDLER = identifier<CommandHandler<TrackAuctionUpdateCommand>>("TrackAuctionUpdateHandler");
 

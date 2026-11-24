@@ -21,6 +21,7 @@ import type { AuctionParticipationRepository } from "../../application/auction-p
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
+import type { WithdrawalGateway } from "../../application/withdraw-item/withdrawal.gateway";
 import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/csgoempire-trade.http";
 import { AddWantedItemCommandHandler } from "../../application/add-wanted-item/add-wanted-item.command-handler";
 import { EditWantedItemCommandHandler } from "../../application/edit-wanted-item/edit-wanted-item.command-handler";
@@ -29,6 +30,7 @@ import { ToggleWantedItemCommandHandler } from "../../application/toggle-wanted-
 import { EvaluateItemCommandHandler } from "../../application/evaluate-item/evaluate-item.command-handler";
 import { SynchronizeAccountCommandHandler } from "../../application/synchronize-account/synchronize-account.command-handler";
 import { PlaceBidCommandHandler } from "../../application/place-bid/place-bid.command-handler";
+import { WithdrawItemCommandHandler } from "../../application/withdraw-item/withdraw-item.command-handler";
 import { LeaveAuctionCommandHandler } from "../../application/leave-auction/leave-auction.command-handler";
 import { TrackAuctionUpdateCommandHandler } from "../../application/track-auction-update/track-auction-update.command-handler";
 import { OnItemApprovedInAuctionPlaceBid } from "../../application/place-bid/on-item-approved-in-auction-place-bid";
@@ -64,6 +66,8 @@ import {
     TOGGLE_WANTED_ITEM_HANDLER,
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
+    WITHDRAW_ITEM_HANDLER,
+    WITHDRAWAL_GATEWAY,
 } from "./bidding.identifiers";
 
 const COMMAND_HANDLERS = [
@@ -76,6 +80,7 @@ const COMMAND_HANDLERS = [
     PLACE_BID_HANDLER,
     LEAVE_AUCTION_HANDLER,
     TRACK_AUCTION_HANDLER,
+    WITHDRAW_ITEM_HANDLER,
 ];
 
 export class BiddingModule extends ContainerModule {
@@ -172,6 +177,14 @@ export class BiddingModule extends ContainerModule {
                 EVENT_BUS,
             ])
             .inSingletonScope();
+        bind(WITHDRAW_ITEM_HANDLER)
+            .toResolvedValue(BiddingModule.createWithdrawItem, [
+                ACCOUNT_REPOSITORY,
+                WITHDRAWAL_GATEWAY,
+                LOGGER,
+                EVENT_BUS,
+            ])
+            .inSingletonScope();
         bind(LEAVE_AUCTION_HANDLER)
             .toResolvedValue(
                 (repo: AuctionParticipationRepository) => new LeaveAuctionCommandHandler(repo),
@@ -238,5 +251,14 @@ export class BiddingModule extends ContainerModule {
         eventBus: EventBus,
     ): PlaceBidCommandHandler {
         return new PlaceBidCommandHandler(accountRepository, participationRepository, logger, auctionGateway, eventBus);
+    }
+
+    private static createWithdrawItem(
+        accountRepository: AccountRepository,
+        withdrawalGateway: WithdrawalGateway,
+        logger: Logger,
+        eventBus: EventBus,
+    ): WithdrawItemCommandHandler {
+        return new WithdrawItemCommandHandler(accountRepository, withdrawalGateway, logger, eventBus);
     }
 }
