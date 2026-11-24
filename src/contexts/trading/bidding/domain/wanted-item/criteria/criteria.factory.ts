@@ -1,10 +1,8 @@
 import { IsWear } from "./is-wear";
-import { ItemCriterionType, ItemCriterion } from "./item-criterion";
+import { ItemCriterionType, ItemCriterion, type CriterionPrimitives } from "./item-criterion";
 import { UnknownCriterionError } from "../errors/unknown-criterion.error";
 
-export type CriteriaPrimitives = { type: string; value: string }[];
-
-type CriterionPrimitives = CriteriaPrimitives[number];
+export type CriteriaPrimitives = CriterionPrimitives[];
 
 const criteriaMap = {
     [ItemCriterionType.IS_WEAR]: (raw) => new IsWear(raw),

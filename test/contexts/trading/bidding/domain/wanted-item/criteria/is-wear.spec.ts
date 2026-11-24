@@ -31,3 +31,6 @@ test("Should return false when the candidate hasn't the desired wear", () => {
 });
 test("Should throw an error when create a IsWear criterion with an invalid wear", () =>
     expect(() => new IsWear("Field Tested")).toThrow(DomainError));
+test("Should give back the primitives it was built from", () => {
+    expect(new IsWear(WearName.FIELD_TESTED).toPrimitives()).toEqual({ type: "IsWear", value: WearName.FIELD_TESTED });
+});
