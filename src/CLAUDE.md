@@ -26,6 +26,7 @@ kebab-case, `<name>.<role>[.<implementation>].ts`:
 | Command / handler              | `<use-case>.command.ts` / `.command-handler.ts`  | `add-wanted-item.command-handler.ts`                                           |
 | Query / handler                | `<use-case>.query.ts` / `.query-handler.ts`      | `list-wanted-items.query-handler.ts`                                           |
 | Query response (DTOs)          | `<use-case>.response.ts`                         | `list-wanted-items.response.ts`                                                |
+| Query response schema (docs)   | `<use-case>.response-schema.ts`                  | `list-wanted-items.response-schema.ts`                                         |
 | DAO / in-memory DAO            | `<name>.dao.ts` / `<name>.dao.in-memory.ts`      | `wanted-items.dao.ts`, `wanted-items.dao.in-memory.ts`                         |
 | Event                          | `<event>.event.ts`                               | `bid-placed.event.ts`                                                          |
 | Event listener                 | `on-<event>-<action>.ts`                         | `on-outbid-counter-bid.ts`                                                     |

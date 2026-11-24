@@ -85,7 +85,7 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
     }
     ```
 
-7. **Docs**: the route doc is a function of the response body (`listWantedItemsDoc(body)`), and the HTTP module passes `new ValidatorZodAdapter(<use-case>ResponseSchema)`. That schema lives in `external/validation/<use-case>.response-schema.ts`, uses `paginatedSchema(item)` for a list and ends with `satisfies z.ZodType<XResponse>`, so it can't drift from the DTO; the frontend's types are generated from it. Add the 200 example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
+7. **Docs**: the route doc is a function of the response body (`listWantedItemsDoc(body)`), and the HTTP module passes `new ValidatorZodAdapter(<use-case>ResponseSchema)`. That schema lives in `external/validation/<use-case>.response-schema.ts`, uses `paginatedSchema(item, examplePage)` (`src/packages/external/validation/paginated.schema.ts`) for a list, gives every field an example (or `docs:check` warns), has a spec that parses the documented example, and ends with `satisfies z.ZodType<XResponse>`, so it can't drift from the DTO; the frontend's types are generated from it. Add the 200 example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
 
 ## Checklist
 
