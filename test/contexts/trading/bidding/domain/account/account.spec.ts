@@ -16,6 +16,24 @@ describe("Account", () => {
         expect(account.getReservedAmount()).toBe(5000);
         expect(account.getAvailableAmount()).toBe(0);
     });
+    it("Should give back its primitives", () => {
+        const account = Account.sync({ id: 1, name: "John Doe", totalAmount: 5000, reservations: { 2: 2000 } });
+
+        expect(account.toPrimitives()).toEqual({
+            id: 1,
+            name: "John Doe",
+            totalAmount: 5000,
+            reservations: { 2: 2000 },
+        });
+    });
+    it("Should be synchronized back from its primitives", () => {
+        const account = Account.sync({ id: 1, name: "John Doe", totalAmount: 300 });
+        account.reserveFor(7, 100);
+
+        const restored = Account.sync(account.toPrimitives());
+
+        expect(restored.toPrimitives()).toEqual(account.toPrimitives());
+    });
     it("Should verify if it's me", () => expect(Account.sync({ id: 123, name: "John Doe" }).isMe(123)).toBe(true));
     it("Should reserve amount for an item", () => {
         const account = Account.sync({ id: 1, name: "John Doe", totalAmount: 300, reservations: { 2: 200 } });

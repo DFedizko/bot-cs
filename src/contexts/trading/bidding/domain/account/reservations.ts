@@ -39,6 +39,10 @@ export class Reservations extends ValueObject<ReadonlyMap<Primitive<ReservationI
         return this.value.get(reservationIdValue)?.getAmount() ?? 0;
     }
 
+    toPrimitives(): ReservationsPrimitives {
+        return Object.fromEntries([...this.value].map(([reservationId, money]) => [reservationId, money.getAmount()]));
+    }
+
     getTotalReserved(): number {
         return [...this.value.values()].reduce((sum, money) => sum + money.getAmount(), 0);
     }

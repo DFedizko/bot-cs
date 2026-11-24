@@ -14,6 +14,8 @@ type CreateProps = {
     reservations?: ReservationsPrimitives;
 };
 
+export type AccountPrimitives = Required<CreateProps>;
+
 export class Account extends AggregateRoot<AccountId> {
     private constructor(
         id: number,
@@ -33,6 +35,15 @@ export class Account extends AggregateRoot<AccountId> {
             new AccountBalance({ total: props?.totalAmount ?? 0, reserved: reservations.getTotalReserved() }),
             reservations,
         );
+    }
+
+    toPrimitives(): AccountPrimitives {
+        return {
+            id: this.getId(),
+            name: this.getName(),
+            totalAmount: this.getTotalAmount(),
+            reservations: this.reservations.toPrimitives(),
+        };
     }
 
     reserveFor(reservationId: number, amount: number): void {
