@@ -29,6 +29,7 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
 | `infrastructure/daos/<name>.dao.in-memory.ts`                            | In-memory DAO adapter over the shared store                                                                  |
 | `infrastructure/stores/<aggregate>.store.in-memory.ts`                   | The store the repository and the DAO share                                                                   |
 | `infrastructure/controllers/<use-case>.http-controller.ts` + `.input.ts` | GET controller and its input type                                                                            |
+| `external/validation/<use-case>.response-schema.ts`                      | zod schema of the response, for the docs                                                                     |
 | `external/validation/<use-case>.schema.ts`                               | zod schema; shared `pageField`, `pageSizeField` from `src/packages/external/validation/pagination.fields.ts` |
 | `infrastructure/docs/<use-case>.route-doc.ts`                            | Route doc (see the `http-route-docs` skill)                                                                  |
 
@@ -45,7 +46,7 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
         readonly pageSize?: number;
     ```
 
-2. **Response and DAO port**: DTO fields are primitives the driver shows; filters are optional fields.
+2. **Response and DAO port**: DTO fields are primitives the driver shows; filters are optional fields. Declare the response and DTO with `type`, not `interface` (`QueryResponse` is `Record<string, unknown>`, which an interface doesn't satisfy).
 
     ```ts
     export type WantedItemsFilter = { accountId: number; enabled?: boolean };
@@ -78,13 +79,13 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
 
     ```ts
     async handle(request: HttpRequest): Promise<HttpResponse> {
-        const input = this.validator.validate(HttpRequestInput.from(request));
+        const input = this.validator.validate(HttpRequestInput.fromQuery(request));
         const body = await this.queryBus.ask(new ListWantedItemsQuery(input));
         return { status: HttpStatus.OK, body };
     }
     ```
 
-7. **Docs**: route doc with the 200 response's example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
+7. **Docs**: the route doc is a function of the response body (`listWantedItemsDoc(body)`), and the HTTP module passes `new ValidatorZodAdapter(<use-case>ResponseSchema)`. That schema lives in `external/validation/<use-case>.response-schema.ts`, uses `paginatedSchema(item)` for a list and ends with `satisfies z.ZodType<XResponse>`, so it can't drift from the DTO; the frontend's types are generated from it. Add the 200 example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
 
 ## Checklist
 
@@ -104,3 +105,5 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
 - A handler asking another query, or a command handler or listener using the `QueryBus`.
 - A new in-memory map in the DAO: it never sees what the repository saved.
 - A bare array response, or a `Result` value instead of a thrown not-found error.
+- `HttpRequestInput.from` in a GET controller: it reads the body, not the query string (`fromQuery` does).
+- A 200 documented without its body schema: the frontend gets `unknown`.
