@@ -59,13 +59,19 @@ describe("AccountRepository", () => {
 
         expect(record?.balance).toEqual({ total: 300, reserved: 100, available: 200 });
     });
-    it("Should not change the stored account until it is saved again", async () => {
+    it("Should keep a reservation made meanwhile when another holder of the account refunds", async () => {
         const accountRepository = container.get(ACCOUNT_REPOSITORY);
-        await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 300 }));
-        const account = await accountRepository.findById(new AccountId(1));
+        await accountRepository.save(Account.sync({ id: 1, name: "John Doe", totalAmount: 1000 }));
+        const first = await accountRepository.findById(new AccountId(1));
+        first?.reserveFor(10, 300);
+        await accountRepository.save(first!);
+        const second = await accountRepository.findById(new AccountId(1));
+        second?.reserveFor(20, 400);
+        await accountRepository.save(second!);
+        first?.refundFor(10);
 
-        account?.reserveFor(7, 100);
+        await accountRepository.save(first!);
 
-        expect((await accountRepository.findById(new AccountId(1)))?.getReservedAmount()).toBe(0);
+        expect((await accountRepository.findById(new AccountId(1)))?.hasReservationFor(20)).toBe(true);
     });
 });
