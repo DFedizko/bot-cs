@@ -94,18 +94,31 @@ describe("ListWantedItemsHttpController", () => {
         });
     });
 
+    it("Should list the items sorted by name when asked", async () => {
+        const api = await startWantedItemsApi(container);
+        await addAsiimovAndDisabledRedline(api);
+
+        const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?sort=name`);
+
+        expect(JSON.parse(response.body)).toEqual(firstPage([wanted(REDLINE, false), wanted(ASIIMOV)]));
+    });
+
     it("Should ask the query bus with the validated input", async () => {
         const askSpy = jest.spyOn(container.get(QUERY_BUS), "ask");
         const api = await startWantedItemsApi(container);
 
-        await api.send(GET, `${itemsPath(ACCOUNT_ID)}?enabled=true&page=${THIRD_PAGE}&pageSize=${FOUR_PER_PAGE}`);
+        await api.send(
+            GET,
+            `${itemsPath(ACCOUNT_ID)}?enabled=true&sort=name&page=${THIRD_PAGE}&pageSize=${FOUR_PER_PAGE}`,
+        );
 
         expect(askSpy).toHaveBeenCalledWith(
             new ListWantedItemsQuery({
                 accountId: ACCOUNT_ID,
-                enabled: true,
                 page: THIRD_PAGE,
                 pageSize: FOUR_PER_PAGE,
+                sort: "name",
+                filters: { enabled: true },
             }),
         );
     });
@@ -115,6 +128,7 @@ describe("ListWantedItemsHttpController", () => {
         ["a page that is not a number", "page=last"],
         ["a page size above the max", `pageSize=${MAX_PAGE_SIZE + 1}`],
         ["an enabled state that is not a boolean", "enabled=maybe"],
+        ["a sort key the route doesn't offer", "sort=price"],
     ])("Should answer bad request for %s", async (_case, query) => {
         const api = await startWantedItemsApi(container);
 

@@ -11,7 +11,7 @@ export class ListWantedItemsQueryHandler implements QueryHandler<ListWantedItems
         return ListWantedItemsQuery.QUERY_NAME;
     }
 
-    handle({ accountId, enabled, page, pageSize }: ListWantedItemsQuery): Promise<ListWantedItemsResponse> {
-        return this.dao.list({ accountId, enabled }, withDefaultPage({ page, pageSize }));
+    handle({ accountId, filters, sort, page, pageSize }: ListWantedItemsQuery): Promise<ListWantedItemsResponse> {
+        return this.dao.list({ accountId, filters, sort }, withDefaultPage({ page, pageSize }));
     }
 }

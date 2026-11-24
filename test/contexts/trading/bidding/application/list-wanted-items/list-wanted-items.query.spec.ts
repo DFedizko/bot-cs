@@ -15,17 +15,19 @@ describe("ListWantedItemsQuery", () => {
     it("Should carry what the driver asked", () => {
         const query = new ListWantedItemsQuery({
             accountId: ACCOUNT_ID,
-            enabled: true,
             page: PAGE,
             pageSize: PAGE_SIZE,
+            sort: "name",
+            filters: { enabled: true },
         });
 
         expect({ ...query }).toEqual({
             name: QUERY_NAME,
             accountId: ACCOUNT_ID,
-            enabled: true,
-            page: 2,
-            pageSize: 10,
+            page: PAGE,
+            pageSize: PAGE_SIZE,
+            sort: "name",
+            filters: { enabled: true },
         });
     });
 });

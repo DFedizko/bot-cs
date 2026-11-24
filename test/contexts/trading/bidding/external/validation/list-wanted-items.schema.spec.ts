@@ -23,13 +23,13 @@ describe("listWantedItemsSchema", () => {
             pageSize: "5",
         });
 
-        expect(input).toEqual({ accountId: 1, enabled: false, page: PAGE, pageSize: PAGE_SIZE });
+        expect(input).toEqual({ accountId: 1, page: PAGE, pageSize: PAGE_SIZE, filters: { enabled: false } });
     });
 
     it("Should read an enabled state of true", () => {
         const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID, enabled: "true" });
 
-        expect(input.enabled).toBe(true);
+        expect(input.filters).toEqual({ enabled: true });
     });
 
     it.each([["yes"], ["1"], [""]])("Should reject the enabled state %p", (enabled) => {
@@ -48,6 +48,18 @@ describe("listWantedItemsSchema", () => {
         const paths = failingPaths({ accountId: ACCOUNT_ID, pageSize });
 
         expect(paths).toEqual(["pageSize"]);
+    });
+
+    it("Should read a sort by name", () => {
+        const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID, sort: "name" });
+
+        expect(input.sort).toBe("name");
+    });
+
+    it("Should reject a sort key the route doesn't offer", () => {
+        const paths = failingPaths({ accountId: ACCOUNT_ID, sort: "price" });
+
+        expect(paths).toEqual(["sort"]);
     });
 
     it("Should accept the max page size", () => {

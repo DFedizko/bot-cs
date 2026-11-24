@@ -43,24 +43,25 @@ describe("ListWantedItemsQueryHandler", () => {
         await container.get(LIST_WANTED_ITEMS_HANDLER).handle(new ListWantedItemsQuery({ accountId: ACCOUNT_ID }));
 
         expect(listSpy).toHaveBeenCalledWith(
-            { accountId: ACCOUNT_ID, enabled: undefined },
+            { accountId: ACCOUNT_ID, filters: undefined, sort: undefined },
             { page: FIRST_PAGE, pageSize: DEFAULT_PAGE_SIZE },
         );
     });
 
-    it("Should read the asked page of the items with the asked enabled state", async () => {
+    it("Should read the asked page of the items with the asked filters and sort", async () => {
         const listSpy = jest.spyOn(container.get(WANTED_ITEMS_DAO), "list").mockResolvedValue(ASIIMOV_PAGE);
         const query = new ListWantedItemsQuery({
             accountId: ACCOUNT_ID,
-            enabled: false,
             page: PAGE,
             pageSize: PAGE_SIZE,
+            sort: "name",
+            filters: { enabled: false },
         });
 
         await container.get(LIST_WANTED_ITEMS_HANDLER).handle(query);
 
         expect(listSpy).toHaveBeenCalledWith(
-            { accountId: ACCOUNT_ID, enabled: false },
+            { accountId: ACCOUNT_ID, filters: { enabled: false }, sort: "name" },
             { page: PAGE, pageSize: PAGE_SIZE },
         );
     });

@@ -5,13 +5,13 @@ import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-input";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
-import { ListWantedItemsQuery } from "../../application/list-wanted-items/list-wanted-items.query";
+import {
+    ListWantedItemsQuery,
+    type ListWantedItemsOptions,
+} from "../../application/list-wanted-items/list-wanted-items.query";
 
-export type ListWantedItemsInput = {
+export type ListWantedItemsInput = ListWantedItemsOptions & {
     accountId: number;
-    enabled?: boolean;
-    page?: number;
-    pageSize?: number;
 };
 
 export class ListWantedItemsHttpController implements HttpController {

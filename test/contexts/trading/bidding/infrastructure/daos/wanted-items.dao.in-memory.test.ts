@@ -18,6 +18,7 @@ const OTHER_ACCOUNT_ID = 2;
 const MAX_VALUE = 19400;
 const FIRST_PAGE = { page: 1, pageSize: 2 };
 const SECOND_PAGE = { page: 2, pageSize: 2 };
+const THREE_PER_PAGE = { page: 1, pageSize: 3 };
 const FIELD_TESTED = { type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED };
 const ASIIMOV = "AWP | Asiimov (Field-Tested)";
 const REDLINE = "AK-47 | Redline (Field-Tested)";
@@ -59,9 +60,37 @@ describe("WantedItemsDaoInMemory", () => {
     it("Should list only the items with the asked enabled state", async () => {
         putAll(container, [record(ASIIMOV), record(REDLINE, false), record(VULCAN)]);
 
-        const page = await container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID, enabled: false }, FIRST_PAGE);
+        const page = await container
+            .get(WANTED_ITEMS_DAO)
+            .list({ accountId: ACCOUNT_ID, filters: { enabled: false } }, FIRST_PAGE);
 
         expect(page).toEqual({ items: [dto(REDLINE, false)], ...FIRST_PAGE, total: 1 });
+    });
+
+    it("Should keep the order the items were added in when no sort is asked", async () => {
+        putAll(container, [record(VULCAN), record(ASIIMOV), record(REDLINE)]);
+
+        const page = await container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID }, THREE_PER_PAGE);
+
+        expect(page.items.map(({ name }) => name)).toEqual([VULCAN, ASIIMOV, REDLINE]);
+    });
+
+    it("Should sort the items by name when asked", async () => {
+        putAll(container, [record(VULCAN), record(ASIIMOV), record(REDLINE)]);
+
+        const page = await container
+            .get(WANTED_ITEMS_DAO)
+            .list({ accountId: ACCOUNT_ID, sort: "name" }, THREE_PER_PAGE);
+
+        expect(page.items.map(({ name }) => name)).toEqual([REDLINE, VULCAN, ASIIMOV]);
+    });
+
+    it("Should sort before it cuts the page", async () => {
+        putAll(container, [record(VULCAN), record(ASIIMOV), record(REDLINE)]);
+
+        const page = await container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID, sort: "name" }, SECOND_PAGE);
+
+        expect(page.items.map(({ name }) => name)).toEqual([ASIIMOV]);
     });
 
     it("Should return the asked page and count every matching item", async () => {
