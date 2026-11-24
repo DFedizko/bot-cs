@@ -1,5 +1,5 @@
 import z from "zod";
-import { paginatedSchema } from "@/packages/external/validation/pagination.fields";
+import { paginatedSchema } from "@/packages/external/validation/paginated.schema";
 import { MaxForType } from "../../domain/wanted-item/max-for/max-for";
 import type { ListWantedItemsResponse } from "../../application/list-wanted-items/list-wanted-items.response";
 import { WANTED_ITEM_EXAMPLE } from "../../infrastructure/docs/wanted-item.example";
