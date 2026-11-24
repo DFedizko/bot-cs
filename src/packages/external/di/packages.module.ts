@@ -15,6 +15,7 @@ import { EventBusInMemoryAsync } from "../event-bus/event-bus.in-memory-async";
 import { EventBusInMemorySync } from "../event-bus/event-bus.in-memory-sync";
 import { HttpClientFactoryAdapter } from "../http/client/http-client.factory.adapter";
 import { HttpServerBunAdapter } from "../http/server/http-server.bun-adapter";
+import { ClockSystemAdapter } from "../clock/clock.system-adapter";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
 import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http-error.mapper.by-error-class";
 import { HttpServerRouteRecordingDecorator } from "@/packages/infrastructure/http/http-server.route-recording-decorator";
@@ -22,6 +23,7 @@ import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/
 import type { Logger } from "@/packages/application/logger";
 import {
     ASYNC_EVENT_BUS,
+    CLOCK,
     COMMAND_BUS,
     COMMAND_DISPATCHER,
     COMMAND_HANDLER,
@@ -51,6 +53,9 @@ export class PackagesModule extends ContainerModule {
         bind(ENV).toConstantValue(env);
         bind(LOGGER)
             .toResolvedValue(() => new LoggerConsoleAdapter())
+            .inSingletonScope();
+        bind(CLOCK)
+            .toResolvedValue(() => new ClockSystemAdapter())
             .inSingletonScope();
         bind(PROCESS_EVENTS).toConstantValue(process);
         bind(UNHANDLED_ERROR_TRAP)
