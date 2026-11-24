@@ -42,7 +42,11 @@ export class WantedItemsDaoInMemory implements WantedItemsDao {
     }
 
     private sortBy(entries: WantedItemEntry[], sort: WantedItemsSortKey): WantedItemEntry[] {
-        return entries.toReversed().toSorted(compareWantedItemsBy(sort));
+        return this.lastInsertedFirst(entries).toSorted(compareWantedItemsBy(sort));
+    }
+
+    private lastInsertedFirst(entries: WantedItemEntry[]): WantedItemEntry[] {
+        return entries.toReversed();
     }
 
     private countAll(records: WantedItemRecord[]): WantedItemCounts {

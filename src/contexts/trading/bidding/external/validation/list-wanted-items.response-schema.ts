@@ -49,7 +49,7 @@ const catalogSchema = z
             examples: [ASIIMOV_CATALOG.imageUrl],
         }),
         rarity: z.enum(CATALOG_RARITIES).meta({
-            description: "The rarity of the skin, from consumer up to contraband; it tints the card",
+            description: "The rarity of the skin, from consumer up to contraband",
             examples: [ASIIMOV_CATALOG.rarity],
         }),
         weapon: z.string().meta({ description: "The weapon the skin is for", examples: [ASIIMOV_CATALOG.weapon] }),
