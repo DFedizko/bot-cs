@@ -48,9 +48,9 @@ describe("listWantedItemsResponseSchema", () => {
     });
 
     it("Should reject a page without its counts", () => {
-        const { counts: _counts, ...page } = WANTED_ITEMS_PAGE;
+        const { items, page, pageSize, total } = WANTED_ITEMS_PAGE;
 
-        const parsed = listWantedItemsResponseSchema.safeParse(page);
+        const parsed = listWantedItemsResponseSchema.safeParse({ items, page, pageSize, total });
 
         expect(parsed.success).toBe(false);
     });
