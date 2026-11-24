@@ -24,7 +24,7 @@ export class ListWantedItemsHttpController implements HttpController {
     }
 
     async handle(request: HttpRequest): Promise<HttpResponse> {
-        const input = this.validator.validate(HttpRequestInput.from(request));
+        const input = this.validator.validate(HttpRequestInput.fromQuery(request));
         const body = await this.queryBus.ask(new ListWantedItemsQuery(input));
         return { status: HttpStatus.OK, body };
     }

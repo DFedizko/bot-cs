@@ -6,8 +6,12 @@ type Fields = Record<string, unknown>;
 const BODY_FIELD = { path: "body", message: "Expected a JSON object" };
 
 export class HttpRequestInput {
-    static from({ params, searchParams, body }: HttpRequest): Fields {
-        return { ...searchParams, ...HttpRequestInput.readBody(body), ...params };
+    static from({ params, body }: HttpRequest): Fields {
+        return { ...HttpRequestInput.readBody(body), ...params };
+    }
+
+    static fromQuery({ params, searchParams }: HttpRequest): Fields {
+        return { ...searchParams, ...params };
     }
 
     private static readBody(body: unknown): Fields {
