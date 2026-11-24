@@ -32,6 +32,8 @@ import type { AddWantedItemHttpController } from "../../infrastructure/controlle
 import type { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
 import type { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
 import type { ToggleWantedItemHttpController } from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
+import type { ListWantedItemsHttpController } from "../../infrastructure/controllers/list-wanted-items.http-controller";
+import type { ListWantedItemsInput } from "../../infrastructure/controllers/list-wanted-items.input";
 import type { ToggleWantedItemInput } from "../../infrastructure/controllers/toggle-wanted-item.input";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
@@ -59,6 +61,8 @@ export const REMOVE_WANTED_ITEM_CONTROLLER = identifier<RemoveWantedItemHttpCont
 export const TOGGLE_WANTED_ITEM_CONTROLLER = identifier<ToggleWantedItemHttpController>(
     "ToggleWantedItemHttpController",
 );
+export const LIST_WANTED_ITEMS_CONTROLLER = identifier<ListWantedItemsHttpController>("ListWantedItemsHttpController");
+export const LIST_WANTED_ITEMS_VALIDATOR = identifier<Validator<ListWantedItemsInput>>("ListWantedItemsValidator");
 export const ADD_WANTED_ITEM_VALIDATOR = identifier<Validator<AddWantedItemInput>>("AddWantedItemValidator");
 export const EDIT_WANTED_ITEM_VALIDATOR = identifier<Validator<EditWantedItemInput>>("EditWantedItemValidator");
 export const REMOVE_WANTED_ITEM_VALIDATOR = identifier<Validator<RemoveWantedItemInput>>("RemoveWantedItemValidator");

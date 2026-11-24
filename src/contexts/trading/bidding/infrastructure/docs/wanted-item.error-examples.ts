@@ -73,3 +73,21 @@ export const INVALID_WEAR = {
     summary: "The wear is not a CS2 wear name",
     value: { code: "DOMAIN_ERROR", message: 'Invalid wear name: "Brand New"' },
 };
+
+export const PAGE_SIZE_TOO_BIG = {
+    summary: "The page size is above the max",
+    value: {
+        code: "VALIDATION_ERROR",
+        message: "Invalid input: pageSize",
+        fields: [{ path: "pageSize", message: "Too big: expected number to be <=100" }],
+    },
+};
+
+export const ENABLED_FILTER_NOT_BOOLEAN = {
+    summary: "The enabled filter is neither true nor false",
+    value: {
+        code: "VALIDATION_ERROR",
+        message: "Invalid input: enabled",
+        fields: [{ path: "enabled", message: 'Invalid option: expected one of "true"|"false"' }],
+    },
+};

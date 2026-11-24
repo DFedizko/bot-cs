@@ -4,9 +4,11 @@ import {
     HTTP_CONTROLLER,
     HTTP_ERROR_MAPPING,
     HTTP_SERVER,
+    QUERY_BUS,
 } from "@/packages/external/di/packages.identifiers";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import type { CommandBus } from "@/packages/application/command-bus";
+import type { QueryBus } from "@/packages/application/query-bus";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
@@ -14,6 +16,10 @@ import { AddWantedItemHttpController } from "../../infrastructure/controllers/ad
 import { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
 import { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
 import { ToggleWantedItemHttpController } from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
+import { ListWantedItemsHttpController } from "../../infrastructure/controllers/list-wanted-items.http-controller";
+import type { ListWantedItemsInput } from "../../infrastructure/controllers/list-wanted-items.input";
+import { listWantedItemsSchema } from "../validation/list-wanted-items.schema";
+import { listWantedItemsDoc } from "../../infrastructure/docs/list-wanted-items.route-doc";
 import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
 import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
 import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
@@ -33,6 +39,8 @@ import {
     ADD_WANTED_ITEM_VALIDATOR,
     EDIT_WANTED_ITEM_CONTROLLER,
     EDIT_WANTED_ITEM_VALIDATOR,
+    LIST_WANTED_ITEMS_CONTROLLER,
+    LIST_WANTED_ITEMS_VALIDATOR,
     REMOVE_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_VALIDATOR,
     TOGGLE_WANTED_ITEM_CONTROLLER,
@@ -45,6 +53,7 @@ export class BiddingHttpModule extends ContainerModule {
         EDIT_WANTED_ITEM_CONTROLLER,
         REMOVE_WANTED_ITEM_CONTROLLER,
         TOGGLE_WANTED_ITEM_CONTROLLER,
+        LIST_WANTED_ITEMS_CONTROLLER,
     ];
     constructor() {
         super((options) => BiddingHttpModule.bindAll(options));
@@ -53,6 +62,7 @@ export class BiddingHttpModule extends ContainerModule {
     private static bindAll(options: ContainerModuleLoadOptions): void {
         BiddingHttpModule.bindValidators(options);
         BiddingHttpModule.bindControllers(options);
+        BiddingHttpModule.bindQueryRoutes(options);
         BiddingHttpModule.bindErrorMappings(options);
     }
 
@@ -101,6 +111,19 @@ export class BiddingHttpModule extends ContainerModule {
             )
             .inSingletonScope();
         BiddingHttpModule.HTTP_CONTROLLERS.forEach((controller) => bind(HTTP_CONTROLLER).toService(controller));
+    }
+
+    private static bindQueryRoutes({ bind }: ContainerModuleLoadOptions): void {
+        bind(LIST_WANTED_ITEMS_VALIDATOR)
+            .toResolvedValue(() => new ValidatorZodAdapter(listWantedItemsSchema))
+            .inSingletonScope();
+        bind(LIST_WANTED_ITEMS_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: QueryBus, validator: Validator<ListWantedItemsInput>) =>
+                    new ListWantedItemsHttpController(http, bus, validator, listWantedItemsDoc),
+                [HTTP_SERVER, QUERY_BUS, LIST_WANTED_ITEMS_VALIDATOR],
+            )
+            .inSingletonScope();
     }
 
     private static bindErrorMappings({ bind }: ContainerModuleLoadOptions): void {

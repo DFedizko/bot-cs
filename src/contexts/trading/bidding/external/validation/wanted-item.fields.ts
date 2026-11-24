@@ -86,3 +86,14 @@ export const enabledField = z.boolean().meta({
     description: "true to bid on the item again, false to pause it",
     examples: [WANTED_ITEM_EXAMPLE.enabled],
 });
+
+const TRUE = "true";
+const FALSE = "false";
+
+export const enabledFilterField = z
+    .enum([TRUE, FALSE])
+    .meta({
+        description: "true lists only the enabled items, false only the disabled ones; leave it out to list both",
+        examples: [TRUE],
+    })
+    .transform((enabled) => enabled === TRUE);
