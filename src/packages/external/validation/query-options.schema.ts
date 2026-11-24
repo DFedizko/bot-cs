@@ -1,7 +1,6 @@
 import z from "zod";
-import { MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/packages/building-blocks/pagination";
 import type { QueryOptions } from "@/packages/building-blocks/query-options";
-import { pageField, pageSizeField } from "./pagination.fields";
+import { limitField, pageField, pageSizeField } from "./pagination.fields";
 
 type SortKeys<TSort extends string> = readonly [TSort, ...TSort[]];
 
@@ -13,20 +12,8 @@ type OptionsConfig<TSort extends string, TFilters extends z.ZodRawShape> = {
 
 type Fields = Record<string, unknown>;
 
-const PLAIN_DIGITS = /^\d+$/;
-const LIMIT_DESCRIPTION = `The most items to read, from ${MIN_PAGE_SIZE} to ${MAX_PAGE_SIZE}`;
-
-export const limitField = z
-    .string()
-    .regex(PLAIN_DIGITS)
-    .meta({ description: LIMIT_DESCRIPTION, examples: [String(MAX_PAGE_SIZE)] })
-    .transform(Number)
-    .pipe(z.number().int().min(MIN_PAGE_SIZE).max(MAX_PAGE_SIZE))
-    .optional()
-    .meta({ description: LIMIT_DESCRIPTION });
-
 export const sortField = <TSort extends string>(keys: SortKeys<TSort>) => {
-    const description = `Sorts the items by ${keys.join(" or ")}; leave it out to keep the order they were added in`;
+    const description = `Sorts the items by ${keys.join(" or ")}`;
     return z
         .enum(keys)
         .meta({ description, examples: [keys[0]] })
