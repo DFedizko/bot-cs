@@ -43,6 +43,12 @@ describe("CatalogSearch", () => {
             expect(found).toEqual([]);
         });
 
+        it("Should find nothing for a text made only of ignored symbols", () => {
+            const found = new CatalogSearch("| ( )").find(named(ASIIMOV, REDLINE));
+
+            expect(found).toEqual([]);
+        });
+
         it("Should find names with symbols the text doesn't type", () => {
             const found = new CatalogSearch("karambit").find(named(KARAMBIT, REDLINE));
 

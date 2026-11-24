@@ -31,7 +31,7 @@ export class CatalogSearch {
 
     private matches({ marketHashName }: Searchable): boolean {
         const name = CatalogSearch.normalize(marketHashName);
-        return this.words.every((word) => name.includes(word));
+        return this.words.length > 0 && this.words.every((word) => name.includes(word));
     }
 
     private compare(first: Searchable, second: Searchable): number {
