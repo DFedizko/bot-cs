@@ -15,6 +15,7 @@ import {
 } from "@/packages/infrastructure/http/docs/query-options.error-examples";
 
 const SORT_KEYS = ["name", "size"] as const;
+const ONLY_KEY = "name";
 const validator = new ValidatorZodAdapter(queryOptionsSchema({}, { sort: SORT_KEYS, limit: true }));
 
 const answerTo = (input: Record<string, string>): unknown => {
@@ -42,5 +43,13 @@ describe("Query options error examples", () => {
         const answer = answerTo(input);
 
         expect(answer).toEqual(example.value);
+    });
+
+    it("Should match the real answer to an unknown sort when the query offers one key", () => {
+        const oneKey = new ValidatorZodAdapter(queryOptionsSchema({}, { sort: [ONLY_KEY] }));
+
+        const throwing = () => oneKey.validate({ sort: "weight" });
+
+        expect(throwing).toThrow(expect.objectContaining({ fields: unknownSort([ONLY_KEY]).value.fields }));
     });
 });
