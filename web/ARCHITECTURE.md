@@ -68,6 +68,10 @@ Invert what is slow or unpredictable (the API, the WebSocket, storage, time) and
 
 An unbound port fails loudly with its name, so a missing binding is found by the first test that renders it.
 
+## HTTP client and feature services
+
+Features reach the bot's API through the `HttpClient` contract in `shared/lib/http/` (`get`, `post`, `put`, `patch`, `delete`; every failure an `HttpError` with `status`, `code`, `message` and `fields`). Its only implementation, `HttpClientAxiosAdapter` in `shared/adapters/`, is the one place that imports Axios; it is built from the `AppConfig` port (the bot's URL from `VITE_BOT_API_URL`) and bound in `app/` by `AppProviders`. A feature declares the calls it needs as a service port in `ports/` (`WantedItemsService`, typed with `shared/api/bot-api.ts`) and implements it in `adapters/` with a class that receives `HttpClient` through its constructor (`WantedItemsHttpService`); `app/` binds it, and the view-model only sees the port. The decision is [ADR-0004](adr/0004-http-client.md).
+
 ## Server state with TanStack Query
 
 - Queries and mutations live in `view-model/`. Build reusable ones as `queryOptions(...)` factories (`wantedItemsQuery(gateway, accountId)`), so a route loader can prefetch them through the feature's `index.ts`.
