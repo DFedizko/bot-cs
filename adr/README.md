@@ -32,8 +32,9 @@ This folder records the significant architecture decisions of the bot (`src/`), 
 
 ## Index
 
-| ADR                                             | Title                                                  | Date       | Status   |
-| ----------------------------------------------- | ------------------------------------------------------ | ---------- | -------- |
-| [0001](0001-keep-in-memory-repositories.md)     | Keep in-memory repositories for now                    | 2026-11-21 | Accepted |
-| [0002](0002-synchronous-buses-for-the-core.md)  | Synchronous command bus and event bus for the core     | 2026-11-21 | Accepted |
-| [0003](0003-api-docs-from-validator-schemas.md) | API documentation generated from the validator schemas | 2026-11-21 | Accepted |
+| ADR                                                | Title                                                  | Date       | Status   |
+| -------------------------------------------------- | ------------------------------------------------------ | ---------- | -------- |
+| [0001](0001-keep-in-memory-repositories.md)        | Keep in-memory repositories for now                    | 2026-11-21 | Accepted |
+| [0002](0002-synchronous-buses-for-the-core.md)     | Synchronous command bus and event bus for the core     | 2026-11-21 | Accepted |
+| [0003](0003-api-docs-from-validator-schemas.md)    | API documentation generated from the validator schemas | 2026-11-21 | Accepted |
+| [0004](0004-query-side-query-bus-daos-and-dtos.md) | Query side: query bus, DAOs and DTOs                   | 2026-11-23 | Accepted |
