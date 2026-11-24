@@ -20,18 +20,18 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
 
 ## Files
 
-| File                                                                     | Holds                                                                                                   |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `application/<use-case>/<use-case>.query.ts`                             | `XQuery extends Query<XResponse>`, `QUERY_NAME`                                                         |
-| `application/<use-case>/<use-case>.query-handler.ts`                     | `implements QueryHandler<XQuery, XResponse>`                                                            |
-| `application/<use-case>/<use-case>.response.ts`                          | The DTO type and `XResponse` (often `Paginated<XDto>`)                                                  |
-| `application/<use-case>/<name>.dao.ts`                                   | DAO port and its filter type                                                                            |
-| `infrastructure/daos/<name>.dao.in-memory.ts`                            | In-memory DAO adapter over the shared store                                                             |
-| `infrastructure/stores/<aggregate>.store.in-memory.ts`                   | The store the repository and the DAO share                                                              |
-| `infrastructure/controllers/<use-case>.http-controller.ts` + `.input.ts` | GET controller and its input type                                                                       |
-| `external/validation/<use-case>.response-schema.ts`                      | zod schema of the response, for the docs                                                                |
-| `external/validation/<use-case>.schema.ts`                               | zod schema built with `queryOptionsSchema` (`src/packages/external/validation/query-options.schema.ts`) |
-| `infrastructure/docs/<use-case>.route-doc.ts`                            | Route doc (see the `http-route-docs` skill)                                                             |
+| File                                                       | Holds                                                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `application/<use-case>/<use-case>.query.ts`               | `XQuery extends Query<XResponse>`, `QUERY_NAME`                                                         |
+| `application/<use-case>/<use-case>.query-handler.ts`       | `implements QueryHandler<XQuery, XResponse>`                                                            |
+| `application/<use-case>/<use-case>.response.ts`            | The DTO type and `XResponse` (often `Paginated<XDto>`)                                                  |
+| `application/<use-case>/<name>.dao.ts`                     | DAO port and its criteria type                                                                          |
+| `infrastructure/daos/<name>.dao.in-memory.ts`              | In-memory DAO adapter over the shared store                                                             |
+| `infrastructure/stores/<aggregate>.store.in-memory.ts`     | The store the repository and the DAO share                                                              |
+| `infrastructure/controllers/<use-case>.http-controller.ts` | GET controller, with its `<Name>Input` type declared in the same file                                   |
+| `external/validation/<use-case>.response-schema.ts`        | zod schema of the response, for the docs                                                                |
+| `external/validation/<use-case>.schema.ts`                 | zod schema built with `queryOptionsSchema` (`src/packages/external/validation/query-options.schema.ts`) |
+| `infrastructure/docs/<use-case>.route-doc.ts`              | Route doc (see the `http-route-docs` skill)                                                             |
 
 ## Recipe (test first at every step, see `test/CLAUDE.md`)
 
@@ -47,33 +47,37 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
         readonly filters?: WantedItemsFilters;
     ```
 
-2. **Response and DAO port**: DTO fields are primitives the driver shows; filters are optional fields. Declare the response and DTO with `type`, not `interface` (`QueryResponse` is `Record<string, unknown>`, which an interface doesn't satisfy).
+2. **Response and DAO port**: DTO fields are primitives the driver shows; the DAO takes the query's criteria (its scope, its filters and its sort) and a `Pagination`. Declare the response and DTO with `type`, not `interface` (`QueryResponse` is `Record<string, unknown>`, which an interface doesn't satisfy).
 
     ```ts
-    export type WantedItemsFilter = { accountId: number; enabled?: boolean };
+    export type WantedItemsCriteria = {
+        accountId: number;
+        filters?: WantedItemsFilters;
+        sort?: WantedItemsSortKey;
+    };
 
     export interface WantedItemsDao {
-        list(filter: WantedItemsFilter, pagination: Pagination): Promise<ListWantedItemsResponse>;
+        list(criteria: WantedItemsCriteria, pagination: Pagination): Promise<ListWantedItemsResponse>;
     }
     ```
 
 3. **Handler** (`.test.ts`: stub the DAO with `jest.spyOn(container.get(X_DAO), "list").mockResolvedValue(page)`, assert the defaults and the response, and ask it once through `QUERY_BUS`):
 
     ```ts
-    handle({ accountId, enabled, page, pageSize }: ListWantedItemsQuery): Promise<ListWantedItemsResponse> {
-        return this.dao.list({ accountId, enabled }, withDefaultPage({ page, pageSize }));
+    handle({ accountId, filters, sort, page, pageSize }: ListWantedItemsQuery): Promise<ListWantedItemsResponse> {
+        return this.dao.list({ accountId, filters, sort }, withDefaultPage({ page, pageSize }));
     }
     ```
 
-4. **DAO adapter** (`.test.ts`: each filter, the page, the total, an empty result, and an item saved through the repository is listed by the DAO). Filter, then page, then map only the DTO's fields:
+4. **DAO adapter** (`.test.ts`: each filter, each sort key, the page, the total, an empty result, and an item saved through the repository is listed by the DAO). Filter, then sort, then page, then map only the DTO's fields:
 
     ```ts
-    const records = this.store.listOf(accountId).filter((record) => this.matchesEnabled(record, enabled));
-    const page = PaginatorInMemory.paginate(records, pagination);
+    const records = this.store.listOf(accountId).filter((record) => this.matchesEnabled(record, filters?.enabled));
+    const page = PaginatorInMemory.paginate(this.sortBy(records, sort), pagination);
     return { ...page, items: page.items.map((record) => this.mapToDto(record)) };
     ```
 
-    With a database: select only the DTO's columns, build the `WHERE` from the filters that are set, and get the page and its total in one atomic call.
+    With a database: select only the DTO's columns, build the `WHERE` from the filters that are set and the `ORDER BY` from the sort, and get the page and its total in one atomic call.
 
 5. **DI**: bind the DAO and the handler in the context module and add the handler to its `QUERY_HANDLERS` list (registered as `QUERY_HANDLER`); `PackagesModule` puts every `QUERY_HANDLER` on the `QueryBusInMemory`.
 6. **Driver**: schema (`.spec.ts`), then controller (`.test.ts` through the context's HTTP test builder: the listed data, each filter, the page, 400 for invalid pagination and filters). Query strings arrive as strings: convert in zod. Put `.optional().meta({ description })` on the outside of each optional query field so the param gets a description.
