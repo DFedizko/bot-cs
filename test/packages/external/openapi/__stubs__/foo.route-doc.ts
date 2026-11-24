@@ -4,6 +4,7 @@ import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import type { HttpRoute, HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import type { HttpRouteCatalog } from "@/packages/infrastructure/http/docs/http-route.catalog";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
+import { queryOptionsSchema } from "@/packages/external/validation/query-options.schema";
 
 export const FOO_ID = "7";
 export const FOO_NAME = "Bar";
@@ -66,5 +67,61 @@ export const listFoosRoute: HttpRoute = {
         description: "Lists every foo",
         tags: ["Foos"],
         responses: [{ status: HttpStatus.OK, description: "The foos" }],
+    },
+};
+
+export const FOO_PAGE = "2";
+export const FOO_FOUND = { items: [{ fooId: FOO_ID, name: FOO_NAME }], total: 1 };
+
+export const searchFoosRoute: HttpRoute = {
+    method: HttpMethod.GET,
+    path: "/owners/:ownerId/foos",
+    input: new ValidatorZodAdapter(
+        z.object({
+            ownerId: z.string().meta({ description: "The owner of the foos", examples: [FOO_ID] }),
+            name: z
+                .string()
+                .optional()
+                .meta({ description: "The name to look for", examples: [FOO_NAME] }),
+            page: z
+                .string()
+                .optional()
+                .meta({ description: "The page to read", examples: [FOO_PAGE] }),
+        }),
+    ),
+    doc: {
+        summary: "Search the foos",
+        description: "Lists the foos of an owner",
+        tags: ["Foos"],
+        responses: [
+            {
+                status: HttpStatus.OK,
+                description: "The foos found",
+                body: new ValidatorZodAdapter(
+                    z.object({
+                        items: z.array(z.object({ fooId: z.string(), name: z.string() })),
+                        total: z.number().int(),
+                    }),
+                ),
+                examples: { fooFound: { summary: "One foo found", value: FOO_FOUND } },
+            },
+        ],
+    },
+};
+
+export const pagedFoosRoute: HttpRoute = {
+    method: HttpMethod.GET,
+    path: "/owners/:ownerId/paged-foos",
+    input: new ValidatorZodAdapter(
+        queryOptionsSchema(
+            { ownerId: z.string().meta({ description: "The owner of the foos", examples: [FOO_ID] }) },
+            { sort: ["name"], filters: { name: z.string().optional().meta({ description: "The name to look for" }) } },
+        ),
+    ),
+    doc: {
+        summary: "Page through the foos",
+        description: "Lists the foos of an owner, a page at a time",
+        tags: ["Foos"],
+        responses: [{ status: HttpStatus.OK, description: "A page of foos" }],
     },
 };

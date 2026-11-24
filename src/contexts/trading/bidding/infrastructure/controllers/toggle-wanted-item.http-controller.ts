@@ -6,7 +6,12 @@ import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-in
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { ToggleWantedItemCommand } from "../../application/toggle-wanted-item/toggle-wanted-item.command";
-import type { ToggleWantedItemInput } from "./toggle-wanted-item.input";
+
+export type ToggleWantedItemInput = {
+    accountId: number;
+    name: string;
+    enabled: boolean;
+};
 
 export class ToggleWantedItemHttpController implements HttpController {
     static readonly PATH = "/accounts/:accountId/wanted-items/:name/enabled";

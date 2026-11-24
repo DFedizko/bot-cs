@@ -2,6 +2,10 @@ import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
 import type { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
+import type { Query } from "@/packages/building-blocks/query";
+import type { QueryHandler } from "@/packages/building-blocks/query-handler";
+import type { QueryResponse } from "@/packages/building-blocks/query-response";
+import { QueryBusInMemory } from "@/packages/infrastructure/query-bus/query-bus.in-memory";
 import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
 import type { CommandBus } from "@/packages/application/command-bus";
 import { UnhandledErrorTrapLoggingAdapter } from "@/packages/infrastructure/process/unhandled-error-trap.logging-adapter";
@@ -30,6 +34,8 @@ import {
     HTTP_SERVER,
     LOGGER,
     PROCESS_EVENTS,
+    QUERY_BUS,
+    QUERY_HANDLER,
     UNHANDLED_ERROR_TRAP,
     RECORDING_HTTP_SERVER,
 } from "./packages.identifiers";
@@ -67,6 +73,11 @@ export class PackagesModule extends ContainerModule {
                 { serviceIdentifier: COMMAND_HANDLER, isMultiple: true, optional: true },
             ])
             .inSingletonScope();
+        bind(QUERY_BUS)
+            .toResolvedValue(PackagesModule.createQueryBus, [
+                { serviceIdentifier: QUERY_HANDLER, isMultiple: true, optional: true },
+            ])
+            .inSingletonScope();
         bind(COMMAND_DISPATCHER)
             .toResolvedValue(
                 (commandBus: CommandBus, logger: Logger) => new CommandDispatcherErrorBoundary(commandBus, logger),
@@ -92,6 +103,14 @@ export class PackagesModule extends ContainerModule {
 
     private static createErrorMapper(logger: Logger, mappings: HttpErrorMapping[] | undefined): HttpErrorMapper {
         return new HttpErrorMapperLoggingDecorator(new HttpErrorMapperByErrorClass(mappings), logger);
+    }
+
+    private static createQueryBus(
+        handlers: QueryHandler<Query<QueryResponse>, QueryResponse>[] | undefined,
+    ): QueryBusInMemory {
+        const queryBus = new QueryBusInMemory();
+        handlers?.forEach((handler) => queryBus.register(handler));
+        return queryBus;
     }
 
     private static createCommandBus(handlers: CommandHandler<Command>[] | undefined): CommandBusInMemory {

@@ -4,6 +4,7 @@ import { freePort } from "@/packages/external/http/__builders__/free-port.builde
 import {
     ADD_WANTED_ITEM_CONTROLLER,
     EDIT_WANTED_ITEM_CONTROLLER,
+    LIST_WANTED_ITEMS_CONTROLLER,
     REMOVE_WANTED_ITEM_CONTROLLER,
     TOGGLE_WANTED_ITEM_CONTROLLER,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
@@ -20,6 +21,7 @@ const WANTED_ITEM_CONTROLLERS = [
     EDIT_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_CONTROLLER,
     TOGGLE_WANTED_ITEM_CONTROLLER,
+    LIST_WANTED_ITEMS_CONTROLLER,
 ];
 
 const JSON_HEADERS = { "content-type": "application/json" };

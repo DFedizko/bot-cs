@@ -15,6 +15,10 @@ type CreateWantedSkinProps = {
     criteria?: CriteriaPrimitives;
 };
 
+export type WantedItemPrimitives = Required<CreateWantedSkinProps> & {
+    enabled: boolean;
+};
+
 export type WantedItemChanges = {
     maxFor?: MaxForPrimitives;
     criteria?: CriteriaPrimitives;
@@ -47,6 +51,22 @@ export class WantedItem extends AggregateRoot<ItemName> {
             MaxForFactory.create(props.maxFor),
             CriteriaFactory.create(props.criteria ?? []),
         );
+    }
+
+    static fromPrimitives({ enabled, ...props }: WantedItemPrimitives): WantedItem {
+        const wantedItem = WantedItem.create(props);
+        wantedItem.enabled = enabled;
+        return wantedItem;
+    }
+
+    toPrimitives(): WantedItemPrimitives {
+        return {
+            accountId: this.getAccountId(),
+            name: this.getName(),
+            maxFor: this.getMaxFor(),
+            criteria: this.criteria.map((criterion) => criterion.toPrimitives()),
+            enabled: this.enabled,
+        };
     }
 
     edit(changes: WantedItemChanges): void {

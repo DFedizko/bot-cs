@@ -24,12 +24,17 @@ kebab-case, `<name>.<role>[.<implementation>].ts`:
 | Kind                           | Pattern                                          | Example                                                                        |
 | ------------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------ |
 | Command / handler              | `<use-case>.command.ts` / `.command-handler.ts`  | `add-wanted-item.command-handler.ts`                                           |
+| Query / handler                | `<use-case>.query.ts` / `.query-handler.ts`      | `list-wanted-items.query-handler.ts`                                           |
+| Query response (DTOs)          | `<use-case>.response.ts`                         | `list-wanted-items.response.ts`                                                |
+| Query response schema (docs)   | `<use-case>.response-schema.ts`                  | `list-wanted-items.response-schema.ts`                                         |
+| DAO / in-memory DAO            | `<name>.dao.ts` / `<name>.dao.in-memory.ts`      | `wanted-items.dao.ts`, `wanted-items.dao.in-memory.ts`                         |
 | Event                          | `<event>.event.ts`                               | `bid-placed.event.ts`                                                          |
 | Event listener                 | `on-<event>-<action>.ts`                         | `on-outbid-counter-bid.ts`                                                     |
 | Port                           | `<name>.repository.ts`, `<name>.gateway.ts`      | `auction-participation.repository.ts`                                          |
 | Port implementation            | `<port>.<implementation>.ts`                     | `wanted-item.repository.in-memory.ts`, `auction.gateway.csgoempire-adapter.ts` |
 | External API contract / client | `<provider>-<area>.http.ts` / `.http.adapter.ts` | `csgoempire-auction.http.adapter.ts`                                           |
 | Controller                     | `<event>.ws-controller.ts`                       | `new-item.ws-controller.ts`                                                    |
+| HTTP controller / input        | `<use-case>.http-controller.ts` / `.input.ts`    | `list-wanted-items.http-controller.ts`, `list-wanted-items.input.ts`           |
 | Domain error                   | `<name>.error.ts`                                | `insufficient-balance.error.ts`                                                |
 | Factory                        | `<name>.factory.ts`                              | `criteria.factory.ts`                                                          |
 

@@ -10,6 +10,10 @@ export class HttpRequestInput {
         return { ...HttpRequestInput.readBody(body), ...params };
     }
 
+    static fromQuery({ params, searchParams }: HttpRequest): Fields {
+        return { ...searchParams, ...params };
+    }
+
     private static readBody(body: unknown): Fields {
         if (body === undefined) return {};
         if (!HttpRequestInput.isObject(body)) throw new ValidationError([BODY_FIELD]);

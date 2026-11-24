@@ -1,6 +1,6 @@
 import { Specification } from "@/packages/building-blocks/specification";
 import type { BidCandidate } from "../bid-candidate";
-import { ItemCriterionType, type ItemCriterion } from "./item-criterion";
+import { ItemCriterionType, type CriterionPrimitives, type ItemCriterion } from "./item-criterion";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { DomainError } from "@/packages/error/domain-error";
 
@@ -16,6 +16,10 @@ export class IsWear extends Specification<BidCandidate> implements ItemCriterion
 
     describe(): string {
         return `${this.type}(${this.wearName})`;
+    }
+
+    toPrimitives(): CriterionPrimitives {
+        return { type: this.type, value: this.wearName };
     }
 
     isSatisfiedBy(candidate: BidCandidate): boolean {

@@ -114,6 +114,7 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
 | ------------------------------- | ------------ | --------------------------------------------------------------------------------------- |
 | Value Object, Money             | PoEAA        | `ValueObject`, `Money`, `PositiveMoney`, `CoinCent`, `Percentage`                       |
 | Repository                      | PoEAA        | `*.repository.ts` ports, `*.repository.in-memory.ts` adapters                           |
+| Data Access Object              | Core J2EE    | `*.dao.ts` ports of the read side, `*.dao.in-memory.ts` adapters                        |
 | Gateway                         | PoEAA        | `auction.gateway.ts`, `active-trades.gateway.ts` and their `*-adapter.ts`               |
 | Data Transfer Object            | PoEAA        | `AuctionDTO`, command and event payloads                                                |
 | Service Layer                   | PoEAA        | Command handlers orchestrate domain and ports; they hold no business rules of their own |
@@ -125,7 +126,7 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
 | Composite                       | GoF          | `AndSpecification`, `OrSpecification`, `NotSpecification`                               |
 | Command                         | GoF          | `Command` objects dispatched on the `CommandBus`                                        |
 | Observer                        | GoF          | `EventBus` + `EventListener`                                                            |
-| Mediator                        | GoF          | `CommandBus` routes each command to its handler; senders never know the handler         |
+| Mediator                        | GoF          | `CommandBus` and `QueryBus` route each command or query to its handler                  |
 
 Prefer one of these before inventing a new structure. Introducing a new pattern is always welcome and is an architecture decision: record it in this file.
 
@@ -147,7 +148,13 @@ Every mutation of the application's state is a **command** handled by exactly on
 
 ### Queries read state
 
-Reads have no side effects and don't go through the command bus. A client that needs to read state gets it from a query and its query handler, placed next to the use case, never from a command's return value.
+Reads have no side effects and don't go through the command bus. A client that needs state gets it from a **query**, never from a command's return value ([ADR-0004](../adr/0004-query-side-query-bus-daos-and-dtos.md); the `cqrs-query` skill has the recipe).
+
+- A query extends `Query<TResponse>`, has a `static readonly QUERY_NAME` in snake_case and only typed `readonly` fields. `QueryBus.ask(query)` returns the response its handler (`QueryHandler<TQuery, TResponse>`) gives, with the type inferred from the query. `QueryBusInMemory` keeps one handler per `QUERY_NAME`, throws `QueryNotRegisteredError` when none is registered, and gets its handlers from the composition root.
+- Only drivers (HTTP controllers today) ask queries, after validating their input; command handlers and event listeners never do, and a query handler never asks another query.
+- The handler reads through a **DAO** port owned by its use case (`application/<use-case>/<name>.dao.ts`), shaped for the driver, with optional filters and pagination (`Pagination`, `Paginated<T>`). The DAO returns DTOs of primitives, never aggregates; its adapter lives in `infrastructure/daos/`, and a real data source behind a port in `external/`.
+- Responses are objects, never bare arrays. A missing resource is a thrown not-found error.
+- In memory, the DAO and the repository of the same aggregate share one store in `infrastructure/stores/`, so the DAO reads what the repository wrote.
 
 ### Events announce what happened
 

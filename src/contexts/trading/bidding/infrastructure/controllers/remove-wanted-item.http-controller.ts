@@ -6,7 +6,11 @@ import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-in
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { RemoveWantedItemCommand } from "../../application/remove-wanted-item/remove-wanted-item.command";
-import type { RemoveWantedItemInput } from "./remove-wanted-item.input";
+
+export type RemoveWantedItemInput = {
+    accountId: number;
+    name: string;
+};
 
 export class RemoveWantedItemHttpController implements HttpController {
     static readonly PATH = "/accounts/:accountId/wanted-items/:name";

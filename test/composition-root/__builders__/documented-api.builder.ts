@@ -11,17 +11,25 @@ import { ApiDocumentHttpController } from "@/packages/infrastructure/http/docs/a
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
 
 type JsonSchema = { properties?: Record<string, unknown>; required?: string[] };
-type OpenApiParameter = { name: string; example?: unknown; schema: { examples?: unknown[] } };
+type OpenApiParameter = {
+    name: string;
+    in: string;
+    required?: boolean;
+    description?: string;
+    schema: { examples?: unknown[] };
+};
 type OpenApiOperation = {
     parameters: OpenApiParameter[];
     requestBody?: { content: Record<string, { schema: JsonSchema; example?: unknown }> };
-    responses: Record<string, unknown>;
+    responses: Record<string, { content?: Record<string, { schema?: JsonSchema }> }>;
 };
 type OpenApiDocument = { paths: Record<string, Record<string, OpenApiOperation>> };
 
 const DOCS_PATHS = [ApiDocumentHttpController.PATH, ApiReferenceHttpController.PATH];
 const JSON_TYPE = "application/json";
 const PATH_PARAM = /:(\w+)/g;
+const READ_METHOD = "get";
+const QUERY = "query";
 
 export type Route = { method: string; path: string };
 export type DocumentedRoute = Route & { operation: OpenApiOperation };
@@ -35,8 +43,20 @@ export type DocumentedApi = {
 
 export const toOpenApiPath = (path: string): string => path.replace(PATH_PARAM, (_match, name) => `{${name}}`);
 
+const readsOnly = (route: Route): boolean => route.method === READ_METHOD;
+
+const queryParams = (route: DocumentedRoute): OpenApiParameter[] =>
+    route.operation.parameters.filter((param) => param.in === QUERY);
+
+const queryExample = (route: DocumentedRoute): Record<string, unknown> =>
+    Object.fromEntries(
+        queryParams(route)
+            .map(({ name, schema }) => [name, schema.examples?.[0]])
+            .filter(([, example]) => example !== undefined),
+    );
+
 export const exampleBody = (route: DocumentedRoute): Record<string, unknown> | undefined =>
-    exampleOf(route.operation.requestBody?.content[JSON_TYPE]?.schema);
+    readsOnly(route) ? queryExample(route) : exampleOf(route.operation.requestBody?.content[JSON_TYPE]?.schema);
 
 const exampleOf = (schema?: JsonSchema): Record<string, unknown> | undefined => {
     if (!schema) return undefined;
@@ -47,7 +67,15 @@ const exampleOf = (schema?: JsonSchema): Record<string, unknown> | undefined => 
     return Object.fromEntries(fields.filter(([, example]) => example !== undefined));
 };
 
+const queryFields = (route: DocumentedRoute): { names: string[]; required: string[] } => ({
+    names: queryParams(route).map(({ name }) => name),
+    required: queryParams(route)
+        .filter(({ required }) => required)
+        .map(({ name }) => name),
+});
+
 export const bodyFields = (route: DocumentedRoute): { names: string[]; required: string[] } => {
+    if (readsOnly(route)) return queryFields(route);
     const schema = route.operation.requestBody?.content[JSON_TYPE]?.schema;
     return { names: Object.keys(schema?.properties ?? {}), required: schema?.required ?? [] };
 };
@@ -63,11 +91,23 @@ const fillPath = (route: DocumentedRoute): string =>
         route.path,
     );
 
+const toQueryString = (fields: Record<string, unknown> = {}): string => {
+    const query = new URLSearchParams(
+        Object.entries(fields).map(([name, value]): [string, string] => [name, String(value)]),
+    );
+    return query.size ? `?${query}` : "";
+};
+
 const readFields = async (response: Response): Promise<string[]> => {
     const text = await response.text();
     const fields = text ? (JSON.parse(text).fields ?? []) : [];
     return fields.map(({ path }: { path: string }) => path);
 };
+
+const answerOf = async (response: Response): Promise<ApiAnswer> => ({
+    status: response.status,
+    fields: await readFields(response),
+});
 
 export const startDocumentedApi = async (container: Container): Promise<DocumentedApi> => {
     jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
@@ -82,9 +122,9 @@ export const startDocumentedApi = async (container: Container): Promise<Document
         served: routes.filter(({ path }) => !DOCS_PATHS.includes(path)).map(({ method, path }) => ({ method, path })),
         documented: listOperations(document),
         send: async (route, body) => {
+            if (readsOnly(route)) return answerOf(await fetch(`${url}${fillPath(route)}${toQueryString(body)}`));
             const init = body && { headers: { "content-type": JSON_TYPE }, body: JSON.stringify(body) };
-            const response = await fetch(`${url}${fillPath(route)}`, { method: route.method, ...init });
-            return { status: response.status, fields: await readFields(response) };
+            return answerOf(await fetch(`${url}${fillPath(route)}`, { method: route.method, ...init }));
         },
     };
 };
