@@ -41,6 +41,11 @@ export class HttpErrorResponseDocs {
         return HttpErrorResponseDocs.create(HttpStatus.UNPROCESSABLE_ENTITY, description, examples);
     }
 
+    static serviceUnavailable(...examples: ErrorExample[]): ErrorResponseDoc {
+        const description = "A resource the route needs is not ready yet; try again later";
+        return HttpErrorResponseDocs.create(HttpStatus.SERVICE_UNAVAILABLE, description, examples);
+    }
+
     static internalError(): ErrorResponseDoc {
         const description = "An unexpected failure; the details are only logged";
         return HttpErrorResponseDocs.create(HttpStatus.INTERNAL_SERVER_ERROR, description, [INTERNAL_ERROR]);
