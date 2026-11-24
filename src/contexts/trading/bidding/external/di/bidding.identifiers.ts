@@ -1,10 +1,14 @@
 import { identifier } from "@/packages/external/di/identifier";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import type { QueryHandler } from "@/packages/building-blocks/query-handler";
 import type { EventListener } from "@/packages/application/event-listener";
 import type { AccountRepository } from "../../application/account.repository";
 import type { AuctionParticipationRepository } from "../../application/auction-participation.repository";
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item.store.in-memory";
+import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
+import type { ListWantedItemsQuery } from "../../application/list-wanted-items/list-wanted-items.query";
+import type { ListWantedItemsResponse } from "../../application/list-wanted-items/list-wanted-items.response";
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
 import type { WithdrawalGateway } from "../../application/withdraw-item/withdrawal.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
@@ -43,6 +47,7 @@ export const ACTIVE_TRADES_GATEWAY = identifier<ActiveTradesGateway>("ActiveTrad
 export const ACCOUNT_REPOSITORY = identifier<AccountRepository>("AccountRepository");
 export const WANTED_ITEM_STORE = identifier<WantedItemStoreInMemory>("WantedItemStore");
 export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedItemRepository");
+export const WANTED_ITEMS_DAO = identifier<WantedItemsDao>("WantedItemsDao");
 export const AUCTION_PARTICIPATION_REPO = identifier<AuctionParticipationRepository>("AuctionParticipationRepository");
 export const NEW_ITEM_CONTROLLER = identifier<NewItemWsController>("NewItemWsController");
 export const AUCTION_UPDATE_CONTROLLER = identifier<AuctionUpdateWsController>("AuctionUpdateWsController");
@@ -59,6 +64,8 @@ export const EDIT_WANTED_ITEM_VALIDATOR = identifier<Validator<EditWantedItemInp
 export const REMOVE_WANTED_ITEM_VALIDATOR = identifier<Validator<RemoveWantedItemInput>>("RemoveWantedItemValidator");
 export const TOGGLE_WANTED_ITEM_VALIDATOR = identifier<Validator<ToggleWantedItemInput>>("ToggleWantedItemValidator");
 
+export const LIST_WANTED_ITEMS_HANDLER =
+    identifier<QueryHandler<ListWantedItemsQuery, ListWantedItemsResponse>>("ListWantedItemsHandler");
 export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
 export const EDIT_WANTED_ITEM_HANDLER = identifier<CommandHandler<EditWantedItemCommand>>("EditWantedItemHandler");
 export const REMOVE_WANTED_ITEM_HANDLER =
