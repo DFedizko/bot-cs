@@ -5,16 +5,22 @@ import { fakeExternals } from "@/__builders__/externals.builder";
 import {
     AUCTION_GATEWAY,
     CSGOEMPIRE_AUCTION_HTTP,
+    CSGOEMPIRE_TRADE_HTTP,
     ON_APPROVED_IN_AUCTION,
+    ON_APPROVED_OFF_AUCTION,
     ON_OUTBID,
+    WITHDRAWAL_GATEWAY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { EVENT_LISTENER, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { AuctionGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/auction.gateway.dry-run-adapter";
+import { WithdrawalGatewayDryRunAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/withdrawal.gateway.dry-run-adapter";
 import type { CsgoempireAuctionHttp } from "@/contexts/trading/bidding/infrastructure/http/csgoempire/csgoempire-auction.http";
 import { getSktMetafakeResponse } from "@/contexts/trading/shared/external/csgoempire/http/socket-metadata.http.fake-adapter";
 
 const AUCTION_ID = 11204;
 const BID_VALUE = 300;
+const ITEM_ID = 288767047;
+const COIN_VALUE = 3656;
 
 let container: Container;
 let placeBidSpy: Mock<CsgoempireAuctionHttp["placeBid"]>;
@@ -48,12 +54,28 @@ describe("BiddingDevModule", () => {
         expect(bidPlaced.bidderId).toBe(getSktMetafakeResponse.user.id);
     });
 
+    it("Should bind the dry-run withdrawal gateway", async () => {
+        const withdrawalGateway = await container.getAsync(WITHDRAWAL_GATEWAY);
+
+        expect(withdrawalGateway).toBeInstanceOf(WithdrawalGatewayDryRunAdapter);
+    });
+
+    it("Should never withdraw an item on csgoempire", async () => {
+        const withdrawSpy = jest.spyOn(container.get(CSGOEMPIRE_TRADE_HTTP), "createWithdrawal");
+        const withdrawalGateway = await container.getAsync(WITHDRAWAL_GATEWAY);
+
+        await withdrawalGateway.withdraw(ITEM_ID, COIN_VALUE);
+
+        expect(withdrawSpy).not.toHaveBeenCalled();
+    });
+
     it("Should subscribe the bidding event listeners to the core event bus", async () => {
         const listeners = await container.getAllAsync(EVENT_LISTENER);
 
         expect(listeners).toEqual([
             await container.getAsync(ON_APPROVED_IN_AUCTION),
             await container.getAsync(ON_OUTBID),
+            await container.getAsync(ON_APPROVED_OFF_AUCTION),
         ]);
     });
 });
