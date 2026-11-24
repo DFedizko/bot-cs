@@ -1,5 +1,7 @@
 import { definePort } from "../define-port";
 
+const HTTP_CLIENT_PORT = "HttpClient";
+
 export type HttpHeaders = Readonly<Record<string, string>>;
 
 export type HttpQuery = Readonly<Record<string, string | number | boolean | undefined>>;
@@ -42,4 +44,4 @@ export abstract class HttpClient {
     ): Promise<TResult>;
 }
 
-export const { Provider: HttpClientProvider, usePort: useHttpClient } = definePort<HttpClient>(HttpClient.name);
+export const { Provider: HttpClientProvider, usePort: useHttpClient } = definePort<HttpClient>(HTTP_CLIENT_PORT);

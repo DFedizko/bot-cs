@@ -26,6 +26,7 @@ const INVALID_FIELD = { path: "maxPrice", message: "Must be positive" };
 const NOT_FOUND_CODE = "NOT_FOUND";
 const NOT_FOUND_MESSAGE = "Wanted item not found";
 const GATEWAY_PAGE = "<html>Bad gateway</html>";
+const UNSERIALIZABLE_BODY = { amount: BigInt(1) };
 
 const captureError = (error: unknown) => error;
 
@@ -158,6 +159,14 @@ describe("HttpClientAxiosAdapter", () => {
             const error = await client.get<Item>(ITEMS_PATH).catch(captureError);
 
             expect(error).toMatchObject({ status: undefined, code: HttpError.NETWORK_ERROR });
+        });
+
+        it("Should throw an invalid request HttpError when the body can't be sent", async () => {
+            const client = new HttpClientAxiosAdapter(TEST_BOT_API_URL);
+
+            const error = await client.post<Item>(ITEMS_PATH, { body: UNSERIALIZABLE_BODY }).catch(captureError);
+
+            expect(error).toMatchObject({ status: undefined, code: HttpError.INVALID_REQUEST });
         });
 
         it("Should throw an HttpError, never a library error", async () => {

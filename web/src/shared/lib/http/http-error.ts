@@ -14,6 +14,8 @@ export type HttpErrorProps = HttpErrorBody & {
 };
 
 export class HttpError extends Error {
+    static readonly ERROR_NAME = "HttpError";
+    static readonly INVALID_REQUEST = "INVALID_REQUEST";
     static readonly NETWORK_ERROR = "NETWORK_ERROR";
     static readonly UNEXPECTED_RESPONSE = "UNEXPECTED_RESPONSE";
 
@@ -23,7 +25,7 @@ export class HttpError extends Error {
 
     constructor({ status, code, message, fields = [] }: HttpErrorProps) {
         super(message);
-        this.name = HttpError.name;
+        this.name = HttpError.ERROR_NAME;
         this.status = status;
         this.code = code;
         this.fields = fields;
