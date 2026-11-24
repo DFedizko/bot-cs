@@ -2,9 +2,9 @@ import type { HttpRequest } from "@/packages/infrastructure/http/http-server";
 import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-input";
 import { ValidationError } from "@/packages/infrastructure/validation/validation.error";
 
-const fooRequest = (params: Record<string, string>, body: unknown): HttpRequest => ({
+const fooRequest = (params: Record<string, string>, body: unknown, searchParams = {}): HttpRequest => ({
     params,
-    searchParams: {},
+    searchParams,
     headers: {},
     cookies: {},
     body,
@@ -25,6 +25,18 @@ describe("HttpRequestInput", () => {
 
     it("Should read a request without body as its path params", () => {
         const input = HttpRequestInput.from(fooRequest({ id: "1" }, undefined));
+
+        expect(input).toEqual({ id: "1" });
+    });
+
+    it("Should merge the search params with the path params", () => {
+        const input = HttpRequestInput.from(fooRequest({ id: "1" }, undefined, { page: "2" }));
+
+        expect(input).toEqual({ id: "1", page: "2" });
+    });
+
+    it("Should keep the path params over the search params with the same name", () => {
+        const input = HttpRequestInput.from(fooRequest({ id: "1" }, undefined, { id: "2" }));
 
         expect(input).toEqual({ id: "1" });
     });
