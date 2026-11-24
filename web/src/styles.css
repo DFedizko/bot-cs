@@ -1,15 +1,13 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./shared/ui/styles/design-system.css";
 
-* {
-    box-sizing: border-box;
-}
+@source not "../eslint.design-system.js";
+@source not "../adr";
 
 html,
 body,
 #app {
     min-height: 100%;
-}
-
-body {
-    margin: 0;
 }

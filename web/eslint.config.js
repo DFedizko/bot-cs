@@ -5,12 +5,15 @@ import { tanstackConfig } from "@tanstack/eslint-config";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import reactHooks from "eslint-plugin-react-hooks";
 import { architectureBoundaries } from "./eslint.boundaries.js";
+import { designSystem, projectCn } from "./eslint.design-system.js";
 
 export default [
     ...tanstackConfig,
     ...pluginQuery.configs["flat/recommended"],
     reactHooks.configs.flat["recommended-latest"],
     architectureBoundaries,
+    designSystem,
+    projectCn,
     {
         rules: {
             "import/no-cycle": "off",

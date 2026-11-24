@@ -1,0 +1,52 @@
+@theme static {
+    --color-*: initial;
+    --color-ground: #0a0b0c;
+    --color-surface: #141517;
+    --color-surface-2: #1c1e21;
+    --color-surface-3: #25282c;
+    --color-line: #232529;
+    --color-line-strong: #31343a;
+    --color-ink: #e8e9eb;
+    --color-muted: #9a9da3;
+    --color-faint: #64676d;
+    --color-accent: #3d7dff;
+    --color-accent-ink: #ffffff;
+    --color-positive: #3ecf8e;
+    --color-warning: #f2b544;
+    --color-danger: #f0565d;
+    --color-overlay: rgba(0, 0, 0, 0.62);
+    --color-rarity-consumer: #b0c3d9;
+    --color-rarity-industrial: #5e98d9;
+    --color-rarity-milspec: #4b69ff;
+    --color-rarity-restricted: #8847ff;
+    --color-rarity-classified: #d32ce6;
+    --color-rarity-covert: #eb4b4b;
+    --color-rarity-contraband: #e4ae39;
+    --color-stattrak: #cf6a32;
+
+    --radius-*: initial;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+    --radius-xl: 14px;
+    --radius-full: 999px;
+
+    --spacing-*: initial;
+    --spacing-1: 4px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-6: 24px;
+    --spacing-8: 32px;
+
+    --font-sans: "Geist Variable", "Geist", sans-serif;
+    --font-mono: "Geist Mono Variable", "Geist Mono", monospace;
+
+    --text-*: initial;
+    --text-xs: 11px;
+    --text-sm: 13px;
+    --text-base: 14px;
+    --text-lg: 16px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+}
