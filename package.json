@@ -12,6 +12,7 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "prepare": "husky",
+        "openapi:export": "bun src/export-openapi.ts",
         "docs:check": "npm exec --yes -- @scalar/cli@latest document validate http://localhost:$HTTP_PORT/openapi.json && npm exec --yes -- @scalar/cli@latest document lint http://localhost:$HTTP_PORT/openapi.json"
     },
     "devDependencies": {

@@ -57,3 +57,14 @@ export const removeFooRoute: HttpRoute = {
 export const undocumentedRoute: HttpRoute = { method: HttpMethod.GET, path: "/health" };
 
 export const fooCatalog = (routes: HttpRoute[]): HttpRouteCatalog => ({ routes: () => routes });
+
+export const listFoosRoute: HttpRoute = {
+    method: HttpMethod.GET,
+    path: "/foos",
+    doc: {
+        summary: "List the foos",
+        description: "Lists every foo",
+        tags: ["Foos"],
+        responses: [{ status: HttpStatus.OK, description: "The foos" }],
+    },
+};

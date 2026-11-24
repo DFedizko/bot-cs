@@ -2,19 +2,22 @@
     "name": "web",
     "private": true,
     "type": "module",
+    "engines": {
+        "node": ">=24.0.0"
+    },
     "scripts": {
-        "dev": "vite dev --port 5173 --strictPort",
-        "build": "vite build",
+        "dev": "bun run api:types && vite dev --port 5173 --strictPort",
+        "build": "bun run api:types && vite build",
         "preview": "vite preview",
         "routes": "tsr generate",
-        "typecheck": "tsr generate && tsc --noEmit",
-        "test": "tsr generate && bun test",
-        "lint": "tsr generate && eslint .",
+        "typecheck": "bun run api:types && tsr generate && tsc --noEmit",
+        "test": "bun run api:types && tsr generate && bun test",
+        "lint": "bun run api:types && tsr generate && eslint .",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "check": "bun run typecheck && bun run lint && bun run format:check && bun run test",
         "test:e2e": "playwright test",
-        "api:types": "openapi-typescript ${BOT_API_URL:-http://localhost:3000}/openapi.json -o src/shared/api/bot-api.ts"
+        "api:types": "bun run --cwd .. openapi:export && NODE_OPTIONS='--import ./openapi-typescript.resolver.js' openapi-typescript ../openapi.json -o src/shared/api/bot-api.ts"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.3.5",
