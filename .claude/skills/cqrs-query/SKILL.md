@@ -20,18 +20,18 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
 
 ## Files
 
-| File                                                                     | Holds                                                                                                        |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `application/<use-case>/<use-case>.query.ts`                             | `XQuery extends Query<XResponse>`, `QUERY_NAME`                                                              |
-| `application/<use-case>/<use-case>.query-handler.ts`                     | `implements QueryHandler<XQuery, XResponse>`                                                                 |
-| `application/<use-case>/<use-case>.response.ts`                          | The DTO type and `XResponse` (often `Paginated<XDto>`)                                                       |
-| `application/<use-case>/<name>.dao.ts`                                   | DAO port and its filter type                                                                                 |
-| `infrastructure/daos/<name>.dao.in-memory.ts`                            | In-memory DAO adapter over the shared store                                                                  |
-| `infrastructure/stores/<aggregate>.store.in-memory.ts`                   | The store the repository and the DAO share                                                                   |
-| `infrastructure/controllers/<use-case>.http-controller.ts` + `.input.ts` | GET controller and its input type                                                                            |
-| `external/validation/<use-case>.response-schema.ts`                      | zod schema of the response, for the docs                                                                     |
-| `external/validation/<use-case>.schema.ts`                               | zod schema; shared `pageField`, `pageSizeField` from `src/packages/external/validation/pagination.fields.ts` |
-| `infrastructure/docs/<use-case>.route-doc.ts`                            | Route doc (see the `http-route-docs` skill)                                                                  |
+| File                                                                     | Holds                                                                                                   |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `application/<use-case>/<use-case>.query.ts`                             | `XQuery extends Query<XResponse>`, `QUERY_NAME`                                                         |
+| `application/<use-case>/<use-case>.query-handler.ts`                     | `implements QueryHandler<XQuery, XResponse>`                                                            |
+| `application/<use-case>/<use-case>.response.ts`                          | The DTO type and `XResponse` (often `Paginated<XDto>`)                                                  |
+| `application/<use-case>/<name>.dao.ts`                                   | DAO port and its filter type                                                                            |
+| `infrastructure/daos/<name>.dao.in-memory.ts`                            | In-memory DAO adapter over the shared store                                                             |
+| `infrastructure/stores/<aggregate>.store.in-memory.ts`                   | The store the repository and the DAO share                                                              |
+| `infrastructure/controllers/<use-case>.http-controller.ts` + `.input.ts` | GET controller and its input type                                                                       |
+| `external/validation/<use-case>.response-schema.ts`                      | zod schema of the response, for the docs                                                                |
+| `external/validation/<use-case>.schema.ts`                               | zod schema built with `queryOptionsSchema` (`src/packages/external/validation/query-options.schema.ts`) |
+| `infrastructure/docs/<use-case>.route-doc.ts`                            | Route doc (see the `http-route-docs` skill)                                                             |
 
 ## Recipe (test first at every step, see `test/CLAUDE.md`)
 
@@ -41,9 +41,10 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
     export class ListWantedItemsQuery extends Query<ListWantedItemsResponse> {
         static readonly QUERY_NAME = "list_wanted_items";
         readonly accountId: number;
-        readonly enabled?: boolean;
         readonly page?: number;
         readonly pageSize?: number;
+        readonly sort?: WantedItemsSortKey;
+        readonly filters?: WantedItemsFilters;
     ```
 
 2. **Response and DAO port**: DTO fields are primitives the driver shows; filters are optional fields. Declare the response and DTO with `type`, not `interface` (`QueryResponse` is `Record<string, unknown>`, which an interface doesn't satisfy).
@@ -85,7 +86,25 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
     }
     ```
 
-7. **Docs**: the route doc is a function of the response body (`listWantedItemsDoc(body)`), and the HTTP module passes `new ValidatorZodAdapter(<use-case>ResponseSchema)`. That schema lives in `external/validation/<use-case>.response-schema.ts`, uses `paginatedSchema(item, examplePage)` (`src/packages/external/validation/paginated.schema.ts`) for a list, gives every field an example (or `docs:check` warns), has a spec that parses the documented example, and ends with `satisfies z.ZodType<XResponse>`, so it can't drift from the DTO; the frontend's types are generated from it. Add the 200 example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
+    Page, page size, limit, sort and filters come from one shared, all-optional type, typed per query:
+
+    ```ts
+    export const WANTED_ITEMS_SORT_KEYS = ["name"] as const;
+    export type WantedItemsSortKey = (typeof WANTED_ITEMS_SORT_KEYS)[number];
+    export type WantedItemsFilters = { enabled?: boolean };
+    export type ListWantedItemsOptions = QueryOptions<WantedItemsSortKey, WantedItemsFilters>;
+    ```
+
+    The controller's input type is `ListWantedItemsOptions & { accountId: number }`, declared in the controller file, and the schema is built from the same options (filters arrive flat in the query string and are gathered under `filters`):
+
+    ```ts
+    export const listWantedItemsSchema = queryOptionsSchema(
+        { accountId: accountIdField },
+        { sort: WANTED_ITEMS_SORT_KEYS, filters: { enabled: enabledFilterField } },
+    ) satisfies z.ZodType<ListWantedItemsInput>;
+    ```
+
+7. **Docs**: the route doc is a function of the response body (`listWantedItemsDoc(body)`), and the HTTP module passes `new ValidatorZodAdapter(<use-case>ResponseSchema)`. That schema lives in `external/validation/<use-case>.response-schema.ts`, uses `paginatedSchema(item, examplePage)` (`src/packages/external/validation/paginated.schema.ts`) for a list, gives every field an example (or `docs:check` warns), has a spec that parses the documented example, and ends with `satisfies z.ZodType<XResponse>`, so it can't drift from the DTO; the frontend's types are generated from it. Add the 200 example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET) with the shared examples of `src/packages/infrastructure/http/docs/query-options.error-examples.ts` (`PAGE_TOO_SMALL`, `PAGE_SIZE_TOO_BIG`, `unknownSort(keys)`…), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
 
 ## Checklist
 
