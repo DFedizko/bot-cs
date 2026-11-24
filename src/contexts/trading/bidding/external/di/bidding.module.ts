@@ -40,6 +40,7 @@ import { ActiveTradesGatewayCsgAdapter } from "../../infrastructure/gateways/act
 import { AccountRepositoryInMemory } from "../../infrastructure/repositories/account.repository.in-memory";
 import { AuctionParticipationRepositoryInMemory } from "../../infrastructure/repositories/auction-participation.repository.in-memory";
 import { WantedItemRepositoryInMemory } from "../../infrastructure/repositories/wanted-item.repository.in-memory";
+import { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item.store.in-memory";
 import { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
 import { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 import { CsgoempireAuctionHttpAdapter } from "../http/csgoempire/csgoempire-auction.http.adapter";
@@ -66,6 +67,7 @@ import {
     TOGGLE_WANTED_ITEM_HANDLER,
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
+    WANTED_ITEM_STORE,
     WITHDRAW_ITEM_HANDLER,
     WITHDRAWAL_GATEWAY,
 } from "./bidding.identifiers";
@@ -117,8 +119,14 @@ export class BiddingModule extends ContainerModule {
         bind(ACCOUNT_REPOSITORY)
             .toResolvedValue(() => new AccountRepositoryInMemory())
             .inSingletonScope();
+        bind(WANTED_ITEM_STORE)
+            .toResolvedValue(() => new WantedItemStoreInMemory())
+            .inSingletonScope();
         bind(WANTED_ITEM_REPOSITORY)
-            .toResolvedValue(() => new WantedItemRepositoryInMemory())
+            .toResolvedValue(
+                (store: WantedItemStoreInMemory) => new WantedItemRepositoryInMemory(store),
+                [WANTED_ITEM_STORE],
+            )
             .inSingletonScope();
         bind(AUCTION_PARTICIPATION_REPO)
             .toResolvedValue(() => new AuctionParticipationRepositoryInMemory())
