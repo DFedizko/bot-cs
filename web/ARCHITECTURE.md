@@ -6,7 +6,7 @@ The frontend is a single-page app that manages the bot (wanted items, accounts, 
 
 ```
 web/src/
-  main.tsx               entry: builds the QueryClient and the router, renders <App>
+  main.tsx               entry: builds the QueryClient, the router and the HTTP client, renders <App>
   app/                   composition root: providers and port bindings, using what shared/adapters builds
   routes/                TanStack Router file routes: only the Route definition (path, params, loader)
   pages/                 one component per page (<name>.page.tsx): composes feature screens
@@ -107,7 +107,7 @@ Features never import each other. A page composes them. **What is shared lives i
 
 ## Enforcement
 
-`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries only in `shared/adapters/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
+`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries and HTTP libraries only in `shared/adapters/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
 
 ## Tests
 
