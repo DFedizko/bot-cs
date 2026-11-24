@@ -11,6 +11,11 @@ import type { SearchCatalogItemsQuery } from "../../application/search-catalog-i
 import type { SearchCatalogItemsResponse } from "../../application/search-catalog-items/search-catalog-items.response";
 import type { CatalogStoreInMemory } from "../../infrastructure/stores/catalog.store.in-memory";
 import type { ByMykelSkinsHttp } from "../../infrastructure/http/bymykel/bymykel-skins.http";
+import type {
+    SearchCatalogItemsHttpController,
+    SearchCatalogItemsInput,
+} from "../../infrastructure/controllers/search-catalog-items.http-controller";
+import type { CatalogLoadingStartupController } from "../../infrastructure/controllers/catalog-loading.startup-controller";
 import type { ByMykelCatalogEntry } from "../../infrastructure/http/bymykel/types/bymykel-catalog-entry";
 
 export const BYMYKEL_HTTP_CLIENT = identifier<HttpClient>("ByMykelHttpClient");
@@ -24,3 +29,10 @@ export const CATALOG_ITEMS_DAO = identifier<CatalogItemsDao>("CatalogItemsDao");
 export const LOAD_CATALOG_HANDLER = identifier<CommandHandler<LoadCatalogCommand>>("LoadCatalogHandler");
 export const SEARCH_CATALOG_ITEMS_HANDLER =
     identifier<QueryHandler<SearchCatalogItemsQuery, SearchCatalogItemsResponse>>("SearchCatalogItemsHandler");
+
+export const SEARCH_CATALOG_ITEMS_VALIDATOR =
+    identifier<Validator<SearchCatalogItemsInput>>("SearchCatalogItemsValidator");
+export const SEARCH_CATALOG_ITEMS_CONTROLLER = identifier<SearchCatalogItemsHttpController>(
+    "SearchCatalogItemsHttpController",
+);
+export const CATALOG_LOADING_CONTROLLER = identifier<CatalogLoadingStartupController>("CatalogLoadingController");

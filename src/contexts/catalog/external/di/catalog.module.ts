@@ -1,5 +1,6 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
 import {
+    COMMAND_DISPATCHER,
     COMMAND_HANDLER,
     HTTP_CLIENT_FACTORY,
     LOGGER,
@@ -8,6 +9,7 @@ import {
 import type { HttpClientFactory } from "@/packages/external/http/client/http-client.factory";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import type { Logger } from "@/packages/application/logger";
+import type { CommandDispatcher } from "@/packages/infrastructure/command-bus/command-dispatcher";
 import type { HttpClient } from "@/packages/infrastructure/http/http-client";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { CatalogSource } from "../../application/load-catalog/catalog.source";
@@ -21,6 +23,7 @@ import { CatalogSourceByMykelAdapter } from "../../infrastructure/gateways/catal
 import { CatalogStoreInMemory } from "../../infrastructure/stores/catalog.store.in-memory";
 import { CatalogRepositoryInMemory } from "../../infrastructure/repositories/catalog.repository.in-memory";
 import { CatalogItemsDaoInMemory } from "../../infrastructure/daos/catalog-items.dao.in-memory";
+import { CatalogLoadingStartupController } from "../../infrastructure/controllers/catalog-loading.startup-controller";
 import { ByMykelSkinsHttpAdapter } from "../http/bymykel/bymykel-skins.http.adapter";
 import { byMykelCatalogEntrySchema } from "../validation/bymykel-catalog-entry.schema";
 import {
@@ -28,6 +31,7 @@ import {
     BYMYKEL_SKINS_HTTP,
     CATALOG_ENTRY_VALIDATOR,
     CATALOG_ITEMS_DAO,
+    CATALOG_LOADING_CONTROLLER,
     CATALOG_REPOSITORY,
     CATALOG_SOURCE,
     CATALOG_STORE,
@@ -93,5 +97,11 @@ export class CatalogModule extends ContainerModule {
             .inSingletonScope();
         bind(COMMAND_HANDLER).toService(LOAD_CATALOG_HANDLER);
         bind(QUERY_HANDLER).toService(SEARCH_CATALOG_ITEMS_HANDLER);
+        bind(CATALOG_LOADING_CONTROLLER)
+            .toResolvedValue(
+                (dispatcher: CommandDispatcher) => new CatalogLoadingStartupController(dispatcher),
+                [COMMAND_DISPATCHER],
+            )
+            .inSingletonScope();
     }
 }
