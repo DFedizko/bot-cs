@@ -5,6 +5,7 @@ import type { AccountRepository } from "../../application/account.repository";
 import type { AuctionParticipationRepository } from "../../application/auction-participation.repository";
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
+import type { WithdrawalGateway } from "../../application/withdraw-item/withdrawal.gateway";
 import type { ActiveTradesGateway } from "../../application/synchronize-account/active-trades.gateway";
 import type { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
 import type { EditWantedItemCommand } from "../../application/edit-wanted-item/edit-wanted-item.command";
@@ -35,6 +36,7 @@ import type { AuctionUpdateWsController } from "../../infrastructure/controllers
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");
 export const CSGOEMPIRE_TRADE_HTTP = identifier<CsgoempireTradeHttp>("CsgoempireTradeHttp");
 export const AUCTION_GATEWAY = identifier<AuctionGateway>("AuctionGateway");
+export const WITHDRAWAL_GATEWAY = identifier<WithdrawalGateway>("WithdrawalGateway");
 export const ACTIVE_TRADES_GATEWAY = identifier<ActiveTradesGateway>("ActiveTradesGateway");
 export const ACCOUNT_REPOSITORY = identifier<AccountRepository>("AccountRepository");
 export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedItemRepository");
