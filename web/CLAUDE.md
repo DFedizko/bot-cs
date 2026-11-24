@@ -7,7 +7,6 @@ React 19 single-page app built with Vite, TanStack Router (file routes) and TanS
 - **Architecture:** [`web/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a feature, a route, a port, a store or an adapter. It covers the folders, MVVM per feature, where dependencies are inverted, and server and client state.
 - **Tests:** [`web/test/CLAUDE.md`](test/CLAUDE.md) before writing or changing any test (UI and hook integration tests, MSW mocks typed by the bot's OpenAPI document); [`web/e2e/CLAUDE.md`](e2e/CLAUDE.md) for Playwright end-to-end tests.
 - **Decisions:** the frontend's ADRs in [`web/adr/`](adr/README.md), separate from the bot's. Follow the accepted ones, and record new frontend decisions there.
-- **Skill:** `web-feature` when creating a feature or adding a port, store, adapter or view-model to one.
 
 Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `ports/`, `adapters/`, `view-model/` (hooks) and `view/` (components that only receive props), wired by `<feature>.screen.tsx` and exposed through `index.ts`. Route files only define routes, pages compose feature screens, shared layouts frame pages; `app/` is the composition root; `shared/` holds what more than one feature uses. `bun run lint` enforces these boundaries.
 

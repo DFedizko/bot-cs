@@ -6,7 +6,6 @@ Bun + TypeScript. It connects to CSGOEmpire's WebSocket, evaluates new items aga
 
 - **Tests:** [`test/CLAUDE.md`](../test/CLAUDE.md) before writing or changing any test.
 - **Architecture:** [`src/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a use case, a port, an adapter, an event or a bounded context. It covers strategic DDD, the Clean Architecture layers, tactical DDD and patterns, and CQRS with events.
-- **Skills** (load them when the task needs them): `external-api-contract` for code that talks to CSGOEmpire (contracts, adapters, mocks, fakes), `steam-integration` for Steam logins, trade offers and confirmations, `http-route-docs` for creating or changing an HTTP route.
 
 Summary: `src/contexts/<context>/<subdomain>/` holds each bounded context, with use-case folders in `application/` and domain-concept folders in `domain/`; dependencies point `external → infrastructure → application → domain`, and `bun run lint` enforces it.
 

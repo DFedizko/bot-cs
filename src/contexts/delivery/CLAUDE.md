@@ -52,4 +52,4 @@ These apply to every change that touches trades:
 - Ports are split by role and owned by the use case that consumes them (interface segregation): a handler depends only on the Steam or marketplace actions it performs.
 - Credentials are read per account through the `SteamCredentials` port, never from the environment directly.
 - Other contexts use delivery only through its barrel (`index.ts`): commands, events and DTO types. Delivery uses other contexts only through their barrels, except in its DI modules.
-- Steam behaviour comes from the libraries' documentation (`steam-integration` skill), and CSGOEmpire contracts from the docs (`external-api-contract` skill).
+- Steam behaviour comes from the libraries' documentation, and CSGOEmpire contracts from its docs.
