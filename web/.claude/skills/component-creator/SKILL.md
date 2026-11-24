@@ -1,6 +1,6 @@
 ---
 name: component-creator
-description: How to build React components as composable parts (a root plus subcomponents, each exported on its own, grouped in a folder with an index.ts), with UI state kept inside and app state passed in through props. Use it whenever you create a new UI component or refactor one, including wrapping a library primitive (Base UI, Radix, shadcn, Headless UI) into the project's own component, or when a component starts growing boolean or "show"/"position" props. Skip it when you only use existing components.
+description: How to build React components as composable parts (a root plus subcomponents, each exported on its own, grouped in a folder with an index.ts), with UI state in one store per instance (built with the project's state manager) and app state passed in through props. Use it whenever you create a new UI component or refactor one, including wrapping a library primitive (Base UI, Radix, shadcn, Headless UI) into the project's own component, or when a component starts growing boolean or "show"/"position" props. Skip it when you only use existing components.
 ---
 
 # Building components by composition
@@ -58,11 +58,12 @@ Separate two kinds of state:
 
 Then:
 
-1. **UI state in the root.** The root keeps the state its parts share with `useState` or `useReducer` and provides it through React context, once per instance: two `ItemCard`s on a page never share state. The parts read and update it themselves, so the caller never threads it through props.
-2. **App state through controlled props.** The root (or the part where the interaction happens) accepts `value`/`onValueChange`, `checked`/`onCheckedChange`, `open`/`onOpenChange`; offer `defaultValue` too when the component also makes sense uncontrolled. Components never fetch data or read app stores.
-3. **A state manager inside a component is the exception**: only when the project's architecture allows it in the UI layer and profiling shows context re-renders are a real problem. Then create one store per root instance with the project's library (or the abstraction the project puts over it) and let each part subscribe to the slice it renders.
-4. **The context hook fails loudly**: `useItemCardContext()` throws `"ItemCardTitle must be used inside ItemCard"` when a part is used outside its root.
-5. **Wrapped library primitives already hold their own state** (a dialog's open state, a select's value): don't copy it; only add the UI state the library doesn't have.
+1. **UI state in one store per root instance.** The root creates a store for the state its parts share, once per instance (two `ItemCard`s on a page never share state), and provides it to its parts through React context. Each part subscribes only to the slice it renders, so a change in one part doesn't re-render the others, and parts read and update it themselves: the caller never threads it through props.
+    - Create the store with the **project's state manager** (`package.json`: Zustand, Jotai, Valtio, Redux...). If the project hides the library behind its own abstraction (a store interface, a store-factory port, an adapter folder), create it through that abstraction and never import the library in the component.
+    - With no state manager in the project, the root keeps the state with `useState` or `useReducer` and provides it through context.
+2. **App state through controlled props.** The root (or the part where the interaction happens) accepts `value`/`onValueChange`, `checked`/`onCheckedChange`, `open`/`onOpenChange`; offer `defaultValue` too when the component also makes sense uncontrolled, and keep the instance store in sync with the controlled value. Components never fetch data or read app stores.
+3. **The context hook fails loudly**: `useItemCardContext()` throws `"ItemCardTitle must be used inside ItemCard"` when a part is used outside its root.
+4. **Wrapped library primitives already hold their own state** (a dialog's open state, a select's value): don't copy it; only add the UI state the library doesn't have.
 
 ## Checklist
 
@@ -70,7 +71,7 @@ Then:
 - [ ] Parts are named `<Root><Part>`, exported individually, no namespace object.
 - [ ] No boolean or position props that choose structure: those are parts.
 - [ ] Events only where the interaction happens, and only the ones a caller needs.
-- [ ] UI state lives in the root's context, one per instance; app state comes in through controlled props; no fetching or app stores inside the component.
+- [ ] UI state lives in one store per root instance, made with the project's state manager (or its abstraction) and provided through context; app state comes in through controlled props; no fetching or app stores inside the component.
 - [ ] Library primitives keep owning their state and accessibility.
 - [ ] Parts forward native props and use semantic elements.
 - [ ] Code a generator owns (e.g. files a component CLI writes and may overwrite) stays as generated; compose on top of it instead of restructuring it.
