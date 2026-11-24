@@ -14,6 +14,7 @@ import { ValidatorZodAdapter } from "../validation/validator.zod-adapter";
 import { httpErrorBodySchema } from "./http-error-body.schema";
 
 const OPENAPI_VERSION = "3.1.0";
+const JSON_TYPE = "application/json";
 const PATH_PARAM = /:(\w+)/g;
 const PARAM_PREFIX = ":";
 const PARAM_PREFIX_LENGTH = PARAM_PREFIX.length;
@@ -67,22 +68,28 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     private createOperation({ doc, input, path, method }: DocumentedRoute): ZodOpenApiOperationObject {
         const shape = this.readShape(input);
         const params = this.readParamNames(path);
-        const body = Object.entries(shape).filter(([name]) => !params.includes(name));
+        const fields = z.object(Object.fromEntries(Object.entries(shape).filter(([name]) => !params.includes(name))));
+        const hasFields = Object.keys(fields.shape).length > 0;
         const { summary, description, tags } = doc;
         return {
             operationId: this.createOperationId(method, path),
             summary,
             description,
             tags,
-            requestParams: { path: z.object(Object.fromEntries(params.map((name) => [name, shape[name]]))) },
-            ...(body.length > 0 && {
-                requestBody: {
-                    description: summary,
-                    content: { "application/json": { schema: z.object(Object.fromEntries(body)) } },
-                },
-            }),
+            requestParams: {
+                path: z.object(Object.fromEntries(params.map((name) => [name, shape[name]]))),
+                ...(hasFields && this.readsOnly(method) && { query: fields }),
+            },
+            ...(hasFields &&
+                !this.readsOnly(method) && {
+                    requestBody: { description: summary, content: { [JSON_TYPE]: { schema: fields } } },
+                }),
             responses: Object.fromEntries(doc.responses.map((response) => this.createResponse(response))),
         };
+    }
+
+    private readsOnly(method: HttpMethod): boolean {
+        return method === HttpMethod.GET;
     }
 
     private readShape(input: HttpRoute["input"]): z.ZodRawShape {
@@ -91,9 +98,14 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     }
 
     private createResponse({ status, description, examples }: HttpResponseDoc): [string, ZodOpenApiResponseObject] {
-        if (status < FIRST_ERROR_STATUS) return [String(status), { description }];
-        const content = { "application/json": { schema: httpErrorBodySchema, ...(examples && { examples }) } };
+        if (status < FIRST_ERROR_STATUS)
+            return [String(status), { description, ...this.createSuccessContent(examples) }];
+        const content = { [JSON_TYPE]: { schema: httpErrorBodySchema, ...(examples && { examples }) } };
         return [String(status), { description, content }];
+    }
+
+    private createSuccessContent(examples: HttpResponseDoc["examples"]): Pick<ZodOpenApiResponseObject, "content"> {
+        return examples ? { content: { [JSON_TYPE]: { examples } } } : {};
     }
 
     private createOperationId(method: string, path: string): string {

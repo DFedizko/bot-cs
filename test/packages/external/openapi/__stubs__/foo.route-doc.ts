@@ -68,3 +68,36 @@ export const listFoosRoute: HttpRoute = {
         responses: [{ status: HttpStatus.OK, description: "The foos" }],
     },
 };
+
+export const FOO_PAGE = "2";
+export const FOO_FOUND = { items: [{ fooId: FOO_ID, name: FOO_NAME }], total: 1 };
+
+export const searchFoosRoute: HttpRoute = {
+    method: HttpMethod.GET,
+    path: "/owners/:ownerId/foos",
+    input: new ValidatorZodAdapter(
+        z.object({
+            ownerId: z.string().meta({ description: "The owner of the foos", examples: [FOO_ID] }),
+            name: z
+                .string()
+                .optional()
+                .meta({ description: "The name to look for", examples: [FOO_NAME] }),
+            page: z
+                .string()
+                .optional()
+                .meta({ description: "The page to read", examples: [FOO_PAGE] }),
+        }),
+    ),
+    doc: {
+        summary: "Search the foos",
+        description: "Lists the foos of an owner",
+        tags: ["Foos"],
+        responses: [
+            {
+                status: HttpStatus.OK,
+                description: "The foos found",
+                examples: { fooFound: { summary: "One foo found", value: FOO_FOUND } },
+            },
+        ],
+    },
+};
