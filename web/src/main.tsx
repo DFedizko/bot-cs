@@ -4,7 +4,7 @@ import { App } from "./app/app";
 import { createQueryClient } from "./shared/adapters/create-query-client";
 import { createAppRouter } from "./shared/adapters/create-app-router";
 import { readViteAppConfig } from "./shared/adapters/read-vite-app-config";
-import { HttpClientAxiosAdapter } from "./shared/adapters/http-client.axios-adapter";
+import { HttpClientAxiosAdapter } from "./shared/adapters/axios/http-client.axios-adapter";
 import "./styles.css";
 
 const ROOT_ELEMENT_ID = "app";

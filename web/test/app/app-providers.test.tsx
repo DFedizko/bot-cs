@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { mswServer } from "@/__setup__/msw-server";
 import { TEST_BOT_API_URL } from "@/__builders__/test-bot-api-url";
 import { AppProviders } from "@/app/app-providers";
-import { HttpClientAxiosAdapter } from "@/shared/adapters/http-client.axios-adapter";
+import { HttpClientAxiosAdapter } from "@/shared/adapters/axios/http-client.axios-adapter";
 import { useHttpClient } from "@/shared/lib/http/http-client";
 
 const HEALTH_PATH = "/health";

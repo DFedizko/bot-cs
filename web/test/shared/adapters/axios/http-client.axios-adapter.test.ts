@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { HttpResponse, http } from "msw";
 import { mswServer } from "@/__setup__/msw-server";
 import { TEST_BOT_API_URL } from "@/__builders__/test-bot-api-url";
-import { HttpClientAxiosAdapter } from "@/shared/adapters/http-client.axios-adapter";
+import { HttpClientAxiosAdapter } from "@/shared/adapters/axios/http-client.axios-adapter";
 import { HttpError } from "@/shared/lib/http/http-error";
 
 type Item = { id: string; name: string };
