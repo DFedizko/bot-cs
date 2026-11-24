@@ -144,8 +144,9 @@ describe("WithdrawItemCommandHandler", () => {
             await withAccount();
             jest.spyOn(container.get(EVENT_BUS), "publish").mockRejectedValue(new Error());
 
-            await expect(container.get(WITHDRAW_ITEM_HANDLER).handle(withdrawCommand())).rejects.toThrow(Error);
+            const withdrawing = container.get(WITHDRAW_ITEM_HANDLER).handle(withdrawCommand());
 
+            await expect(withdrawing).rejects.toThrow(Error);
             expect((await findAccount()).getReservedAmount()).toBe(VALUE);
         });
     });

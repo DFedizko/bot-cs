@@ -18,7 +18,7 @@ type WithdrawScenario = { withdrawFailure?: WithdrawFailure };
 
 const LOST_RESPONSE_MESSAGE = "socket hang up";
 const ONE_WITHDRAWAL = 1;
-const [WITHDRAWAL_TEMPLATE] = activeTrades.data.withdrawals;
+const WITHDRAWAL_TEMPLATE: ActiveWithdrawal = activeTrades.data.withdrawals[0];
 
 export class CsgoempireTradeHttpFakeAdapter implements CsgoempireTradeHttp {
     private readonly withdrawals: ActiveWithdrawal[] = structuredClone(activeTrades.data.withdrawals);
@@ -65,7 +65,7 @@ export class CsgoempireTradeHttpFakeAdapter implements CsgoempireTradeHttp {
     private recordWithdrawal({ deposit_id, coin_value }: CreateWithdrawal.Request): ActiveWithdrawal {
         this.createdCount += ONE_WITHDRAWAL;
         const offset = this.createdCount;
-        const template = structuredClone(WITHDRAWAL_TEMPLATE!);
+        const template = structuredClone(WITHDRAWAL_TEMPLATE);
         const withdrawal: ActiveWithdrawal = {
             ...template,
             id: createWithdrawalSuccess.data.id + offset,
