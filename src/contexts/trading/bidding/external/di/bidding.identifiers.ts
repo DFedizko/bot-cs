@@ -6,6 +6,11 @@ import type { AccountRepository } from "../../application/account.repository";
 import type { AuctionParticipationRepository } from "../../application/auction-participation.repository";
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item.store.in-memory";
+import type { AccountStoreInMemory } from "../../infrastructure/stores/account.store.in-memory";
+import type { AccountsDao } from "../../application/list-accounts/accounts.dao";
+import type { ListAccountsQuery } from "../../application/list-accounts/list-accounts.query";
+import type { ListAccountsResponse } from "../../application/list-accounts/list-accounts.response";
+import type { ListAccountsHttpController } from "../../infrastructure/controllers/list-accounts.http-controller";
 import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
 import type { CatalogDetailsGateway } from "../../application/list-wanted-items/catalog-details.gateway";
 import type { ListWantedItemsQuery } from "../../application/list-wanted-items/list-wanted-items.query";
@@ -57,7 +62,9 @@ export const CSGOEMPIRE_TRADE_HTTP = identifier<CsgoempireTradeHttp>("Csgoempire
 export const AUCTION_GATEWAY = identifier<AuctionGateway>("AuctionGateway");
 export const WITHDRAWAL_GATEWAY = identifier<WithdrawalGateway>("WithdrawalGateway");
 export const ACTIVE_TRADES_GATEWAY = identifier<ActiveTradesGateway>("ActiveTradesGateway");
+export const ACCOUNT_STORE = identifier<AccountStoreInMemory>("AccountStore");
 export const ACCOUNT_REPOSITORY = identifier<AccountRepository>("AccountRepository");
+export const ACCOUNTS_DAO = identifier<AccountsDao>("AccountsDao");
 export const WANTED_ITEM_STORE = identifier<WantedItemStoreInMemory>("WantedItemStore");
 export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedItemRepository");
 export const WANTED_ITEMS_DAO = identifier<WantedItemsDao>("WantedItemsDao");
@@ -74,6 +81,7 @@ export const TOGGLE_WANTED_ITEM_CONTROLLER = identifier<ToggleWantedItemHttpCont
     "ToggleWantedItemHttpController",
 );
 export const LIST_WANTED_ITEMS_CONTROLLER = identifier<ListWantedItemsHttpController>("ListWantedItemsHttpController");
+export const LIST_ACCOUNTS_CONTROLLER = identifier<ListAccountsHttpController>("ListAccountsHttpController");
 export const LIST_WANTED_ITEMS_VALIDATOR = identifier<Validator<ListWantedItemsInput>>("ListWantedItemsValidator");
 export const ADD_WANTED_ITEM_VALIDATOR = identifier<Validator<AddWantedItemInput>>("AddWantedItemValidator");
 export const EDIT_WANTED_ITEM_VALIDATOR = identifier<Validator<EditWantedItemInput>>("EditWantedItemValidator");
@@ -82,6 +90,8 @@ export const TOGGLE_WANTED_ITEM_VALIDATOR = identifier<Validator<ToggleWantedIte
 
 export const LIST_WANTED_ITEMS_HANDLER =
     identifier<QueryHandler<ListWantedItemsQuery, ListWantedItemsResponse>>("ListWantedItemsHandler");
+export const LIST_ACCOUNTS_HANDLER =
+    identifier<QueryHandler<ListAccountsQuery, ListAccountsResponse>>("ListAccountsHandler");
 export const ADD_WANTED_ITEM_HANDLER = identifier<CommandHandler<AddWantedItemCommand>>("AddWantedItemHandler");
 export const EDIT_WANTED_ITEM_HANDLER = identifier<CommandHandler<EditWantedItemCommand>>("EditWantedItemHandler");
 export const REMOVE_WANTED_ITEM_HANDLER =
