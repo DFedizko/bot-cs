@@ -89,11 +89,12 @@ export const enabledField = z.boolean().meta({
 
 const TRUE = "true";
 const FALSE = "false";
+const ENABLED_FILTER_DESCRIPTION =
+    "true lists only the enabled items, false only the disabled ones; leave it out to list both";
 
 export const enabledFilterField = z
     .enum([TRUE, FALSE])
-    .meta({
-        description: "true lists only the enabled items, false only the disabled ones; leave it out to list both",
-        examples: [TRUE],
-    })
-    .transform((enabled) => enabled === TRUE);
+    .meta({ description: ENABLED_FILTER_DESCRIPTION, examples: [TRUE] })
+    .transform((enabled) => enabled === TRUE)
+    .optional()
+    .meta({ description: ENABLED_FILTER_DESCRIPTION });

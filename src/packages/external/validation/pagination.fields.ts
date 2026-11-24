@@ -10,11 +10,15 @@ export const pageField = z
     .regex(PLAIN_DIGITS)
     .meta({ description: PAGE_DESCRIPTION, examples: [String(FIRST_PAGE)] })
     .transform(Number)
-    .pipe(z.number().int().min(FIRST_PAGE));
+    .pipe(z.number().int().min(FIRST_PAGE))
+    .optional()
+    .meta({ description: PAGE_DESCRIPTION });
 
 export const pageSizeField = z
     .string()
     .regex(PLAIN_DIGITS)
     .meta({ description: PAGE_SIZE_DESCRIPTION, examples: [String(DEFAULT_PAGE_SIZE)] })
     .transform(Number)
-    .pipe(z.number().int().min(1).max(MAX_PAGE_SIZE));
+    .pipe(z.number().int().min(1).max(MAX_PAGE_SIZE))
+    .optional()
+    .meta({ description: PAGE_SIZE_DESCRIPTION });

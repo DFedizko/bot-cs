@@ -5,7 +5,7 @@ import { accountIdField, enabledFilterField } from "./wanted-item.fields";
 
 export const listWantedItemsSchema = z.object({
     accountId: accountIdField,
-    enabled: enabledFilterField.optional(),
-    page: pageField.optional(),
-    pageSize: pageSizeField.optional(),
+    enabled: enabledFilterField,
+    page: pageField,
+    pageSize: pageSizeField,
 }) satisfies z.ZodType<ListWantedItemsInput>;

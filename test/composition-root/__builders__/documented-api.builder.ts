@@ -11,7 +11,13 @@ import { ApiDocumentHttpController } from "@/packages/infrastructure/http/docs/a
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
 
 type JsonSchema = { properties?: Record<string, unknown>; required?: string[] };
-type OpenApiParameter = { name: string; in: string; required?: boolean; schema: { examples?: unknown[] } };
+type OpenApiParameter = {
+    name: string;
+    in: string;
+    required?: boolean;
+    description?: string;
+    schema: { examples?: unknown[] };
+};
 type OpenApiOperation = {
     parameters: OpenApiParameter[];
     requestBody?: { content: Record<string, { schema: JsonSchema; example?: unknown }> };

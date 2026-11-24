@@ -73,6 +73,14 @@ describe("Api documentation", () => {
         expect(params.filter(({ schema }) => schema.examples === undefined)).toEqual([]);
     });
 
+    it("Should describe every param", async () => {
+        const api = await startDocumentedApi(container);
+
+        const params = api.documented.flatMap(({ operation }) => operation.parameters);
+
+        expect(params.filter(({ description }) => description === undefined).map(({ name }) => name)).toEqual([]);
+    });
+
     it("Should document a success and the internal error of every route", async () => {
         const api = await startDocumentedApi(container);
 
