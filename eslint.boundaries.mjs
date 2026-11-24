@@ -22,8 +22,8 @@ const ELEMENTS = [
     { type: "composition", pattern: "src/contexts/*/external/di", partialMatch: false },
     { type: "composition", pattern: "src/contexts/*/*/external/di", partialMatch: false },
     ...CONTEXT_LAYERS.flatMap(contextLayer),
-    { type: "barrel", pattern: "src/contexts/*", capture: ["context"], partialMatch: false },
     { type: "barrel", pattern: "src/contexts/*/*", capture: ["group", "context"], partialMatch: false },
+    { type: "barrel", pattern: "src/contexts/*", capture: ["context"], partialMatch: false },
     ...["building-blocks", "domain-primitives", "error", "types", "application", "infrastructure", "external"].map(
         packageFolder,
     ),
