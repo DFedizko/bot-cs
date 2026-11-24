@@ -34,12 +34,12 @@ describe("export-openapi", () => {
     it("Should write the api document to openapi.json by default", async () => {
         await runExport(folder, []);
 
-        expect(await readFile(join(folder, DEFAULT_OUTPUT), ENCODING)).toBe((await exportedApiDocument())!);
+        expect(await readFile(join(folder, DEFAULT_OUTPUT), ENCODING)).toBe(await exportedApiDocument());
     });
 
     it("Should write the api document to the given path", async () => {
         await runExport(folder, [GIVEN_OUTPUT]);
 
-        expect(await readFile(join(folder, GIVEN_OUTPUT), ENCODING)).toBe((await exportedApiDocument())!);
+        expect(await readFile(join(folder, GIVEN_OUTPUT), ENCODING)).toBe(await exportedApiDocument());
     });
 });
