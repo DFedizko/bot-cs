@@ -6,7 +6,13 @@ import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-in
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { ListWantedItemsQuery } from "../../application/list-wanted-items/list-wanted-items.query";
-import type { ListWantedItemsInput } from "./list-wanted-items.input";
+
+export type ListWantedItemsInput = {
+    accountId: number;
+    enabled?: boolean;
+    page?: number;
+    pageSize?: number;
+};
 
 export class ListWantedItemsHttpController implements HttpController {
     static readonly PATH = "/accounts/:accountId/wanted-items";

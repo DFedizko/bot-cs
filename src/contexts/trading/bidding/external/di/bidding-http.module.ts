@@ -12,19 +12,29 @@ import type { QueryBus } from "@/packages/application/query-bus";
 import type { HttpServer } from "@/packages/infrastructure/http/http-server";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
-import { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
-import { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
-import { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
-import { ToggleWantedItemHttpController } from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
-import { ListWantedItemsHttpController } from "../../infrastructure/controllers/list-wanted-items.http-controller";
-import type { ListWantedItemsInput } from "../../infrastructure/controllers/list-wanted-items.input";
+import {
+    AddWantedItemHttpController,
+    type AddWantedItemInput,
+} from "../../infrastructure/controllers/add-wanted-item.http-controller";
+import {
+    EditWantedItemHttpController,
+    type EditWantedItemInput,
+} from "../../infrastructure/controllers/edit-wanted-item.http-controller";
+import {
+    RemoveWantedItemHttpController,
+    type RemoveWantedItemInput,
+} from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import {
+    ToggleWantedItemHttpController,
+    type ToggleWantedItemInput,
+} from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
+import {
+    ListWantedItemsHttpController,
+    type ListWantedItemsInput,
+} from "../../infrastructure/controllers/list-wanted-items.http-controller";
 import { listWantedItemsSchema } from "../validation/list-wanted-items.schema";
 import { listWantedItemsResponseSchema } from "../validation/list-wanted-items.response-schema";
 import { listWantedItemsDoc } from "../../infrastructure/docs/list-wanted-items.route-doc";
-import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
-import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
-import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
-import type { ToggleWantedItemInput } from "../../infrastructure/controllers/toggle-wanted-item.input";
 import { WantedItemNotFoundError } from "../../domain/wanted-item/errors/wanted-item-not-found.error";
 import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
 import { addWantedItemSchema } from "../validation/add-wanted-item.schema";

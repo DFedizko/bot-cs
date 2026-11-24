@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ToggleWantedItemInput } from "../../infrastructure/controllers/toggle-wanted-item.input";
+import type { ToggleWantedItemInput } from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
 import { accountIdField, enabledField, itemNameField } from "./wanted-item.fields";
 
 export const toggleWantedItemSchema = z.object({

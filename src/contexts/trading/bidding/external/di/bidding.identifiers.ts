@@ -28,17 +28,27 @@ import type { TrackAuctionUpdateCommand } from "../../application/track-auction-
 import type { CsgoempireAuctionHttp } from "../../infrastructure/http/csgoempire/csgoempire-auction.http";
 import type { CsgoempireTradeHttp } from "../../infrastructure/http/csgoempire/csgoempire-trade.http";
 import type { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
-import type { AddWantedItemHttpController } from "../../infrastructure/controllers/add-wanted-item.http-controller";
-import type { EditWantedItemHttpController } from "../../infrastructure/controllers/edit-wanted-item.http-controller";
-import type { RemoveWantedItemHttpController } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
-import type { ToggleWantedItemHttpController } from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
-import type { ListWantedItemsHttpController } from "../../infrastructure/controllers/list-wanted-items.http-controller";
-import type { ListWantedItemsInput } from "../../infrastructure/controllers/list-wanted-items.input";
-import type { ToggleWantedItemInput } from "../../infrastructure/controllers/toggle-wanted-item.input";
+import type {
+    AddWantedItemHttpController,
+    AddWantedItemInput,
+} from "../../infrastructure/controllers/add-wanted-item.http-controller";
+import type {
+    EditWantedItemHttpController,
+    EditWantedItemInput,
+} from "../../infrastructure/controllers/edit-wanted-item.http-controller";
+import type {
+    RemoveWantedItemHttpController,
+    RemoveWantedItemInput,
+} from "../../infrastructure/controllers/remove-wanted-item.http-controller";
+import type {
+    ToggleWantedItemHttpController,
+    ToggleWantedItemInput,
+} from "../../infrastructure/controllers/toggle-wanted-item.http-controller";
+import type {
+    ListWantedItemsHttpController,
+    ListWantedItemsInput,
+} from "../../infrastructure/controllers/list-wanted-items.http-controller";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
-import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
-import type { EditWantedItemInput } from "../../infrastructure/controllers/edit-wanted-item.input";
-import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
 import type { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 
 export const CSGOEMPIRE_AUCTION_HTTP = identifier<CsgoempireAuctionHttp>("CsgoempireAuctionHttp");

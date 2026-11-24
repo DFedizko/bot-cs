@@ -6,7 +6,15 @@ import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-in
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { AddWantedItemCommand } from "../../application/add-wanted-item/add-wanted-item.command";
-import type { AddWantedItemInput } from "./add-wanted-item.input";
+import type { CriteriaPrimitives } from "../../domain/wanted-item/criteria/criteria.factory";
+import type { MaxForPrimitives } from "../../domain/wanted-item/max-for/max-for";
+
+export type AddWantedItemInput = {
+    accountId: number;
+    name: string;
+    maxFor: MaxForPrimitives;
+    criteria?: CriteriaPrimitives;
+};
 
 export class AddWantedItemHttpController implements HttpController {
     static readonly PATH = "/accounts/:accountId/wanted-items";

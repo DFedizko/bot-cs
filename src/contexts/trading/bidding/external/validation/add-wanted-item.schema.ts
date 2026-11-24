@@ -1,5 +1,5 @@
 import z from "zod";
-import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.input";
+import type { AddWantedItemInput } from "../../infrastructure/controllers/add-wanted-item.http-controller";
 import { accountIdField, criteriaField, itemNameField, maxForField } from "./wanted-item.fields";
 
 export const addWantedItemSchema = z.object({
