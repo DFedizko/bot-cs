@@ -93,8 +93,9 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     }
 
     private readShape(input: HttpRoute["input"]): z.ZodRawShape {
-        const isZodObject = input instanceof ValidatorZodAdapter && input.schema instanceof z.ZodObject;
-        return isZodObject ? input.schema.shape : {};
+        if (!(input instanceof ValidatorZodAdapter)) return {};
+        const schema = input.schema instanceof z.ZodPipe ? input.schema.in : input.schema;
+        return schema instanceof z.ZodObject ? schema.shape : {};
     }
 
     private createResponse({

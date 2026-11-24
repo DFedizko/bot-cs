@@ -4,6 +4,7 @@ import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import type { HttpRoute, HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import type { HttpRouteCatalog } from "@/packages/infrastructure/http/docs/http-route.catalog";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
+import { queryOptionsSchema } from "@/packages/external/validation/query-options.schema";
 
 export const FOO_ID = "7";
 export const FOO_NAME = "Bar";
@@ -105,5 +106,22 @@ export const searchFoosRoute: HttpRoute = {
                 examples: { fooFound: { summary: "One foo found", value: FOO_FOUND } },
             },
         ],
+    },
+};
+
+export const pagedFoosRoute: HttpRoute = {
+    method: HttpMethod.GET,
+    path: "/owners/:ownerId/paged-foos",
+    input: new ValidatorZodAdapter(
+        queryOptionsSchema(
+            { ownerId: z.string().meta({ description: "The owner of the foos", examples: [FOO_ID] }) },
+            { sort: ["name"], filters: { name: z.string().optional().meta({ description: "The name to look for" }) } },
+        ),
+    ),
+    doc: {
+        summary: "Page through the foos",
+        description: "Lists the foos of an owner, a page at a time",
+        tags: ["Foos"],
+        responses: [{ status: HttpStatus.OK, description: "A page of foos" }],
     },
 };

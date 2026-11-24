@@ -1,5 +1,5 @@
 import { ApiDocumentZodOpenApiAdapter } from "@/packages/external/openapi/api-document.zod-openapi-adapter";
-import { FOO_FOUND, fooCatalog, searchFoosRoute } from "./__stubs__/foo.route-doc";
+import { FOO_FOUND, fooCatalog, pagedFoosRoute, searchFoosRoute } from "./__stubs__/foo.route-doc";
 
 type Parameter = { name: string; in: string; required?: boolean };
 type Schema = { type?: string; properties?: Record<string, unknown>; required?: string[] };
@@ -58,6 +58,20 @@ describe("ApiDocumentZodOpenApiAdapter for a route that reads", () => {
         expect([Object.keys(schema?.properties ?? {}), schema?.required]).toEqual([
             ["items", "total"],
             ["items", "total"],
+        ]);
+    });
+
+    it("Should document the fields of a schema built with the query options", () => {
+        const document = new ApiDocumentZodOpenApiAdapter(fooCatalog([pagedFoosRoute]), INFO).toJson() as Json;
+
+        const { parameters } = document.paths["/owners/{ownerId}/paged-foos"]!.get!;
+
+        expect(parameters.map(({ name, in: location }) => `${location}:${name}`)).toEqual([
+            "path:ownerId",
+            "query:page",
+            "query:pageSize",
+            "query:sort",
+            "query:name",
         ]);
     });
 });
