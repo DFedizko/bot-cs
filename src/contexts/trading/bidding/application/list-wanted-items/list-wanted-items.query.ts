@@ -2,9 +2,11 @@ import { Query } from "@/packages/building-blocks/query";
 import type { QueryOptions } from "@/packages/building-blocks/query-options";
 import type { ListWantedItemsResponse } from "./list-wanted-items.response";
 
-export const WANTED_ITEMS_SORT_KEYS = ["name"] as const;
+export const WANTED_ITEMS_SORT_KEYS = ["recent", "name-asc", "name-desc", "max-asc", "max-desc", "rarity"] as const;
 
 export type WantedItemsSortKey = (typeof WANTED_ITEMS_SORT_KEYS)[number];
+
+export const DEFAULT_WANTED_ITEMS_SORT: WantedItemsSortKey = "recent";
 
 export type WantedItemsFilters = {
     enabled?: boolean;

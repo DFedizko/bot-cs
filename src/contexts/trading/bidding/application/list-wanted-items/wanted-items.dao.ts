@@ -5,7 +5,7 @@ import type { WantedItemsFilters, WantedItemsSortKey } from "./list-wanted-items
 export type WantedItemsCriteria = {
     accountId: number;
     filters?: WantedItemsFilters;
-    sort?: WantedItemsSortKey;
+    sort: WantedItemsSortKey;
 };
 
 export interface WantedItemsDao {

@@ -50,11 +50,14 @@ describe("listWantedItemsSchema", () => {
         expect(paths).toEqual(["pageSize"]);
     });
 
-    it("Should read a sort by name", () => {
-        const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID, sort: "name" });
+    it.each([["recent"], ["name-asc"], ["name-desc"], ["max-asc"], ["max-desc"], ["rarity"]] as const)(
+        "Should read the sort %p",
+        (sort) => {
+            const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID, sort });
 
-        expect(input.sort).toBe("name");
-    });
+            expect(input.sort).toBe(sort);
+        },
+    );
 
     it("Should reject a sort key the route doesn't offer", () => {
         const paths = failingPaths({ accountId: ACCOUNT_ID, sort: "price" });

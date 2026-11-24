@@ -7,6 +7,7 @@ import type { AuctionParticipationRepository } from "../../application/auction-p
 import type { WantedItemRepository } from "../../application/wanted-item.repository";
 import type { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item.store.in-memory";
 import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
+import type { CatalogDetailsGateway } from "../../application/list-wanted-items/catalog-details.gateway";
 import type { ListWantedItemsQuery } from "../../application/list-wanted-items/list-wanted-items.query";
 import type { ListWantedItemsResponse } from "../../application/list-wanted-items/list-wanted-items.response";
 import type { AuctionGateway } from "../../application/place-bid/auction.gateway";
@@ -60,6 +61,7 @@ export const ACCOUNT_REPOSITORY = identifier<AccountRepository>("AccountReposito
 export const WANTED_ITEM_STORE = identifier<WantedItemStoreInMemory>("WantedItemStore");
 export const WANTED_ITEM_REPOSITORY = identifier<WantedItemRepository>("WantedItemRepository");
 export const WANTED_ITEMS_DAO = identifier<WantedItemsDao>("WantedItemsDao");
+export const CATALOG_DETAILS_GATEWAY = identifier<CatalogDetailsGateway>("CatalogDetailsGateway");
 export const AUCTION_PARTICIPATION_REPO = identifier<AuctionParticipationRepository>("AuctionParticipationRepository");
 export const NEW_ITEM_CONTROLLER = identifier<NewItemWsController>("NewItemWsController");
 export const AUCTION_UPDATE_CONTROLLER = identifier<AuctionUpdateWsController>("AuctionUpdateWsController");

@@ -47,6 +47,8 @@ import { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item
 import { WantedItemsDaoInMemory } from "../../infrastructure/daos/wanted-items.dao.in-memory";
 import { ListWantedItemsQueryHandler } from "../../application/list-wanted-items/list-wanted-items.query-handler";
 import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
+import type { CatalogDetailsGateway } from "../../application/list-wanted-items/catalog-details.gateway";
+import { CatalogDetailsGatewayEmptyAdapter } from "../../infrastructure/gateways/catalog-details.gateway.empty-adapter";
 import { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
 import { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 import { CsgoempireAuctionHttpAdapter } from "../http/csgoempire/csgoempire-auction.http.adapter";
@@ -58,6 +60,7 @@ import {
     AUCTION_GATEWAY,
     AUCTION_PARTICIPATION_REPO,
     AUCTION_UPDATE_CONTROLLER,
+    CATALOG_DETAILS_GATEWAY,
     CSGOEMPIRE_AUCTION_HTTP,
     CSGOEMPIRE_TRADE_HTTP,
     EDIT_WANTED_ITEM_HANDLER,
@@ -223,8 +226,15 @@ export class BiddingModule extends ContainerModule {
     }
 
     private static bindQueryHandlers({ bind }: ContainerModuleLoadOptions): void {
+        bind(CATALOG_DETAILS_GATEWAY)
+            .toResolvedValue(() => new CatalogDetailsGatewayEmptyAdapter())
+            .inSingletonScope();
         bind(WANTED_ITEMS_DAO)
-            .toResolvedValue((store: WantedItemStoreInMemory) => new WantedItemsDaoInMemory(store), [WANTED_ITEM_STORE])
+            .toResolvedValue(
+                (store: WantedItemStoreInMemory, catalog: CatalogDetailsGateway) =>
+                    new WantedItemsDaoInMemory(store, catalog),
+                [WANTED_ITEM_STORE, CATALOG_DETAILS_GATEWAY],
+            )
             .inSingletonScope();
         bind(LIST_WANTED_ITEMS_HANDLER)
             .toResolvedValue((dao: WantedItemsDao) => new ListWantedItemsQueryHandler(dao), [WANTED_ITEMS_DAO])
