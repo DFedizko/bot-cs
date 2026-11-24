@@ -1,3 +1,4 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
 import { Bootstrap } from "@/composition-root/bootstrap";
 import { testContainer } from "@/__builders__/test-container.builder";
@@ -9,7 +10,6 @@ import {
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { evaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/__mocks__/evaluate-item.command.mock";
 
@@ -25,7 +25,7 @@ const approvedOffAuctionItem = async (container: Container): Promise<void> => {
         .save(Account.sync({ id: accountId, name: BUYER_NAME, totalAmount: BUYER_BALANCE }));
     await container
         .get(WANTED_ITEM_REPOSITORY)
-        .save(WantedItem.create({ accountId, name: itemName, maxFor: maxForPercentage(aboveRecommendedPercentage) }));
+        .save(buildWantedItem({ accountId, name: itemName, maxFor: maxForPercentage(aboveRecommendedPercentage) }));
 };
 
 const evaluateOffAuctionItem = async (container: Container): Promise<void> => {

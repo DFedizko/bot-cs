@@ -10,7 +10,8 @@ import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-nam
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
 import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
 import { NonPositiveMaxValueError } from "@/contexts/trading/bidding/domain/wanted-item/errors/non-positive-max-value.error";
-import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";
+import { CLOCK, COMMAND_BUS } from "@/packages/external/di/packages.identifiers";
+import { ADDED_AT } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import { testContainer } from "@/__builders__/test-container.builder";
 import {
     ADD_WANTED_ITEM_HANDLER,
@@ -49,6 +50,17 @@ describe("AddWantedItemCommandHandler", () => {
         expect(wantedItem?.getAccountId()).toBe(command.accountId);
         expect(wantedItem?.getMaxFor()).toEqual(command.maxFor);
         expect(wantedItem?.getCriteria()).toEqual(["IsWear"]);
+    });
+
+    it("Should record when the item was added, as the clock reads it", async () => {
+        jest.spyOn(container.get(CLOCK), "now").mockReturnValue(ADDED_AT);
+
+        await container.get(ADD_WANTED_ITEM_HANDLER).handle(addAsiimov());
+
+        const wantedItem = await container
+            .get(WANTED_ITEM_REPOSITORY)
+            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+        expect(wantedItem?.toPrimitives().addedAt).toBe(ADDED_AT);
     });
 
     it("Should add a wanted item with a max value", async () => {

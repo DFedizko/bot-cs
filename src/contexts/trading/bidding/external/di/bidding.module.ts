@@ -4,9 +4,11 @@ import {
     COMMAND_DISPATCHER,
     COMMAND_HANDLER,
     EVENT_BUS,
+    CLOCK,
     LOGGER,
     QUERY_HANDLER,
 } from "@/packages/external/di/packages.identifiers";
+import type { Clock } from "@/packages/application/clock";
 import type { CommandDispatcher } from "@/packages/infrastructure/command-bus/command-dispatcher";
 import {
     CSG_WS_CLIENT,
@@ -145,8 +147,8 @@ export class BiddingModule extends ContainerModule {
     private static bindWantedItemHandlers({ bind }: ContainerModuleLoadOptions): void {
         bind(ADD_WANTED_ITEM_HANDLER)
             .toResolvedValue(
-                (repo: WantedItemRepository) => new AddWantedItemCommandHandler(repo),
-                [WANTED_ITEM_REPOSITORY],
+                (repo: WantedItemRepository, clock: Clock) => new AddWantedItemCommandHandler(repo, clock),
+                [WANTED_ITEM_REPOSITORY, CLOCK],
             )
             .inSingletonScope();
         bind(EDIT_WANTED_ITEM_HANDLER)

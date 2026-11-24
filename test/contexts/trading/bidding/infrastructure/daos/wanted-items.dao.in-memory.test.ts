@@ -1,3 +1,7 @@
+import {
+    ADDED_AT,
+    buildWantedItem,
+} from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import {
@@ -6,7 +10,6 @@ import {
 } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import {
     WANTED_ITEM_REPOSITORY,
     WANTED_ITEM_STORE,
@@ -30,6 +33,7 @@ const record = (name: string, enabled = true, accountId = ACCOUNT_ID) => ({
     maxFor: maxForPercentage("-3"),
     criteria: [FIELD_TESTED],
     enabled,
+    addedAt: ADDED_AT,
 });
 
 const dto = (name: string, enabled = true) => ({
@@ -108,7 +112,7 @@ describe("WantedItemsDaoInMemory", () => {
     });
 
     it("Should list a wanted item saved through the repository", async () => {
-        const asiimov = WantedItem.create({ accountId: ACCOUNT_ID, name: ASIIMOV, maxFor: maxForValue(MAX_VALUE) });
+        const asiimov = buildWantedItem({ accountId: ACCOUNT_ID, name: ASIIMOV, maxFor: maxForValue(MAX_VALUE) });
         await container.get(WANTED_ITEM_REPOSITORY).save(asiimov);
 
         const page = await container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID }, FIRST_PAGE);

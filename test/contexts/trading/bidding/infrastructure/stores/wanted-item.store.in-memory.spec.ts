@@ -1,4 +1,5 @@
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
+import { ADDED_AT } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import { WantedItemStoreInMemory } from "@/contexts/trading/bidding/infrastructure/stores/wanted-item.store.in-memory";
 
 const ACCOUNT_ID = 1;
@@ -12,6 +13,7 @@ const record = (accountId: number, name: string) => ({
     maxFor: maxForPercentage("-3"),
     criteria: [],
     enabled: true,
+    addedAt: ADDED_AT,
 });
 
 describe("WantedItemStoreInMemory", () => {
