@@ -27,4 +27,12 @@ describe("ByMykelSkinsHttpAdapter", () => {
 
         expect(skins).toEqual(skinsNotGrouped());
     });
+
+    it("Should read the skins when the file is served as plain text", async () => {
+        jest.spyOn(container.get(BYMYKEL_HTTP_CLIENT), "get").mockResolvedValue(JSON.stringify(skinsNotGrouped()));
+
+        const skins = await container.get(BYMYKEL_SKINS_HTTP).getSkinsNotGrouped();
+
+        expect(skins).toEqual(skinsNotGrouped());
+    });
 });

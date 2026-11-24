@@ -8,7 +8,8 @@ export class ByMykelSkinsHttpAdapter implements ByMykelSkinsHttp {
 
     constructor(private readonly client: HttpClient) {}
 
-    getSkinsNotGrouped(): Promise<GetSkinsNotGrouped.Response> {
-        return this.client.get<GetSkinsNotGrouped.Response>(ByMykelSkinsHttpAdapter.SKINS_PATH);
+    async getSkinsNotGrouped(): Promise<GetSkinsNotGrouped.Response> {
+        const body = await this.client.get<GetSkinsNotGrouped.Response | string>(ByMykelSkinsHttpAdapter.SKINS_PATH);
+        return typeof body === "string" ? JSON.parse(body) : body;
     }
 }
