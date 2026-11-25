@@ -20,6 +20,7 @@ import {
     VULCAN,
     wantedItemRecord,
 } from "./__mocks__/wanted-item-record.mock";
+import { CatalogDetailsGatewayFakeAdapter } from "../gateways/catalog-details.gateway.fake-adapter";
 
 const MAX_VALUE = 19400;
 const NEWEST_FIRST = { field: "addedAt", order: "desc" } as const;
@@ -49,6 +50,7 @@ let container: Container;
 describe("WantedItemsDaoInMemory", () => {
     beforeEach(() => {
         container = testContainer();
+        container.rebind(CATALOG_DETAILS_GATEWAY).toConstantValue(new CatalogDetailsGatewayFakeAdapter());
     });
 
     it("Should list the wanted items of the account as DTOs", async () => {
@@ -120,9 +122,9 @@ describe("WantedItemsDaoInMemory", () => {
     });
 
     it("Should give the catalog details the catalog knows of the item", async () => {
-        jest.spyOn(container.get(CATALOG_DETAILS_GATEWAY), "findByNames").mockResolvedValue(
-            new Map([[ASIIMOV, catalogDetails()]]),
-        );
+        container
+            .rebind(CATALOG_DETAILS_GATEWAY)
+            .toConstantValue(new CatalogDetailsGatewayFakeAdapter(new Map([[ASIIMOV, catalogDetails()]])));
         putAll(container, [record(ASIIMOV), record(REDLINE)]);
 
         const page = await listOf(container);
