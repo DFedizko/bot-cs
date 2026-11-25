@@ -4,6 +4,7 @@ import type {
     CatalogItemDto,
     SearchCatalogItemsResponse,
 } from "../../application/search-catalog-items/search-catalog-items.response";
+import type { CatalogLookup, CatalogLookupResponse } from "../../application/look-up-catalog-items/catalog-lookup";
 import { CatalogUnavailableError } from "../../application/search-catalog-items/catalog-unavailable.error";
 import type { CatalogRow, CatalogSource } from "../sources/catalog.source";
 
@@ -16,7 +17,7 @@ const FIRST = 0;
 const STARTS_FIRST = -1;
 const STARTS_LATER = 1;
 
-export class CatalogItemsDaoMemoryCache implements CatalogItemsDao {
+export class CatalogItemsDaoMemoryCache implements CatalogItemsDao, CatalogLookup {
     private rows?: readonly CatalogRow[];
     private loading?: Promise<void>;
 
@@ -37,6 +38,12 @@ export class CatalogItemsDaoMemoryCache implements CatalogItemsDao {
         const matches = this.rows.map((row) => this.matchOf(row, words)).filter((match) => match !== undefined);
         const found = matches.toSorted((first, second) => this.compare(first, second)).slice(FIRST, limit);
         return { items: found.map(({ row }) => this.mapToDto(row)) };
+    }
+
+    async findByNames(names: readonly string[]): Promise<CatalogLookupResponse> {
+        const wanted = new Set(names);
+        const found = (this.rows ?? []).filter(({ marketHashName }) => wanted.has(marketHashName));
+        return { items: found.map((row) => this.mapToDto(row)) };
     }
 
     private async load(): Promise<void> {
