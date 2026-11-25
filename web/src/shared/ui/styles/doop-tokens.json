@@ -1,0 +1,87 @@
+{
+    "canvas": "CIuc1lzmCL",
+    "tokens": [
+        {
+            "name": "--color-ground",
+            "type": "color",
+            "value": "#0a0b0c",
+            "description": "Outer app background behind the panels (near-black)"
+        },
+        {
+            "name": "--color-surface",
+            "type": "color",
+            "value": "#141517",
+            "description": "Panels: sidebar, main content, dialogs, palette"
+        },
+        {
+            "name": "--color-surface-2",
+            "type": "color",
+            "value": "#1c1e21",
+            "description": "Raised on a panel: cards, inputs, active nav, hover"
+        },
+        { "name": "--color-line", "type": "color", "value": "#232529", "description": "Hairline borders" },
+        {
+            "name": "--color-line-strong",
+            "type": "color",
+            "value": "#31343a",
+            "description": "Hover/focus borders, key caps"
+        },
+        { "name": "--color-ink", "type": "color", "value": "#e8e9eb", "description": "Primary text" },
+        { "name": "--color-muted", "type": "color", "value": "#9a9da3", "description": "Secondary text" },
+        {
+            "name": "--color-faint",
+            "type": "color",
+            "value": "#64676d",
+            "description": "Hints, placeholders, section labels"
+        },
+        {
+            "name": "--color-accent",
+            "type": "color",
+            "value": "#3d7dff",
+            "description": "Primary action (send-button blue), focus, active indicator"
+        },
+        { "name": "--color-accent-ink", "type": "color", "value": "#ffffff", "description": "Text/icons on accent" },
+        {
+            "name": "--color-positive",
+            "type": "color",
+            "value": "#3ecf8e",
+            "description": "Below-recommended max (good deal)"
+        },
+        { "name": "--color-warning", "type": "color", "value": "#f2b544", "description": "Above-recommended max" },
+        { "name": "--color-danger", "type": "color", "value": "#f0565d", "description": "Destructive, errors" },
+        { "name": "--color-overlay", "type": "color", "value": "rgba(0,0,0,0.62)", "description": "Modal scrim" },
+        { "name": "--color-rarity-consumer", "type": "color", "value": "#b0c3d9" },
+        { "name": "--color-rarity-industrial", "type": "color", "value": "#5e98d9" },
+        { "name": "--color-rarity-milspec", "type": "color", "value": "#4b69ff" },
+        { "name": "--color-rarity-restricted", "type": "color", "value": "#8847ff" },
+        { "name": "--color-rarity-classified", "type": "color", "value": "#d32ce6" },
+        { "name": "--color-rarity-covert", "type": "color", "value": "#eb4b4b" },
+        { "name": "--color-rarity-contraband", "type": "color", "value": "#e4ae39" },
+        { "name": "--color-stattrak", "type": "color", "value": "#cf6a32" },
+        {
+            "name": "--color-surface-3",
+            "type": "color",
+            "value": "#25282c",
+            "description": "Highest neutral step: image tiles inside cards, chip counts, pressed states"
+        },
+        { "name": "--radius-sm", "type": "radius", "value": "6px" },
+        { "name": "--radius-md", "type": "radius", "value": "8px" },
+        { "name": "--radius-lg", "type": "radius", "value": "10px" },
+        { "name": "--radius-xl", "type": "radius", "value": "14px" },
+        { "name": "--radius-full", "type": "radius", "value": "999px" },
+        { "name": "--spacing-1", "type": "spacing", "value": "4px" },
+        { "name": "--spacing-2", "type": "spacing", "value": "8px" },
+        { "name": "--spacing-3", "type": "spacing", "value": "12px" },
+        { "name": "--spacing-4", "type": "spacing", "value": "16px" },
+        { "name": "--spacing-6", "type": "spacing", "value": "24px" },
+        { "name": "--spacing-8", "type": "spacing", "value": "32px" },
+        { "name": "--font-sans", "type": "fontFamily", "value": "\"Geist\", sans-serif" },
+        { "name": "--font-mono", "type": "fontFamily", "value": "\"Geist Mono\", monospace" },
+        { "name": "--text-xs", "type": "fontSize", "value": "11px" },
+        { "name": "--text-sm", "type": "fontSize", "value": "13px" },
+        { "name": "--text-base", "type": "fontSize", "value": "14px" },
+        { "name": "--text-lg", "type": "fontSize", "value": "16px" },
+        { "name": "--text-xl", "type": "fontSize", "value": "20px" },
+        { "name": "--text-2xl", "type": "fontSize", "value": "24px" }
+    ]
+}

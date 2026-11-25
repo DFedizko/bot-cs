@@ -26,6 +26,15 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 - `shared/model/` follows the same rules as a feature's `model/`: plain TypeScript, no React, no libraries. A value object is a branded type in its own file (`email/email.ts` → `Email`), plus one function per file to create and check it (`email/create-email.ts` → `createEmail`, which validates and returns an `Email`), grouped in a folder per concept.
 - Shared hooks still respect the boundaries: a hook that needs the outside world (`useLocalStorage`) reaches it through a port with its adapter in `shared/adapters/`, never by calling the browser API directly.
 
+## Design system
+
+The source of the design is the doop canvas **`CIuc1lzmCL`** ("bot-cs — Wanted items"); the decision is [ADR-0003](adr/0003-design-system-from-doop.md). Its CSS lives in `src/shared/ui/styles/` (tokens, frame values, shadcn theme mapping, typography, effects, base), imported once from `src/styles.css`.
+
+- **Theme classes and typography utilities only:** `bg-surface`, `text-muted`, `border-line`, `rounded-md`, `p-4`, `text-page-title`, `text-body`, `text-figure`... No hex, no arbitrary values (`p-[13px]`), no inline styles for design values. Tailwind's default palette, radii, font sizes and shadows don't exist here; spacing accepts only doop's steps (1, 2, 3, 4, 6, 8) and sizes whole 4px steps. `bun run lint` rejects anything else.
+- **Dark only.** There is no light theme.
+- **Tokens follow doop:** `tokens.css` mirrors `doop-tokens.json` (the canvas's `get_tokens` export), and a test keeps them equal. A new value goes on the canvas first.
+- **Components:** add shadcn components with `bunx --bun shadcn@latest add <name> -c web` (they land in `shared/ui/components/`), import `cn` from `@/shared/lib/cn`, and map their classes to the tokens until lint passes. Remove any `:root` or `.dark` block the CLI writes into `src/styles.css`.
+
 ## File naming
 
 **Every hook, component, page, layout, function, type and constant is named after its file**: the file name, without dots and dashes, in camelCase for hooks and functions, PascalCase for components, pages, layouts and types, and `UPPER_SNAKE_CASE` for constants. Files are kebab-case, except hooks, whose files are camelCase like the hook.

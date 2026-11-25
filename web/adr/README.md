@@ -32,8 +32,9 @@ This folder records the significant architecture decisions of the frontend (`web
 
 ## Index
 
-| ADR                                   | Title                 | Date       | Status   |
-| ------------------------------------- | --------------------- | ---------- | -------- |
-| [0001](0001-frontend-architecture.md) | Frontend architecture | 2026-11-22 | Accepted |
-| [0002](0002-testing-strategy.md)      | Testing strategy      | 2026-11-22 | Accepted |
-| [0004](0004-http-client.md)           | HTTP client           | 2026-11-24 | Accepted |
+| ADR                                     | Title                   | Date       | Status   |
+| --------------------------------------- | ----------------------- | ---------- | -------- |
+| [0001](0001-frontend-architecture.md)   | Frontend architecture   | 2026-11-22 | Accepted |
+| [0002](0002-testing-strategy.md)        | Testing strategy        | 2026-11-22 | Accepted |
+| [0003](0003-design-system-from-doop.md) | Design system from doop | 2026-11-22 | Accepted |
+| [0004](0004-http-client.md)             | HTTP client             | 2026-11-24 | Accepted |

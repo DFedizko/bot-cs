@@ -1,0 +1,25 @@
+@layer base {
+    :root {
+        color-scheme: dark;
+    }
+
+    * {
+        @apply border-line outline-accent/50;
+    }
+
+    html {
+        @apply bg-ground font-sans text-ink antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        @apply text-body;
+    }
+
+    table,
+    kbd,
+    output,
+    time {
+        @apply tabular-nums;
+    }
+}
