@@ -1,6 +1,7 @@
 import { FIRST_PAGE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/packages/building-blocks/pagination";
 import type { HttpErrorBody } from "../http-error.mapper";
 import type { HttpExampleDoc } from "./http-route.doc";
+import { SORT_ORDERS } from "@/packages/building-blocks/sort";
 
 type ValidationExample = HttpExampleDoc & { value: HttpErrorBody };
 
@@ -42,3 +43,12 @@ const describeSortKeys = (keys: readonly string[]): string => {
 
 export const unknownSort = (keys: readonly string[]): ValidationExample =>
     validationExample("The sort key is not one the route offers", "sort", describeSortKeys(keys));
+
+export const unknownSortField = (fields: readonly string[]): ValidationExample =>
+    validationExample("The sort field is not one the route offers", "sort", describeSortKeys(fields));
+
+export const INVALID_SORT_ORDER = validationExample(
+    "The order is neither asc nor desc",
+    "order",
+    describeSortKeys(SORT_ORDERS),
+);

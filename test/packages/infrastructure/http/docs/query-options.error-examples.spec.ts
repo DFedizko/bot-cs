@@ -1,5 +1,6 @@
 import { MAX_PAGE_SIZE } from "@/packages/building-blocks/pagination";
 import { queryOptionsSchema } from "@/packages/external/validation/query-options.schema";
+import { sortSchema } from "@/packages/external/validation/sort.fields";
 import { ValidatorZodAdapter } from "@/packages/external/validation/validator.zod-adapter";
 import { ValidationError } from "@/packages/infrastructure/validation/validation.error";
 import {
@@ -11,7 +12,9 @@ import {
     PAGE_SIZE_TOO_BIG,
     PAGE_SIZE_TOO_SMALL,
     PAGE_TOO_SMALL,
+    INVALID_SORT_ORDER,
     unknownSort,
+    unknownSortField,
 } from "@/packages/infrastructure/http/docs/query-options.error-examples";
 
 const SORT_KEYS = ["name", "size"] as const;
@@ -51,5 +54,16 @@ describe("Query options error examples", () => {
         const throwing = () => oneKey.validate({ sort: "weight" });
 
         expect(throwing).toThrow(expect.objectContaining({ fields: unknownSort([ONLY_KEY]).value.fields }));
+    });
+
+    it.each([
+        ["a sort field the query doesn't offer", { sort: "weight" }, unknownSortField(SORT_KEYS)],
+        ["an order that is neither asc nor desc", { order: "up" }, INVALID_SORT_ORDER],
+    ])("Should match the real answer to %s", (_case, input, example) => {
+        const sortValidator = new ValidatorZodAdapter(sortSchema(SORT_KEYS, { field: ONLY_KEY, order: "asc" }));
+
+        const throwing = () => sortValidator.validate(input);
+
+        expect(throwing).toThrow(expect.objectContaining({ fields: example.value.fields }));
     });
 });
