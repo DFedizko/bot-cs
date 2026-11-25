@@ -78,12 +78,22 @@ describe("CatalogItemsDaoMemoryCache as the catalog lookup", () => {
         expect(found).toEqual({ items: [] });
     });
 
-    it("Should not download the catalog when looked up before it is loaded", async () => {
+    it("Should start loading the catalog when looked up before it is loaded", async () => {
         const loadSpy = sourceGives(container, [catalogRow()]);
 
         await container.get(CATALOG_LOOKUP).findByNames([ASIIMOV]);
 
-        expect(loadSpy).not.toHaveBeenCalled();
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("Should find the items once a lookup's load has finished", async () => {
+        sourceGives(container, [catalogRow()]);
+        await container.get(CATALOG_LOOKUP).findByNames([ASIIMOV]);
+        await container.get(CATALOG_CACHE).warmUp();
+
+        const found = await container.get(CATALOG_LOOKUP).findByNames([ASIIMOV]);
+
+        expect(found).toEqual({ items: [catalogRow()] });
     });
 
     it("Should give copies a caller can't use to change the catalog", async () => {

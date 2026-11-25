@@ -19,6 +19,7 @@ const STARTS_LATER = 1;
 
 export class CatalogItemsDaoMemoryCache implements CatalogItemsDao, CatalogLookup {
     private rows?: readonly CatalogRow[];
+    private rowsByName?: ReadonlyMap<string, CatalogRow>;
     private loading?: Promise<void>;
 
     constructor(
@@ -41,8 +42,9 @@ export class CatalogItemsDaoMemoryCache implements CatalogItemsDao, CatalogLooku
     }
 
     async findByNames(names: readonly string[]): Promise<CatalogLookupResponse> {
-        const wanted = new Set(names);
-        const found = (this.rows ?? []).filter(({ marketHashName }) => wanted.has(marketHashName));
+        const rowsByName = this.rowsByName;
+        if (!rowsByName) return this.findNothingWhileLoading();
+        const found = [...new Set(names)].map((name) => rowsByName.get(name)).filter((row) => row !== undefined);
         return { items: found.map((row) => this.mapToDto(row)) };
     }
 
@@ -50,10 +52,16 @@ export class CatalogItemsDaoMemoryCache implements CatalogItemsDao, CatalogLooku
         try {
             const rows = await this.source.load();
             this.rows = rows.map((row) => ({ ...row }));
+            this.rowsByName = new Map(this.rows.map((row) => [row.marketHashName, row]));
             this.logger.log(`Catalog loaded: ${rows.length} items`);
         } catch (error) {
             this.logger.log(`Could not load the catalog: ${error instanceof Error ? error.message : String(error)}`);
         }
+    }
+
+    private findNothingWhileLoading(): CatalogLookupResponse {
+        void this.warmUp();
+        return { items: [] };
     }
 
     private refuseWhileLoading(): never {
