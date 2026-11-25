@@ -3,7 +3,6 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER, QUERY_BUS } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import { Rarity } from "@/contexts/catalog/domain/catalog-item/rarity";
 import { SearchCatalogItemsQuery } from "@/contexts/catalog/application/search-catalog-items/search-catalog-items.query";
 import { awpAsiimovFieldTested } from "../../external/http/bymykel/__mocks__/bymykel-skin.mock";
 import { loadCatalog, startCatalogApi } from "./__builders__/catalog-api.builder";
@@ -17,7 +16,7 @@ const ASIIMOV = {
     stattrak: false,
     souvenir: false,
     category: "Rifles",
-    rarity: Rarity.COVERT,
+    rarity: "covert",
     imageUrl: awpAsiimovFieldTested.image,
 };
 const STATTRAK_ASIIMOV = { ...ASIIMOV, marketHashName: "StatTrak™ AWP | Asiimov (Field-Tested)", stattrak: true };

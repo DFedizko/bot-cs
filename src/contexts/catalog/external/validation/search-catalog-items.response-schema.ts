@@ -1,7 +1,6 @@
 import z from "zod";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import { Rarity } from "../../domain/catalog-item/rarity";
-import type { SearchCatalogItemsResponse } from "../../application/search-catalog-items/search-catalog-items.response";
+import { CATALOG_RARITY_KEYS, type CatalogItemsBody } from "../../infrastructure/controllers/catalog-items.http-body";
 import { CATALOG_ITEM_EXAMPLE, VANILLA_ITEM_EXAMPLE } from "../../infrastructure/docs/catalog-item.example";
 import { CATALOG_ITEMS_FOUND } from "../../infrastructure/docs/search-catalog-items.route-doc";
 
@@ -26,7 +25,9 @@ const catalogItemSchema = z
         category: z
             .string()
             .meta({ description: "The item's category, such as Rifles or Knives", examples: [category] }),
-        rarity: z.enum(Rarity).meta({ description: "The rarity, in the bot's own vocabulary", examples: [rarity] }),
+        rarity: z
+            .enum(CATALOG_RARITY_KEYS)
+            .meta({ description: "The rarity, in the bot's own vocabulary", examples: [rarity] }),
         imageUrl: z
             .string()
             .meta({ description: "The picture of the item, loaded straight from its CDN", examples: [imageUrl] }),
@@ -40,4 +41,4 @@ export const searchCatalogItemsResponseSchema = z
             examples: [CATALOG_ITEMS_FOUND.items],
         }),
     })
-    .meta({ examples: [CATALOG_ITEMS_FOUND] }) satisfies z.ZodType<SearchCatalogItemsResponse>;
+    .meta({ examples: [CATALOG_ITEMS_FOUND] }) satisfies z.ZodType<CatalogItemsBody>;

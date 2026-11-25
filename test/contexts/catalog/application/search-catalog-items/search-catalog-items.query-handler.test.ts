@@ -1,14 +1,13 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { QUERY_BUS } from "@/packages/external/di/packages.identifiers";
-import { CatalogSearch } from "@/contexts/catalog/domain/catalog-search/catalog-search";
 import { SearchCatalogItemsQuery } from "@/contexts/catalog/application/search-catalog-items/search-catalog-items.query";
 import { CATALOG_ITEMS_DAO, SEARCH_CATALOG_ITEMS_HANDLER } from "@/contexts/catalog/external/di/catalog.identifiers";
-import { catalogItemPrimitives } from "../../domain/catalog-item/__builders__/catalog-item.builder";
+import { catalogRow } from "../__builders__/catalog-row.builder";
 
 const TEXT = "awp asii";
 const LIMIT = 5;
-const ASIIMOV_FOUND = { items: [catalogItemPrimitives()] };
+const ASIIMOV_FOUND = { items: [catalogRow()] };
 
 let container: Container;
 
@@ -32,7 +31,7 @@ describe("SearchCatalogItemsQueryHandler", () => {
 
         await container.get(SEARCH_CATALOG_ITEMS_HANDLER).handle(new SearchCatalogItemsQuery({ text: TEXT }));
 
-        expect(searchSpy).toHaveBeenCalledWith({ text: TEXT, limit: CatalogSearch.DEFAULT_LIMIT });
+        expect(searchSpy).toHaveBeenCalledWith({ text: TEXT, limit: SearchCatalogItemsQuery.DEFAULT_LIMIT });
     });
 
     it("Should search up to the asked limit", async () => {

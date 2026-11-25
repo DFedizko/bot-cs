@@ -3,8 +3,7 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { LOGGER } from "@/packages/external/di/packages.identifiers";
 import { NotFoundError } from "@/packages/infrastructure/http/errors/not-found.error";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import { Rarity } from "@/contexts/catalog/domain/catalog-item/rarity";
-import type { CatalogItem } from "@/contexts/catalog/domain/catalog-item/catalog-item";
+import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import { BYMYKEL_SKINS_HTTP, CATALOG_SOURCE } from "@/contexts/catalog/external/di/catalog.identifiers";
 import { ByMykelSkinsHttpFakeAdapter } from "../../external/http/bymykel/bymykel-skins.http.fake-adapter";
 import { awpAsiimovFieldTested, byMykelSkin } from "../../external/http/bymykel/__mocks__/bymykel-skin.mock";
@@ -14,6 +13,7 @@ import {
     akOlivePolycam,
     akUncharted,
     handWrapsSpruceDdpat,
+    karambitDopplerBlackPearl,
     m4a4Howl,
     skinsNotGrouped,
     souvenirAugSurveillance,
@@ -23,14 +23,18 @@ import {
 
 const WITHOUT_MARKET_NAME = { ...byMykelSkin(), market_hash_name: undefined };
 const UNKNOWN_RARITY = byMykelSkin({ rarity: { id: "rarity_unknown", name: "Unknown", color: "#000" } } as never);
-const BROKEN_ENTRIES = [WITHOUT_MARKET_NAME, UNKNOWN_RARITY, null];
+const BLANK_MARKET_NAME = byMykelSkin({ market_hash_name: "   " });
+const IMAGE_NOT_URL = byMykelSkin({ image: "not a url" });
+const BROKEN_ENTRIES = [WITHOUT_MARKET_NAME, UNKNOWN_RARITY, BLANK_MARKET_NAME, IMAGE_NOT_URL, null];
+const DOPPLER_PHASE_ONE = { ...karambitDopplerBlackPearl, phase: "Phase 1", image: "https://example.com/phase-1.png" };
+const DOPPLER_PHASE_TWO = { ...karambitDopplerBlackPearl, phase: "Phase 2", image: "https://example.com/phase-2.png" };
 
 const sourceServes = (container: Container, skins: readonly unknown[]) =>
     container.rebind(BYMYKEL_SKINS_HTTP).toConstantValue(new ByMykelSkinsHttpFakeAdapter(skins));
 
 const loadedItem = async (container: Container, marketHashName: string) => {
-    const items = await container.get(CATALOG_SOURCE).load();
-    return items.find((item: CatalogItem) => item.marketHashName === marketHashName)?.toPrimitives();
+    const rows = await container.get(CATALOG_SOURCE).load();
+    return rows.find((row) => row.marketHashName === marketHashName);
 };
 
 let container: Container;
@@ -41,13 +45,29 @@ describe("CatalogSourceByMykelAdapter", () => {
         jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
     });
 
-    it("Should give one catalog item per skin the source lists", async () => {
-        const items = await container.get(CATALOG_SOURCE).load();
+    it("Should give one row per skin the source lists", async () => {
+        const rows = await container.get(CATALOG_SOURCE).load();
 
-        expect(items).toHaveLength(skinsNotGrouped().length);
+        expect(rows).toHaveLength(skinsNotGrouped().length);
     });
 
-    it("Should map a skin to a catalog item", async () => {
+    it("Should keep only the first skin of a market name listed more than once", async () => {
+        sourceServes(container, [DOPPLER_PHASE_ONE, DOPPLER_PHASE_TWO]);
+
+        const rows = await container.get(CATALOG_SOURCE).load();
+
+        expect(rows.map(({ imageUrl }) => imageUrl)).toEqual([DOPPLER_PHASE_ONE.image]);
+    });
+
+    it("Should trim the market name", async () => {
+        sourceServes(container, [byMykelSkin({ market_hash_name: " AWP | Asiimov (Field-Tested) " })]);
+
+        const rows = await container.get(CATALOG_SOURCE).load();
+
+        expect(rows.map(({ marketHashName }) => marketHashName)).toEqual(["AWP | Asiimov (Field-Tested)"]);
+    });
+
+    it("Should map a skin to a row", async () => {
         const item = await loadedItem(container, awpAsiimovFieldTested.market_hash_name);
 
         expect(item).toEqual({
@@ -64,15 +84,15 @@ describe("CatalogSourceByMykelAdapter", () => {
     });
 
     it.each([
-        [souvenirAugSurveillance, Rarity.CONSUMER],
-        [akOlivePolycam, Rarity.INDUSTRIAL],
-        [akUncharted, Rarity.MILSPEC],
+        [souvenirAugSurveillance, Rarity.CONSUMER_GRADE],
+        [akOlivePolycam, Rarity.INDUSTRIAL_GRADE],
+        [akUncharted, Rarity.MIL_SPEC_GRADE],
         [akFirstClass, Rarity.RESTRICTED],
         [akCraneFlight, Rarity.CLASSIFIED],
         [awpAsiimovFieldTested, Rarity.COVERT],
         [handWrapsSpruceDdpat, Rarity.EXTRAORDINARY],
         [m4a4Howl, Rarity.CONTRABAND],
-    ])("Should map the rarity of $rarity.name to our own", async (skin, rarity) => {
+    ])("Should map the rarity of $rarity.name to the CS2 rarity", async (skin, rarity) => {
         const item = await loadedItem(container, skin.market_hash_name);
 
         expect(item?.rarity).toBe(rarity);
@@ -99,9 +119,9 @@ describe("CatalogSourceByMykelAdapter", () => {
     it("Should skip the entries the contract rejects", async () => {
         sourceServes(container, [...BROKEN_ENTRIES, ...skinsNotGrouped()]);
 
-        const items = await container.get(CATALOG_SOURCE).load();
+        const rows = await container.get(CATALOG_SOURCE).load();
 
-        expect(items).toHaveLength(skinsNotGrouped().length);
+        expect(rows).toHaveLength(skinsNotGrouped().length);
     });
 
     it("Should count the rejected entries in one warning", async () => {
@@ -110,7 +130,7 @@ describe("CatalogSourceByMykelAdapter", () => {
 
         await container.get(CATALOG_SOURCE).load();
 
-        expect(logSpy.mock.calls).toEqual([["Warning: the catalog source has 3 entries the contract rejects"]]);
+        expect(logSpy.mock.calls).toEqual([["Warning: the catalog source has 5 entries the contract rejects"]]);
     });
 
     it("Should warn about nothing when every entry is valid", async () => {

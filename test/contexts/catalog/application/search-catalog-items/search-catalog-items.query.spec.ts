@@ -16,4 +16,14 @@ describe("SearchCatalogItemsQuery", () => {
 
         expect({ ...query }).toEqual({ name: QUERY_NAME, text: TEXT, limit: LIMIT });
     });
+
+    it("Should search 20 items by default, at most 50, with a text of at least 2 characters", () => {
+        const limits = [
+            SearchCatalogItemsQuery.DEFAULT_LIMIT,
+            SearchCatalogItemsQuery.MAX_LIMIT,
+            SearchCatalogItemsQuery.MIN_TEXT_LENGTH,
+        ];
+
+        expect(limits).toEqual([20, 50, 2]);
+    });
 });

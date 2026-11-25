@@ -1,15 +1,12 @@
-import type { CatalogItemPrimitives } from "../../domain/catalog-item/catalog-item";
+import type { CatalogRow } from "../../application/catalog-row";
+import type { CatalogStore } from "../../application/load-catalog/catalog.store";
 
-export type CatalogItemRecord = CatalogItemPrimitives;
-
-export class CatalogStoreInMemory {
-    private records = new Map<string, CatalogItemRecord>();
+export class CatalogStoreInMemory implements CatalogStore {
+    private rows: readonly CatalogRow[] = [];
     private loaded = false;
 
-    replaceAll(records: CatalogItemRecord[]): void {
-        const byName = new Map<string, CatalogItemRecord>();
-        records.forEach((record) => this.keepFirstOfName(byName, record));
-        this.records = byName;
+    async replaceAll(rows: CatalogRow[]): Promise<void> {
+        this.rows = rows.map((row) => ({ ...row }));
         this.loaded = true;
     }
 
@@ -17,11 +14,7 @@ export class CatalogStoreInMemory {
         return this.loaded;
     }
 
-    list(): readonly CatalogItemRecord[] {
-        return [...this.records.values()];
-    }
-
-    private keepFirstOfName(byName: Map<string, CatalogItemRecord>, record: CatalogItemRecord): void {
-        if (!byName.has(record.marketHashName)) byName.set(record.marketHashName, record);
+    list(): readonly CatalogRow[] {
+        return this.rows;
     }
 }

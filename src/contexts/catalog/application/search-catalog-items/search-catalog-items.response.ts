@@ -1,17 +1,6 @@
-import type { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import type { Rarity } from "../../domain/catalog-item/rarity";
+import type { CatalogRow } from "../catalog-row";
 
-export type CatalogItemDto = {
-    marketHashName: string;
-    weapon: string;
-    skin: string | null;
-    wear: WearName | null;
-    stattrak: boolean;
-    souvenir: boolean;
-    category: string;
-    rarity: Rarity;
-    imageUrl: string;
-};
+export type CatalogItemDto = CatalogRow;
 
 export type SearchCatalogItemsResponse = {
     items: CatalogItemDto[];

@@ -1,5 +1,5 @@
-import type { CatalogItem } from "../../domain/catalog-item/catalog-item";
+import type { CatalogRow } from "../catalog-row";
 
 export interface CatalogSource {
-    load(): Promise<CatalogItem[]>;
+    load(): Promise<CatalogRow[]>;
 }

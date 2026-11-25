@@ -1,10 +1,10 @@
+import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import type { CatalogItemPrimitives } from "@/contexts/catalog/domain/catalog-item/catalog-item";
-import { Rarity } from "@/contexts/catalog/domain/catalog-item/rarity";
+import type { CatalogRow } from "@/contexts/catalog/application/catalog-row";
 
 export const ASIIMOV_IMAGE_URL = "https://community.akamai.steamstatic.com/economy/image/asiimov";
 
-export const catalogItemPrimitives = (overrides: Partial<CatalogItemPrimitives> = {}): CatalogItemPrimitives => ({
+export const catalogRow = (overrides: Partial<CatalogRow> = {}): CatalogRow => ({
     marketHashName: "AWP | Asiimov (Field-Tested)",
     weapon: "AWP",
     skin: "Asiimov",
@@ -16,3 +16,6 @@ export const catalogItemPrimitives = (overrides: Partial<CatalogItemPrimitives> 
     imageUrl: ASIIMOV_IMAGE_URL,
     ...overrides,
 });
+
+export const namedRows = (...names: string[]): CatalogRow[] =>
+    names.map((marketHashName) => catalogRow({ marketHashName }));

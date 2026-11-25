@@ -1,21 +1,17 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { COMMAND_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
-import { CatalogItem } from "@/contexts/catalog/domain/catalog-item/catalog-item";
 import { LoadCatalogCommand } from "@/contexts/catalog/application/load-catalog/load-catalog.command";
 import {
     CATALOG_SOURCE,
     CATALOG_STORE,
     LOAD_CATALOG_HANDLER,
 } from "@/contexts/catalog/external/di/catalog.identifiers";
-import { catalogItemPrimitives } from "../../domain/catalog-item/__builders__/catalog-item.builder";
+import { catalogRow } from "../__builders__/catalog-row.builder";
 
-const ASIIMOV = catalogItemPrimitives();
-const REDLINE = catalogItemPrimitives({ marketHashName: "AK-47 | Redline (Field-Tested)", weapon: "AK-47" });
+const ASIIMOV = catalogRow();
+const REDLINE = catalogRow({ marketHashName: "AK-47 | Redline (Field-Tested)", weapon: "AK-47" });
 const SOURCE_DOWN = new Error("The catalog source is down");
-
-const sourceGives = (container: Container, ...items: (typeof ASIIMOV)[]) =>
-    jest.spyOn(container.get(CATALOG_SOURCE), "load").mockResolvedValue(items.map((item) => CatalogItem.create(item)));
 
 let container: Container;
 
@@ -25,8 +21,8 @@ describe("LoadCatalogCommandHandler", () => {
         jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});
     });
 
-    it("Should store every item the source gives", async () => {
-        sourceGives(container, ASIIMOV, REDLINE);
+    it("Should store every row the source gives", async () => {
+        jest.spyOn(container.get(CATALOG_SOURCE), "load").mockResolvedValue([ASIIMOV, REDLINE]);
 
         await container.get(LOAD_CATALOG_HANDLER).handle(new LoadCatalogCommand());
 
@@ -34,7 +30,7 @@ describe("LoadCatalogCommandHandler", () => {
     });
 
     it("Should log how many items it loaded", async () => {
-        sourceGives(container, ASIIMOV, REDLINE);
+        jest.spyOn(container.get(CATALOG_SOURCE), "load").mockResolvedValue([ASIIMOV, REDLINE]);
         const logSpy = jest.spyOn(container.get(LOGGER), "log");
 
         await container.get(LOAD_CATALOG_HANDLER).handle(new LoadCatalogCommand());
@@ -62,7 +58,7 @@ describe("LoadCatalogCommandHandler", () => {
     });
 
     it("Should be dispatched through the command bus", async () => {
-        sourceGives(container, ASIIMOV);
+        jest.spyOn(container.get(CATALOG_SOURCE), "load").mockResolvedValue([ASIIMOV]);
 
         await container.get(COMMAND_BUS).dispatch(new LoadCatalogCommand());
 

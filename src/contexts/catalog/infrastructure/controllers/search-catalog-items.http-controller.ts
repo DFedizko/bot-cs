@@ -6,6 +6,7 @@ import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-in
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { SearchCatalogItemsQuery } from "../../application/search-catalog-items/search-catalog-items.query";
+import { mapToCatalogItemsBody } from "./catalog-items.http-body";
 
 export type SearchCatalogItemsInput = {
     q: string;
@@ -29,7 +30,7 @@ export class SearchCatalogItemsHttpController implements HttpController {
 
     async handle(request: HttpRequest): Promise<HttpResponse> {
         const { q, limit } = this.validator.validate(HttpRequestInput.fromQuery(request));
-        const body = await this.queryBus.ask(new SearchCatalogItemsQuery({ text: q, limit }));
-        return { status: HttpStatus.OK, body };
+        const response = await this.queryBus.ask(new SearchCatalogItemsQuery({ text: q, limit }));
+        return { status: HttpStatus.OK, body: mapToCatalogItemsBody(response) };
     }
 }

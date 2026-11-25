@@ -2,7 +2,7 @@ import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-rout
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpErrorResponseDocs } from "@/packages/infrastructure/http/docs/http-error.response-docs";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
-import type { SearchCatalogItemsResponse } from "../../application/search-catalog-items/search-catalog-items.response";
+import type { CatalogItemsBody } from "../controllers/catalog-items.http-body";
 import { CATALOG_TAG } from "./catalog.tag";
 import { CATALOG_ITEM_EXAMPLE } from "./catalog-item.example";
 import {
@@ -14,7 +14,7 @@ import {
     TEXT_TOO_SHORT,
 } from "./catalog.error-examples";
 
-export const CATALOG_ITEMS_FOUND: SearchCatalogItemsResponse = {
+export const CATALOG_ITEMS_FOUND: CatalogItemsBody = {
     items: [
         CATALOG_ITEM_EXAMPLE,
         {
