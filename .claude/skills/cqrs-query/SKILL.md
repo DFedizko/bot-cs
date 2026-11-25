@@ -72,10 +72,17 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
 4. **DAO adapter** (`.test.ts`: each filter, each sort field in both orders, the page, the total, an empty result, and an item saved through the repository is listed by the DAO). Filter, then sort, then page, then map only the DTO's fields:
 
     ```ts
-    const records = this.store.listOf(accountId).filter((record) => this.matchesEnabled(record, filters?.enabled));
-    const page = PaginatorInMemory.paginate(this.sortBy(records, sort), pagination);
+    const enabledFilter = new EqualsFilter<WantedItemRecord, boolean>(({ enabled }) => enabled, filters?.enabled);
+    const records = this.store.listOf(accountId).filter((record) => enabledFilter.matches(record));
+    const comparator = compareWantedItemsBy(sort);
+    const page = PaginatorInMemory.paginate(
+        records.toSorted((a, b) => comparator.compare(a, b)),
+        pagination,
+    );
     return { ...page, items: page.items.map((record) => this.mapToDto(record)) };
     ```
+
+    In memory, build the filters, the sort and the page from the shared classes of `src/packages/infrastructure/in-memory-query/`: `Filter` (`EqualsFilter`), `Comparator` (`KeyComparator`, `RankComparator`, `ReversedComparator`, `ChainedComparator`) and `PaginatorInMemory`. Never write your own comparator or filter in a DAO.
 
     With a database: select only the DTO's columns, build the `WHERE` from the filters that are set and the `ORDER BY` from the sort, and get the page and its total in one atomic call.
 
@@ -113,7 +120,7 @@ Decided in ADR-0004 (`adr/0004-query-side-query-bus-daos-and-dtos.md`). The refe
     ) satisfies z.ZodType<ListWantedItemsInput>;
     ```
 
-    In the DAO, each sort field has one comparator for ascending order; `desc` reverses it.
+    In the DAO, each sort field has one comparator for ascending order. `desc` wraps it in a `ReversedComparator`, and a `ChainedComparator` adds the tie-breakers.
 
 7. **Docs**: the route doc is a function of the response body (`listWantedItemsDoc(body)`), and the HTTP module passes `new ValidatorZodAdapter(<use-case>ResponseSchema)`. That schema lives in `external/validation/<use-case>.response-schema.ts`, uses `paginatedSchema(item, examplePage)` (`src/packages/external/validation/paginated.schema.ts`) for a list, gives every field an example (or `docs:check` warns), has a spec that parses the documented example, and ends with `satisfies z.ZodType<XResponse>`, so it can't drift from the DTO; the frontend's types are generated from it. Add the 200 example, `HttpErrorResponseDocs.badQuery(...)` for 400 (no JSON body on a GET) with the shared examples of `src/packages/infrastructure/http/docs/query-options.error-examples.ts` (`PAGE_TOO_SMALL`, `PAGE_SIZE_TOO_BIG`, `unknownSortField(fields)`, `INVALID_SORT_ORDER`…), `notFound(...)` for a get-by-id, `internalError()`. `bun test` (the api-documentation guard) and `bun run docs:check` must stay clean.
 
