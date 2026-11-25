@@ -1,4 +1,4 @@
-import { PaginatorInMemory } from "@/packages/infrastructure/pagination/paginator.in-memory";
+import { PaginatorInMemory } from "@/packages/infrastructure/in-memory-query/paginator.in-memory";
 import type { Pagination } from "@/packages/building-blocks/pagination";
 import type { WantedItemsCriteria, WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
 import type { WantedItemsSort } from "../../application/list-wanted-items/list-wanted-items.query";
