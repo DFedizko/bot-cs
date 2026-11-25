@@ -21,7 +21,22 @@ src/contexts/
   trading/                  core domain: buying skins for profit
     shared/                 model shared by the trading subdomains (CoinCent, Float, Sticker, CSGOEmpire session)
     bidding/                subdomain: wanted items, item evaluation, auction participation, account balance and bids
+  delivery/                 supporting: receiving bought items through Steam trade offers
+  catalog/                  supporting: CS2 reference data (skins, images, rarities) and its search, no domain model
 ```
+
+### Context map
+
+Who depends on whom, and how. Add a row when a new dependency between contexts is created, in the same change.
+
+| Upstream         | Downstream                         | How                                                                                                          | Limit                                                               |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `shared-kernel`  | every context                      | Direct imports of its domain concepts                                                                        | Pure domain only                                                    |
+| `trading/shared` | `trading/bidding`                  | Direct imports (shared kernel of the trading subdomains): coin cents, CSGOEmpire session and its contracts   | Trading subdomains only                                             |
+| `trading/shared` | `delivery`                         | Reuses the CSGOEmpire HTTP and WebSocket clients `trading/shared` binds, wired in delivery's DI modules only | No import outside `external/di/`                                    |
+| `catalog`        | `trading/bidding` (read side only) | The catalog's published lookup by market names, through its barrel, adapted in bidding's `infrastructure/`   | Only the wanted items list query; never the bidding flow (ADR-0002) |
+
+`delivery` and `trading/bidding` don't depend on each other: delivery follows withdrawals from CSGOEmpire itself.
 
 Rules:
 

@@ -46,6 +46,7 @@ These apply to every change that touches trades:
 
 ## Rules
 
+- Delivery depends on no other bounded context: it follows withdrawals from CSGOEmpire itself. It reuses only the CSGOEmpire HTTP and WebSocket clients `trading/shared` binds, wired in `external/di/` (see the context map in `src/ARCHITECTURE.md`).
 - Facts about a delivery are **domain events** recorded by the aggregate; outcomes that aren't a change of the aggregate (offer not found, scam offers found, offer cancelled, step failed) are **application events**. See "Events announce what happened" in `src/ARCHITECTURE.md`.
 - Every step is idempotent: its handler checks the delivery's status first and does nothing when the step already happened, so a step can always be dispatched again.
 - Delivery steps run outside the core trading flow (ADR-0002): its listeners dispatch through the delivery command bus, which reports a failed step as `DeliveryStepFailedEvent` instead of throwing. Never inject that bus anywhere else.

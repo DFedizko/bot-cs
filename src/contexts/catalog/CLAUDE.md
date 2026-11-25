@@ -36,5 +36,5 @@ The catalog has **no domain layer by design** ([ADR-0005](../../../adr/0005-cata
 - Source entries the contract rejects are skipped and counted in one warning log; they never fail the load.
 - No repository and no command: nothing the application decides is saved. The cache keeps its own copy of the rows and returns DTO copies, never the cached rows.
 - `imageUrl` is the source's URL as is: the bot never downloads or proxies images.
-- Other contexts use the catalog only through its barrel (`index.ts`).
+- Other contexts use the catalog only through its barrel (`index.ts`). Bidding's read side (the wanted items list) consumes its lookup, so keep the barrel's contract stable; consumers are listed in the context map of `src/ARCHITECTURE.md`.
 - The source's shape comes from the real file; tests use the trimmed fixture in `test/.../external/http/bymykel/__mocks__/` and never touch the network.
