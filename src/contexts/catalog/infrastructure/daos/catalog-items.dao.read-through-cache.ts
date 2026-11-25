@@ -1,11 +1,11 @@
-import type { CatalogRow } from "../../application/catalog-row";
+import type { Logger } from "@/packages/application/logger";
 import type { CatalogItemsCriteria, CatalogItemsDao } from "../../application/search-catalog-items/catalog-items.dao";
 import type {
     CatalogItemDto,
     SearchCatalogItemsResponse,
 } from "../../application/search-catalog-items/search-catalog-items.response";
 import { CatalogUnavailableError } from "../../application/search-catalog-items/catalog-unavailable.error";
-import type { CatalogStoreInMemory } from "../stores/catalog.store.in-memory";
+import type { CatalogRow, CatalogSource } from "../sources/catalog.source";
 
 type Match = { row: CatalogRow; startsWithText: boolean };
 
@@ -16,18 +16,42 @@ const FIRST = 0;
 const STARTS_FIRST = -1;
 const STARTS_LATER = 1;
 
-export class CatalogItemsDaoInMemory implements CatalogItemsDao {
-    constructor(private readonly store: CatalogStoreInMemory) {}
+export class CatalogItemsDaoReadThroughCache implements CatalogItemsDao {
+    private rows?: readonly CatalogRow[];
+    private loading?: Promise<void>;
+
+    constructor(
+        private readonly source: CatalogSource,
+        private readonly logger: Logger,
+    ) {}
+
+    warmUp(): Promise<void> {
+        if (this.rows) return Promise.resolve();
+        this.loading ??= this.load().finally(() => (this.loading = undefined));
+        return this.loading;
+    }
 
     async search({ text, limit }: CatalogItemsCriteria): Promise<SearchCatalogItemsResponse> {
-        if (!this.store.isLoaded()) throw new CatalogUnavailableError();
+        if (!this.rows) return this.refuseWhileLoading();
         const words = this.splitWords(text);
-        const matches = this.store
-            .list()
-            .map((row) => this.matchOf(row, words))
-            .filter((match) => match !== undefined);
-        const page = matches.toSorted((first, second) => this.compare(first, second)).slice(FIRST, limit);
-        return { items: page.map(({ row }) => this.mapToDto(row)) };
+        const matches = this.rows.map((row) => this.matchOf(row, words)).filter((match) => match !== undefined);
+        const found = matches.toSorted((first, second) => this.compare(first, second)).slice(FIRST, limit);
+        return { items: found.map(({ row }) => this.mapToDto(row)) };
+    }
+
+    private async load(): Promise<void> {
+        try {
+            const rows = await this.source.load();
+            this.rows = rows.map((row) => ({ ...row }));
+            this.logger.log(`Catalog loaded: ${rows.length} items`);
+        } catch (error) {
+            this.logger.log(`Could not load the catalog: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    private refuseWhileLoading(): never {
+        void this.warmUp();
+        throw new CatalogUnavailableError();
     }
 
     private matchOf(row: CatalogRow, words: string[]): Match | undefined {

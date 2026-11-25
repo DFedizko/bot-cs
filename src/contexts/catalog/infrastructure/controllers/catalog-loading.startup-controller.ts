@@ -1,12 +1,9 @@
-import type { CommandDispatcher } from "@/packages/infrastructure/command-bus/command-dispatcher";
-import { LoadCatalogCommand } from "../../application/load-catalog/load-catalog.command";
+import type { CatalogItemsDaoReadThroughCache } from "../daos/catalog-items.dao.read-through-cache";
 
 export class CatalogLoadingStartupController {
-    private static readonly CONTEXT = { trigger: "startup" };
-
-    constructor(private readonly dispatcher: CommandDispatcher) {}
+    constructor(private readonly cache: CatalogItemsDaoReadThroughCache) {}
 
     start(): Promise<void> {
-        return this.dispatcher.dispatch(new LoadCatalogCommand(), CatalogLoadingStartupController.CONTEXT);
+        return this.cache.warmUp();
     }
 }

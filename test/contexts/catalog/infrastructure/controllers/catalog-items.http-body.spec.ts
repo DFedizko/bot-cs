@@ -1,6 +1,6 @@
 import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import { mapToCatalogItemsBody } from "@/contexts/catalog/infrastructure/controllers/catalog-items.http-body";
-import { catalogRow } from "../../application/__builders__/catalog-row.builder";
+import { catalogRow } from "../../__builders__/catalog-row.builder";
 
 describe("mapToCatalogItemsBody", () => {
     it.each([

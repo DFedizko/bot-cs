@@ -1,6 +1,6 @@
 import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
-import type { CatalogRow } from "@/contexts/catalog/application/catalog-row";
+import type { CatalogRow } from "@/contexts/catalog/infrastructure/sources/catalog.source";
 
 export const ASIIMOV_IMAGE_URL = "https://community.akamai.steamstatic.com/economy/image/asiimov";
 

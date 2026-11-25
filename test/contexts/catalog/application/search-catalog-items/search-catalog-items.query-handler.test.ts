@@ -3,7 +3,7 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { QUERY_BUS } from "@/packages/external/di/packages.identifiers";
 import { SearchCatalogItemsQuery } from "@/contexts/catalog/application/search-catalog-items/search-catalog-items.query";
 import { CATALOG_ITEMS_DAO, SEARCH_CATALOG_ITEMS_HANDLER } from "@/contexts/catalog/external/di/catalog.identifiers";
-import { catalogRow } from "../__builders__/catalog-row.builder";
+import { catalogRow } from "../../__builders__/catalog-row.builder";
 
 const TEXT = "awp asii";
 const LIMIT = 5;

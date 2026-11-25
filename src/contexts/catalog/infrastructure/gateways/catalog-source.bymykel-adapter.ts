@@ -1,8 +1,7 @@
 import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import type { Logger } from "@/packages/application/logger";
 import type { Validator } from "@/packages/infrastructure/validation/validator";
-import type { CatalogRow } from "../../application/catalog-row";
-import type { CatalogSource } from "../../application/load-catalog/catalog.source";
+import type { CatalogRow, CatalogSource } from "../sources/catalog.source";
 import type { ByMykelSkinsHttp } from "../http/bymykel/bymykel-skins.http";
 import type { ByMykelRarityId } from "../http/bymykel/types/bymykel-skin";
 import type { ByMykelCatalogEntry } from "../http/bymykel/types/bymykel-catalog-entry";

@@ -1,8 +1,10 @@
 import type { Container } from "inversify";
-import { COMMAND_BUS, HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers";
+import { HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers";
 import { freePort } from "@/packages/external/http/__builders__/free-port.builder";
-import { LoadCatalogCommand } from "@/contexts/catalog/application/load-catalog/load-catalog.command";
-import { SEARCH_CATALOG_ITEMS_CONTROLLER } from "@/contexts/catalog/external/di/catalog.identifiers";
+import {
+    CATALOG_LOADING_CONTROLLER,
+    SEARCH_CATALOG_ITEMS_CONTROLLER,
+} from "@/contexts/catalog/external/di/catalog.identifiers";
 
 type ApiResponse = { status: number; body: unknown };
 
@@ -13,7 +15,7 @@ export type CatalogApi = {
 const ITEMS_PATH = "/catalog/items";
 
 export const loadCatalog = async (container: Container): Promise<void> =>
-    (await container.getAsync(COMMAND_BUS)).dispatch(new LoadCatalogCommand());
+    (await container.getAsync(CATALOG_LOADING_CONTROLLER)).start();
 
 export const startCatalogApi = async (container: Container): Promise<CatalogApi> => {
     jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});

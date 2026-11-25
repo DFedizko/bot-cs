@@ -12,3 +12,7 @@ export type CatalogRow = {
     rarity: Rarity;
     imageUrl: string;
 };
+
+export interface CatalogSource {
+    load(): Promise<CatalogRow[]>;
+}
