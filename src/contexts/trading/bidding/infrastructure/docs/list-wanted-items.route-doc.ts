@@ -19,7 +19,7 @@ export const listWantedItemsDoc = (body: Validator<unknown>): HttpRouteDoc => ({
     description: [
         "Lists the items the account wants, a page at a time, with each one's max for, criteria, enabled state, the time it was added and what the catalog knows of it (its picture, rarity, weapon, skin, wear, StatTrak™ and souvenir), or null when the catalog doesn't know it.",
         "Filter by enabled state. `counts` counts every item of the account, whatever the filter and the page.",
-        "Sort with `sort` (the field) and `order` (`asc` lowest first, `desc` highest first). The default is `sort=addedAt&order=desc`, newest first. `name` sorts alphabetically. `max` lists the percentage maxes first, then the fixed values, each group in the asked order. `rarity` follows the official order from Consumer Grade to Contraband, and the items without catalog details always come last. Items that tie stay newest first.",
+        "Sort with `sort` (the field) and `order` (`asc` lowest first, `desc` highest first). The default is `sort=addedAt&order=desc`, newest first. `name` sorts alphabetically. `max` ranks the percentage maxes below the fixed values, each from lowest to highest. `rarity` follows the official order from Consumer Grade to Contraband, and items without catalog details rank lowest. `desc` reverses the whole order. Items that tie stay newest first.",
         "An account that wants nothing, or that the bot doesn't know, gets an empty page.",
     ].join("\n\n"),
     tags: [WANTED_ITEMS_TAG],

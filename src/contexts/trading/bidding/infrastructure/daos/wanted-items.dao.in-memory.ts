@@ -1,5 +1,6 @@
 import { PaginatorInMemory } from "@/packages/infrastructure/in-memory-query/paginator.in-memory";
 import type { Pagination } from "@/packages/building-blocks/pagination";
+import { EqualsFilter } from "@/packages/infrastructure/in-memory-query/filters/equals.filter";
 import type { WantedItemsCriteria, WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
 import type { WantedItemsSort } from "../../application/list-wanted-items/list-wanted-items.query";
 import type {
@@ -26,15 +27,12 @@ export class WantedItemsDaoInMemory implements WantedItemsDao {
         pagination: Pagination,
     ): Promise<ListWantedItemsResponse> {
         const records = this.store.listOf(accountId);
-        const matching = records.filter((record) => this.matchesEnabled(record, filters?.enabled));
+        const enabledFilter = new EqualsFilter<WantedItemRecord, boolean>(({ enabled }) => enabled, filters?.enabled);
+        const matching = records.filter((record) => enabledFilter.matches(record));
         const details = await this.catalog.findByNames(matching.map(({ name }) => name));
         const entries = matching.map((record) => this.toEntry(record, details));
         const page = PaginatorInMemory.paginate(this.sortBy(entries, sort), pagination);
         return { ...page, items: page.items.map((entry) => this.mapToDto(entry)), counts: this.countAll(records) };
-    }
-
-    private matchesEnabled(record: WantedItemRecord, enabled?: boolean): boolean {
-        return enabled === undefined || record.enabled === enabled;
     }
 
     private toEntry(record: WantedItemRecord, details: CatalogDetailsByName): WantedItemEntry {
@@ -42,7 +40,8 @@ export class WantedItemsDaoInMemory implements WantedItemsDao {
     }
 
     private sortBy(entries: WantedItemEntry[], sort: WantedItemsSort): WantedItemEntry[] {
-        return this.lastInsertedFirst(entries).toSorted(compareWantedItemsBy(sort));
+        const comparator = compareWantedItemsBy(sort);
+        return this.lastInsertedFirst(entries).toSorted((first, second) => comparator.compare(first, second));
     }
 
     private lastInsertedFirst(entries: WantedItemEntry[]): WantedItemEntry[] {

@@ -1,11 +1,16 @@
 import { RARITY_ORDER } from "@/contexts/shared-kernel/domain/rarity-order";
-import { ASCENDING, type SortOrder } from "@/packages/building-blocks/sort";
+import { DESCENDING, type SortOrder } from "@/packages/building-blocks/sort";
+import type { Comparator } from "@/packages/infrastructure/in-memory-query/comparators/comparator";
+import { KeyComparator } from "@/packages/infrastructure/in-memory-query/comparators/key.comparator";
+import { RankComparator } from "@/packages/infrastructure/in-memory-query/comparators/rank.comparator";
+import { ReversedComparator } from "@/packages/infrastructure/in-memory-query/comparators/reversed.comparator";
+import { ChainedComparator } from "@/packages/infrastructure/in-memory-query/comparators/chained.comparator";
 import type {
     WantedItemsSort,
     WantedItemsSortField,
 } from "../../application/list-wanted-items/list-wanted-items.query";
 import type { CatalogDetailsDto } from "../../application/list-wanted-items/catalog-details.gateway";
-import { MaxForType, type MaxForPrimitives } from "../../domain/wanted-item/max-for/max-for";
+import { MaxForType } from "../../domain/wanted-item/max-for/max-for";
 import type { WantedItemRecord } from "../stores/wanted-item.store.in-memory";
 
 export type WantedItemEntry = {
@@ -13,59 +18,26 @@ export type WantedItemEntry = {
     catalog: CatalogDetailsDto | null;
 };
 
-type Comparator = (first: WantedItemEntry, second: WantedItemEntry) => number;
-
-type FieldComparators = {
-    group: Comparator;
-    value: Comparator;
-};
-
 const MAX_FOR_TYPE_ORDER = [MaxForType.PERCENTAGE, MaxForType.VALUE];
-const KNOWN_FIRST = [true, false];
-const SAME_GROUP: Comparator = () => 0;
+const UNKNOWN_TYPE_RANK = MAX_FOR_TYPE_ORDER.length;
+const NO_RARITY_RANK = -1;
 
-const byAddedAt: Comparator = (first, second) => first.record.addedAt - second.record.addedAt;
+const byAddedAt = new KeyComparator<WantedItemEntry>(({ record }) => record.addedAt);
 
-const byName: Comparator = (first, second) => first.record.name.localeCompare(second.record.name);
-
-const typeRankOf = ({ type }: MaxForPrimitives): number => MAX_FOR_TYPE_ORDER.indexOf(type);
-
-const byMaxForType: Comparator = (first, second) => typeRankOf(first.record.maxFor) - typeRankOf(second.record.maxFor);
-
-const byMaxValue: Comparator = (first, second) =>
-    Number(first.record.maxFor.value) - Number(second.record.maxFor.value);
-
-const knownRankOf = ({ catalog }: WantedItemEntry): number => KNOWN_FIRST.indexOf(catalog !== null);
-
-const byCatalogKnown: Comparator = (first, second) => knownRankOf(first) - knownRankOf(second);
-
-const rarityRankOf = ({ catalog }: WantedItemEntry): number => (catalog ? RARITY_ORDER.indexOf(catalog.rarity) : 0);
-
-const byRarity: Comparator = (first, second) => rarityRankOf(first) - rarityRankOf(second);
-
-const FIELD_COMPARATORS = {
-    addedAt: { group: SAME_GROUP, value: byAddedAt },
-    name: { group: SAME_GROUP, value: byName },
-    max: { group: byMaxForType, value: byMaxValue },
-    rarity: { group: byCatalogKnown, value: byRarity },
-} satisfies Record<WantedItemsSortField, FieldComparators>;
-
-const thenBy =
-    (primary: Comparator, secondary: Comparator): Comparator =>
-    (first, second) =>
-        primary(first, second) || secondary(first, second);
-
-const reversed =
-    (comparator: Comparator): Comparator =>
-    (first, second) =>
-        comparator(second, first);
-
-const inOrder = (comparator: Comparator, order: SortOrder): Comparator =>
-    order === ASCENDING ? comparator : reversed(comparator);
-
-const newestFirst = reversed(byAddedAt);
-
-export const compareWantedItemsBy = ({ field, order }: WantedItemsSort): Comparator => {
-    const { group, value } = FIELD_COMPARATORS[field];
-    return thenBy(thenBy(group, inOrder(value, order)), newestFirst);
+const FIELD_COMPARATORS: Record<WantedItemsSortField, Comparator<WantedItemEntry>> = {
+    addedAt: byAddedAt,
+    name: new KeyComparator(({ record }) => record.name),
+    max: new ChainedComparator(
+        new RankComparator(({ record }) => record.maxFor.type, MAX_FOR_TYPE_ORDER, UNKNOWN_TYPE_RANK),
+        new KeyComparator(({ record }) => Number(record.maxFor.value)),
+    ),
+    rarity: new RankComparator(({ catalog }) => catalog?.rarity, RARITY_ORDER, NO_RARITY_RANK),
 };
+
+const newestFirst = new ReversedComparator(byAddedAt);
+
+const inOrder = (comparator: Comparator<WantedItemEntry>, order: SortOrder): Comparator<WantedItemEntry> =>
+    order === DESCENDING ? new ReversedComparator(comparator) : comparator;
+
+export const compareWantedItemsBy = ({ field, order }: WantedItemsSort): Comparator<WantedItemEntry> =>
+    new ChainedComparator(inOrder(FIELD_COMPARATORS[field], order), newestFirst);

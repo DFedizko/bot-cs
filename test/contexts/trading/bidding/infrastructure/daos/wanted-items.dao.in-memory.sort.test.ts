@@ -121,12 +121,12 @@ describe("WantedItemsDaoInMemory sort", () => {
         expect(names).toEqual([VULCAN, KNIFE, REDLINE, KARAMBIT, ASIIMOV]);
     });
 
-    it("Should sort the percentage maxes from highest to lowest, then the fixed values, descending", async () => {
+    it("Should reverse the max order, the fixed values from highest to lowest first, descending", async () => {
         putMaxes(container);
 
         const names = await namesSortedBy(container, "max", "desc");
 
-        expect(names).toEqual([REDLINE, KNIFE, VULCAN, ASIIMOV, KARAMBIT]);
+        expect(names).toEqual([ASIIMOV, KARAMBIT, REDLINE, KNIFE, VULCAN]);
     });
 
     it("Should sort by rarity from Contraband down, the items without catalog details last, descending", async () => {
@@ -138,22 +138,29 @@ describe("WantedItemsDaoInMemory sort", () => {
         expect(names).toEqual([KNIFE, KARAMBIT, ASIIMOV, REDLINE, VULCAN]);
     });
 
-    it("Should sort by rarity from Consumer Grade up, the items without catalog details last, ascending", async () => {
+    it("Should sort by rarity from the items without catalog details up to Contraband, ascending", async () => {
         stubCatalog(container);
         putMaxes(container);
 
         const names = await namesSortedBy(container, "rarity", "asc");
 
-        expect(names).toEqual([REDLINE, ASIIMOV, KARAMBIT, KNIFE, VULCAN]);
+        expect(names).toEqual([VULCAN, REDLINE, ASIIMOV, KARAMBIT, KNIFE]);
     });
 
-    it("Should keep the newest first among items of the same rarity", async () => {
-        putAll(container, [addedMinutesLater(VULCAN, 1), addedMinutesLater(ASIIMOV, 3), addedMinutesLater(REDLINE, 2)]);
+    it.each(["asc", "desc"] as const)(
+        "Should keep the newest first among items of the same rarity, %s",
+        async (order) => {
+            putAll(container, [
+                addedMinutesLater(VULCAN, 1),
+                addedMinutesLater(ASIIMOV, 3),
+                addedMinutesLater(REDLINE, 2),
+            ]);
 
-        const names = await namesSortedBy(container, "rarity", "asc");
+            const names = await namesSortedBy(container, "rarity", order);
 
-        expect(names).toEqual([ASIIMOV, REDLINE, VULCAN]);
-    });
+            expect(names).toEqual([ASIIMOV, REDLINE, VULCAN]);
+        },
+    );
 
     it("Should sort before it cuts the page", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 0), addedMinutesLater(ASIIMOV, 0), addedMinutesLater(REDLINE, 0)]);
