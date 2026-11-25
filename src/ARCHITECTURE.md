@@ -93,6 +93,16 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
 - **External (frameworks and drivers)** is the only layer that imports a library, a runtime API or talks to the outside world. It implements the infrastructure contracts and contains no business rules and no mapping to the domain. Swapping fetch for axios, Express for Bun, or a provider for a fake means replacing only this layer.
 - **Composition roots** (`src/main.ts`, each context's wiring) are the only places that instantiate concrete classes. Everything else receives its collaborators through the constructor, typed by a contract.
 
+### When a context needs no domain layer
+
+The domain layer exists to model rules we own. When a bounded context has no complex domain to handle and nothing to model, because the domain isn't ours (reference data from a provider, another system's records) or the context only moves and reads data, it doesn't need a `domain/` folder:
+
+- Use cases work as **transaction scripts**: a command handler or a query handler does the job in one place, through its ports, with plain DTOs.
+- Data that isn't ours isn't ours to validate beyond what our use cases need. **Adapt it in the interface adapters** (`infrastructure/`) into the shape that suits the use cases and command handlers, and reject only what they can't work with, at the boundary.
+- **No aggregate, no repository.** A repository persists an aggregate; without one, read and write data through a DAO, a gateway or another pattern that fits the job, never a repository.
+- A context may still keep a small `domain/` for simple value objects that validate data we do own (e.g. a `FooCode` the user types), without aggregates or entities.
+- The other layers and the dependency rule stay the same, and lint still enforces them. If the context later gains rules of its own, it grows a domain model then, not before.
+
 ## 3. Tactical DDD and design patterns
 
 ### Tactical DDD
