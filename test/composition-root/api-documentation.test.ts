@@ -15,8 +15,12 @@ const READ_METHOD = "get";
 const JSON_TYPE = "application/json";
 
 const toKey = ({ method, path }: { method: string; path: string }): string => `${method} ${path}`;
-const nullFields = (route: DocumentedRoute): Record<string, null> =>
-    Object.fromEntries(bodyFields(route).names.map((name) => [name, null]));
+const EMPTY_QUERY_VALUE = "";
+
+const invalidFields = (route: DocumentedRoute): Record<string, null | string> => {
+    const invalid = route.method === READ_METHOD ? EMPTY_QUERY_VALUE : null;
+    return Object.fromEntries(bodyFields(route).names.map((name) => [name, invalid]));
+};
 
 let container: Container;
 
@@ -62,7 +66,7 @@ describe("Api documentation", () => {
     it("Should validate exactly the documented body fields of every route", async () => {
         const api = await startDocumentedApi(container);
 
-        const answers = await Promise.all(api.documented.map((route) => api.send(route, nullFields(route))));
+        const answers = await Promise.all(api.documented.map((route) => api.send(route, invalidFields(route))));
 
         expect(answers.map(({ fields }) => fields)).toEqual(api.documented.map((route) => bodyFields(route).names));
     });

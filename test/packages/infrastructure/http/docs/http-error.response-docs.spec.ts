@@ -36,6 +36,7 @@ describe("HttpErrorResponseDocs", () => {
         ["notFound", HttpStatus.NOT_FOUND],
         ["conflict", HttpStatus.CONFLICT],
         ["unprocessable", HttpStatus.UNPROCESSABLE_ENTITY],
+        ["serviceUnavailable", HttpStatus.SERVICE_UNAVAILABLE],
     ] as const)("Should document %s with its status", (name, status) => {
         const response = HttpErrorResponseDocs[name](NOT_FOUND);
 

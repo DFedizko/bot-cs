@@ -5,6 +5,6 @@ export abstract class Entity<Id extends ValueObject<unknown>> {
 
     equals(entity: Entity<Id>): boolean {
         if (entity === undefined || entity === null) return false;
-        return entity.id === this.id;
+        return this.id.equals(entity.id);
     }
 }

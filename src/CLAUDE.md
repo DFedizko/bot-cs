@@ -15,6 +15,7 @@ Shared folders and bounded contexts have their own `CLAUDE.md`, which loads when
 - [`contexts/trading/shared/CLAUDE.md`](contexts/trading/shared/CLAUDE.md): concepts and CSGOEmpire integration shared by the trading subdomains.
 - [`packages/CLAUDE.md`](packages/CLAUDE.md): shared infrastructure with no business meaning (building blocks, ports and adapters, shared and HTTP errors, TypeScript type helpers).
 - [`contexts/delivery/CLAUDE.md`](contexts/delivery/CLAUDE.md): the delivery bounded context (receiving bought items through Steam trade offers): its responsibilities, language and safety rules.
+- [`contexts/catalog/CLAUDE.md`](contexts/catalog/CLAUDE.md): the catalog bounded context (the CS2 items that exist, with picture and rarity, searchable by name): its responsibilities, language and rules.
 - [`contexts/trading/bidding/CLAUDE.md`](contexts/trading/bidding/CLAUDE.md): the bidding bounded context, the core of the bot (wanted items, evaluating items, bidding): its responsibilities, language and rules.
 
 ## File naming
