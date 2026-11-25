@@ -30,32 +30,23 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 
 **Every hook, component, page, layout, function, type and constant is named after its file**: the file name, without dots and dashes, in camelCase for hooks and functions, PascalCase for components, pages, layouts and types, and `UPPER_SNAKE_CASE` for constants. Files are kebab-case, except hooks, whose files are camelCase like the hook.
 
-| Kind                   | File                                              | Export                                           |
-| ---------------------- | ------------------------------------------------- | ------------------------------------------------ |
-| Model type             | `wanted-item.ts`                                  | `WantedItem`                                     |
-| UI rule (one per file) | `can-save-wanted-item.ts`                         | `canSaveWantedItem`                              |
-| Port                   | `wanted-items.gateway.ts`                         | `WantedItemsGateway` (+ its `definePort` pair)   |
-| Store port             | `selected-account.store.ts`                       | `SelectedAccountStore` (+ its `definePort` pair) |
-| Port implementation    | `create-http-wanted-items-gateway.ts`             | `createHttpWantedItemsGateway`                   |
-| Fake (tests only)      | `create-fake-wanted-items-gateway.ts`             | `createFakeWantedItemsGateway`                   |
-| View-model             | `useWantedItemsViewModel.ts`                      | `useWantedItemsViewModel`                        |
-| Feature hook           | `view-model/hooks/useWantedItemFilters.ts`        | `useWantedItemFilters`                           |
-| Shared hook            | `shared/hooks/useLocalStorage.ts`                 | `useLocalStorage`                                |
-| Query options          | `wanted-items-query.ts`                           | `wantedItemsQuery`                               |
-| View                   | `view/wanted-items.view.tsx`                      | `WantedItemsView`                                |
-| Feature component      | `view/components/wanted-item-row.tsx`             | `WantedItemRow`                                  |
-| Screen                 | `wanted-items.screen.tsx`                         | `WantedItemsScreen`                              |
-| Page                   | `pages/account.page.tsx`                          | `AccountPage`                                    |
-| Layout                 | `shared/ui/layouts/root.layout.tsx`               | `RootLayout`                                     |
-| Shared component       | `shared/ui/components/button.tsx`                 | `Button`                                         |
-| Value object           | `shared/model/email/email.ts`, `create-email.ts`  | `Email`, `createEmail`                           |
-| Constant               | `app-name.ts`                                     | `APP_NAME`                                       |
-| Route                  | TanStack Router names (`accounts.$accountId.tsx`) | only `Route`                                     |
-| Test                   | `test/<same path>/<file>.test.ts(x)`              | —                                                |
+| Kind                                              | File → export                                                                                                  |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Model type, UI rule, constant                     | `wanted-item.ts` → `WantedItem`, `can-save-wanted-item.ts` → `canSaveWantedItem`, `app-name.ts` → `APP_NAME`   |
+| Port, store port                                  | `wanted-items.gateway.ts` → `WantedItemsGateway`, `selected-account.store.ts`, each with its `definePort` pair |
+| Implementation, fake                              | `create-http-wanted-items-gateway.ts` → `createHttpWantedItemsGateway`; fakes `create-fake-…` (tests only)     |
+| Hook (view-model, feature, shared), query options | `useWantedItemsViewModel.ts` → `useWantedItemsViewModel`; `wanted-items-query.ts` → `wantedItemsQuery`         |
+| View, screen, page, layout                        | `wanted-items.view.tsx` → `WantedItemsView`; `.screen.tsx`, `.page.tsx`, `.layout.tsx` the same way            |
+| Component, value object                           | `wanted-item-row.tsx` → `WantedItemRow`; `email/email.ts` + `create-email.ts` → `Email`, `createEmail`         |
+| Route, test                                       | TanStack Router names (`accounts.$accountId.tsx`) → only `Route`; `test/<same path>/<file>.test.ts(x)`         |
 
 - **Route files hold only the `Route` definition** (path, params, loader), with its `component` imported from `pages/` or `shared/ui/layouts/`: the router dictates their names, so no component can be named after them.
 - **One exported function per file.** Export a second one only when they truly can't live apart (e.g. a port's `Provider` and `use<Port>` hook from `definePort`). Types may sit beside the function that uses them.
 - Named exports only, except the `Route` export TanStack Router requires.
+
+## Documentation files
+
+**Never create, edit or delete any `.md` file** (`CLAUDE.md`, `ARCHITECTURE.md`, ADRs, skills, `README.md` or any other Markdown file) unless the user explicitly asks for that change. If you believe a doc should change, propose it in your final summary and let the user decide.
 
 ## Imports
 
