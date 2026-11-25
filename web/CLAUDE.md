@@ -56,7 +56,7 @@ Use the `@/` alias (`@/shared/ui/components/button`, `@/features/wanted-items`) 
 ## Frontend code rules
 
 - **Dependency inversion at the boundaries.** View-models reach the API, the WebSocket, storage, time and shared client state only through ports (`definePort`) and stores (`Store<T>`), never through an adapter. Only the composition root (`src/app/`) binds concrete implementations; tests bind fakes.
-- **Functions for UI, classes for infrastructure.** Components, hooks and view-models are functions. Classes are allowed for infrastructure: the HTTP client (`HttpClient` and its adapters) and the feature services that use it ([ADR-0004](adr/0004-http-client.md)).
+- **Functions for UI, classes for infrastructure.** Components, hooks and view-models are functions; infrastructure may be classes.
 - **SOLID.** One responsibility per component, hook and function; small focused ports and props; extend by adding adapters, not by editing view-models.
 - **No generator functions** (`function*`, `yield`) unless there's no reasonable alternative.
 - **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in a feature's `adapters/` and in `shared/adapters/`, which also creates the framework objects (the router, the `QueryClient`, devtools), like the bot's `external/`. `shared/lib/` holds only contracts and helpers that touch no outside world. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/components/`.
