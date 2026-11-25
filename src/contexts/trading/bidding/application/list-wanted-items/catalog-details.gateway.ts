@@ -1,19 +1,8 @@
-export const CATALOG_RARITIES = [
-    "consumer",
-    "industrial",
-    "milspec",
-    "restricted",
-    "classified",
-    "covert",
-    "extraordinary",
-    "contraband",
-] as const;
-
-export type CatalogRarity = (typeof CATALOG_RARITIES)[number];
+import type { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 
 export type CatalogDetailsDto = {
     imageUrl: string;
-    rarity: CatalogRarity;
+    rarity: Rarity;
     weapon: string;
     skin: string;
     wear: string | null;

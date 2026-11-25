@@ -1,3 +1,4 @@
+import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import { FIRST_PAGE } from "@/packages/building-blocks/pagination";
 import type {
     ListWantedItemsResponse,
@@ -14,7 +15,7 @@ const EXAMPLE_PAGE_SIZE = 4;
 
 export const ASIIMOV_CATALOG = {
     imageUrl: `${STEAM_IMAGES}i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_jdk7uW-V6V-Kf2cGFidxOp_pewnF3nhxEt0sGnSzN76dH3GOg9xC8FyEORftRe-x9PuYurq71bW3d8UnjK-0H0YSTpMGQ`,
-    rarity: "covert",
+    rarity: Rarity.COVERT,
     weapon: "AWP",
     skin: "Asiimov",
     wear: FIELD_TESTED,
@@ -24,7 +25,7 @@ export const ASIIMOV_CATALOG = {
 
 const REDLINE_CATALOG: CatalogDetailsDto = {
     imageUrl: `${STEAM_IMAGES}i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSI_-RHGavzOtyufRkASq2lkxx4W-HnNyqJC3FZwYoC5p0Q7FfthW6wdWxPu-371Pdit5HnyXgznQeHYY5wyA`,
-    rarity: "classified",
+    rarity: Rarity.CLASSIFIED,
     weapon: "AK-47",
     skin: "Redline",
     wear: FIELD_TESTED,
@@ -34,7 +35,7 @@ const REDLINE_CATALOG: CatalogDetailsDto = {
 
 const KARAMBIT_CATALOG: CatalogDetailsDto = {
     imageUrl: `${STEAM_IMAGES}i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Q7uCvZaZkNM-SA1iUzv5mvOR7cDm7lA4i4QKJk4jxNWWXawUgA8dxRLEO40KwkobnMbnj5QKL348Qmy-sji5K7i466uxUUKQn5OSJ2KBZjkQR`,
-    rarity: "extraordinary",
+    rarity: Rarity.EXTRAORDINARY,
     weapon: "Karambit",
     skin: "Doppler",
     wear: FACTORY_NEW,

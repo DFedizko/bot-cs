@@ -1,5 +1,6 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
+import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import {
     maxForPercentage,
     maxForValue,
@@ -50,10 +51,10 @@ const putMaxes = (container: Container) =>
 const stubCatalog = (container: Container) =>
     jest.spyOn(container.get(CATALOG_DETAILS_GATEWAY), "findByNames").mockResolvedValue(
         new Map([
-            [ASIIMOV, catalogDetails({ rarity: "covert" })],
-            [REDLINE, catalogDetails({ rarity: "classified" })],
-            [KARAMBIT, catalogDetails({ rarity: "extraordinary" })],
-            [KNIFE, catalogDetails({ rarity: "contraband" })],
+            [ASIIMOV, catalogDetails({ rarity: Rarity.COVERT })],
+            [REDLINE, catalogDetails({ rarity: Rarity.CLASSIFIED })],
+            [KARAMBIT, catalogDetails({ rarity: Rarity.EXTRAORDINARY })],
+            [KNIFE, catalogDetails({ rarity: Rarity.CONTRABAND })],
         ]),
     );
 

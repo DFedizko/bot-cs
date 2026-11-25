@@ -1,5 +1,6 @@
 import type { WantedItemsSortKey } from "../../application/list-wanted-items/list-wanted-items.query";
-import { CATALOG_RARITIES, type CatalogDetailsDto } from "../../application/list-wanted-items/catalog-details.gateway";
+import type { CatalogDetailsDto } from "../../application/list-wanted-items/catalog-details.gateway";
+import { RARITY_ORDER } from "@/contexts/shared-kernel/domain/rarity-order";
 import { MaxForType, type MaxForPrimitives } from "../../domain/wanted-item/max-for/max-for";
 import type { WantedItemRecord } from "../stores/wanted-item.store.in-memory";
 
@@ -35,7 +36,7 @@ const reversed =
         comparator(second, first);
 
 const rarityRankOf = ({ catalog }: WantedItemEntry): number =>
-    catalog ? CATALOG_RARITIES.indexOf(catalog.rarity) : NO_RARITY_RANK;
+    catalog ? RARITY_ORDER.indexOf(catalog.rarity) : NO_RARITY_RANK;
 
 const byRarityDesc: Comparator = (first, second) => rarityRankOf(second) - rarityRankOf(first);
 

@@ -8,7 +8,7 @@ import {
     ASIIMOV_WANTED,
     WANTED_ITEMS_PAGE,
 } from "../../infrastructure/docs/wanted-items-page.example";
-import { CATALOG_RARITIES } from "../../application/list-wanted-items/catalog-details.gateway";
+import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 
 const { name, maxPercentage, maxValue, criterionType, wear } = WANTED_ITEM_EXAMPLE;
 const PERCENTAGE_EXAMPLE = { type: MaxForType.PERCENTAGE, value: maxPercentage };
@@ -48,8 +48,8 @@ const catalogSchema = z
             description: "The picture of the skin, on Steam's image server",
             examples: [ASIIMOV_CATALOG.imageUrl],
         }),
-        rarity: z.enum(CATALOG_RARITIES).meta({
-            description: "The rarity of the skin, from consumer up to contraband",
+        rarity: z.enum(Rarity).meta({
+            description: "The rarity of the skin, from Consumer Grade up to Contraband",
             examples: [ASIIMOV_CATALOG.rarity],
         }),
         weapon: z.string().meta({ description: "The weapon the skin is for", examples: [ASIIMOV_CATALOG.weapon] }),

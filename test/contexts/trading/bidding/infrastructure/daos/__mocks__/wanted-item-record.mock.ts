@@ -1,4 +1,5 @@
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
+import { Rarity } from "@/contexts/shared-kernel/domain/rarity";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { ADDED_AT } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
@@ -26,7 +27,7 @@ export const wantedItemRecord = (overrides: RecordOverrides): WantedItemRecord =
 
 export const catalogDetails = (overrides: Partial<CatalogDetailsDto> = {}): CatalogDetailsDto => ({
     imageUrl: "https://community.akamai.steamstatic.com/economy/image/asiimov",
-    rarity: "covert",
+    rarity: Rarity.COVERT,
     weapon: "AWP",
     skin: "Asiimov",
     wear: WearName.FIELD_TESTED,
