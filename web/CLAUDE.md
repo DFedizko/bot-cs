@@ -35,6 +35,7 @@ Summary: `src/features/<feature>/` holds `model/` (plain TypeScript UI rules), `
 | Model type, UI rule, constant                     | `wanted-item.ts` → `WantedItem`, `can-save-wanted-item.ts` → `canSaveWantedItem`, `app-name.ts` → `APP_NAME`   |
 | Port, store port                                  | `wanted-items.gateway.ts` → `WantedItemsGateway`, `selected-account.store.ts`, each with its `definePort` pair |
 | Implementation, fake                              | `create-http-wanted-items-gateway.ts` → `createHttpWantedItemsGateway`; fakes `create-fake-…` (tests only)     |
+| Service port, HTTP service                        | `wanted-items.service.ts` → `WantedItemsService`; `wanted-items.http-service.ts` → `WantedItemsHttpService`    |
 | Hook (view-model, feature, shared), query options | `useWantedItemsViewModel.ts` → `useWantedItemsViewModel`; `wanted-items-query.ts` → `wantedItemsQuery`         |
 | View, screen, page, layout                        | `wanted-items.view.tsx` → `WantedItemsView`; `.screen.tsx`, `.page.tsx`, `.layout.tsx` the same way            |
 | Component, value object                           | `wanted-item-row.tsx` → `WantedItemRow`; `email/email.ts` + `create-email.ts` → `Email`, `createEmail`         |
@@ -55,7 +56,7 @@ Use the `@/` alias (`@/shared/ui/components/button`, `@/features/wanted-items`) 
 ## Frontend code rules
 
 - **Dependency inversion at the boundaries.** View-models reach the API, the WebSocket, storage, time and shared client state only through ports (`definePort`) and stores (`Store<T>`), never through an adapter. Only the composition root (`src/app/`) binds concrete implementations; tests bind fakes.
-- **Functions, not classes.** Function components, hooks and plain functions; no OOP.
+- **Functions for UI, classes for infrastructure.** Components, hooks and view-models are functions; infrastructure may be classes.
 - **SOLID.** One responsibility per component, hook and function; small focused ports and props; extend by adding adapters, not by editing view-models.
 - **No generator functions** (`function*`, `yield`) unless there's no reasonable alternative.
 - **Libraries stay behind adapters.** Libraries for I/O and client state (HTTP clients, WebSocket clients, Zustand and the like) are imported only in a feature's `adapters/` and in `shared/adapters/`, which also creates the framework objects (the router, the `QueryClient`, devtools), like the bot's `external/`. `shared/lib/` holds only contracts and helpers that touch no outside world. The UI foundation we chose is used directly: React, TanStack Router and Query, Tailwind CSS, and the base components copied into `shared/ui/components/`.

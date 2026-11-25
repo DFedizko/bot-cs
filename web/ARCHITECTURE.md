@@ -6,7 +6,7 @@ The frontend is a single-page app that manages the bot (wanted items, accounts, 
 
 ```
 web/src/
-  main.tsx               entry: builds the QueryClient and the router, renders <App>
+  main.tsx               entry: builds the QueryClient, the router and the HTTP client, renders <App>
   app/                   composition root: providers and port bindings, using what shared/adapters builds
   routes/                TanStack Router file routes: only the Route definition (path, params, loader)
   pages/                 one component per page (<name>.page.tsx): composes feature screens
@@ -68,6 +68,10 @@ Invert what is slow or unpredictable (the API, the WebSocket, storage, time) and
 
 An unbound port fails loudly with its name, so a missing binding is found by the first test that renders it.
 
+## HTTP client and feature services
+
+Features reach the bot's API through the `HttpClient` contract in `shared/lib/http/` (`get`, `post`, `put`, `patch`, `delete`; every failure an `HttpError` with `status`, `code`, `message` and `fields`). Its only implementation, `HttpClientAxiosAdapter` in `shared/adapters/`, is the one place that imports Axios; it is built from the `AppConfig` port (the bot's URL from `VITE_BOT_API_URL`) and bound in `app/` by `AppProviders`. A feature declares the calls it needs as a service port in `ports/` (`WantedItemsService`, typed with `shared/api/bot-api.ts`) and implements it in `adapters/` with a class that receives `HttpClient` through its constructor (`WantedItemsHttpService`); `app/` binds it, and the view-model only sees the port. The decision is [ADR-0004](adr/0004-http-client.md).
+
 ## Server state with TanStack Query
 
 - Queries and mutations live in `view-model/`. Build reusable ones as `queryOptions(...)` factories (`wantedItemsQuery(gateway, accountId)`), so a route loader can prefetch them through the feature's `index.ts`.
@@ -103,7 +107,7 @@ Features never import each other. A page composes them. **What is shared lives i
 
 ## Enforcement
 
-`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries only in `shared/adapters/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
+`bun run lint` enforces every arrow above (`eslint.boundaries.js`): layers inside a feature, no imports between features, no libraries in `model/` and `ports/`, no TanStack Query in `view/`, no React in `adapters/`, state libraries and HTTP libraries only in `shared/adapters/`, and `shared/adapters/` only for `app/`. Tests (`*.test.ts(x)`) and the generated route tree are exempt.
 
 ## Tests
 
