@@ -6,7 +6,7 @@ import { OfferVerificationPolicy } from "../../domain/offer-verification/offer-v
 import type { OfferVerdict } from "../../domain/offer-verification/offer-verdict";
 import { ReceivedOffer } from "../../domain/offer-verification/received-offer";
 import type { DeliveryRepository } from "../delivery.repository";
-import { loadDelivery } from "../load-delivery";
+import { TradeId } from "../../domain/delivery/trade-id";
 import { ACCEPT_OUTCOME, type AcceptOutcome, type OfferAcceptanceGateway } from "./offer-acceptance.gateway";
 import type { ReceivedOffersGateway } from "./received-offers.gateway";
 import { AcceptDeliveryOfferCommand } from "./accept-delivery-offer.command";
@@ -29,7 +29,7 @@ export class AcceptDeliveryOfferCommandHandler implements CommandHandler<AcceptD
     }
 
     async handle(command: AcceptDeliveryOfferCommand): Promise<void> {
-        const delivery = await loadDelivery(this.repository, command.tradeId);
+        const delivery = await this.repository.getByTradeId(new TradeId(command.tradeId));
         if (!delivery.canTakeOffers())
             return this.logger.log(
                 `Delivery of trade "${command.tradeId}" is ${delivery.getStatus()}, nothing to accept`,

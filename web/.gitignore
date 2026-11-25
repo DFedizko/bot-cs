@@ -16,3 +16,4 @@ src/routeTree.gen.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+src/shared/api/bot-api.ts

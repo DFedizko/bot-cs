@@ -46,10 +46,11 @@ These apply to every change that touches trades:
 
 ## Rules
 
+- Delivery depends on no other bounded context: it follows withdrawals from CSGOEmpire itself. It reuses only the CSGOEmpire HTTP and WebSocket clients `trading/shared` binds, wired in `external/di/` (see the context map in `src/ARCHITECTURE.md`).
 - Facts about a delivery are **domain events** recorded by the aggregate; outcomes that aren't a change of the aggregate (offer not found, scam offers found, offer cancelled, step failed) are **application events**. See "Events announce what happened" in `src/ARCHITECTURE.md`.
 - Every step is idempotent: its handler checks the delivery's status first and does nothing when the step already happened, so a step can always be dispatched again.
 - Delivery steps run outside the core trading flow (ADR-0002): its listeners dispatch through the delivery command bus, which reports a failed step as `DeliveryStepFailedEvent` instead of throwing. Never inject that bus anywhere else.
 - Ports are split by role and owned by the use case that consumes them (interface segregation): a handler depends only on the Steam or marketplace actions it performs.
 - Credentials are read per account through the `SteamCredentials` port, never from the environment directly.
 - Other contexts use delivery only through its barrel (`index.ts`): commands, events and DTO types. Delivery uses other contexts only through their barrels, except in its DI modules.
-- Steam behaviour comes from the libraries' documentation (`steam-integration` skill), and CSGOEmpire contracts from the docs (`external-api-contract` skill).
+- Steam behaviour comes from the libraries' documentation, and CSGOEmpire contracts from its docs.

@@ -21,6 +21,7 @@ import {
     ACTIVE_WITHDRAWALS_CONTROLLER,
     TRADE_STATUS_CONTROLLER,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { CATALOG_LOADING_CONTROLLER } from "@/contexts/catalog/external/di/catalog.identifiers";
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
 
@@ -35,6 +36,7 @@ export class Bootstrap {
         await this.subscribe(EVENT_LISTENER, EVENT_BUS);
         await this.subscribe(ASYNC_EVENT_LISTENER, ASYNC_EVENT_BUS);
         await this.startHttpServer();
+        await this.startCatalogLoading();
         const commandBus = await this.container.getAsync(COMMAND_BUS);
         const { user } = await this.container.getAsync(SOCKET_METADATA);
         await this.container.getAsync(INIT_CSG_SESSION);
@@ -46,6 +48,11 @@ export class Bootstrap {
     private async subscribe(listenerId: Identifier<EventListener>, busId: Identifier<EventBus>): Promise<void> {
         const listeners = await this.container.getAllAsync(listenerId, { optional: true });
         (await this.container.getAsync(busId)).addSubscribers(listeners);
+    }
+
+    private async startCatalogLoading(): Promise<void> {
+        const controller = await this.container.getAsync(CATALOG_LOADING_CONTROLLER);
+        void controller.start();
     }
 
     private async startDeliveryTracking(accountId: number): Promise<void> {

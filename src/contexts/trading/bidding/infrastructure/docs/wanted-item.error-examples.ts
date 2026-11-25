@@ -12,9 +12,14 @@ export const NOT_WANTED = {
     value: { code: "WANTED_ITEM_NOT_FOUND", message: `The account ${accountId} doesn't want "${name}"` },
 };
 
-export const INVALID_MAX_FOR = {
-    summary: "The max for is not a percentage",
+export const INVALID_MAX_PERCENTAGE = {
+    summary: "The max percentage is not a number",
     value: { code: "INVALID_VALUE", message: 'Invalid percentage/fraction: "a lot"' },
+};
+
+export const NON_POSITIVE_MAX_VALUE = {
+    summary: "The max value is not above zero",
+    value: { code: "NON_POSITIVE_MAX_VALUE", message: 'The max value "0" must be above zero coin cents' },
 };
 
 export const UNKNOWN_CRITERION = {
@@ -67,4 +72,13 @@ export const ENABLED_NOT_BOOLEAN = {
 export const INVALID_WEAR = {
     summary: "The wear is not a CS2 wear name",
     value: { code: "DOMAIN_ERROR", message: 'Invalid wear name: "Brand New"' },
+};
+
+export const ENABLED_FILTER_NOT_BOOLEAN = {
+    summary: "The enabled filter is neither true nor false",
+    value: {
+        code: "VALIDATION_ERROR",
+        message: "Invalid input: enabled",
+        fields: [{ path: "enabled", message: 'Invalid option: expected one of "true"|"false"' }],
+    },
 };

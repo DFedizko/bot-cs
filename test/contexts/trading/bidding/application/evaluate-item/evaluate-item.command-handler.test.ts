@@ -1,4 +1,6 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { evaluateItemCommand } from "./__mocks__/evaluate-item.command.mock";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-off-auction.event";
@@ -19,7 +21,7 @@ const OTHER_ACCOUNT_ID = ACCOUNT_ID + 1;
 const ITEM_NAME = evaluateItemCommand().itemName;
 
 const disabledCyberSecurity = (accountId: number) => {
-    const wantedItem = WantedItem.create({ accountId, name: ITEM_NAME, maxFor: "-4.05" });
+    const wantedItem = buildWantedItem({ accountId, name: ITEM_NAME, maxFor: maxForPercentage("-4.05") });
     wantedItem.disable();
     return wantedItem;
 };
@@ -34,10 +36,10 @@ describe("EvaluateItemCommandHandler", () => {
     it("Should evaluate and approve a item in auction when all criteria are met", async () => {
         const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
-            WantedItem.create({
+            buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.05",
+                maxFor: maxForPercentage("-4.05"),
             }),
         );
         const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
@@ -61,10 +63,10 @@ describe("EvaluateItemCommandHandler", () => {
     it("Should evaluate and approve a item out of the auction when all criteria are met", async () => {
         const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
-            WantedItem.create({
+            buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.05",
+                maxFor: maxForPercentage("-4.05"),
             }),
         );
         const wantedItemRepoSpy = jest.spyOn(wantedItemRepo, "findByName");
@@ -88,10 +90,10 @@ describe("EvaluateItemCommandHandler", () => {
         const criterion = { type: ItemCriterionType.IS_WEAR, value: WearName.BATTLE_SCARRED };
         const wantedItemRepo = container.get(WANTED_ITEM_REPOSITORY);
         await wantedItemRepo.save(
-            WantedItem.create({
+            buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.06",
+                maxFor: maxForPercentage("-4.06"),
                 criteria: [criterion],
             }),
         );
@@ -111,10 +113,10 @@ describe("EvaluateItemCommandHandler", () => {
     });
     it("Should ignore the same item wanted by another account", async () => {
         await container.get(WANTED_ITEM_REPOSITORY).save(
-            WantedItem.create({
+            buildWantedItem({
                 accountId: OTHER_ACCOUNT_ID,
                 name: "M4A4 | Cyber Security (Field-Tested)",
-                maxFor: "-4.05",
+                maxFor: maxForPercentage("-4.05"),
             }),
         );
         const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
@@ -147,7 +149,9 @@ describe("EvaluateItemCommandHandler", () => {
             const repository = container.get(WANTED_ITEM_REPOSITORY);
             await repository.save(disabledCyberSecurity(OTHER_ACCOUNT_ID));
             jest.spyOn(container.get(LOGGER), "debug").mockImplementation(() => {});
-            await repository.save(WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-4.05" }));
+            await repository.save(
+                buildWantedItem({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-4.05") }),
+            );
             const publishSpy = jest.spyOn(container.get(EVENT_BUS), "publish");
 
             await container.get(EVALUATE_ITEM_HANDLER).handle(evaluateItemCommand());

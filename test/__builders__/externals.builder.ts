@@ -21,6 +21,9 @@ import { ClockFakeAdapter } from "@/contexts/delivery/external/scheduling/clock.
 import { SteamSessionsFakeAdapter } from "@/contexts/delivery/external/steam/steam-sessions.fake-adapter";
 import { CsgDeliveryHttpFakeAdapter } from "@/contexts/delivery/external/http/csgoempire/csg-delivery.http.fake-adapter";
 
+import { BYMYKEL_SKINS_HTTP } from "@/contexts/catalog/external/di/catalog.identifiers";
+import { ByMykelSkinsHttpFakeAdapter } from "@/contexts/catalog/external/http/bymykel/bymykel-skins.http.fake-adapter";
+
 const FAKE_WS_URL = "ws://localhost";
 
 export const fakeExternals = (container: Container): Container => {
@@ -32,6 +35,7 @@ export const fakeExternals = (container: Container): Container => {
     container.rebind(CSG_DELIVERY_HTTP).toConstantValue(new CsgDeliveryHttpFakeAdapter());
     container.rebind(SCHEDULER).toConstantValue(new SchedulerFakeAdapter());
     container.rebind(CLOCK).toConstantValue(new ClockFakeAdapter());
+    container.rebind(BYMYKEL_SKINS_HTTP).toConstantValue(new ByMykelSkinsHttpFakeAdapter());
     container.rebind(PROCESS_EVENTS).toConstantValue(new EventEmitter());
     return container;
 };

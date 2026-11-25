@@ -21,7 +21,22 @@ src/contexts/
   trading/                  core domain: buying skins for profit
     shared/                 model shared by the trading subdomains (CoinCent, Float, Sticker, CSGOEmpire session)
     bidding/                subdomain: wanted items, item evaluation, auction participation, account balance and bids
+  delivery/                 supporting: receiving bought items through Steam trade offers
+  catalog/                  supporting: CS2 reference data (skins, images, rarities) and its search, no domain model
 ```
+
+### Context map
+
+Who depends on whom, and how. Add a row when a new dependency between contexts is created, in the same change.
+
+| Upstream         | Downstream                         | How                                                                                                          | Limit                                                               |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `shared-kernel`  | every context                      | Direct imports of its domain concepts                                                                        | Pure domain only                                                    |
+| `trading/shared` | `trading/bidding`                  | Direct imports (shared kernel of the trading subdomains): coin cents, CSGOEmpire session and its contracts   | Trading subdomains only                                             |
+| `trading/shared` | `delivery`                         | Reuses the CSGOEmpire HTTP and WebSocket clients `trading/shared` binds, wired in delivery's DI modules only | No import outside `external/di/`                                    |
+| `catalog`        | `trading/bidding` (read side only) | The catalog's published lookup by market names, through its barrel, adapted in bidding's `infrastructure/`   | Only the wanted items list query; never the bidding flow (ADR-0002) |
+
+`delivery` and `trading/bidding` don't depend on each other: delivery follows withdrawals from CSGOEmpire itself.
 
 Rules:
 
@@ -93,6 +108,16 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
 - **External (frameworks and drivers)** is the only layer that imports a library, a runtime API or talks to the outside world. It implements the infrastructure contracts and contains no business rules and no mapping to the domain. Swapping fetch for axios, Express for Bun, or a provider for a fake means replacing only this layer.
 - **Composition roots** (`src/main.ts`, each context's wiring) are the only places that instantiate concrete classes. Everything else receives its collaborators through the constructor, typed by a contract.
 
+### When a context needs no domain layer
+
+The domain layer exists to model rules we own. When a bounded context has no complex domain to handle and nothing to model, because the domain isn't ours (reference data from a provider, another system's records) or the context only moves and reads data, it doesn't need a `domain/` folder:
+
+- Use cases work as **transaction scripts**: a command handler or a query handler does the job in one place, through its ports, with plain DTOs.
+- Data that isn't ours isn't ours to validate beyond what our use cases need. **Adapt it in the interface adapters** (`infrastructure/`) into the shape that suits the use cases and command handlers, and reject only what they can't work with, at the boundary.
+- **No aggregate, no repository.** A repository persists an aggregate; without one, read and write data through a DAO, a gateway or another pattern that fits the job, never a repository.
+- A context may still keep a small `domain/` for simple value objects that validate data we do own (e.g. a `FooCode` the user types), without aggregates or entities.
+- The other layers and the dependency rule stay the same, and lint still enforces them. If the context later gains rules of its own, it grows a domain model then, not before.
+
 ## 3. Tactical DDD and design patterns
 
 ### Tactical DDD
@@ -114,6 +139,7 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
 | ------------------------------- | ------------ | --------------------------------------------------------------------------------------- |
 | Value Object, Money             | PoEAA        | `ValueObject`, `Money`, `PositiveMoney`, `CoinCent`, `Percentage`                       |
 | Repository                      | PoEAA        | `*.repository.ts` ports, `*.repository.in-memory.ts` adapters                           |
+| Data Access Object              | Core J2EE    | `*.dao.ts` ports of the read side, `*.dao.in-memory.ts` adapters                        |
 | Gateway                         | PoEAA        | `auction.gateway.ts`, `active-trades.gateway.ts` and their `*-adapter.ts`               |
 | Data Transfer Object            | PoEAA        | `AuctionDTO`, command and event payloads                                                |
 | Service Layer                   | PoEAA        | Command handlers orchestrate domain and ports; they hold no business rules of their own |
@@ -125,7 +151,7 @@ A contract (interface) lives in the layer that **uses** it; its implementation l
 | Composite                       | GoF          | `AndSpecification`, `OrSpecification`, `NotSpecification`                               |
 | Command                         | GoF          | `Command` objects dispatched on the `CommandBus`                                        |
 | Observer                        | GoF          | `EventBus` + `EventListener`                                                            |
-| Mediator                        | GoF          | `CommandBus` routes each command to its handler; senders never know the handler         |
+| Mediator                        | GoF          | `CommandBus` and `QueryBus` route each command or query to its handler                  |
 
 Prefer one of these before inventing a new structure. Introducing a new pattern is always welcome and is an architecture decision: record it in this file.
 
@@ -147,7 +173,13 @@ Every mutation of the application's state is a **command** handled by exactly on
 
 ### Queries read state
 
-Reads have no side effects and don't go through the command bus. A client that needs to read state gets it from a query and its query handler, placed next to the use case, never from a command's return value.
+Reads have no side effects and don't go through the command bus. A client that needs state gets it from a **query**, never from a command's return value ([ADR-0004](../adr/0004-query-side-query-bus-daos-and-dtos.md); the `cqrs-query` skill has the recipe).
+
+- A query extends `Query<TResponse>`, has a `static readonly QUERY_NAME` in snake_case and only typed `readonly` fields. `QueryBus.ask(query)` returns the response its handler (`QueryHandler<TQuery, TResponse>`) gives, with the type inferred from the query. `QueryBusInMemory` keeps one handler per `QUERY_NAME`, throws `QueryNotRegisteredError` when none is registered, and gets its handlers from the composition root.
+- Only drivers (HTTP controllers today) ask queries, after validating their input; command handlers and event listeners never do, and a query handler never asks another query.
+- The handler reads through a **DAO** port owned by its use case (`application/<use-case>/<name>.dao.ts`), shaped for the driver, with optional filters and pagination (`Pagination`, `Paginated<T>`). The DAO returns DTOs of primitives, never aggregates; its adapter lives in `infrastructure/daos/`, and a real data source behind a port in `external/`.
+- Responses are objects, never bare arrays. A missing resource is a thrown not-found error.
+- In memory, the DAO and the repository of the same aggregate share one store in `infrastructure/stores/`, so the DAO reads what the repository wrote.
 
 ### Events announce what happened
 

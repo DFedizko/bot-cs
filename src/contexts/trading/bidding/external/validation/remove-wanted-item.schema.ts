@@ -1,5 +1,5 @@
 import z from "zod";
-import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.input";
+import type { RemoveWantedItemInput } from "../../infrastructure/controllers/remove-wanted-item.http-controller";
 import { accountIdField, itemNameField } from "./wanted-item.fields";
 
 export const removeWantedItemSchema = z.object({

@@ -1,4 +1,5 @@
 import z from "zod";
+import { MaxForType, type MaxForPrimitives } from "../../domain/wanted-item/max-for/max-for";
 import { WANTED_ITEM_EXAMPLE } from "../../infrastructure/docs/wanted-item.example";
 
 const PLAIN_DIGITS = /^\d+$/;
@@ -20,14 +21,50 @@ export const itemNameField = z.string().meta({
     examples: [WANTED_ITEM_EXAMPLE.name],
 });
 
-export const maxForField = z
-    .union([z.string(), z.number()])
-    .meta({
-        description:
-            "The highest price to pay, as a percentage over the item's recommended price (-3 pays at most 3% below it)",
-        examples: [WANTED_ITEM_EXAMPLE.maxFor],
+const MAX_PERCENTAGE_EXAMPLE = { type: MaxForType.PERCENTAGE, value: WANTED_ITEM_EXAMPLE.maxPercentage };
+const MAX_VALUE_EXAMPLE = { type: MaxForType.VALUE, value: WANTED_ITEM_EXAMPLE.maxValue };
+
+const maxPercentageField = z
+    .object({
+        type: z.literal(MaxForType.PERCENTAGE).meta({ description: "The max for is a percentage" }),
+        value: z.union([z.string(), z.number()]).meta({
+            description: "The percentage over the item's recommended price (-3 pays at most 3% below it)",
+            examples: [WANTED_ITEM_EXAMPLE.maxPercentage],
+        }),
     })
-    .transform(String);
+    .meta({
+        description: "The highest price to pay, as a percentage over the item's recommended price",
+        examples: [MAX_PERCENTAGE_EXAMPLE],
+    });
+
+const maxValueField = z
+    .object({
+        type: z.literal(MaxForType.VALUE).meta({ description: "The max for is a fixed value" }),
+        value: z
+            .number()
+            .int()
+            .meta({
+                description: "The highest price to pay, in coin cents (19400 pays at most 194.00 coins), above zero",
+                examples: [WANTED_ITEM_EXAMPLE.maxValue],
+            }),
+    })
+    .meta({
+        description: "The highest price to pay, as a fixed value whatever the recommended price",
+        examples: [MAX_VALUE_EXAMPLE],
+    });
+
+type RawMaxFor = z.infer<typeof maxPercentageField> | z.infer<typeof maxValueField>;
+
+const toMaxForPrimitives = (maxFor: RawMaxFor): MaxForPrimitives =>
+    maxFor.type === MaxForType.PERCENTAGE ? { ...maxFor, value: String(maxFor.value) } : maxFor;
+
+export const maxForField = z
+    .discriminatedUnion("type", [maxPercentageField, maxValueField])
+    .meta({
+        description: "The highest price to pay: either a percentage over the recommended price or a fixed value",
+        examples: [MAX_PERCENTAGE_EXAMPLE, MAX_VALUE_EXAMPLE],
+    })
+    .transform(toMaxForPrimitives);
 
 export const criteriaField = z
     .array(
@@ -49,3 +86,15 @@ export const enabledField = z.boolean().meta({
     description: "true to bid on the item again, false to pause it",
     examples: [WANTED_ITEM_EXAMPLE.enabled],
 });
+
+const TRUE = "true";
+const FALSE = "false";
+const ENABLED_FILTER_DESCRIPTION =
+    "true lists only the enabled items, false only the disabled ones; leave it out to list both";
+
+export const enabledFilterField = z
+    .enum([TRUE, FALSE])
+    .meta({ description: ENABLED_FILTER_DESCRIPTION, examples: [TRUE] })
+    .transform((enabled) => enabled === TRUE)
+    .optional()
+    .meta({ description: ENABLED_FILTER_DESCRIPTION });

@@ -6,7 +6,7 @@ import {
     type SteamOfferState,
     type SteamTradeOffer,
 } from "@/contexts/delivery/infrastructure/steam/steam-trade-offer";
-import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/steam-trade.error";
+import { SteamTradeError } from "@/contexts/delivery/infrastructure/steam/errors/steam-trade.error";
 
 export type SteamFakeScenario = { confirmationRequired?: boolean; acceptTimesOut?: boolean };
 

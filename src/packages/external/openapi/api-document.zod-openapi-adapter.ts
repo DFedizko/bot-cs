@@ -9,10 +9,12 @@ import {
 import type { ApiDocument, ApiDocumentJson } from "@/packages/infrastructure/http/docs/api-document";
 import type { HttpRouteCatalog } from "@/packages/infrastructure/http/docs/http-route.catalog";
 import type { HttpResponseDoc, HttpRoute, HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
+import { HttpMethod } from "@/packages/infrastructure/http/http-method";
 import { ValidatorZodAdapter } from "../validation/validator.zod-adapter";
 import { httpErrorBodySchema } from "./http-error-body.schema";
 
 const OPENAPI_VERSION = "3.1.0";
+const JSON_TYPE = "application/json";
 const PATH_PARAM = /:(\w+)/g;
 const PARAM_PREFIX = ":";
 const PARAM_PREFIX_LENGTH = PARAM_PREFIX.length;
@@ -20,6 +22,9 @@ const PATH_SEPARATOR = "/";
 const WORD_SEPARATOR = "-";
 const SAME_ORIGIN = { url: "/" };
 const FIRST_ERROR_STATUS = 400;
+const BEFORE = -1;
+const AFTER = 1;
+const METHOD_ORDER: string[] = Object.values(HttpMethod);
 
 type ApiInfo = { title: string; version: string; description: string };
 type DocumentedRoute = HttpRoute & { doc: HttpRouteDoc };
@@ -44,7 +49,15 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     }
 
     private documentedRoutes(): DocumentedRoute[] {
-        return this.catalog.routes().filter((route): route is DocumentedRoute => route.doc !== undefined);
+        return this.catalog
+            .routes()
+            .filter((route): route is DocumentedRoute => route.doc !== undefined)
+            .toSorted((first, second) => this.compareRoutes(first, second));
+    }
+
+    private compareRoutes(first: HttpRoute, second: HttpRoute): number {
+        if (first.path !== second.path) return first.path < second.path ? BEFORE : AFTER;
+        return METHOD_ORDER.indexOf(first.method) - METHOD_ORDER.indexOf(second.method);
     }
 
     private addRoute(paths: ZodOpenApiPathsObject, route: DocumentedRoute): ZodOpenApiPathsObject {
@@ -55,33 +68,55 @@ export class ApiDocumentZodOpenApiAdapter implements ApiDocument {
     private createOperation({ doc, input, path, method }: DocumentedRoute): ZodOpenApiOperationObject {
         const shape = this.readShape(input);
         const params = this.readParamNames(path);
-        const body = Object.entries(shape).filter(([name]) => !params.includes(name));
+        const fields = z.object(Object.fromEntries(Object.entries(shape).filter(([name]) => !params.includes(name))));
+        const hasFields = Object.keys(fields.shape).length > 0;
         const { summary, description, tags } = doc;
         return {
             operationId: this.createOperationId(method, path),
             summary,
             description,
             tags,
-            requestParams: { path: z.object(Object.fromEntries(params.map((name) => [name, shape[name]]))) },
-            ...(body.length > 0 && {
-                requestBody: {
-                    description: summary,
-                    content: { "application/json": { schema: z.object(Object.fromEntries(body)) } },
-                },
-            }),
+            requestParams: {
+                path: z.object(Object.fromEntries(params.map((name) => [name, shape[name]]))),
+                ...(hasFields && this.readsOnly(method) && { query: fields }),
+            },
+            ...(hasFields &&
+                !this.readsOnly(method) && {
+                    requestBody: { description: summary, content: { [JSON_TYPE]: { schema: fields } } },
+                }),
             responses: Object.fromEntries(doc.responses.map((response) => this.createResponse(response))),
         };
     }
 
-    private readShape(input: HttpRoute["input"]): z.ZodRawShape {
-        const isZodObject = input instanceof ValidatorZodAdapter && input.schema instanceof z.ZodObject;
-        return isZodObject ? input.schema.shape : {};
+    private readsOnly(method: HttpMethod): boolean {
+        return method === HttpMethod.GET;
     }
 
-    private createResponse({ status, description, examples }: HttpResponseDoc): [string, ZodOpenApiResponseObject] {
-        if (status < FIRST_ERROR_STATUS) return [String(status), { description }];
-        const content = { "application/json": { schema: httpErrorBodySchema, ...(examples && { examples }) } };
+    private readShape(input: HttpRoute["input"]): z.ZodRawShape {
+        if (!(input instanceof ValidatorZodAdapter)) return {};
+        const schema = input.schema instanceof z.ZodPipe ? input.schema.in : input.schema;
+        return schema instanceof z.ZodObject ? schema.shape : {};
+    }
+
+    private createResponse({
+        status,
+        description,
+        examples,
+        body,
+    }: HttpResponseDoc): [string, ZodOpenApiResponseObject] {
+        if (status < FIRST_ERROR_STATUS)
+            return [String(status), { description, ...this.createSuccessContent(examples, body) }];
+        const content = { [JSON_TYPE]: { schema: httpErrorBodySchema, ...(examples && { examples }) } };
         return [String(status), { description, content }];
+    }
+
+    private createSuccessContent(
+        examples: HttpResponseDoc["examples"],
+        body: HttpResponseDoc["body"],
+    ): Pick<ZodOpenApiResponseObject, "content"> {
+        const schema = body instanceof ValidatorZodAdapter ? body.schema : undefined;
+        if (!examples && !schema) return {};
+        return { content: { [JSON_TYPE]: { ...(schema && { schema }), ...(examples && { examples }) } } };
     }
 
     private createOperationId(method: string, path: string): string {

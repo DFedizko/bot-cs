@@ -25,6 +25,13 @@ export default [
         },
     },
     {
-        ignores: ["dist/", "src/routeTree.gen.ts", "eslint.config.js", "eslint.*.js", "prettier.config.js"],
+        ignores: [
+            "dist/",
+            "src/routeTree.gen.ts",
+            "eslint.config.js",
+            "eslint.*.js",
+            "openapi-typescript.resolver.js",
+            "prettier.config.js",
+        ],
     },
 ];

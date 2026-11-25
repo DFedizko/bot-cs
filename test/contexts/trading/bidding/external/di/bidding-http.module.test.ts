@@ -1,3 +1,4 @@
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import type { Container } from "inversify";
 import { biddingContainer } from "./__builders__/bidding-container.builder";
 import { fakeExternals } from "@/__builders__/externals.builder";
@@ -102,9 +103,13 @@ describe.each(ENVIRONMENTS)("BiddingHttpModule in %s", (nodeEnv) => {
     it("Should convert the input with the endpoint's schema", () => {
         const validator = container.get(ADD_WANTED_ITEM_VALIDATOR);
 
-        const input = validator.validate({ accountId: "1", name: ITEM_NAME, maxFor: -3 });
+        const input = validator.validate({
+            accountId: "1",
+            name: ITEM_NAME,
+            maxFor: { type: "percentage", value: -3 },
+        });
 
-        expect(input).toEqual({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: "-3" });
+        expect(input).toEqual({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
     });
 
     it.each(HTTP_ERROR_STATUSES)("Should answer $error.name with $status", ({ error, status }) => {

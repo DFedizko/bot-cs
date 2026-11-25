@@ -11,10 +11,16 @@ import {
 } from "./__builders__/documented-api.builder";
 
 const DOCS_ENV = "development";
+const READ_METHOD = "get";
+const JSON_TYPE = "application/json";
 
 const toKey = ({ method, path }: { method: string; path: string }): string => `${method} ${path}`;
-const nullFields = (route: DocumentedRoute): Record<string, null> =>
-    Object.fromEntries(bodyFields(route).names.map((name) => [name, null]));
+const EMPTY_QUERY_VALUE = "";
+
+const invalidFields = (route: DocumentedRoute): Record<string, null | string> => {
+    const invalid = route.method === READ_METHOD ? EMPTY_QUERY_VALUE : null;
+    return Object.fromEntries(bodyFields(route).names.map((name) => [name, invalid]));
+};
 
 let container: Container;
 
@@ -60,7 +66,7 @@ describe("Api documentation", () => {
     it("Should validate exactly the documented body fields of every route", async () => {
         const api = await startDocumentedApi(container);
 
-        const answers = await Promise.all(api.documented.map((route) => api.send(route, nullFields(route))));
+        const answers = await Promise.all(api.documented.map((route) => api.send(route, invalidFields(route))));
 
         expect(answers.map(({ fields }) => fields)).toEqual(api.documented.map((route) => bodyFields(route).names));
     });
@@ -71,6 +77,22 @@ describe("Api documentation", () => {
         const params = api.documented.flatMap(({ operation }) => operation.parameters);
 
         expect(params.filter(({ schema }) => schema.examples === undefined)).toEqual([]);
+    });
+
+    it("Should describe every param", async () => {
+        const api = await startDocumentedApi(container);
+
+        const params = api.documented.flatMap(({ operation }) => operation.parameters);
+
+        expect(params.filter(({ description }) => description === undefined).map(({ name }) => name)).toEqual([]);
+    });
+
+    it("Should document the body every route that reads answers with", async () => {
+        const api = await startDocumentedApi(container);
+
+        const reads = api.documented.filter(({ method }) => method === READ_METHOD);
+
+        expect(reads.filter(({ operation }) => !operation.responses["200"]?.content?.[JSON_TYPE]?.schema)).toEqual([]);
     });
 
     it("Should document a success and the internal error of every route", async () => {

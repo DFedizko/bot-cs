@@ -7,6 +7,7 @@ const SAME_FEATURE = "{{ from.element.captured.feature }}";
 const ANY_MODULE = { origin: ["external", "core"] };
 const REACT_AND_TANSTACK = ["react", "react-dom", "@tanstack/*"];
 const STATE_LIBRARIES = ["zustand", "jotai", "valtio", "redux", "@reduxjs/*", "mobx"];
+const HTTP_LIBRARIES = ["axios"];
 const ALL_BUT_SHARED_ADAPTERS = [
     "app",
     "routes",
@@ -72,6 +73,11 @@ const MODULE_POLICIES = [
         ALL_BUT_SHARED_ADAPTERS,
         STATE_LIBRARIES,
         "State libraries stay behind the Store port: implement it in shared/adapters/, read stores with useStoreState",
+    ),
+    ...disallowModules(
+        ALL_BUT_SHARED_ADAPTERS,
+        HTTP_LIBRARIES,
+        "HTTP libraries stay behind the HttpClient contract: implement it in shared/adapters/, receive HttpClient in feature adapters. See web/adr/0004-http-client.md",
     ),
 ];
 

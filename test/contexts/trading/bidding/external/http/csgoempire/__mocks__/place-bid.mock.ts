@@ -41,4 +41,4 @@ export const placeBidSuccess = {
     invoice,
 } satisfies PlaceBid.Response;
 
-export const placeBidError = {} satisfies PlaceBid.ErrorResponse;
+export const placeBidBadRequest = {} satisfies PlaceBid.ErrorResponse;

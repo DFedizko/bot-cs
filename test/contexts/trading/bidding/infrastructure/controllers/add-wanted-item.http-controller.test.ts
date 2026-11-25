@@ -7,15 +7,21 @@ import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id"
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
+import {
+    maxForPercentage,
+    maxForValue,
+} from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { itemsPath, startWantedItemsApi } from "./__builders__/wanted-items-api.builder";
 
 const ACCOUNT_ID = 1;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 const POST = "POST";
 const MALFORMED_JSON = "{ not json";
+const MINUS_THREE_PERCENT = { type: "percentage", value: "-3" };
+const MAX_VALUE = { type: "value", value: 19400 };
 const asiimov = {
     name: ITEM_NAME,
-    maxFor: "-3",
+    maxFor: MINUS_THREE_PERCENT,
     criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
 };
 
@@ -49,6 +55,39 @@ describe("AddWantedItemHttpController", () => {
         expect(wantedItem?.getCriteria()).toEqual([ItemCriterionType.IS_WEAR]);
     });
 
+    it.each([
+        ["a max percentage", MINUS_THREE_PERCENT, maxForPercentage("-3")],
+        ["a max value", MAX_VALUE, maxForValue(19400)],
+    ])("Should add the item with %s", async (_kind, maxFor, expected) => {
+        const api = await startWantedItemsApi(container);
+
+        await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, maxFor });
+
+        const wantedItem = await container
+            .get(WANTED_ITEM_REPOSITORY)
+            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+        expect(wantedItem?.getMaxFor()).toEqual(expected);
+    });
+
+    it.each([[0], [-1]])("Should answer unprocessable entity for a max value of %p", async (value) => {
+        const api = await startWantedItemsApi(container);
+
+        const response = await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, maxFor: { ...MAX_VALUE, value } });
+
+        expect(response.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+    });
+
+    it.each([["-3"], [{ type: "discount", value: "-3" }], [{ type: "value", value: 194.5 }], [{ type: "percentage" }]])(
+        "Should answer bad request when the max for is %p",
+        async (maxFor) => {
+            const api = await startWantedItemsApi(container);
+
+            const response = await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, maxFor });
+
+            expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+        },
+    );
+
     it("Should answer conflict when the account already wants the item", async () => {
         const api = await startWantedItemsApi(container);
         await api.send(POST, itemsPath(ACCOUNT_ID), asiimov);
@@ -61,7 +100,10 @@ describe("AddWantedItemHttpController", () => {
     it("Should answer unprocessable entity for an invalid max for", async () => {
         const api = await startWantedItemsApi(container);
 
-        const response = await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, maxFor: "a lot" });
+        const response = await api.send(POST, itemsPath(ACCOUNT_ID), {
+            ...asiimov,
+            maxFor: { type: "percentage", value: "a lot" },
+        });
 
         expect(response.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
     });
@@ -78,7 +120,7 @@ describe("AddWantedItemHttpController", () => {
     it("Should answer bad request when the name is missing", async () => {
         const api = await startWantedItemsApi(container);
 
-        const response = await api.send(POST, itemsPath(ACCOUNT_ID), { maxFor: "-3" });
+        const response = await api.send(POST, itemsPath(ACCOUNT_ID), { maxFor: MINUS_THREE_PERCENT });
 
         expect(response.status).toBe(HttpStatus.BAD_REQUEST);
     });
@@ -132,7 +174,7 @@ describe("AddWantedItemHttpController", () => {
     it("Should name the failing fields of a bad request", async () => {
         const api = await startWantedItemsApi(container);
 
-        const response = await api.send(POST, itemsPath("john"), { maxFor: "-3" });
+        const response = await api.send(POST, itemsPath("john"), { maxFor: MINUS_THREE_PERCENT });
 
         expect(JSON.parse(response.body).fields.map(({ path }: { path: string }) => path)).toEqual([
             "accountId",

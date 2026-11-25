@@ -23,6 +23,11 @@ export class HttpErrorResponseDocs {
         return HttpErrorResponseDocs.create(HttpStatus.BAD_REQUEST, description, [validation, MALFORMED_BODY]);
     }
 
+    static badQuery(...validations: ErrorExample[]): ErrorResponseDoc {
+        const description = "The path or query params are invalid: the fields name each failing one";
+        return HttpErrorResponseDocs.create(HttpStatus.BAD_REQUEST, description, validations);
+    }
+
     static notFound(...examples: ErrorExample[]): ErrorResponseDoc {
         return HttpErrorResponseDocs.create(HttpStatus.NOT_FOUND, "The resource doesn't exist", examples);
     }
@@ -34,6 +39,11 @@ export class HttpErrorResponseDocs {
     static unprocessable(...examples: ErrorExample[]): ErrorResponseDoc {
         const description = "The input is well formed but breaks a domain rule";
         return HttpErrorResponseDocs.create(HttpStatus.UNPROCESSABLE_ENTITY, description, examples);
+    }
+
+    static serviceUnavailable(...examples: ErrorExample[]): ErrorResponseDoc {
+        const description = "A resource the route needs is not ready yet; try again later";
+        return HttpErrorResponseDocs.create(HttpStatus.SERVICE_UNAVAILABLE, description, examples);
     }
 
     static internalError(): ErrorResponseDoc {

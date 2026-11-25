@@ -1,2 +1,4 @@
 bun.lock
 src/routeTree.gen.ts
+.claude/
+skills-lock.json

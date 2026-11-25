@@ -1,4 +1,6 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
+import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { Bootstrap } from "@/composition-root/bootstrap";
 import { testContainer } from "@/__builders__/test-container.builder";
 import {
@@ -42,7 +44,6 @@ import {
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
-import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
 import { newItem } from "@/contexts/trading/bidding/infrastructure/controllers/__mocks__/new-item.mock";
 import { EvaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/evaluate-item.command";
@@ -93,7 +94,7 @@ const approvedInAuctionItem = async (container: Container): Promise<void> => {
         .save(Account.sync({ id: accountId, name: BIDDER_NAME, totalAmount: BIDDER_BALANCE }));
     await container
         .get(WANTED_ITEM_REPOSITORY)
-        .save(WantedItem.create({ accountId, name: itemName, maxFor: aboveRecommendedPercentage }));
+        .save(buildWantedItem({ accountId, name: itemName, maxFor: maxForPercentage(aboveRecommendedPercentage) }));
 };
 
 const flushEventBus = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));

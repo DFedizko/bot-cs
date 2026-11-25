@@ -1,4 +1,5 @@
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
+import type { Clock } from "@/packages/application/clock";
 import { AddWantedItemCommand } from "./add-wanted-item.command";
 import type { WantedItemRepository } from "../wanted-item.repository";
 import { WantedItem } from "../../domain/wanted-item/wanted-item";
@@ -7,14 +8,23 @@ import { AccountId } from "../../domain/account/account-id";
 import { ItemName } from "../../domain/wanted-item/item-name";
 
 export class AddWantedItemCommandHandler implements CommandHandler<AddWantedItemCommand> {
-    constructor(private readonly wantedItemRepo: WantedItemRepository) {}
+    constructor(
+        private readonly wantedItemRepo: WantedItemRepository,
+        private readonly clock: Clock,
+    ) {}
 
     subscribedTo(): string {
         return AddWantedItemCommand.COMMAND_NAME;
     }
 
     async handle({ accountId, itemName, maxFor, criteria }: AddWantedItemCommand): Promise<void> {
-        const wantedItem = WantedItem.create({ accountId, name: itemName, maxFor, criteria });
+        const wantedItem = WantedItem.create({
+            accountId,
+            name: itemName,
+            maxFor,
+            criteria,
+            addedAt: this.clock.now(),
+        });
         await this.rejectExistingItem(wantedItem);
         await this.wantedItemRepo.save(wantedItem);
     }

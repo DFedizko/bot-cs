@@ -6,7 +6,6 @@ Bun + TypeScript. It connects to CSGOEmpire's WebSocket, evaluates new items aga
 
 - **Tests:** [`test/CLAUDE.md`](../test/CLAUDE.md) before writing or changing any test.
 - **Architecture:** [`src/ARCHITECTURE.md`](ARCHITECTURE.md) before adding a use case, a port, an adapter, an event or a bounded context. It covers strategic DDD, the Clean Architecture layers, tactical DDD and patterns, and CQRS with events.
-- **Skills** (load them when the task needs them): `external-api-contract` for code that talks to CSGOEmpire (contracts, adapters, mocks, fakes), `steam-integration` for Steam logins, trade offers and confirmations, `http-route-docs` for creating or changing an HTTP route.
 
 Summary: `src/contexts/<context>/<subdomain>/` holds each bounded context, with use-case folders in `application/` and domain-concept folders in `domain/`; dependencies point `external → infrastructure → application → domain`, and `bun run lint` enforces it.
 
@@ -16,6 +15,8 @@ Shared folders and bounded contexts have their own `CLAUDE.md`, which loads when
 - [`contexts/trading/shared/CLAUDE.md`](contexts/trading/shared/CLAUDE.md): concepts and CSGOEmpire integration shared by the trading subdomains.
 - [`packages/CLAUDE.md`](packages/CLAUDE.md): shared infrastructure with no business meaning (building blocks, ports and adapters, shared and HTTP errors, TypeScript type helpers).
 - [`contexts/delivery/CLAUDE.md`](contexts/delivery/CLAUDE.md): the delivery bounded context (receiving bought items through Steam trade offers): its responsibilities, language and safety rules.
+- [`contexts/catalog/CLAUDE.md`](contexts/catalog/CLAUDE.md): the catalog bounded context (the CS2 items that exist, with picture and rarity, searchable by name): its responsibilities, language and rules.
+- [`contexts/trading/bidding/CLAUDE.md`](contexts/trading/bidding/CLAUDE.md): the bidding bounded context, the core of the bot (wanted items, evaluating items, bidding): its responsibilities, language and rules.
 
 ## File naming
 
@@ -24,12 +25,17 @@ kebab-case, `<name>.<role>[.<implementation>].ts`:
 | Kind                           | Pattern                                          | Example                                                                        |
 | ------------------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------ |
 | Command / handler              | `<use-case>.command.ts` / `.command-handler.ts`  | `add-wanted-item.command-handler.ts`                                           |
+| Query / handler                | `<use-case>.query.ts` / `.query-handler.ts`      | `list-wanted-items.query-handler.ts`                                           |
+| Query response (DTOs)          | `<use-case>.response.ts`                         | `list-wanted-items.response.ts`                                                |
+| Query response schema (docs)   | `<use-case>.response-schema.ts`                  | `list-wanted-items.response-schema.ts`                                         |
+| DAO / in-memory DAO            | `<name>.dao.ts` / `<name>.dao.in-memory.ts`      | `wanted-items.dao.ts`, `wanted-items.dao.in-memory.ts`                         |
 | Event                          | `<event>.event.ts`                               | `bid-placed.event.ts`                                                          |
 | Event listener                 | `on-<event>-<action>.ts`                         | `on-outbid-counter-bid.ts`                                                     |
 | Port                           | `<name>.repository.ts`, `<name>.gateway.ts`      | `auction-participation.repository.ts`                                          |
 | Port implementation            | `<port>.<implementation>.ts`                     | `wanted-item.repository.in-memory.ts`, `auction.gateway.csgoempire-adapter.ts` |
 | External API contract / client | `<provider>-<area>.http.ts` / `.http.adapter.ts` | `csgoempire-auction.http.adapter.ts`                                           |
 | Controller                     | `<event>.ws-controller.ts`                       | `new-item.ws-controller.ts`                                                    |
+| HTTP controller / input        | `<use-case>.http-controller.ts` / `.input.ts`    | `list-wanted-items.http-controller.ts`, `list-wanted-items.input.ts`           |
 | Domain error                   | `<name>.error.ts`                                | `insufficient-balance.error.ts`                                                |
 | Factory                        | `<name>.factory.ts`                              | `criteria.factory.ts`                                                          |
 

@@ -2,6 +2,10 @@ import { ContainerModule, type ContainerModuleLoadOptions } from "inversify";
 import type { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
 import { CommandBusInMemory } from "@/packages/infrastructure/command-bus/command-bus.in-memory";
+import type { Query } from "@/packages/building-blocks/query";
+import type { QueryHandler } from "@/packages/building-blocks/query-handler";
+import type { QueryResponse } from "@/packages/building-blocks/query-response";
+import { QueryBusInMemory } from "@/packages/infrastructure/query-bus/query-bus.in-memory";
 import { CommandDispatcherErrorBoundary } from "@/packages/infrastructure/command-bus/command-dispatcher.error-boundary";
 import type { CommandBus } from "@/packages/application/command-bus";
 import { UnhandledErrorTrapLoggingAdapter } from "@/packages/infrastructure/process/unhandled-error-trap.logging-adapter";
@@ -11,6 +15,7 @@ import { EventBusInMemoryAsync } from "../event-bus/event-bus.in-memory-async";
 import { EventBusInMemorySync } from "../event-bus/event-bus.in-memory-sync";
 import { HttpClientFactoryAdapter } from "../http/client/http-client.factory.adapter";
 import { HttpServerBunAdapter } from "../http/server/http-server.bun-adapter";
+import { ClockSystemAdapter } from "../clock/clock.system-adapter";
 import type { HttpErrorMapper, HttpErrorMapping } from "@/packages/infrastructure/http/http-error.mapper";
 import { HttpErrorMapperByErrorClass } from "@/packages/infrastructure/http/http-error.mapper.by-error-class";
 import { HttpServerRouteRecordingDecorator } from "@/packages/infrastructure/http/http-server.route-recording-decorator";
@@ -18,6 +23,7 @@ import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/
 import type { Logger } from "@/packages/application/logger";
 import {
     ASYNC_EVENT_BUS,
+    CLOCK,
     COMMAND_BUS,
     COMMAND_DISPATCHER,
     COMMAND_HANDLER,
@@ -30,6 +36,8 @@ import {
     HTTP_SERVER,
     LOGGER,
     PROCESS_EVENTS,
+    QUERY_BUS,
+    QUERY_HANDLER,
     UNHANDLED_ERROR_TRAP,
     RECORDING_HTTP_SERVER,
 } from "./packages.identifiers";
@@ -45,6 +53,9 @@ export class PackagesModule extends ContainerModule {
         bind(ENV).toConstantValue(env);
         bind(LOGGER)
             .toResolvedValue(() => new LoggerConsoleAdapter())
+            .inSingletonScope();
+        bind(CLOCK)
+            .toResolvedValue(() => new ClockSystemAdapter())
             .inSingletonScope();
         bind(PROCESS_EVENTS).toConstantValue(process);
         bind(UNHANDLED_ERROR_TRAP)
@@ -65,6 +76,11 @@ export class PackagesModule extends ContainerModule {
         bind(COMMAND_BUS)
             .toResolvedValue(PackagesModule.createCommandBus, [
                 { serviceIdentifier: COMMAND_HANDLER, isMultiple: true, optional: true },
+            ])
+            .inSingletonScope();
+        bind(QUERY_BUS)
+            .toResolvedValue(PackagesModule.createQueryBus, [
+                { serviceIdentifier: QUERY_HANDLER, isMultiple: true, optional: true },
             ])
             .inSingletonScope();
         bind(COMMAND_DISPATCHER)
@@ -92,6 +108,14 @@ export class PackagesModule extends ContainerModule {
 
     private static createErrorMapper(logger: Logger, mappings: HttpErrorMapping[] | undefined): HttpErrorMapper {
         return new HttpErrorMapperLoggingDecorator(new HttpErrorMapperByErrorClass(mappings), logger);
+    }
+
+    private static createQueryBus(
+        handlers: QueryHandler<Query<QueryResponse>, QueryResponse>[] | undefined,
+    ): QueryBusInMemory {
+        const queryBus = new QueryBusInMemory();
+        handlers?.forEach((handler) => queryBus.register(handler));
+        return queryBus;
     }
 
     private static createCommandBus(handlers: CommandHandler<Command>[] | undefined): CommandBusInMemory {

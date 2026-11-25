@@ -105,4 +105,4 @@ Each test has three blocks in this order, separated by a blank line, with no com
 
 ## External API contracts, mocks and fakes
 
-Never call a third-party API (e.g. CSGOEmpire) in tests. Its contract types, mocks, fakes and contract tests follow the `external-api-contract` skill: load it whenever a test or adapter touches a provider's API.
+Never call a third-party API (e.g. CSGOEmpire) in tests.

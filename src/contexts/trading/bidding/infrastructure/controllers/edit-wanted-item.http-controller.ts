@@ -6,7 +6,15 @@ import { HttpRequestInput } from "@/packages/infrastructure/http/http-request-in
 import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-route.doc";
 import { EditWantedItemCommand } from "../../application/edit-wanted-item/edit-wanted-item.command";
-import type { EditWantedItemInput } from "./edit-wanted-item.input";
+import type { CriteriaPrimitives } from "../../domain/wanted-item/criteria/criteria.factory";
+import type { MaxForPrimitives } from "../../domain/wanted-item/max-for/max-for";
+
+export type EditWantedItemInput = {
+    accountId: number;
+    name: string;
+    maxFor?: MaxForPrimitives;
+    criteria?: CriteriaPrimitives;
+};
 
 export class EditWantedItemHttpController implements HttpController {
     static readonly PATH = "/accounts/:accountId/wanted-items/:name";
