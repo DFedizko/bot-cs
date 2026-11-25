@@ -34,7 +34,7 @@ const searchNames = async (container: Container, rows: CatalogRow[], text: strin
 
 let container: Container;
 
-describe("CatalogItemsDaoReadThroughCache", () => {
+describe("CatalogItemsDaoMemoryCache", () => {
     beforeEach(() => {
         container = testContainer();
         jest.spyOn(container.get(LOGGER), "log").mockImplementation(() => {});

@@ -6,7 +6,7 @@ import type { CatalogItemsDao } from "../../application/search-catalog-items/cat
 import type { SearchCatalogItemsQuery } from "../../application/search-catalog-items/search-catalog-items.query";
 import type { SearchCatalogItemsResponse } from "../../application/search-catalog-items/search-catalog-items.response";
 import type { CatalogSource } from "../../infrastructure/sources/catalog.source";
-import type { CatalogItemsDaoReadThroughCache } from "../../infrastructure/daos/catalog-items.dao.read-through-cache";
+import type { CatalogItemsDaoMemoryCache } from "../../infrastructure/daos/catalog-items.dao.memory-cache";
 import type { ByMykelSkinsHttp } from "../../infrastructure/http/bymykel/bymykel-skins.http";
 import type {
     SearchCatalogItemsHttpController,
@@ -19,7 +19,7 @@ export const BYMYKEL_HTTP_CLIENT = identifier<HttpClient>("ByMykelHttpClient");
 export const BYMYKEL_SKINS_HTTP = identifier<ByMykelSkinsHttp>("ByMykelSkinsHttp");
 export const CATALOG_ENTRY_VALIDATOR = identifier<Validator<ByMykelCatalogEntry>>("CatalogEntryValidator");
 export const CATALOG_SOURCE = identifier<CatalogSource>("CatalogSource");
-export const CATALOG_CACHE = identifier<CatalogItemsDaoReadThroughCache>("CatalogCache");
+export const CATALOG_CACHE = identifier<CatalogItemsDaoMemoryCache>("CatalogCache");
 export const CATALOG_ITEMS_DAO = identifier<CatalogItemsDao>("CatalogItemsDao");
 
 export const SEARCH_CATALOG_ITEMS_HANDLER =

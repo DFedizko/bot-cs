@@ -16,7 +16,7 @@ const FIRST = 0;
 const STARTS_FIRST = -1;
 const STARTS_LATER = 1;
 
-export class CatalogItemsDaoReadThroughCache implements CatalogItemsDao {
+export class CatalogItemsDaoMemoryCache implements CatalogItemsDao {
     private rows?: readonly CatalogRow[];
     private loading?: Promise<void>;
 

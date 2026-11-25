@@ -11,7 +11,7 @@ import { SearchCatalogItemsQueryHandler } from "../../application/search-catalog
 import type { ByMykelSkinsHttp } from "../../infrastructure/http/bymykel/bymykel-skins.http";
 import type { ByMykelCatalogEntry } from "../../infrastructure/http/bymykel/types/bymykel-catalog-entry";
 import { CatalogSourceByMykelAdapter } from "../../infrastructure/gateways/catalog-source.bymykel-adapter";
-import { CatalogItemsDaoReadThroughCache } from "../../infrastructure/daos/catalog-items.dao.read-through-cache";
+import { CatalogItemsDaoMemoryCache } from "../../infrastructure/daos/catalog-items.dao.memory-cache";
 import { CatalogLoadingStartupController } from "../../infrastructure/controllers/catalog-loading.startup-controller";
 import { ByMykelSkinsHttpAdapter } from "../http/bymykel/bymykel-skins.http.adapter";
 import { byMykelCatalogEntrySchema } from "../validation/bymykel-catalog-entry.schema";
@@ -62,7 +62,7 @@ export class CatalogModule extends ContainerModule {
     private static bindStorage({ bind }: ContainerModuleLoadOptions): void {
         bind(CATALOG_CACHE)
             .toResolvedValue(
-                (source: CatalogSource, logger: Logger) => new CatalogItemsDaoReadThroughCache(source, logger),
+                (source: CatalogSource, logger: Logger) => new CatalogItemsDaoMemoryCache(source, logger),
                 [CATALOG_SOURCE, LOGGER],
             )
             .inSingletonScope();
@@ -76,7 +76,7 @@ export class CatalogModule extends ContainerModule {
         bind(QUERY_HANDLER).toService(SEARCH_CATALOG_ITEMS_HANDLER);
         bind(CATALOG_LOADING_CONTROLLER)
             .toResolvedValue(
-                (cache: CatalogItemsDaoReadThroughCache) => new CatalogLoadingStartupController(cache),
+                (cache: CatalogItemsDaoMemoryCache) => new CatalogLoadingStartupController(cache),
                 [CATALOG_CACHE],
             )
             .inSingletonScope();
