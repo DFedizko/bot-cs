@@ -1,8 +1,18 @@
-import { PaginatorInMemory } from "@/packages/infrastructure/in-memory-query/paginator.in-memory";
+import { RARITY_ORDER } from "@/contexts/shared-kernel/domain/rarity-order";
 import type { Pagination } from "@/packages/building-blocks/pagination";
+import { DESCENDING, type SortOrder } from "@/packages/building-blocks/sort";
+import { PaginatorInMemory } from "@/packages/infrastructure/in-memory-query/paginator.in-memory";
 import { EqualsFilter } from "@/packages/infrastructure/in-memory-query/filters/equals.filter";
+import type { Comparator } from "@/packages/infrastructure/in-memory-query/comparators/comparator";
+import { KeyComparator } from "@/packages/infrastructure/in-memory-query/comparators/key.comparator";
+import { RankComparator } from "@/packages/infrastructure/in-memory-query/comparators/rank.comparator";
+import { ReversedComparator } from "@/packages/infrastructure/in-memory-query/comparators/reversed.comparator";
+import { ChainedComparator } from "@/packages/infrastructure/in-memory-query/comparators/chained.comparator";
 import type { WantedItemsCriteria, WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
-import type { WantedItemsSort } from "../../application/list-wanted-items/list-wanted-items.query";
+import type {
+    WantedItemsSort,
+    WantedItemsSortField,
+} from "../../application/list-wanted-items/list-wanted-items.query";
 import type {
     CatalogDetailsByName,
     CatalogDetailsDto,
@@ -13,10 +23,40 @@ import type {
     WantedItemCounts,
     WantedItemDto,
 } from "../../application/list-wanted-items/list-wanted-items.response";
+import { MaxForType } from "../../domain/wanted-item/max-for/max-for";
 import type { WantedItemRecord, WantedItemStoreInMemory } from "../stores/wanted-item.store.in-memory";
-import { compareWantedItemsBy, type WantedItemEntry } from "./wanted-items.comparators";
+
+type WantedItemEntry = {
+    record: WantedItemRecord;
+    catalog: CatalogDetailsDto | null;
+};
+
+type EntryComparator = Comparator<WantedItemEntry>;
 
 export class WantedItemsDaoInMemory implements WantedItemsDao {
+    private static readonly MAX_FOR_TYPE_ORDER = [MaxForType.PERCENTAGE, MaxForType.VALUE];
+    private static readonly UNKNOWN_TYPE_RANK = WantedItemsDaoInMemory.MAX_FOR_TYPE_ORDER.length;
+    private static readonly NO_RARITY_RANK = -1;
+    private static readonly BY_ADDED_AT: EntryComparator = new KeyComparator(({ record }) => record.addedAt);
+    private static readonly NEWEST_FIRST = new ReversedComparator(WantedItemsDaoInMemory.BY_ADDED_AT);
+    private static readonly FIELD_COMPARATORS: Record<WantedItemsSortField, EntryComparator> = {
+        addedAt: WantedItemsDaoInMemory.BY_ADDED_AT,
+        name: new KeyComparator(({ record }) => record.name),
+        max: new ChainedComparator(
+            new RankComparator(
+                ({ record }) => record.maxFor.type,
+                WantedItemsDaoInMemory.MAX_FOR_TYPE_ORDER,
+                WantedItemsDaoInMemory.UNKNOWN_TYPE_RANK,
+            ),
+            new KeyComparator(({ record }) => Number(record.maxFor.value)),
+        ),
+        rarity: new RankComparator(
+            ({ catalog }) => catalog?.rarity,
+            RARITY_ORDER,
+            WantedItemsDaoInMemory.NO_RARITY_RANK,
+        ),
+    };
+
     constructor(
         private readonly store: WantedItemStoreInMemory,
         private readonly catalog: CatalogDetailsGateway,
@@ -40,8 +80,17 @@ export class WantedItemsDaoInMemory implements WantedItemsDao {
     }
 
     private sortBy(entries: WantedItemEntry[], sort: WantedItemsSort): WantedItemEntry[] {
-        const comparator = compareWantedItemsBy(sort);
+        const comparator = this.comparatorFor(sort);
         return this.lastInsertedFirst(entries).toSorted((first, second) => comparator.compare(first, second));
+    }
+
+    private comparatorFor({ field, order }: WantedItemsSort): EntryComparator {
+        const byField = this.inOrder(WantedItemsDaoInMemory.FIELD_COMPARATORS[field], order);
+        return new ChainedComparator(byField, WantedItemsDaoInMemory.NEWEST_FIRST);
+    }
+
+    private inOrder(comparator: EntryComparator, order: SortOrder): EntryComparator {
+        return order === DESCENDING ? new ReversedComparator(comparator) : comparator;
     }
 
     private lastInsertedFirst(entries: WantedItemEntry[]): WantedItemEntry[] {
