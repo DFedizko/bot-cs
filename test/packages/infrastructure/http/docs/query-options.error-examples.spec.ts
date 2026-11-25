@@ -11,12 +11,16 @@ import {
     PAGE_SIZE_TOO_BIG,
     PAGE_SIZE_TOO_SMALL,
     PAGE_TOO_SMALL,
-    unknownSort,
+    INVALID_SORT_ORDER,
+    unknownSortField,
 } from "@/packages/infrastructure/http/docs/query-options.error-examples";
 
 const SORT_KEYS = ["name", "size"] as const;
 const ONLY_KEY = "name";
-const validator = new ValidatorZodAdapter(queryOptionsSchema({}, { sort: SORT_KEYS, limit: true }));
+const DEFAULT_SORT = { field: ONLY_KEY, order: "asc" } as const;
+const validator = new ValidatorZodAdapter(
+    queryOptionsSchema({}, { sort: { fields: SORT_KEYS, default: DEFAULT_SORT }, limit: true }),
+);
 
 const answerTo = (input: Record<string, string>): unknown => {
     try {
@@ -38,18 +42,21 @@ describe("Query options error examples", () => {
         ["a limit that is not a whole number", { limit: "all" }, LIMIT_NOT_WHOLE_NUMBER],
         ["a limit below the min", { limit: "0" }, LIMIT_TOO_SMALL],
         ["a limit above the max", { limit: String(MAX_PAGE_SIZE + 1) }, LIMIT_TOO_BIG],
-        ["a sort key the query doesn't offer", { sort: "weight" }, unknownSort(SORT_KEYS)],
+        ["a sort field the query doesn't offer", { sort: "weight" }, unknownSortField(SORT_KEYS)],
+        ["an order that is neither asc nor desc", { order: "up" }, INVALID_SORT_ORDER],
     ])("Should match the real answer to %s", (_case, input, example) => {
         const answer = answerTo(input);
 
         expect(answer).toEqual(example.value);
     });
 
-    it("Should match the real answer to an unknown sort when the query offers one key", () => {
-        const oneKey = new ValidatorZodAdapter(queryOptionsSchema({}, { sort: [ONLY_KEY] }));
+    it("Should match the real answer to an unknown sort field when the query offers one", () => {
+        const oneField = new ValidatorZodAdapter(
+            queryOptionsSchema({}, { sort: { fields: [ONLY_KEY], default: DEFAULT_SORT } }),
+        );
 
-        const throwing = () => oneKey.validate({ sort: "weight" });
+        const throwing = () => oneField.validate({ sort: "weight" });
 
-        expect(throwing).toThrow(expect.objectContaining({ fields: unknownSort([ONLY_KEY]).value.fields }));
+        expect(throwing).toThrow(expect.objectContaining({ fields: unknownSortField([ONLY_KEY]).value.fields }));
     });
 });

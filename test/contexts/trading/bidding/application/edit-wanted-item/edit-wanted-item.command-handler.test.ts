@@ -1,3 +1,4 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
 import {
     maxForPercentage,
@@ -8,7 +9,6 @@ import { EditWantedItemCommand } from "@/contexts/trading/bidding/application/ed
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { EmptyWantedItemChangesError } from "@/contexts/trading/bidding/domain/wanted-item/errors/empty-wanted-item-changes.error";
 import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";
@@ -24,7 +24,7 @@ const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 const WELL_WORN = { type: ItemCriterionType.IS_WEAR, value: WearName.WELL_WORN };
 
 const asiimov = (accountId: number) =>
-    WantedItem.create({
+    buildWantedItem({
         accountId,
         name: ITEM_NAME,
         maxFor: maxForPercentage("-3"),

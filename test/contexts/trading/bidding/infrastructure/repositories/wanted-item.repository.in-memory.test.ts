@@ -1,8 +1,8 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { WANTED_ITEM_REPOSITORY, WANTED_ITEM_STORE } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 
@@ -11,7 +11,7 @@ const OTHER_ACCOUNT_ID = 2;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 
 const asiimov = (accountId: number, maxFor = "-3") =>
-    WantedItem.create({ accountId, name: ITEM_NAME, maxFor: maxForPercentage(maxFor) });
+    buildWantedItem({ accountId, name: ITEM_NAME, maxFor: maxForPercentage(maxFor) });
 
 let container: Container;
 

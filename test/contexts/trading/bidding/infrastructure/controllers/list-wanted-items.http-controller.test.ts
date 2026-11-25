@@ -1,6 +1,7 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { HTTP_SERVER, QUERY_BUS } from "@/packages/external/di/packages.identifiers";
+import { CLOCK, HTTP_SERVER, QUERY_BUS } from "@/packages/external/di/packages.identifiers";
+import { ADDED_AT } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { DEFAULT_PAGE_SIZE, FIRST_PAGE, MAX_PAGE_SIZE } from "@/packages/building-blocks/pagination";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
@@ -21,16 +22,29 @@ const ASIIMOV = "AWP | Asiimov (Field-Tested)";
 const REDLINE = "AK-47 | Redline (Field-Tested)";
 const MINUS_THREE_PERCENT = { type: "percentage", value: "-3" };
 const FIELD_TESTED = [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }];
+const ONE_MINUTE_MS = 60_000;
+const REDLINE_ADDED_AT = ADDED_AT + ONE_MINUTE_MS;
+const ADDED_AT_OF: Record<string, number> = { [ASIIMOV]: ADDED_AT, [REDLINE]: REDLINE_ADDED_AT };
+const COUNTS = { all: 2, enabled: 1, disabled: 1 };
 
 const wanted = (name: string, enabled = true) => ({
     name,
     maxFor: MINUS_THREE_PERCENT,
     criteria: FIELD_TESTED,
     enabled,
+    addedAt: new Date(ADDED_AT_OF[name]).toISOString(),
+    catalog: null,
 });
-const firstPage = (items: unknown[]) => ({ items, page: FIRST_PAGE, pageSize: DEFAULT_PAGE_SIZE, total: items.length });
+const firstPage = (items: unknown[], counts = COUNTS) => ({
+    items,
+    page: FIRST_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: items.length,
+    counts,
+});
 
 const addAsiimovAndDisabledRedline = async (api: Awaited<ReturnType<typeof startWantedItemsApi>>) => {
+    jest.spyOn(container.get(CLOCK), "now").mockReturnValueOnce(ADDED_AT).mockReturnValueOnce(REDLINE_ADDED_AT);
     await api.send(POST, itemsPath(ACCOUNT_ID), { name: ASIIMOV, maxFor: MINUS_THREE_PERCENT, criteria: FIELD_TESTED });
     await api.send(POST, itemsPath(ACCOUNT_ID), { name: REDLINE, maxFor: MINUS_THREE_PERCENT, criteria: FIELD_TESTED });
     await api.send(PATCH, enabledPath(ACCOUNT_ID, REDLINE), { enabled: false });
@@ -47,7 +61,7 @@ describe("ListWantedItemsHttpController", () => {
         await container.get(HTTP_SERVER).close();
     });
 
-    it("Should list the items added to the account", async () => {
+    it("Should list the items added to the account, newest first, with their counts", async () => {
         const api = await startWantedItemsApi(container);
         await addAsiimovAndDisabledRedline(api);
 
@@ -55,7 +69,7 @@ describe("ListWantedItemsHttpController", () => {
 
         expect({ ...response, body: JSON.parse(response.body) }).toEqual({
             status: HttpStatus.OK,
-            body: firstPage([wanted(ASIIMOV), wanted(REDLINE, false)]),
+            body: firstPage([wanted(REDLINE, false), wanted(ASIIMOV)]),
         });
     });
 
@@ -75,10 +89,11 @@ describe("ListWantedItemsHttpController", () => {
         const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?page=${SECOND_PAGE}&pageSize=${ONE_PER_PAGE}`);
 
         expect(JSON.parse(response.body)).toEqual({
-            items: [wanted(REDLINE, false)],
+            items: [wanted(ASIIMOV)],
             page: SECOND_PAGE,
             pageSize: ONE_PER_PAGE,
             total: 2,
+            counts: COUNTS,
         });
     });
 
@@ -90,7 +105,7 @@ describe("ListWantedItemsHttpController", () => {
 
         expect({ ...response, body: JSON.parse(response.body) }).toEqual({
             status: HttpStatus.OK,
-            body: firstPage([]),
+            body: firstPage([], { all: 0, enabled: 0, disabled: 0 }),
         });
     });
 
@@ -98,9 +113,9 @@ describe("ListWantedItemsHttpController", () => {
         const api = await startWantedItemsApi(container);
         await addAsiimovAndDisabledRedline(api);
 
-        const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?sort=name`);
+        const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?sort=name&order=desc`);
 
-        expect(JSON.parse(response.body)).toEqual(firstPage([wanted(REDLINE, false), wanted(ASIIMOV)]));
+        expect(JSON.parse(response.body)).toEqual(firstPage([wanted(ASIIMOV), wanted(REDLINE, false)]));
     });
 
     it("Should ask the query bus with the validated input", async () => {
@@ -109,7 +124,7 @@ describe("ListWantedItemsHttpController", () => {
 
         await api.send(
             GET,
-            `${itemsPath(ACCOUNT_ID)}?enabled=true&sort=name&page=${THIRD_PAGE}&pageSize=${FOUR_PER_PAGE}`,
+            `${itemsPath(ACCOUNT_ID)}?enabled=true&sort=rarity&order=asc&page=${THIRD_PAGE}&pageSize=${FOUR_PER_PAGE}`,
         );
 
         expect(askSpy).toHaveBeenCalledWith(
@@ -117,7 +132,7 @@ describe("ListWantedItemsHttpController", () => {
                 accountId: ACCOUNT_ID,
                 page: THIRD_PAGE,
                 pageSize: FOUR_PER_PAGE,
-                sort: "name",
+                sort: { field: "rarity", order: "asc" },
                 filters: { enabled: true },
             }),
         );
@@ -128,7 +143,9 @@ describe("ListWantedItemsHttpController", () => {
         ["a page that is not a number", "page=last"],
         ["a page size above the max", `pageSize=${MAX_PAGE_SIZE + 1}`],
         ["an enabled state that is not a boolean", "enabled=maybe"],
-        ["a sort key the route doesn't offer", "sort=price"],
+        ["a sort field the route doesn't offer", "sort=price"],
+        ["the old recent sort", "sort=recent"],
+        ["an order that is neither asc nor desc", "order=up"],
     ])("Should answer bad request for %s", async (_case, query) => {
         const api = await startWantedItemsApi(container);
 

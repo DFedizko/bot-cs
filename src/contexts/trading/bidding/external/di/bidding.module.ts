@@ -4,9 +4,10 @@ import {
     COMMAND_DISPATCHER,
     COMMAND_HANDLER,
     EVENT_BUS,
+    CLOCK,
     LOGGER,
-    QUERY_HANDLER,
 } from "@/packages/external/di/packages.identifiers";
+import type { Clock } from "@/packages/application/clock";
 import type { CommandDispatcher } from "@/packages/infrastructure/command-bus/command-dispatcher";
 import {
     CSG_WS_CLIENT,
@@ -42,15 +43,15 @@ import { AccountRepositoryInMemory } from "../../infrastructure/repositories/acc
 import { AuctionParticipationRepositoryInMemory } from "../../infrastructure/repositories/auction-participation.repository.in-memory";
 import { WantedItemRepositoryInMemory } from "../../infrastructure/repositories/wanted-item.repository.in-memory";
 import { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item.store.in-memory";
-import { WantedItemsDaoInMemory } from "../../infrastructure/daos/wanted-items.dao.in-memory";
-import { ListWantedItemsQueryHandler } from "../../application/list-wanted-items/list-wanted-items.query-handler";
-import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
+import { AccountStoreInMemory } from "../../infrastructure/stores/account.store.in-memory";
+import { bindBiddingQueries } from "./bidding-queries.bindings";
 import { NewItemWsController } from "../../infrastructure/controllers/new-item.ws-controller";
 import { AuctionUpdateWsController } from "../../infrastructure/controllers/auction-update.ws-controller";
 import { CsgoempireAuctionHttpAdapter } from "../http/csgoempire/csgoempire-auction.http.adapter";
 import { CsgoempireTradeHttpAdapter } from "../http/csgoempire/csgoempire-trade.http.adapter";
 import {
     ACCOUNT_REPOSITORY,
+    ACCOUNT_STORE,
     ACTIVE_TRADES_GATEWAY,
     ADD_WANTED_ITEM_HANDLER,
     AUCTION_GATEWAY,
@@ -61,7 +62,6 @@ import {
     EDIT_WANTED_ITEM_HANDLER,
     EVALUATE_ITEM_HANDLER,
     LEAVE_AUCTION_HANDLER,
-    LIST_WANTED_ITEMS_HANDLER,
     NEW_ITEM_CONTROLLER,
     ON_APPROVED_IN_AUCTION,
     ON_APPROVED_OFF_AUCTION,
@@ -73,12 +73,9 @@ import {
     TRACK_AUCTION_HANDLER,
     WANTED_ITEM_REPOSITORY,
     WANTED_ITEM_STORE,
-    WANTED_ITEMS_DAO,
     WITHDRAW_ITEM_HANDLER,
     WITHDRAWAL_GATEWAY,
 } from "./bidding.identifiers";
-
-const QUERY_HANDLERS = [LIST_WANTED_ITEMS_HANDLER];
 
 const COMMAND_HANDLERS = [
     EVALUATE_ITEM_HANDLER,
@@ -104,7 +101,7 @@ export class BiddingModule extends ContainerModule {
         BiddingModule.bindWantedItemHandlers(options);
         BiddingModule.bindAuctionHandlers(options);
         BiddingModule.registerCommandHandlers(options);
-        BiddingModule.bindQueryHandlers(options);
+        bindBiddingQueries(options);
         BiddingModule.bindEventListeners(options);
         BiddingModule.bindControllers(options);
     }
@@ -125,8 +122,11 @@ export class BiddingModule extends ContainerModule {
     }
 
     private static bindRepositories({ bind }: ContainerModuleLoadOptions): void {
+        bind(ACCOUNT_STORE)
+            .toResolvedValue(() => new AccountStoreInMemory())
+            .inSingletonScope();
         bind(ACCOUNT_REPOSITORY)
-            .toResolvedValue(() => new AccountRepositoryInMemory())
+            .toResolvedValue((store: AccountStoreInMemory) => new AccountRepositoryInMemory(store), [ACCOUNT_STORE])
             .inSingletonScope();
         bind(WANTED_ITEM_STORE)
             .toResolvedValue(() => new WantedItemStoreInMemory())
@@ -145,8 +145,8 @@ export class BiddingModule extends ContainerModule {
     private static bindWantedItemHandlers({ bind }: ContainerModuleLoadOptions): void {
         bind(ADD_WANTED_ITEM_HANDLER)
             .toResolvedValue(
-                (repo: WantedItemRepository) => new AddWantedItemCommandHandler(repo),
-                [WANTED_ITEM_REPOSITORY],
+                (repo: WantedItemRepository, clock: Clock) => new AddWantedItemCommandHandler(repo, clock),
+                [WANTED_ITEM_REPOSITORY, CLOCK],
             )
             .inSingletonScope();
         bind(EDIT_WANTED_ITEM_HANDLER)
@@ -218,16 +218,6 @@ export class BiddingModule extends ContainerModule {
 
     private static registerCommandHandlers({ bind }: ContainerModuleLoadOptions): void {
         COMMAND_HANDLERS.forEach((handler) => bind(COMMAND_HANDLER).toService(handler));
-    }
-
-    private static bindQueryHandlers({ bind }: ContainerModuleLoadOptions): void {
-        bind(WANTED_ITEMS_DAO)
-            .toResolvedValue((store: WantedItemStoreInMemory) => new WantedItemsDaoInMemory(store), [WANTED_ITEM_STORE])
-            .inSingletonScope();
-        bind(LIST_WANTED_ITEMS_HANDLER)
-            .toResolvedValue((dao: WantedItemsDao) => new ListWantedItemsQueryHandler(dao), [WANTED_ITEMS_DAO])
-            .inSingletonScope();
-        QUERY_HANDLERS.forEach((handler) => bind(QUERY_HANDLER).toService(handler));
     }
 
     private static bindEventListeners({ bind }: ContainerModuleLoadOptions): void {

@@ -1,6 +1,6 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { DomainError } from "@/packages/error/domain-error";
 import { maxForPercentage, maxForValue } from "./__builders__/max-for.builder";
 
@@ -15,12 +15,12 @@ const MATCHING_CANDIDATE = {
     wearName: WearName.FIELD_TESTED,
 };
 
-const asiimov = () => WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
+const asiimov = () => buildWantedItem({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
 
 describe("Wanted Item with a max value", () => {
     describe("Should evaluate an item against a max value", () => {
         const asiimovUpTo = (cents: number) =>
-            WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForValue(cents) });
+            buildWantedItem({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForValue(cents) });
 
         it("Approving a candidate worth exactly the max value", () => {
             const decision = asiimovUpTo(19400).evaluate({ ...MATCHING_CANDIDATE, value: 19400 });
@@ -43,7 +43,7 @@ describe("Wanted Item with a max value", () => {
             expect(decision.approved).toBe(true);
         });
         it("Rejecting a max value and a criterion together", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: ITEM_NAME,
                 maxFor: maxForValue(19400),
@@ -64,7 +64,7 @@ describe("Wanted Item with a max value", () => {
             expect(wantedItem.getMaxFor()).toEqual(maxForValue(19400));
         });
         it("From a value to a percentage", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: ITEM_NAME,
                 maxFor: maxForValue(19400),
@@ -75,7 +75,7 @@ describe("Wanted Item with a max value", () => {
             expect(wantedItem.getMaxFor()).toEqual(maxForPercentage("-5"));
         });
         it("Changing the value within the same kind", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: ITEM_NAME,
                 maxFor: maxForValue(19400),
@@ -101,7 +101,7 @@ describe("Wanted Item with a max value", () => {
     describe("Should reject a max value", () => {
         it.each([[0], [-1]])("Of %p coin cents when created", (cents) => {
             const create = () =>
-                WantedItem.create({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForValue(cents) });
+                buildWantedItem({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForValue(cents) });
 
             expect(create).toThrow(DomainError);
         });

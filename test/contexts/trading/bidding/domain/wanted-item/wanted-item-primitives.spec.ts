@@ -7,6 +7,7 @@ const ACCOUNT_ID = 1;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 const FIELD_TESTED = { type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED };
 const MAX_VALUE = 19400;
+const ADDED_AT = Date.parse("2026-11-20T14:03:00.000Z");
 
 const ASIIMOV = {
     accountId: ACCOUNT_ID,
@@ -14,6 +15,7 @@ const ASIIMOV = {
     maxFor: maxForPercentage("-3"),
     criteria: [FIELD_TESTED],
     enabled: true,
+    addedAt: ADDED_AT,
 };
 
 describe("Wanted Item primitives", () => {
@@ -34,6 +36,12 @@ describe("Wanted Item primitives", () => {
         const wantedItem = WantedItem.create({ ...ASIIMOV, criteria: undefined });
 
         expect(wantedItem.toPrimitives().criteria).toEqual([]);
+    });
+
+    it("Should give back when it was added", () => {
+        const wantedItem = WantedItem.create(ASIIMOV);
+
+        expect(wantedItem.toPrimitives().addedAt).toBe(ADDED_AT);
     });
 
     it("Should be restored from its primitives", () => {

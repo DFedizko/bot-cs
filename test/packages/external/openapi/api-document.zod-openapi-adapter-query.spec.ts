@@ -71,6 +71,7 @@ describe("ApiDocumentZodOpenApiAdapter for a route that reads", () => {
             "query:page",
             "query:pageSize",
             "query:sort",
+            "query:order",
             "query:name",
         ]);
     });

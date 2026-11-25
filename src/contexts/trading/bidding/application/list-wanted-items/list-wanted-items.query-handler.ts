@@ -1,6 +1,6 @@
 import type { QueryHandler } from "@/packages/building-blocks/query-handler";
 import { withDefaultPage } from "@/packages/building-blocks/pagination";
-import { ListWantedItemsQuery } from "./list-wanted-items.query";
+import { DEFAULT_WANTED_ITEMS_SORT, ListWantedItemsQuery } from "./list-wanted-items.query";
 import type { ListWantedItemsResponse } from "./list-wanted-items.response";
 import type { WantedItemsDao } from "./wanted-items.dao";
 
@@ -11,7 +11,13 @@ export class ListWantedItemsQueryHandler implements QueryHandler<ListWantedItems
         return ListWantedItemsQuery.QUERY_NAME;
     }
 
-    handle({ accountId, filters, sort, page, pageSize }: ListWantedItemsQuery): Promise<ListWantedItemsResponse> {
+    handle({
+        accountId,
+        filters,
+        sort = DEFAULT_WANTED_ITEMS_SORT,
+        page,
+        pageSize,
+    }: ListWantedItemsQuery): Promise<ListWantedItemsResponse> {
         return this.dao.list({ accountId, filters, sort }, withDefaultPage({ page, pageSize }));
     }
 }

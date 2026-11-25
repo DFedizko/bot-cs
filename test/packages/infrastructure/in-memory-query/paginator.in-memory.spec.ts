@@ -1,4 +1,4 @@
-import { PaginatorInMemory } from "@/packages/infrastructure/pagination/paginator.in-memory";
+import { PaginatorInMemory } from "@/packages/infrastructure/in-memory-query/paginator.in-memory";
 
 const LETTERS = ["a", "b", "c", "d", "e"];
 const PAGE_SIZE = 2;

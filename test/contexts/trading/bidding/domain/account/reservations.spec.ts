@@ -11,6 +11,11 @@ describe("Reservations", () => {
         expect(reservations.amountFor(3)).toBe(150);
         expect(reservations.amountFor(4)).toBe(1000);
     });
+    it("Should give back its primitives", () => {
+        const reservations = Reservations.create({ 1: 100, 2: 200 }).reserveFor(3, 150);
+
+        expect(reservations.toPrimitives()).toEqual({ 1: 100, 2: 200, 3: 150 });
+    });
     it("Should reserve amount", () => {
         const reservations = Reservations.empty().reserveFor(1, 100);
         const reservationsNotEmpty = Reservations.create({ 1: 100 }).reserveFor(2, 100);

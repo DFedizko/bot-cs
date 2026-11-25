@@ -1,6 +1,7 @@
 import type { CommandBus } from "@/packages/application/command-bus";
 import type { EventBus } from "@/packages/application/event-bus";
 import type { Logger } from "@/packages/application/logger";
+import type { Clock } from "@/packages/application/clock";
 import type { EventListener } from "@/packages/application/event-listener";
 import type { Command } from "@/packages/building-blocks/command";
 import type { CommandHandler } from "@/packages/building-blocks/command-handler";
@@ -25,6 +26,7 @@ import { identifier } from "./identifier";
 
 export const ENV = identifier<AppEnv>("Env");
 export const LOGGER = identifier<Logger>("Logger");
+export const CLOCK = identifier<Clock>("Clock");
 export const EVENT_BUS = identifier<EventBus>("EventBus");
 export const COMMAND_BUS = identifier<CommandBus>("CommandBus");
 export const COMMAND_DISPATCHER = identifier<CommandDispatcher>("CommandDispatcher");

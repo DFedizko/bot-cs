@@ -1,3 +1,4 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
@@ -18,7 +19,7 @@ const MATCHING_CANDIDATE = {
 };
 
 const asiimov = () =>
-    WantedItem.create({
+    buildWantedItem({
         accountId: ACCOUNT_ID,
         name: ITEM_NAME,
         maxFor: maxForPercentage("-3"),
@@ -27,7 +28,7 @@ const asiimov = () =>
 
 describe("Wanted Item", () => {
     it("Should create a wanted item", () => {
-        const wantedItem = WantedItem.create({
+        const wantedItem = buildWantedItem({
             accountId: ACCOUNT_ID,
             name: "AWP | Asiimov (Field-Tested)",
             maxFor: maxForPercentage("-3"),
@@ -43,7 +44,13 @@ describe("Wanted Item", () => {
         expect(wantedItem.getAccountId()).toBe(ACCOUNT_ID);
     });
     it("Should reject an invalid account", () => {
-        const create = () => WantedItem.create({ accountId: -1, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
+        const create = () => buildWantedItem({ accountId: -1, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
+
+        expect(create).toThrow(DomainError);
+    });
+    it("Should reject an added-at time before the epoch", () => {
+        const create = () =>
+            buildWantedItem({ accountId: ACCOUNT_ID, name: ITEM_NAME, maxFor: maxForPercentage("-3"), addedAt: -1 });
 
         expect(create).toThrow(DomainError);
     });
@@ -178,7 +185,7 @@ describe("Wanted Item", () => {
     });
     describe("Should evaluate an item and approve", () => {
         it("With negative above recommended percentage", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: maxForPercentage("-3"),
@@ -192,7 +199,7 @@ describe("Wanted Item", () => {
             });
         });
         it("With negative above recommended percentage and a criterion", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: maxForPercentage("-3"),
@@ -212,7 +219,7 @@ describe("Wanted Item", () => {
             });
         });
         it("With positive above recommended percentage", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: maxForPercentage("3"),
@@ -228,7 +235,7 @@ describe("Wanted Item", () => {
     });
     describe("Should evaluate an item and reject", () => {
         it("With a value above recommended recommended percentage", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: maxForPercentage("-3"),
@@ -242,7 +249,7 @@ describe("Wanted Item", () => {
             });
         });
         it("With a value above recommended recommended percentage and without met a criterion", () => {
-            const wantedItem = WantedItem.create({
+            const wantedItem = buildWantedItem({
                 accountId: ACCOUNT_ID,
                 name: "AWP | Asiimov (Field-Tested)",
                 maxFor: maxForPercentage("-3"),

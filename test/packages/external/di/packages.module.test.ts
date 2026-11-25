@@ -20,7 +20,9 @@ import {
     LOGGER,
     QUERY_BUS,
     QUERY_HANDLER,
+    CLOCK,
 } from "@/packages/external/di/packages.identifiers";
+import { ClockSystemAdapter } from "@/packages/external/clock/clock.system-adapter";
 import { HttpErrorMapperLoggingDecorator } from "@/packages/infrastructure/http/http-error.mapper.logging-decorator";
 import { HttpServerRouteRecordingDecorator } from "@/packages/infrastructure/http/http-server.route-recording-decorator";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
@@ -65,6 +67,12 @@ describe.each(ENVIRONMENTS)("PackagesModule in %s", (nodeEnv) => {
         const logger = container.get(LOGGER);
 
         expect(logger).toBeInstanceOf(LoggerConsoleAdapter);
+    });
+
+    it("Should bind the system clock", () => {
+        const clock = container.get(CLOCK);
+
+        expect(clock).toBeInstanceOf(ClockSystemAdapter);
     });
 
     it("Should bind the sync in-memory event bus for the core flow", () => {

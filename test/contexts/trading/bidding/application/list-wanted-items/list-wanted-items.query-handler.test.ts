@@ -14,10 +14,20 @@ const PAGE = 2;
 const PAGE_SIZE = 5;
 
 const ASIIMOV_PAGE = {
-    items: [{ name: "AWP | Asiimov (Field-Tested)", maxFor: maxForPercentage("-3"), criteria: [], enabled: true }],
+    items: [
+        {
+            name: "AWP | Asiimov (Field-Tested)",
+            maxFor: maxForPercentage("-3"),
+            criteria: [],
+            enabled: true,
+            addedAt: "2026-11-20T14:03:00.000Z",
+            catalog: null,
+        },
+    ],
     page: FIRST_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
     total: 1,
+    counts: { all: 1, enabled: 1, disabled: 0 },
 };
 
 let container: Container;
@@ -37,13 +47,13 @@ describe("ListWantedItemsQueryHandler", () => {
         expect(response).toEqual(ASIIMOV_PAGE);
     });
 
-    it("Should read the first page of every item of the account when nothing else is asked", async () => {
+    it("Should read the first page of every item of the account, newest first, when nothing else is asked", async () => {
         const listSpy = jest.spyOn(container.get(WANTED_ITEMS_DAO), "list").mockResolvedValue(ASIIMOV_PAGE);
 
         await container.get(LIST_WANTED_ITEMS_HANDLER).handle(new ListWantedItemsQuery({ accountId: ACCOUNT_ID }));
 
         expect(listSpy).toHaveBeenCalledWith(
-            { accountId: ACCOUNT_ID, filters: undefined, sort: undefined },
+            { accountId: ACCOUNT_ID, filters: undefined, sort: { field: "addedAt", order: "desc" } },
             { page: FIRST_PAGE, pageSize: DEFAULT_PAGE_SIZE },
         );
     });
@@ -54,14 +64,14 @@ describe("ListWantedItemsQueryHandler", () => {
             accountId: ACCOUNT_ID,
             page: PAGE,
             pageSize: PAGE_SIZE,
-            sort: "name",
+            sort: { field: "name", order: "desc" },
             filters: { enabled: false },
         });
 
         await container.get(LIST_WANTED_ITEMS_HANDLER).handle(query);
 
         expect(listSpy).toHaveBeenCalledWith(
-            { accountId: ACCOUNT_ID, filters: { enabled: false }, sort: "name" },
+            { accountId: ACCOUNT_ID, filters: { enabled: false }, sort: { field: "name", order: "desc" } },
             { page: PAGE, pageSize: PAGE_SIZE },
         );
     });

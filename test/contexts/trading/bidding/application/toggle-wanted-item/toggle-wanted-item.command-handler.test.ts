@@ -1,3 +1,4 @@
+import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
 import type { Container } from "inversify";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { ToggleWantedItemCommand } from "@/contexts/trading/bidding/application/toggle-wanted-item/toggle-wanted-item.command";
@@ -16,8 +17,7 @@ const ACCOUNT_ID = 1;
 const OTHER_ACCOUNT_ID = 2;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 
-const asiimov = (accountId: number) =>
-    WantedItem.create({ accountId, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
+const asiimov = (accountId: number) => buildWantedItem({ accountId, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
 
 const toggle = (enabled: boolean, accountId = ACCOUNT_ID) =>
     new ToggleWantedItemCommand({ accountId, itemName: ITEM_NAME, enabled });

@@ -35,6 +35,9 @@ import {
 import { listWantedItemsSchema } from "../validation/list-wanted-items.schema";
 import { listWantedItemsResponseSchema } from "../validation/list-wanted-items.response-schema";
 import { listWantedItemsDoc } from "../../infrastructure/docs/list-wanted-items.route-doc";
+import { ListAccountsHttpController } from "../../infrastructure/controllers/list-accounts.http-controller";
+import { listAccountsResponseSchema } from "../validation/list-accounts.response-schema";
+import { listAccountsDoc } from "../../infrastructure/docs/list-accounts.route-doc";
 import { WantedItemNotFoundError } from "../../domain/wanted-item/errors/wanted-item-not-found.error";
 import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
 import { addWantedItemSchema } from "../validation/add-wanted-item.schema";
@@ -50,6 +53,7 @@ import {
     ADD_WANTED_ITEM_VALIDATOR,
     EDIT_WANTED_ITEM_CONTROLLER,
     EDIT_WANTED_ITEM_VALIDATOR,
+    LIST_ACCOUNTS_CONTROLLER,
     LIST_WANTED_ITEMS_CONTROLLER,
     LIST_WANTED_ITEMS_VALIDATOR,
     REMOVE_WANTED_ITEM_CONTROLLER,
@@ -65,10 +69,13 @@ export class BiddingHttpModule extends ContainerModule {
         REMOVE_WANTED_ITEM_CONTROLLER,
         TOGGLE_WANTED_ITEM_CONTROLLER,
         LIST_WANTED_ITEMS_CONTROLLER,
+        LIST_ACCOUNTS_CONTROLLER,
     ];
     private static readonly LIST_WANTED_ITEMS_DOC = listWantedItemsDoc(
         new ValidatorZodAdapter(listWantedItemsResponseSchema),
     );
+
+    private static readonly LIST_ACCOUNTS_DOC = listAccountsDoc(new ValidatorZodAdapter(listAccountsResponseSchema));
 
     constructor() {
         super((options) => BiddingHttpModule.bindAll(options));
@@ -137,6 +144,13 @@ export class BiddingHttpModule extends ContainerModule {
                 (http: HttpServer, bus: QueryBus, validator: Validator<ListWantedItemsInput>) =>
                     new ListWantedItemsHttpController(http, bus, validator, BiddingHttpModule.LIST_WANTED_ITEMS_DOC),
                 [HTTP_SERVER, QUERY_BUS, LIST_WANTED_ITEMS_VALIDATOR],
+            )
+            .inSingletonScope();
+        bind(LIST_ACCOUNTS_CONTROLLER)
+            .toResolvedValue(
+                (http: HttpServer, bus: QueryBus) =>
+                    new ListAccountsHttpController(http, bus, BiddingHttpModule.LIST_ACCOUNTS_DOC),
+                [HTTP_SERVER, QUERY_BUS],
             )
             .inSingletonScope();
     }

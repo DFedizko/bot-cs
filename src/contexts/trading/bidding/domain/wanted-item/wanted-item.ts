@@ -7,15 +7,17 @@ import { MaxForFactory } from "./max-for/max-for.factory";
 import { CriteriaFactory, type CriteriaPrimitives } from "./criteria/criteria.factory";
 import { AccountId } from "../account/account-id";
 import { EmptyWantedItemChangesError } from "./errors/empty-wanted-item-changes.error";
+import { AddedAt } from "./added-at";
 
-type CreateWantedSkinProps = {
+export type CreateWantedItemProps = {
     accountId: number;
     name: string;
     maxFor: MaxForPrimitives;
     criteria?: CriteriaPrimitives;
+    addedAt: number;
 };
 
-export type WantedItemPrimitives = Required<CreateWantedSkinProps> & {
+export type WantedItemPrimitives = Required<CreateWantedItemProps> & {
     enabled: boolean;
 };
 
@@ -40,16 +42,18 @@ export class WantedItem extends AggregateRoot<ItemName> {
         private readonly accountId: AccountId,
         private maxFor: MaxFor,
         private criteria: ItemCriterion[],
+        private readonly addedAt: AddedAt,
     ) {
         super(id);
     }
 
-    static create(props: CreateWantedSkinProps): WantedItem {
+    static create(props: CreateWantedItemProps): WantedItem {
         return new WantedItem(
             new ItemName(props.name),
             new AccountId(props.accountId),
             MaxForFactory.create(props.maxFor),
             CriteriaFactory.create(props.criteria ?? []),
+            new AddedAt(props.addedAt),
         );
     }
 
@@ -66,6 +70,7 @@ export class WantedItem extends AggregateRoot<ItemName> {
             maxFor: this.getMaxFor(),
             criteria: this.criteria.map((criterion) => criterion.toPrimitives()),
             enabled: this.enabled,
+            addedAt: this.addedAt.getValue(),
         };
     }
 

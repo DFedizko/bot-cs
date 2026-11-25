@@ -1,6 +1,7 @@
 import { FIRST_PAGE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/packages/building-blocks/pagination";
 import type { HttpErrorBody } from "../http-error.mapper";
 import type { HttpExampleDoc } from "./http-route.doc";
+import { SORT_ORDERS } from "@/packages/building-blocks/sort";
 
 type ValidationExample = HttpExampleDoc & { value: HttpErrorBody };
 
@@ -33,12 +34,18 @@ export const LIMIT_NOT_WHOLE_NUMBER = validationExample("The limit is not a whol
 export const LIMIT_TOO_SMALL = validationExample("The limit is below the min", "limit", tooSmall(MIN_PAGE_SIZE));
 export const LIMIT_TOO_BIG = validationExample("The limit is above the max", "limit", tooBig(MAX_PAGE_SIZE));
 
-const describeSortKeys = (keys: readonly string[]): string => {
+const describeOptions = (keys: readonly string[]): string => {
     const quoted = keys.map((key) => `"${key}"`);
     return quoted.length === 1
         ? `Invalid input: expected ${quoted[0]}`
         : `Invalid option: expected one of ${quoted.join(OPTION_SEPARATOR)}`;
 };
 
-export const unknownSort = (keys: readonly string[]): ValidationExample =>
-    validationExample("The sort key is not one the route offers", "sort", describeSortKeys(keys));
+export const unknownSortField = (fields: readonly string[]): ValidationExample =>
+    validationExample("The sort field is not one the route offers", "sort", describeOptions(fields));
+
+export const INVALID_SORT_ORDER = validationExample(
+    "The order is neither asc nor desc",
+    "order",
+    describeOptions(SORT_ORDERS),
+);
