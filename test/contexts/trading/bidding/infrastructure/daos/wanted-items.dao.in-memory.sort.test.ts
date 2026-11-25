@@ -6,7 +6,8 @@ import {
     maxForValue,
 } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { ADDED_AT } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/wanted-item.builder";
-import type { WantedItemsSortKey } from "@/contexts/trading/bidding/application/list-wanted-items/list-wanted-items.query";
+import type { WantedItemsSortField } from "@/contexts/trading/bidding/application/list-wanted-items/list-wanted-items.query";
+import type { SortOrder } from "@/packages/building-blocks/sort";
 import type { WantedItemRecord } from "@/contexts/trading/bidding/infrastructure/stores/wanted-item.store.in-memory";
 import {
     CATALOG_DETAILS_GATEWAY,
@@ -34,8 +35,15 @@ const addedMinutesLater = (name: string, minutes: number) =>
 const putAll = (container: Container, records: WantedItemRecord[]) =>
     records.forEach((wanted) => container.get(WANTED_ITEM_STORE).put(wanted));
 
-const namesSortedBy = async (container: Container, sort: WantedItemsSortKey, pagination = EVERY_ITEM) => {
-    const page = await container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID, sort }, pagination);
+const namesSortedBy = async (
+    container: Container,
+    field: WantedItemsSortField,
+    order: SortOrder,
+    pagination = EVERY_ITEM,
+) => {
+    const page = await container
+        .get(WANTED_ITEMS_DAO)
+        .list({ accountId: ACCOUNT_ID, sort: { field, order } }, pagination);
     return page.items.map(({ name }) => name);
 };
 
@@ -65,67 +73,84 @@ describe("WantedItemsDaoInMemory sort", () => {
         container = testContainer();
     });
 
-    it("Should list the newest items first for recent", async () => {
+    it("Should list the newest items first by added time, descending", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 1), addedMinutesLater(ASIIMOV, 3), addedMinutesLater(REDLINE, 2)]);
 
-        const names = await namesSortedBy(container, "recent");
+        const names = await namesSortedBy(container, "addedAt", "desc");
 
         expect(names).toEqual([ASIIMOV, REDLINE, VULCAN]);
+    });
+
+    it("Should list the oldest items first by added time, ascending", async () => {
+        putAll(container, [addedMinutesLater(VULCAN, 1), addedMinutesLater(ASIIMOV, 3), addedMinutesLater(REDLINE, 2)]);
+
+        const names = await namesSortedBy(container, "addedAt", "asc");
+
+        expect(names).toEqual([VULCAN, REDLINE, ASIIMOV]);
     });
 
     it("Should list the last added first among items added at the same time", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 0), addedMinutesLater(ASIIMOV, 0), addedMinutesLater(REDLINE, 0)]);
 
-        const names = await namesSortedBy(container, "recent");
+        const names = await namesSortedBy(container, "addedAt", "desc");
 
         expect(names).toEqual([REDLINE, ASIIMOV, VULCAN]);
     });
 
-    it("Should sort by name from A to Z", async () => {
+    it("Should sort by name from A to Z, ascending", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 0), addedMinutesLater(ASIIMOV, 0), addedMinutesLater(REDLINE, 0)]);
 
-        const names = await namesSortedBy(container, "name-asc");
+        const names = await namesSortedBy(container, "name", "asc");
 
         expect(names).toEqual([REDLINE, VULCAN, ASIIMOV]);
     });
 
-    it("Should sort by name from Z to A", async () => {
+    it("Should sort by name from Z to A, descending", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 0), addedMinutesLater(ASIIMOV, 0), addedMinutesLater(REDLINE, 0)]);
 
-        const names = await namesSortedBy(container, "name-desc");
+        const names = await namesSortedBy(container, "name", "desc");
 
         expect(names).toEqual([ASIIMOV, VULCAN, REDLINE]);
     });
 
-    it("Should sort the percentage maxes from lowest to highest, then the fixed values", async () => {
+    it("Should sort the percentage maxes from lowest to highest, then the fixed values, ascending", async () => {
         putMaxes(container);
 
-        const names = await namesSortedBy(container, "max-asc");
+        const names = await namesSortedBy(container, "max", "asc");
 
         expect(names).toEqual([VULCAN, KNIFE, REDLINE, KARAMBIT, ASIIMOV]);
     });
 
-    it("Should sort the percentage maxes from highest to lowest, then the fixed values", async () => {
+    it("Should sort the percentage maxes from highest to lowest, then the fixed values, descending", async () => {
         putMaxes(container);
 
-        const names = await namesSortedBy(container, "max-desc");
+        const names = await namesSortedBy(container, "max", "desc");
 
         expect(names).toEqual([REDLINE, KNIFE, VULCAN, ASIIMOV, KARAMBIT]);
     });
 
-    it("Should sort by rarity from contraband down, the items without catalog details last", async () => {
+    it("Should sort by rarity from Contraband down, the items without catalog details last, descending", async () => {
         stubCatalog(container);
         putMaxes(container);
 
-        const names = await namesSortedBy(container, "rarity");
+        const names = await namesSortedBy(container, "rarity", "desc");
 
         expect(names).toEqual([KNIFE, KARAMBIT, ASIIMOV, REDLINE, VULCAN]);
+    });
+
+    it("Should sort by rarity from Consumer Grade up, the items without catalog details last, ascending", async () => {
+        stubCatalog(container);
+        putMaxes(container);
+
+        const names = await namesSortedBy(container, "rarity", "asc");
+
+        expect(names).toEqual([REDLINE, ASIIMOV, KARAMBIT, KNIFE, VULCAN]);
     });
 
     it("Should keep the newest first among items of the same rarity", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 1), addedMinutesLater(ASIIMOV, 3), addedMinutesLater(REDLINE, 2)]);
 
-        const names = await namesSortedBy(container, "rarity");
+        const names = await namesSortedBy(container, "rarity", "asc");
 
         expect(names).toEqual([ASIIMOV, REDLINE, VULCAN]);
     });
@@ -133,7 +158,7 @@ describe("WantedItemsDaoInMemory sort", () => {
     it("Should sort before it cuts the page", async () => {
         putAll(container, [addedMinutesLater(VULCAN, 0), addedMinutesLater(ASIIMOV, 0), addedMinutesLater(REDLINE, 0)]);
 
-        const names = await namesSortedBy(container, "name-asc", SECOND_PAGE);
+        const names = await namesSortedBy(container, "name", "asc", SECOND_PAGE);
 
         expect(names).toEqual([ASIIMOV]);
     });

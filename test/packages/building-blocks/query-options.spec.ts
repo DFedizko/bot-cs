@@ -1,8 +1,9 @@
 import type { QueryOptions } from "@/packages/building-blocks/query-options";
+import type { Sort } from "@/packages/building-blocks/sort";
 
-type FooSort = "name" | "size";
+type FooSortField = "name" | "size";
 type FooFilters = { color?: string };
-type FooOptions = QueryOptions<FooSort, FooFilters>;
+type FooOptions = QueryOptions<FooSortField, FooFilters>;
 
 describe("QueryOptions", () => {
     it("Should make every option optional", () => {
@@ -17,8 +18,8 @@ describe("QueryOptions", () => {
         expectTypeOf<FooOptions["limit"]>().toEqualTypeOf<number | undefined>();
     });
 
-    it("Should accept only the sort keys of its query", () => {
-        expectTypeOf<FooOptions["sort"]>().toEqualTypeOf<FooSort | undefined>();
+    it("Should sort by a field of its query and an order", () => {
+        expectTypeOf<FooOptions["sort"]>().toEqualTypeOf<Sort<FooSortField> | undefined>();
     });
 
     it("Should carry the filters of its query", () => {

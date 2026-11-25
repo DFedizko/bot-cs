@@ -1,7 +1,7 @@
 import { PaginatorInMemory } from "@/packages/infrastructure/pagination/paginator.in-memory";
 import type { Pagination } from "@/packages/building-blocks/pagination";
 import type { WantedItemsCriteria, WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
-import type { WantedItemsSortKey } from "../../application/list-wanted-items/list-wanted-items.query";
+import type { WantedItemsSort } from "../../application/list-wanted-items/list-wanted-items.query";
 import type {
     CatalogDetailsByName,
     CatalogDetailsDto,
@@ -41,7 +41,7 @@ export class WantedItemsDaoInMemory implements WantedItemsDao {
         return { record, catalog: details.get(record.name) ?? null };
     }
 
-    private sortBy(entries: WantedItemEntry[], sort: WantedItemsSortKey): WantedItemEntry[] {
+    private sortBy(entries: WantedItemEntry[], sort: WantedItemsSort): WantedItemEntry[] {
         return this.lastInsertedFirst(entries).toSorted(compareWantedItemsBy(sort));
     }
 

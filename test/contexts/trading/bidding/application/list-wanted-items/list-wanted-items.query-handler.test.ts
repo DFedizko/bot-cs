@@ -53,7 +53,7 @@ describe("ListWantedItemsQueryHandler", () => {
         await container.get(LIST_WANTED_ITEMS_HANDLER).handle(new ListWantedItemsQuery({ accountId: ACCOUNT_ID }));
 
         expect(listSpy).toHaveBeenCalledWith(
-            { accountId: ACCOUNT_ID, filters: undefined, sort: "recent" },
+            { accountId: ACCOUNT_ID, filters: undefined, sort: { field: "addedAt", order: "desc" } },
             { page: FIRST_PAGE, pageSize: DEFAULT_PAGE_SIZE },
         );
     });
@@ -64,14 +64,14 @@ describe("ListWantedItemsQueryHandler", () => {
             accountId: ACCOUNT_ID,
             page: PAGE,
             pageSize: PAGE_SIZE,
-            sort: "name-desc",
+            sort: { field: "name", order: "desc" },
             filters: { enabled: false },
         });
 
         await container.get(LIST_WANTED_ITEMS_HANDLER).handle(query);
 
         expect(listSpy).toHaveBeenCalledWith(
-            { accountId: ACCOUNT_ID, filters: { enabled: false }, sort: "name-desc" },
+            { accountId: ACCOUNT_ID, filters: { enabled: false }, sort: { field: "name", order: "desc" } },
             { page: PAGE, pageSize: PAGE_SIZE },
         );
     });

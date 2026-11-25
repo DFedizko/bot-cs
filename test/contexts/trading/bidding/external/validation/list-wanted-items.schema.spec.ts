@@ -4,15 +4,16 @@ import { MAX_PAGE_SIZE } from "@/packages/building-blocks/pagination";
 const ACCOUNT_ID = "1";
 const PAGE = 2;
 const PAGE_SIZE = 5;
+const NEWEST_FIRST = { field: "addedAt", order: "desc" } as const;
 
 const failingPaths = (input: unknown): string[] =>
     listWantedItemsSchema.safeParse(input).error?.issues.map(({ path }) => path.join(".")) ?? [];
 
 describe("listWantedItemsSchema", () => {
-    it("Should read only the account id when nothing else is asked", () => {
+    it("Should read only the account id and the default sort when nothing else is asked", () => {
         const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID });
 
-        expect(input).toEqual({ accountId: 1 });
+        expect(input).toEqual({ accountId: 1, sort: NEWEST_FIRST });
     });
 
     it("Should convert the query strings into the enabled state and the page", () => {
@@ -23,7 +24,13 @@ describe("listWantedItemsSchema", () => {
             pageSize: "5",
         });
 
-        expect(input).toEqual({ accountId: 1, page: PAGE, pageSize: PAGE_SIZE, filters: { enabled: false } });
+        expect(input).toEqual({
+            accountId: 1,
+            page: PAGE,
+            pageSize: PAGE_SIZE,
+            sort: NEWEST_FIRST,
+            filters: { enabled: false },
+        });
     });
 
     it("Should read an enabled state of true", () => {
@@ -50,17 +57,20 @@ describe("listWantedItemsSchema", () => {
         expect(paths).toEqual(["pageSize"]);
     });
 
-    it.each([["recent"], ["name-asc"], ["name-desc"], ["max-asc"], ["max-desc"], ["rarity"]] as const)(
-        "Should read the sort %p",
-        (sort) => {
-            const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID, sort });
+    it.each([["addedAt"], ["name"], ["max"], ["rarity"]] as const)("Should read a sort by %p", (field) => {
+        const input = listWantedItemsSchema.parse({ accountId: ACCOUNT_ID, sort: field, order: "asc" });
 
-            expect(input.sort).toBe(sort);
-        },
-    );
+        expect(input.sort).toEqual({ field, order: "asc" });
+    });
 
-    it("Should reject a sort key the route doesn't offer", () => {
-        const paths = failingPaths({ accountId: ACCOUNT_ID, sort: "price" });
+    it("Should reject an order that is neither asc nor desc", () => {
+        const paths = failingPaths({ accountId: ACCOUNT_ID, order: "up" });
+
+        expect(paths).toEqual(["order"]);
+    });
+
+    it.each([["price"], ["recent"]])("Should reject the sort field %p", (sort) => {
+        const paths = failingPaths({ accountId: ACCOUNT_ID, sort });
 
         expect(paths).toEqual(["sort"]);
     });

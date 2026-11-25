@@ -115,7 +115,10 @@ export const pagedFoosRoute: HttpRoute = {
     input: new ValidatorZodAdapter(
         queryOptionsSchema(
             { ownerId: z.string().meta({ description: "The owner of the foos", examples: [FOO_ID] }) },
-            { sort: ["name"], filters: { name: z.string().optional().meta({ description: "The name to look for" }) } },
+            {
+                sort: { fields: ["name"], default: { field: "name", order: "asc" } },
+                filters: { name: z.string().optional().meta({ description: "The name to look for" }) },
+            },
         ),
     ),
     doc: {

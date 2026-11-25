@@ -8,19 +8,24 @@ const PAGE = 2;
 const PAGE_SIZE = 5;
 const LIMIT = 3;
 
+const DEFAULT_SORT = { field: "name", order: "asc" } as const;
 const fooSchema = queryOptionsSchema(
     { ownerId: z.string() },
-    { sort: ["name", "size"], filters: { color: z.string().optional() }, limit: true },
+    {
+        sort: { fields: ["name", "size"], default: DEFAULT_SORT },
+        filters: { color: z.string().optional() },
+        limit: true,
+    },
 );
 
 const failingPaths = (input: unknown): string[] =>
     fooSchema.safeParse(input).error?.issues.map(({ path }) => path.join(".")) ?? [];
 
 describe("queryOptionsSchema", () => {
-    it("Should read only the query's own fields when no option is given", () => {
+    it("Should read the query's own fields and its default sort when no option is given", () => {
         const input = fooSchema.parse({ ownerId: OWNER_ID });
 
-        expect(input).toEqual({ ownerId: OWNER_ID });
+        expect(input).toEqual({ ownerId: OWNER_ID, sort: DEFAULT_SORT });
     });
 
     it("Should read the page, the page size, the limit and the sort from the query string", () => {
@@ -30,21 +35,34 @@ describe("queryOptionsSchema", () => {
             pageSize: String(PAGE_SIZE),
             limit: String(LIMIT),
             sort: "size",
+            order: "desc",
         });
 
-        expect(input).toEqual({ ownerId: OWNER_ID, page: PAGE, pageSize: PAGE_SIZE, limit: LIMIT, sort: "size" });
+        expect(input).toEqual({
+            ownerId: OWNER_ID,
+            page: PAGE,
+            pageSize: PAGE_SIZE,
+            limit: LIMIT,
+            sort: { field: "size", order: "desc" },
+        });
     });
 
     it("Should gather the query's filters under filters", () => {
         const input = fooSchema.parse({ ownerId: OWNER_ID, color: "red" });
 
-        expect(input).toEqual({ ownerId: OWNER_ID, filters: { color: "red" } });
+        expect(input).toEqual({ ownerId: OWNER_ID, sort: DEFAULT_SORT, filters: { color: "red" } });
     });
 
-    it("Should reject a sort key the query doesn't offer", () => {
+    it("Should reject a sort field the query doesn't offer", () => {
         const paths = failingPaths({ ownerId: OWNER_ID, sort: "weight" });
 
         expect(paths).toEqual(["sort"]);
+    });
+
+    it("Should reject an order that is neither asc nor desc", () => {
+        const paths = failingPaths({ ownerId: OWNER_ID, order: "up" });
+
+        expect(paths).toEqual(["order"]);
     });
 
     it.each([
@@ -61,7 +79,13 @@ describe("queryOptionsSchema", () => {
     it("Should not offer a sort, a limit or filters the query didn't ask for", () => {
         const pagedOnly = queryOptionsSchema({ ownerId: z.string() });
 
-        const input = pagedOnly.parse({ ownerId: OWNER_ID, sort: "name", limit: String(LIMIT), color: "red" });
+        const input = pagedOnly.parse({
+            ownerId: OWNER_ID,
+            sort: "name",
+            order: "asc",
+            limit: String(LIMIT),
+            color: "red",
+        });
 
         expect(input).toEqual({ ownerId: OWNER_ID });
     });

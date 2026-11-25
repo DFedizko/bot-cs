@@ -1,18 +1,21 @@
 import { Query } from "@/packages/building-blocks/query";
 import type { QueryOptions } from "@/packages/building-blocks/query-options";
+import { DESCENDING, type Sort } from "@/packages/building-blocks/sort";
 import type { ListWantedItemsResponse } from "./list-wanted-items.response";
 
-export const WANTED_ITEMS_SORT_KEYS = ["recent", "name-asc", "name-desc", "max-asc", "max-desc", "rarity"] as const;
+export const WANTED_ITEMS_SORT_FIELDS = ["addedAt", "name", "max", "rarity"] as const;
 
-export type WantedItemsSortKey = (typeof WANTED_ITEMS_SORT_KEYS)[number];
+export type WantedItemsSortField = (typeof WANTED_ITEMS_SORT_FIELDS)[number];
 
-export const DEFAULT_WANTED_ITEMS_SORT: WantedItemsSortKey = "recent";
+export type WantedItemsSort = Sort<WantedItemsSortField>;
+
+export const DEFAULT_WANTED_ITEMS_SORT: WantedItemsSort = { field: "addedAt", order: DESCENDING };
 
 export type WantedItemsFilters = {
     enabled?: boolean;
 };
 
-export type ListWantedItemsOptions = QueryOptions<WantedItemsSortKey, WantedItemsFilters>;
+export type ListWantedItemsOptions = QueryOptions<WantedItemsSortField, WantedItemsFilters>;
 
 type QueryProps = ListWantedItemsOptions & {
     accountId: number;
@@ -23,7 +26,7 @@ export class ListWantedItemsQuery extends Query<ListWantedItemsResponse> {
     readonly accountId: number;
     readonly page?: number;
     readonly pageSize?: number;
-    readonly sort?: WantedItemsSortKey;
+    readonly sort?: WantedItemsSort;
     readonly filters?: WantedItemsFilters;
 
     constructor(props: QueryProps) {

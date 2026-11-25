@@ -22,7 +22,7 @@ import {
 } from "./__mocks__/wanted-item-record.mock";
 
 const MAX_VALUE = 19400;
-const RECENT = "recent";
+const NEWEST_FIRST = { field: "addedAt", order: "desc" } as const;
 const FIRST_PAGE = { page: 1, pageSize: 2 };
 const SECOND_PAGE = { page: 2, pageSize: 2 };
 const NO_COUNTS = { all: 0, enabled: 0, disabled: 0 };
@@ -42,7 +42,7 @@ const putAll = (container: Container, records: WantedItemRecord[]) =>
     records.forEach((wanted) => container.get(WANTED_ITEM_STORE).put(wanted));
 
 const listOf = (container: Container, criteria = {}, pagination = FIRST_PAGE) =>
-    container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID, sort: RECENT, ...criteria }, pagination);
+    container.get(WANTED_ITEMS_DAO).list({ accountId: ACCOUNT_ID, sort: NEWEST_FIRST, ...criteria }, pagination);
 
 let container: Container;
 

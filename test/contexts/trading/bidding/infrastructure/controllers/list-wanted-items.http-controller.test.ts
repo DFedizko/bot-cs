@@ -113,7 +113,7 @@ describe("ListWantedItemsHttpController", () => {
         const api = await startWantedItemsApi(container);
         await addAsiimovAndDisabledRedline(api);
 
-        const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?sort=name-desc`);
+        const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?sort=name&order=desc`);
 
         expect(JSON.parse(response.body)).toEqual(firstPage([wanted(ASIIMOV), wanted(REDLINE, false)]));
     });
@@ -124,7 +124,7 @@ describe("ListWantedItemsHttpController", () => {
 
         await api.send(
             GET,
-            `${itemsPath(ACCOUNT_ID)}?enabled=true&sort=rarity&page=${THIRD_PAGE}&pageSize=${FOUR_PER_PAGE}`,
+            `${itemsPath(ACCOUNT_ID)}?enabled=true&sort=rarity&order=asc&page=${THIRD_PAGE}&pageSize=${FOUR_PER_PAGE}`,
         );
 
         expect(askSpy).toHaveBeenCalledWith(
@@ -132,7 +132,7 @@ describe("ListWantedItemsHttpController", () => {
                 accountId: ACCOUNT_ID,
                 page: THIRD_PAGE,
                 pageSize: FOUR_PER_PAGE,
-                sort: "rarity",
+                sort: { field: "rarity", order: "asc" },
                 filters: { enabled: true },
             }),
         );
@@ -143,8 +143,9 @@ describe("ListWantedItemsHttpController", () => {
         ["a page that is not a number", "page=last"],
         ["a page size above the max", `pageSize=${MAX_PAGE_SIZE + 1}`],
         ["an enabled state that is not a boolean", "enabled=maybe"],
-        ["a sort key the route doesn't offer", "sort=price"],
-        ["the old sort by name", "sort=name"],
+        ["a sort field the route doesn't offer", "sort=price"],
+        ["the old recent sort", "sort=recent"],
+        ["an order that is neither asc nor desc", "order=up"],
     ])("Should answer bad request for %s", async (_case, query) => {
         const api = await startWantedItemsApi(container);
 

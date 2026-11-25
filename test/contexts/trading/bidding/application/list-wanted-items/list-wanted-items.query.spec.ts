@@ -1,6 +1,7 @@
 import {
     ListWantedItemsQuery,
-    WANTED_ITEMS_SORT_KEYS,
+    DEFAULT_WANTED_ITEMS_SORT,
+    WANTED_ITEMS_SORT_FIELDS,
 } from "@/contexts/trading/bidding/application/list-wanted-items/list-wanted-items.query";
 
 const ACCOUNT_ID = 1;
@@ -20,7 +21,7 @@ describe("ListWantedItemsQuery", () => {
             accountId: ACCOUNT_ID,
             page: PAGE,
             pageSize: PAGE_SIZE,
-            sort: "name-asc",
+            sort: { field: "name", order: "asc" },
             filters: { enabled: true },
         });
 
@@ -29,12 +30,16 @@ describe("ListWantedItemsQuery", () => {
             accountId: ACCOUNT_ID,
             page: PAGE,
             pageSize: PAGE_SIZE,
-            sort: "name-asc",
+            sort: { field: "name", order: "asc" },
             filters: { enabled: true },
         });
     });
 
-    it("Should offer the sorts of the wanted items page", () => {
-        expect(WANTED_ITEMS_SORT_KEYS).toEqual(["recent", "name-asc", "name-desc", "max-asc", "max-desc", "rarity"]);
+    it("Should offer the fields the wanted items page sorts by", () => {
+        expect(WANTED_ITEMS_SORT_FIELDS).toEqual(["addedAt", "name", "max", "rarity"]);
+    });
+
+    it("Should sort the newest items first by default", () => {
+        expect(DEFAULT_WANTED_ITEMS_SORT).toEqual({ field: "addedAt", order: "desc" });
     });
 });

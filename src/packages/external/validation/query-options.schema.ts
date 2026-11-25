@@ -1,25 +1,25 @@
 import z from "zod";
 import type { QueryOptions } from "@/packages/building-blocks/query-options";
+import type { Sort, SortOrder } from "@/packages/building-blocks/sort";
 import { limitField, pageField, pageSizeField } from "./pagination.fields";
+import { sortParams, toSort, type SortFields } from "./sort.fields";
 
-type SortKeys<TSort extends string> = readonly [TSort, ...TSort[]];
+type SortConfig<TSortField extends string> = {
+    fields: SortFields<TSortField>;
+    default: Sort<TSortField>;
+};
 
-type OptionsConfig<TSort extends string, TFilters extends z.ZodRawShape> = {
-    sort?: SortKeys<TSort>;
+type OptionsConfig<TSortField extends string, TFilters extends z.ZodRawShape> = {
+    sort?: SortConfig<TSortField>;
     filters?: TFilters;
     limit?: boolean;
 };
 
 type Fields = Record<string, unknown>;
 
-export const sortField = <TSort extends string>(keys: SortKeys<TSort>) => {
-    const description = `Sorts the items by ${keys.join(" or ")}`;
-    return z
-        .enum(keys)
-        .meta({ description, examples: [keys[0]] })
-        .optional()
-        .meta({ description });
-};
+const ORDER_PARAM = "order";
+
+type SortInput<TSortField extends string> = { sort?: TSortField; order?: SortOrder };
 
 const nestFilters = (input: Fields, filterNames: string[]): Fields => {
     const entries = Object.entries(input);
@@ -28,13 +28,19 @@ const nestFilters = (input: Fields, filterNames: string[]): Fields => {
     return { ...Object.fromEntries(rest), ...(filters.length > 0 && { filters: Object.fromEntries(filters) }) };
 };
 
+const gatherSort = <TSortField extends string>(input: Fields, sort?: SortConfig<TSortField>): Fields => {
+    if (!sort) return input;
+    const rest = Object.entries(input).filter(([name]) => name !== ORDER_PARAM);
+    return { ...Object.fromEntries(rest), sort: toSort(input as SortInput<TSortField>, sort.default) };
+};
+
 export const queryOptionsSchema = <
     TFields extends z.ZodRawShape,
-    const TSort extends string = never,
+    const TSortField extends string = never,
     TFilters extends z.ZodRawShape = Record<never, never>,
 >(
     fields: TFields,
-    { sort, filters, limit }: OptionsConfig<TSort, TFilters> = {},
+    { sort, filters, limit }: OptionsConfig<TSortField, TFilters> = {},
 ) => {
     const filterNames = Object.keys(filters ?? {});
     return z
@@ -43,12 +49,12 @@ export const queryOptionsSchema = <
             page: pageField,
             pageSize: pageSizeField,
             ...(limit && { limit: limitField }),
-            ...(sort && { sort: sortField(sort) }),
+            ...(sort && sortParams(sort.fields, sort.default)),
             ...filters,
         })
         .transform(
             (input) =>
-                nestFilters(input, filterNames) as z.output<z.ZodObject<TFields>> &
-                    QueryOptions<TSort, z.output<z.ZodObject<TFilters>>>,
+                nestFilters(gatherSort(input, sort), filterNames) as z.output<z.ZodObject<TFields>> &
+                    QueryOptions<TSortField, z.output<z.ZodObject<TFilters>>>,
         );
 };
