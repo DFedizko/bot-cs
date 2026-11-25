@@ -9,6 +9,7 @@ const ASIIMOV = "AWP | Asiimov (Field-Tested)";
 const REDLINE = "AK-47 | Redline (Field-Tested)";
 const VULCAN = "AK-47 | Vulcan (Field-Tested)";
 const UNKNOWN = "Not A Real Item";
+const SOURCE_DOWN = new Error("The catalog source is down");
 
 const sourceGives = (container: Container, rows: CatalogRow[]) =>
     jest.spyOn(container.get(CATALOG_SOURCE), "load").mockResolvedValue(rows);
@@ -94,6 +95,15 @@ describe("CatalogItemsDaoMemoryCache as the catalog lookup", () => {
         const found = await container.get(CATALOG_LOOKUP).findByNames([ASIIMOV]);
 
         expect(found).toEqual({ items: [catalogRow()] });
+    });
+
+    it("Should download the catalog again when looked up after a failed load", async () => {
+        const loadSpy = jest.spyOn(container.get(CATALOG_SOURCE), "load").mockRejectedValue(SOURCE_DOWN);
+        await container.get(CATALOG_CACHE).warmUp();
+
+        await container.get(CATALOG_LOOKUP).findByNames([ASIIMOV]);
+
+        expect(loadSpy).toHaveBeenCalledTimes(2);
     });
 
     it("Should give copies a caller can't use to change the catalog", async () => {

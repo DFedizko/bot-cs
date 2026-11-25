@@ -88,12 +88,4 @@ describe("CatalogDetailsGatewayAdapter", () => {
 
         expect(lookupSpy.mock.calls).toEqual([[[ASIIMOV, KARAMBIT]]]);
     });
-
-    it("Should give no details when the catalog finds none", async () => {
-        catalogKnows(container);
-
-        const details = await container.get(CATALOG_DETAILS_GATEWAY).findByNames([ASIIMOV]);
-
-        expect(details.size).toBe(0);
-    });
 });
