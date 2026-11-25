@@ -13,21 +13,21 @@ The catalog has **no domain layer by design** ([ADR-0005](../../../adr/0005-cata
 
 ## Ubiquitous language
 
-| Term             | Meaning                                                                                                                                                                                                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Catalog          | Every CS2 item the source lists, one row per market name.                                                                                                                                                                                                                                        |
-| Catalog row      | One item of the catalog (`CatalogRow` in `infrastructure/sources/`, primitives only): market name, weapon, skin (null for a vanilla item), wear (null when it has none), StatTrak, Souvenir, category, rarity and image URL.                                                                     |
-| Market hash name | The item's market name (`AWP \| Asiimov (Field-Tested)`), the one wanted items use. Unique in the catalog: the source adapter keeps the first entry of a name (Doppler phases share one).                                                                                                        |
-| Rarity           | The shared kernel's `Rarity` (official CS2 names) in rows and DTOs. The HTTP API answers its own keys (`consumer`, `industrial`, `milspec`, `restricted`, `classified`, `covert`, `extraordinary`, `contraband`), mapped in one place (`infrastructure/controllers/catalog-items.http-body.ts`). |
-| Catalog search   | The search rule, implemented by the DAO: every word of the text in the market name, case-insensitive, ignoring `\|`, `(` and `)`; names that start with the text first, then the rest, each alphabetical; at most a limit.                                                                       |
-| Catalog source   | The infrastructure port the cache downloads the rows through.                                                                                                                                                                                                                                    |
+| Term             | Meaning                                                                                                                                                                                                                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catalog          | Every CS2 item the source lists, one row per market name.                                                                                                                                                                                                                               |
+| Catalog row      | One item of the catalog (`CatalogRow` in `infrastructure/sources/`, primitives only): market name, weapon, skin (null for a vanilla item), wear (null when it has none), StatTrak, Souvenir, category, rarity and image URL.                                                            |
+| Market hash name | The item's market name (`AWP \| Asiimov (Field-Tested)`), the one wanted items use. Unique in the catalog: the source adapter keeps the first entry of a name (Doppler phases share one).                                                                                               |
+| Rarity           | The shared kernel's `Rarity`, with its official CS2 names (`Consumer Grade` … `Contraband`), everywhere: rows, DTOs and the HTTP response, with no keys of our own. The frontend maps the names to its colour tokens. `RARITY_ORDER` (shared kernel) ranks them from lowest to highest. |
+| Catalog search   | The search rule, implemented by the DAO: every word of the text in the market name, case-insensitive, ignoring `\|`, `(` and `)`; names that start with the text first, then the rest, each alphabetical; at most a limit.                                                              |
+| Catalog source   | The infrastructure port the cache downloads the rows through.                                                                                                                                                                                                                           |
 
 ## Folders
 
 - `application/search-catalog-items/`: the only use case: the query (with its limits), its handler, response DTOs, the DAO port and `CatalogUnavailableError`.
 - `infrastructure/sources/`: the `CatalogSource` port and `CatalogRow`.
 - `infrastructure/daos/`: the read-through cache, which implements the DAO and the search rule.
-- `infrastructure/`: also the ByMykel contract types (`http/bymykel/`), the source adapter that validates, de-duplicates and maps entries to rows (`gateways/`), the startup controller that warms the cache, the HTTP controller with the rarity-to-key mapping, and the route docs.
+- `infrastructure/`: also the ByMykel contract types (`http/bymykel/`), the source adapter that validates, de-duplicates and maps entries to rows (`gateways/`), the startup controller that warms the cache, the HTTP controller, and the route docs.
 - `external/`: the ByMykel HTTP adapter, the zod schemas and the DI modules.
 
 ## Rules
