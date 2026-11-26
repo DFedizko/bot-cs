@@ -39,3 +39,4 @@ This folder records the significant architecture decisions of the frontend (`web
 | [0003](0003-design-system-from-doop.md) | Design system from doop | 2026-11-22 | Accepted |
 | [0004](0004-http-client.md)             | HTTP client             | 2026-11-24 | Accepted |
 | [0005](0005-composable-components.md)   | Composable components   | 2026-11-25 | Accepted |
+| [0006](0006-zustand-stores.md)          | Zustand stores          | 2026-11-26 | Accepted |
