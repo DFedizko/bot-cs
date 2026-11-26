@@ -10,7 +10,7 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 const MOCK_WORKER_PATH = "/mockServiceWorker.js";
-const MOCK_WORKER_SOURCE = "msw/lib/mockServiceWorker.js";
+const MOCK_WORKER_SOURCE = "msw/mockServiceWorker.js";
 const JAVASCRIPT = "text/javascript";
 
 const serveMockWorker = (): Plugin => ({
