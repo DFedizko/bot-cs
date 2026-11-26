@@ -1,11 +1,7 @@
 import type { ComponentProps } from "react";
 import { cn } from "@/shared/lib/cn";
-import type { RarityTone } from "@/shared/model/rarity/rarity-tone";
-import { RARITY_COLORS } from "@/shared/ui/components/rarity-tile";
 
-type WantedItemCardRarityProps = ComponentProps<"p"> & { tone: RarityTone | null; rarityName: string | null };
-
-export function WantedItemCardRarity({ tone, rarityName, className, children, ...props }: WantedItemCardRarityProps) {
+export function WantedItemCardRarity({ className, ...props }: ComponentProps<"p">) {
     return (
         <p
             className={cn(
@@ -13,10 +9,6 @@ export function WantedItemCardRarity({ tone, rarityName, className, children, ..
                 className,
             )}
             {...props}
-        >
-            {tone && <span aria-hidden className={cn("size-2 shrink-0 rounded-full", RARITY_COLORS[tone].dot)} />}
-            {rarityName && <span className={tone ? RARITY_COLORS[tone].text : undefined}>{rarityName}</span>}
-            {children}
-        </p>
+        />
     );
 }

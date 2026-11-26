@@ -1,10 +1,8 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { cn } from "@/shared/lib/cn";
 import { DropdownMenuRadioItem } from "@/shared/ui/components/dropdown-menu";
 
-type SortMenuOptionProps = ComponentProps<typeof DropdownMenuRadioItem> & { hint: ReactNode };
-
-export function SortMenuOption({ hint, className, children, ...props }: SortMenuOptionProps) {
+export function SortMenuOption({ className, ...props }: ComponentProps<typeof DropdownMenuRadioItem>) {
     return (
         <DropdownMenuRadioItem
             className={cn(
@@ -12,9 +10,6 @@ export function SortMenuOption({ hint, className, children, ...props }: SortMenu
                 className,
             )}
             {...props}
-        >
-            {children}
-            <span className="ml-auto font-mono text-xs text-faint">{hint}</span>
-        </DropdownMenuRadioItem>
+        />
     );
 }

@@ -3,6 +3,7 @@ import {
     SortMenu,
     SortMenuContent,
     SortMenuOption,
+    SortMenuOptionHint,
     SortMenuSeparator,
     SortMenuTrigger,
 } from "@/shared/ui/components/sort-menu";
@@ -31,9 +32,10 @@ export function WantedItemsSortMenu({ value, onValueChange }: WantedItemsSortMen
                     return (
                         <Fragment key={sort}>
                             {sort === FIRST_MAX_SORT && <SortMenuSeparator />}
-                            <SortMenuOption value={sort} hint={hint}>
+                            <SortMenuOption value={sort}>
                                 <Icon aria-hidden strokeWidth={ICON_STROKE} />
                                 {label}
+                                <SortMenuOptionHint>{hint}</SortMenuOptionHint>
                             </SortMenuOption>
                         </Fragment>
                     );

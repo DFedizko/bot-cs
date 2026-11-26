@@ -1,13 +1,14 @@
+import type { ReactNode } from "react";
 import type { MaxDescription } from "../../model/describe-max";
-import { MaxBadge, MaxBadgeNote, MaxBadgeValue } from "./max-badge";
+import { MaxBadge, MaxBadgeValue } from "./max-badge";
 
-type WantedItemMaxProps = { max: MaxDescription; withNote?: boolean };
+type WantedItemMaxProps = { max: MaxDescription; children?: ReactNode };
 
-export function WantedItemMax({ max, withNote = false }: WantedItemMaxProps) {
+export function WantedItemMax({ max, children }: WantedItemMaxProps) {
     return (
         <MaxBadge tone={max.tone} className="group-data-[enabled=false]/item:opacity-45">
             <MaxBadgeValue>{max.value}</MaxBadgeValue>
-            {withNote && max.relative && <MaxBadgeNote>vs rec.</MaxBadgeNote>}
+            {children}
         </MaxBadge>
     );
 }

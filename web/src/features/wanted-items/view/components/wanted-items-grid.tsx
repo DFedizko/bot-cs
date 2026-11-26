@@ -11,12 +11,16 @@ import {
     WantedItemCardMedia,
     WantedItemCardMeta,
     WantedItemCardRarity,
+    WantedItemCardRarityDot,
+    WantedItemCardRarityName,
     WantedItemCardTags,
     WantedItemCardTitle,
 } from "./wanted-item-card";
 import { WantedItemMax } from "./wanted-item-max";
 import { WantedItemSwitch } from "./wanted-item-switch";
 import { WantedItemTags } from "./wanted-item-tags";
+
+const NO_CATALOG = "No catalog data";
 
 type WantedItemsGridProps = { items: Array<WantedItemView>; onToggle: (name: string, enabled: boolean) => void };
 
@@ -35,8 +39,14 @@ export function WantedItemsGrid({ items, onToggle }: WantedItemsGridProps) {
                             {!item.enabled && <PausedMark className="absolute bottom-2 left-2" />}
                         </WantedItemCardMedia>
                         <WantedItemCardBody>
-                            <WantedItemCardRarity tone={item.tone} rarityName={item.rarityName}>
-                                {item.weapon ? <span className="truncate">· {item.weapon}</span> : "No catalog data"}
+                            <WantedItemCardRarity>
+                                {item.tone && <WantedItemCardRarityDot tone={item.tone} />}
+                                {item.tone && (
+                                    <WantedItemCardRarityName tone={item.tone}>
+                                        {item.rarityName}
+                                    </WantedItemCardRarityName>
+                                )}
+                                {item.weapon ? <span className="truncate">· {item.weapon}</span> : NO_CATALOG}
                             </WantedItemCardRarity>
                             <WantedItemCardTitle title={item.title}>{item.title}</WantedItemCardTitle>
                             <WantedItemCardMeta>{item.wear && <WearPill>{item.wear}</WearPill>}</WantedItemCardMeta>
