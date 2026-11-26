@@ -129,6 +129,15 @@ describe("AccountPage", () => {
     });
 
     it.each([
+        ["meta", "Meta+B"],
+        ["ctrl", "Control+B"],
+    ] as const)("Should announce the %s sidebar shortcut as %s", async (shortcutModifier, ariaShortcut) => {
+        await renderShell({ shortcutModifier });
+
+        expect(screen.getByRole("button", TOGGLE)).toHaveAttribute("aria-keyshortcuts", ariaShortcut);
+    });
+
+    it.each([
         ["meta", "⌘B"],
         ["ctrl", "Ctrl B"],
     ] as const)("Should show the %s sidebar shortcut as %s", async (shortcutModifier, hint) => {
