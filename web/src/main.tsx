@@ -5,6 +5,7 @@ import { createQueryClient } from "./shared/adapters/create-query-client";
 import { createAppRouter } from "./shared/adapters/create-app-router";
 import { readViteAppConfig } from "./shared/adapters/read-vite-app-config";
 import { HttpClientAxiosAdapter } from "./shared/adapters/axios/http-client.axios-adapter";
+import { startMockBotApi } from "./shared/adapters/start-mock-bot-api";
 import "./styles.css";
 
 const ROOT_ELEMENT_ID = "app";
@@ -13,6 +14,8 @@ const queryClient = createQueryClient();
 const router = createAppRouter({ queryClient });
 const httpClient = new HttpClientAxiosAdapter(readViteAppConfig().botApiUrl);
 const rootElement = document.getElementById(ROOT_ELEMENT_ID);
+
+await startMockBotApi();
 
 if (rootElement && !rootElement.innerHTML)
     createRoot(rootElement).render(
