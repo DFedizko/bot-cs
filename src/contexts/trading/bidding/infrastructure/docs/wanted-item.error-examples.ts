@@ -1,6 +1,8 @@
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { WANTED_ITEM_EXAMPLE } from "./wanted-item.example";
 
 const { accountId, name } = WANTED_ITEM_EXAMPLE;
+const TOO_LONG_NAME = "A".repeat(MarketHashName.MAX_LENGTH + 1);
 
 export const ALREADY_WANTED = {
     summary: "The account already wants the item",
@@ -32,9 +34,12 @@ export const BLANK_NAME = {
     value: { code: "EMPTY_STRING", message: "The value provided must not be empty" },
 };
 
-export const NAME_OUT_OF_BOUNDS = {
-    summary: "The item name is too short or too long",
-    value: { code: "DOMAIN_ERROR", message: 'The item name "A" must have between 2 and 100 characters' },
+export const NAME_TOO_LONG = {
+    summary: "The item name is longer than a market hash name can be",
+    value: {
+        code: "DOMAIN_ERROR",
+        message: `The market hash name "${TOO_LONG_NAME}" must have at most ${MarketHashName.MAX_LENGTH} characters`,
+    },
 };
 
 export const EMPTY_CHANGES = {

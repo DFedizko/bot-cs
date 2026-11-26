@@ -2,7 +2,7 @@ import type { Container } from "inversify";
 import { trackAuctionUpdateCommand } from "./__mocks__/track-auction-update.command.mock";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import type { OutbidEvent } from "@/contexts/trading/bidding/application/track-auction-update/outbid.event";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS } from "@/packages/external/di/packages.identifiers";
 import { ACCOUNT_REPOSITORY, TRACK_AUCTION_HANDLER } from "@/contexts/trading/bidding/external/di/bidding.identifiers";

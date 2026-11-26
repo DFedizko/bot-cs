@@ -2,8 +2,8 @@ import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/_
 import type { Container } from "inversify";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { RemoveWantedItemCommand } from "@/contexts/trading/bidding/application/remove-wanted-item/remove-wanted-item.command";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { testContainer } from "@/__builders__/test-container.builder";
 import {
@@ -33,7 +33,7 @@ describe("RemoveWantedItemCommandHandler", () => {
             .get(REMOVE_WANTED_ITEM_HANDLER)
             .handle(new RemoveWantedItemCommand({ accountId: ACCOUNT_ID, itemName: ITEM_NAME }));
 
-        const wantedItem = await wantedItemRepo.findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+        const wantedItem = await wantedItemRepo.findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem).toBe(undefined);
     });
 
@@ -46,7 +46,10 @@ describe("RemoveWantedItemCommandHandler", () => {
             .get(REMOVE_WANTED_ITEM_HANDLER)
             .handle(new RemoveWantedItemCommand({ accountId: ACCOUNT_ID, itemName: ITEM_NAME }));
 
-        const wantedItem = await wantedItemRepo.findByName(new AccountId(OTHER_ACCOUNT_ID), new ItemName(ITEM_NAME));
+        const wantedItem = await wantedItemRepo.findByName(
+            new AccountId(OTHER_ACCOUNT_ID),
+            new MarketHashName(ITEM_NAME),
+        );
         expect(wantedItem).toBeDefined();
     });
 

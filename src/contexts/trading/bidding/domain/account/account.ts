@@ -1,5 +1,5 @@
 import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
-import { AccountId } from "./account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { AccountBalance } from "./account-balance";
 import { Reservations, type ReservationsPrimitives } from "./reservations";
 import { InsufficientBalanceError } from "./errors/insufficient-balance.error";

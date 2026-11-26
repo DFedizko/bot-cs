@@ -9,7 +9,7 @@ import {
     WANTED_ITEM_REPOSITORY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { evaluateItemCommand } from "@/contexts/trading/bidding/application/evaluate-item/__mocks__/evaluate-item.command.mock";
 

@@ -7,8 +7,8 @@ import { ItemApprovedOffAuctionEvent } from "@/contexts/trading/bidding/applicat
 import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/application/evaluate-item/item-approved-in-auction.event";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import {
@@ -51,7 +51,7 @@ describe("EvaluateItemCommandHandler", () => {
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedInAuctionEvent]];
         expect(wantedItemRepoSpy).toHaveBeenCalledWith(
             new AccountId(ACCOUNT_ID),
-            new ItemName("M4A4 | Cyber Security (Field-Tested)"),
+            new MarketHashName("M4A4 | Cyber Security (Field-Tested)"),
         );
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.payload.auctionId).toBe(288767047);
@@ -78,7 +78,7 @@ describe("EvaluateItemCommandHandler", () => {
         const [[event]] = publishSpy.mock.calls[0] as [[ItemApprovedOffAuctionEvent]];
         expect(wantedItemRepoSpy).toHaveBeenCalledWith(
             new AccountId(ACCOUNT_ID),
-            new ItemName("M4A4 | Cyber Security (Field-Tested)"),
+            new MarketHashName("M4A4 | Cyber Security (Field-Tested)"),
         );
         expect(publishSpy).toHaveBeenCalledTimes(1);
         expect(event.name).toBe(ItemApprovedOffAuctionEvent.EVENT_NAME);
@@ -105,7 +105,7 @@ describe("EvaluateItemCommandHandler", () => {
 
         expect(wantedItemRepoSpy).toHaveBeenCalledWith(
             new AccountId(ACCOUNT_ID),
-            new ItemName("M4A4 | Cyber Security (Field-Tested)"),
+            new MarketHashName("M4A4 | Cyber Security (Field-Tested)"),
         );
         expect(loggerSpy).toHaveBeenCalledTimes(1);
         expect(loggerSpy).toHaveBeenCalledWith(`AboveRecommendedPercentage(-4.06%); IsWear(Battle-Scarred)`);

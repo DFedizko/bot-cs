@@ -1,6 +1,6 @@
 # shared-kernel
 
-The shared kernel holds **domain concepts that mean exactly the same thing in more than one bounded context**: the CS2 vocabulary every context speaks (wear names and their acronyms, item and sticker rarities, sticker types), the currencies the bot handles (`COIN`, `USD`, `BRL`) and fixed facts of the game (`CS_APP_ID`).
+The shared kernel holds **domain concepts that mean exactly the same thing in more than one bounded context**: the CS2 vocabulary every context speaks (wear names and their acronyms, item and sticker rarities, sticker types), the item's Steam market hash name (`MarketHashName`), the marketplace account id (`AccountId`), the currencies the bot handles (`COIN`, `USD`, `BRL`) and fixed facts of the game (`CS_APP_ID`).
 
 ## What belongs here
 

@@ -5,8 +5,8 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { itemPath, startWantedItemsApi } from "./__builders__/wanted-items-api.builder";
 
 const ACCOUNT_ID = 1;
@@ -43,7 +43,7 @@ describe("RemoveWantedItemHttpController", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem).toBeUndefined();
     });
 

@@ -1,17 +1,17 @@
 import { ValueObject } from "@/packages/building-blocks/value-object";
 import { AppId } from "./app-id";
 import { AssetId } from "./asset-id";
-import { MarketName } from "./market-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 
 export type ExpectedItemProps = { assetId: string; marketName: string; appId: number };
 
-type ExpectedItemValue = { assetId: AssetId; marketName: MarketName; appId: AppId };
+type ExpectedItemValue = { assetId: AssetId; marketName: MarketHashName; appId: AppId };
 
 export class ExpectedItem extends ValueObject<ExpectedItemValue> {
     static create(props: ExpectedItemProps): ExpectedItem {
         return new ExpectedItem({
             assetId: new AssetId(props.assetId),
-            marketName: new MarketName(props.marketName),
+            marketName: new MarketHashName(props.marketName),
             appId: new AppId(props.appId),
         });
     }

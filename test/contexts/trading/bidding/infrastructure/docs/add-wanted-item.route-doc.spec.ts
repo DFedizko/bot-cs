@@ -3,7 +3,7 @@ import {
     BLANK_NAME,
     INVALID_MAX_PERCENTAGE,
     INVALID_WEAR,
-    NAME_OUT_OF_BOUNDS,
+    NAME_TOO_LONG,
     NON_POSITIVE_MAX_VALUE,
 } from "@/contexts/trading/bidding/infrastructure/docs/wanted-item.error-examples";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
@@ -16,7 +16,7 @@ const unprocessableExamples = () =>
 describe("addWantedItemDoc", () => {
     it.each([
         ["a blank item name", BLANK_NAME],
-        ["an item name out of bounds", NAME_OUT_OF_BOUNDS],
+        ["an item name too long", NAME_TOO_LONG],
         ["an invalid wear", INVALID_WEAR],
         ["an invalid max percentage", INVALID_MAX_PERCENTAGE],
         ["a max value not above zero", NON_POSITIVE_MAX_VALUE],

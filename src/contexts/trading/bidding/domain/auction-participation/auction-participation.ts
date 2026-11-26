@@ -2,7 +2,7 @@ import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
 import { AuctionId } from "./auction-id";
 import { MaxBid } from "./max-bid";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
-import { AccountId } from "../account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 
 export class AuctionParticipation extends AggregateRoot<AuctionId> {
     private constructor(

@@ -5,6 +5,8 @@ import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted
 import { EmptyWantedItemChangesError } from "@/contexts/trading/bidding/domain/wanted-item/errors/empty-wanted-item-changes.error";
 import { DomainError } from "@/packages/error/domain-error";
 import { maxForPercentage } from "./__builders__/max-for.builder";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
+import { EmptyStringError } from "@/packages/error/empty-string.error";
 
 const ACCOUNT_ID = 1;
 const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
@@ -17,6 +19,11 @@ const MATCHING_CANDIDATE = {
     aboveRecommendedPercentage: "-3",
     wearName: WearName.FIELD_TESTED,
 };
+
+const LONGEST_NAME = "A".repeat(MarketHashName.MAX_LENGTH);
+const TOO_LONG_NAME = "A".repeat(MarketHashName.MAX_LENGTH + 1);
+
+const namedItem = (name: string) => buildWantedItem({ accountId: ACCOUNT_ID, name, maxFor: maxForPercentage("-3") });
 
 const asiimov = () =>
     buildWantedItem({
@@ -47,6 +54,22 @@ describe("Wanted Item", () => {
         const create = () => buildWantedItem({ accountId: -1, name: ITEM_NAME, maxFor: maxForPercentage("-3") });
 
         expect(create).toThrow(DomainError);
+    });
+    it("Should be identified by the trimmed market hash name of the item", () => {
+        const wantedItem = namedItem(` ${ITEM_NAME} `);
+
+        expect(wantedItem.getId()).toBe(ITEM_NAME);
+    });
+    it("Should accept any market hash name up to its max length", () => {
+        const wantedItem = namedItem(LONGEST_NAME);
+
+        expect(wantedItem.getName()).toBe(LONGEST_NAME);
+    });
+    it("Should reject a blank name", () => {
+        expect(() => namedItem("   ")).toThrow(EmptyStringError);
+    });
+    it("Should reject a name longer than a market hash name can be", () => {
+        expect(() => namedItem(TOO_LONG_NAME)).toThrow(DomainError);
     });
     it("Should reject an added-at time before the epoch", () => {
         const create = () =>

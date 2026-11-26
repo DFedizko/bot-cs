@@ -5,8 +5,8 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { enabledPath, startWantedItemsApi } from "./__builders__/wanted-items-api.builder";
 
 const ACCOUNT_ID = 1;
@@ -15,7 +15,7 @@ const ITEM_NAME = "AWP | Asiimov (Field-Tested)";
 const PATCH = "PATCH";
 
 const findAsiimov = (container: Container, accountId: number) =>
-    container.get(WANTED_ITEM_REPOSITORY).findByName(new AccountId(accountId), new ItemName(ITEM_NAME));
+    container.get(WANTED_ITEM_REPOSITORY).findByName(new AccountId(accountId), new MarketHashName(ITEM_NAME));
 
 let container: Container;
 

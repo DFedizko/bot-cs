@@ -4,8 +4,8 @@ import { AddWantedItemCommand } from "./add-wanted-item.command";
 import type { WantedItemRepository } from "../wanted-item.repository";
 import { WantedItem } from "../../domain/wanted-item/wanted-item";
 import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
-import { AccountId } from "../../domain/account/account-id";
-import { ItemName } from "../../domain/wanted-item/item-name";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 
 export class AddWantedItemCommandHandler implements CommandHandler<AddWantedItemCommand> {
     constructor(
@@ -32,7 +32,7 @@ export class AddWantedItemCommandHandler implements CommandHandler<AddWantedItem
     private async rejectExistingItem(wantedItem: WantedItem): Promise<void> {
         const accountId = wantedItem.getAccountId();
         const name = wantedItem.getName();
-        const existing = await this.wantedItemRepo.findByName(new AccountId(accountId), new ItemName(name));
+        const existing = await this.wantedItemRepo.findByName(new AccountId(accountId), new MarketHashName(name));
         if (existing) throw new WantedItemAlreadyExistsError(accountId, name);
     }
 }

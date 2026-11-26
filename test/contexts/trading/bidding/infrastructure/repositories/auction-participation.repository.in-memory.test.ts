@@ -1,5 +1,5 @@
 import type { Container } from "inversify";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
 import { AuctionParticipation } from "@/contexts/trading/bidding/domain/auction-participation/auction-participation";
 import { testContainer } from "@/__builders__/test-container.builder";
