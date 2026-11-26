@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Account } from "../model/account";
 import type { AccountSummary } from "../model/account-summary";
 import { summarizeAccount } from "../model/summarize-account";
-import { useAccountsService } from "../ports/accounts.service";
+import { useAccountsService } from "./ports/accounts.service";
 import { accountsQuery } from "./accounts-query";
 import { toQueryStatus } from "./query-status";
 import type { QueryStatus } from "./query-status";

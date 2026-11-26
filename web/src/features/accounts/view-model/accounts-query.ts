@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import type { AccountsService } from "../ports/accounts.service";
+import type { AccountsService } from "./ports/accounts.service";
 
 export const ACCOUNTS_QUERY_KEY = ["accounts"] as const;
 

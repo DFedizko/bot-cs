@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAccountsService } from "../ports/accounts.service";
+import { useAccountsService } from "./ports/accounts.service";
 import { accountsQuery } from "./accounts-query";
 import { toQueryStatus } from "./query-status";
 

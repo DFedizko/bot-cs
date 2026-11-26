@@ -9,7 +9,7 @@ import { WANTED_ITEMS_FILTERS } from "../model/wanted-items-filters";
 import type { WantedItemsCounts, WantedItemsPage } from "../model/wanted-items-page";
 import { WANTED_ITEMS_PAGE_SIZES } from "../model/wanted-items-page-sizes";
 import type { SearchChangeOptions, WantedItemsSearch } from "../model/wanted-items-search";
-import { useWantedItemsService } from "../ports/wanted-items.service";
+import { useWantedItemsService } from "./ports/wanted-items.service";
 import { useToggleWantedItem } from "./hooks/useToggleWantedItem";
 import { useWantedItemsSearchActions } from "./hooks/useWantedItemsSearchActions";
 import { wantedItemsQuery } from "./wanted-items-query";

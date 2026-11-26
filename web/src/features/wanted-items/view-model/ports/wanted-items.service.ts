@@ -1,6 +1,6 @@
 import { definePort } from "@/shared/lib/define-port";
-import type { WantedItemsPage } from "../model/wanted-items-page";
-import type { WantedItemsQuery } from "../model/wanted-items-query";
+import type { WantedItemsPage } from "../../model/wanted-items-page";
+import type { WantedItemsQuery } from "../../model/wanted-items-query";
 
 const WANTED_ITEMS_SERVICE_PORT = "WantedItemsService";
 

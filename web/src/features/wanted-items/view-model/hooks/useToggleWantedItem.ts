@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { QueryKey } from "@tanstack/react-query";
 import { setWantedItemEnabled } from "../../model/set-wanted-item-enabled";
 import type { WantedItemsPage } from "../../model/wanted-items-page";
-import { useWantedItemsService } from "../../ports/wanted-items.service";
+import { useWantedItemsService } from "../ports/wanted-items.service";
 import { wantedItemsKey } from "../wanted-items-query";
 
 type Toggle = { name: string; enabled: boolean };

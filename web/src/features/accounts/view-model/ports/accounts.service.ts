@@ -1,5 +1,5 @@
 import { definePort } from "@/shared/lib/define-port";
-import type { Account } from "../model/account";
+import type { Account } from "../../model/account";
 
 const ACCOUNTS_SERVICE_PORT = "AccountsService";
 

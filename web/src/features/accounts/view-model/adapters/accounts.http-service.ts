@@ -1,6 +1,6 @@
 import type { paths } from "@/shared/api/bot-api";
 import type { HttpClient } from "@/shared/lib/http/http-client";
-import type { Account } from "../model/account";
+import type { Account } from "../../model/account";
 import type { AccountsService } from "../ports/accounts.service";
 
 type AccountsBody = paths["/accounts"]["get"]["responses"][200]["content"]["application/json"];

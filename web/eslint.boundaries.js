@@ -3,6 +3,13 @@
 import boundaries from "eslint-plugin-boundaries";
 
 const FEATURE_LAYERS = ["model", "ports", "adapters", "view-model", "view"];
+const LAYER_FOLDERS = {
+    model: "model",
+    ports: "view-model/ports",
+    adapters: "view-model/adapters",
+    "view-model": "view-model",
+    view: "view",
+};
 const SAME_FEATURE = "{{ from.element.captured.feature }}";
 const ANY_MODULE = { origin: ["external", "core"] };
 const REACT_AND_TANSTACK = ["react", "react-dom", "@tanstack/*"];
@@ -23,7 +30,7 @@ const ALL_BUT_SHARED_ADAPTERS = [
 
 const featureLayer = (layer) => ({
     type: layer,
-    pattern: `src/features/*/${layer}`,
+    pattern: `src/features/*/${LAYER_FOLDERS[layer]}`,
     capture: ["feature"],
     partialMatch: false,
 });
@@ -70,9 +77,9 @@ const MODULE_POLICIES = [
         "Views, pages and shared UI receive server state through props: query in view-model/",
     ),
     ...disallowModules(
-        ALL_BUT_SHARED_ADAPTERS,
+        ALL_BUT_SHARED_ADAPTERS.filter((type) => type !== "adapters"),
         STATE_LIBRARIES,
-        "State libraries stay behind the Store port: implement it in shared/adapters/, read stores with useStoreState",
+        "State libraries stay behind store ports: implement a store in view-model/adapters/store/ or shared/adapters/, read it through its port's use<Name>Store hook",
     ),
     ...disallowModules(
         ALL_BUT_SHARED_ADAPTERS,

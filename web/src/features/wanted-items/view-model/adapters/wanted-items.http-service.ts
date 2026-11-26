@@ -1,9 +1,9 @@
 import type { paths } from "@/shared/api/bot-api";
 import type { HttpClient } from "@/shared/lib/http/http-client";
-import type { MaxFor } from "../model/max-for";
-import type { WantedItem } from "../model/wanted-item";
-import type { WantedItemsPage } from "../model/wanted-items-page";
-import type { WantedItemsQuery } from "../model/wanted-items-query";
+import type { MaxFor } from "../../model/max-for";
+import type { WantedItem } from "../../model/wanted-item";
+import type { WantedItemsPage } from "../../model/wanted-items-page";
+import type { WantedItemsQuery } from "../../model/wanted-items-query";
 import type { WantedItemsService } from "../ports/wanted-items.service";
 
 type ListOperation = paths["/accounts/{accountId}/wanted-items"]["get"];

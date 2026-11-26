@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import type { Query } from "@tanstack/react-query";
 import type { WantedItemsPage } from "../model/wanted-items-page";
 import type { WantedItemsQuery } from "../model/wanted-items-query";
-import type { WantedItemsService } from "../ports/wanted-items.service";
+import type { WantedItemsService } from "./ports/wanted-items.service";
 
 const ACCOUNT_KEY_INDEX = 1;
 
