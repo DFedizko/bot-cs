@@ -2,6 +2,7 @@ import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
+import { UNKNOWN_CURRENCY } from "@/contexts/trading/bidding/infrastructure/docs/currency.error-examples";
 import { itemsPath, startWantedItemsApi, type WantedItemsApi } from "./__builders__/wanted-items-api.builder";
 
 const ACCOUNT_ID = 1;
@@ -68,7 +69,10 @@ describe("ListWantedItemsHttpController", () => {
 
             const response = await api.send(GET, `${itemsPath(ACCOUNT_ID)}?currency=usd`);
 
-            expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+            expect({ ...response, body: JSON.parse(response.body) }).toEqual({
+                status: HttpStatus.BAD_REQUEST,
+                body: UNKNOWN_CURRENCY.value,
+            });
         });
     });
 });
