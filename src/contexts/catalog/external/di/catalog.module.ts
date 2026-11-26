@@ -22,6 +22,7 @@ import {
     CATALOG_ENTRY_VALIDATOR,
     CATALOG_ITEMS_DAO,
     CATALOG_LOADING_CONTROLLER,
+    CATALOG_LOOKUP,
     CATALOG_SOURCE,
     SEARCH_CATALOG_ITEMS_HANDLER,
 } from "./catalog.identifiers";
@@ -67,6 +68,7 @@ export class CatalogModule extends ContainerModule {
             )
             .inSingletonScope();
         bind(CATALOG_ITEMS_DAO).toService(CATALOG_CACHE);
+        bind(CATALOG_LOOKUP).toService(CATALOG_CACHE);
     }
 
     private static bindHandlers({ bind }: ContainerModuleLoadOptions): void {

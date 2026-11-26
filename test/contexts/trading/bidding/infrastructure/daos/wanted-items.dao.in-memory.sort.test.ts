@@ -22,6 +22,7 @@ import {
     VULCAN,
     wantedItemRecord,
 } from "./__mocks__/wanted-item-record.mock";
+import { CatalogDetailsGatewayFakeAdapter } from "../gateways/catalog-details.gateway.fake-adapter";
 
 const ONE_MINUTE_MS = 60_000;
 const KARAMBIT = "★ Karambit | Doppler (Factory New)";
@@ -57,13 +58,15 @@ const putMaxes = (container: Container) =>
     ]);
 
 const stubCatalog = (container: Container) =>
-    jest.spyOn(container.get(CATALOG_DETAILS_GATEWAY), "findByNames").mockResolvedValue(
-        new Map([
-            [ASIIMOV, catalogDetails({ rarity: Rarity.COVERT })],
-            [REDLINE, catalogDetails({ rarity: Rarity.CLASSIFIED })],
-            [KARAMBIT, catalogDetails({ rarity: Rarity.EXTRAORDINARY })],
-            [KNIFE, catalogDetails({ rarity: Rarity.CONTRABAND })],
-        ]),
+    container.rebind(CATALOG_DETAILS_GATEWAY).toConstantValue(
+        new CatalogDetailsGatewayFakeAdapter(
+            new Map([
+                [ASIIMOV, catalogDetails({ rarity: Rarity.COVERT })],
+                [REDLINE, catalogDetails({ rarity: Rarity.CLASSIFIED })],
+                [KARAMBIT, catalogDetails({ rarity: Rarity.EXTRAORDINARY })],
+                [KNIFE, catalogDetails({ rarity: Rarity.CONTRABAND })],
+            ]),
+        ),
     );
 
 let container: Container;
@@ -71,6 +74,7 @@ let container: Container;
 describe("WantedItemsDaoInMemory sort", () => {
     beforeEach(() => {
         container = testContainer();
+        container.rebind(CATALOG_DETAILS_GATEWAY).toConstantValue(new CatalogDetailsGatewayFakeAdapter());
     });
 
     it("Should list the newest items first by added time, descending", async () => {

@@ -5,6 +5,7 @@ import type { Validator } from "@/packages/infrastructure/validation/validator";
 import type { CatalogItemsDao } from "../../application/search-catalog-items/catalog-items.dao";
 import type { SearchCatalogItemsQuery } from "../../application/search-catalog-items/search-catalog-items.query";
 import type { SearchCatalogItemsResponse } from "../../application/search-catalog-items/search-catalog-items.response";
+import type { CatalogLookup } from "../../application/look-up-catalog-items/catalog-lookup";
 import type { CatalogSource } from "../../infrastructure/sources/catalog.source";
 import type { CatalogItemsDaoMemoryCache } from "../../infrastructure/daos/catalog-items.dao.memory-cache";
 import type { ByMykelSkinsHttp } from "../../infrastructure/http/bymykel/bymykel-skins.http";
@@ -21,6 +22,7 @@ export const CATALOG_ENTRY_VALIDATOR = identifier<Validator<ByMykelCatalogEntry>
 export const CATALOG_SOURCE = identifier<CatalogSource>("CatalogSource");
 export const CATALOG_CACHE = identifier<CatalogItemsDaoMemoryCache>("CatalogCache");
 export const CATALOG_ITEMS_DAO = identifier<CatalogItemsDao>("CatalogItemsDao");
+export const CATALOG_LOOKUP = identifier<CatalogLookup>("CatalogLookup");
 
 export const SEARCH_CATALOG_ITEMS_HANDLER =
     identifier<QueryHandler<SearchCatalogItemsQuery, SearchCatalogItemsResponse>>("SearchCatalogItemsHandler");

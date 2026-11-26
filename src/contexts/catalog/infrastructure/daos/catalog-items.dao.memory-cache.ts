@@ -4,6 +4,7 @@ import type {
     CatalogItemDto,
     SearchCatalogItemsResponse,
 } from "../../application/search-catalog-items/search-catalog-items.response";
+import type { CatalogLookup, CatalogLookupResponse } from "../../application/look-up-catalog-items/catalog-lookup";
 import { CatalogUnavailableError } from "../../application/search-catalog-items/catalog-unavailable.error";
 import type { CatalogRow, CatalogSource } from "../sources/catalog.source";
 
@@ -16,8 +17,9 @@ const FIRST = 0;
 const STARTS_FIRST = -1;
 const STARTS_LATER = 1;
 
-export class CatalogItemsDaoMemoryCache implements CatalogItemsDao {
+export class CatalogItemsDaoMemoryCache implements CatalogItemsDao, CatalogLookup {
     private rows?: readonly CatalogRow[];
+    private rowsByName?: ReadonlyMap<string, CatalogRow>;
     private loading?: Promise<void>;
 
     constructor(
@@ -39,14 +41,27 @@ export class CatalogItemsDaoMemoryCache implements CatalogItemsDao {
         return { items: found.map(({ row }) => this.mapToDto(row)) };
     }
 
+    async findByNames(names: readonly string[]): Promise<CatalogLookupResponse> {
+        const rowsByName = this.rowsByName;
+        if (!rowsByName) return this.findNothingWhileLoading();
+        const found = [...new Set(names)].map((name) => rowsByName.get(name)).filter((row) => row !== undefined);
+        return { items: found.map((row) => this.mapToDto(row)) };
+    }
+
     private async load(): Promise<void> {
         try {
             const rows = await this.source.load();
             this.rows = rows.map((row) => ({ ...row }));
+            this.rowsByName = new Map(this.rows.map((row) => [row.marketHashName, row]));
             this.logger.log(`Catalog loaded: ${rows.length} items`);
         } catch (error) {
             this.logger.log(`Could not load the catalog: ${error instanceof Error ? error.message : String(error)}`);
         }
+    }
+
+    private findNothingWhileLoading(): CatalogLookupResponse {
+        void this.warmUp();
+        return { items: [] };
     }
 
     private refuseWhileLoading(): never {
