@@ -5,7 +5,7 @@ import { HTTP_SERVER, LOGGER } from "@/packages/external/di/packages.identifiers
 import { CSG_WS_CLIENT } from "@/contexts/trading/shared/external/di/trading-shared.identifiers";
 
 const CAPTURED_EVENTS = ["trade_status", "deposit_failed", "auction_update", "deleted_item"];
-const DEPOSIT_FAILED = "deposit_failed";
+const PRODUCTION_LISTENERS = { trade_status: 1, deposit_failed: 0, auction_update: 0, deleted_item: 0 };
 
 const listenedEvents = async (nodeEnv: AppEnv["NODE_ENV"]): Promise<string[]> => {
     container = testContainer(nodeEnv);
@@ -14,6 +14,9 @@ const listenedEvents = async (nodeEnv: AppEnv["NODE_ENV"]): Promise<string[]> =>
     await new Bootstrap(container).run();
     return wsOnSpy.mock.calls.map(([event]) => event);
 };
+
+const countListeners = (events: string[]): Record<string, number> =>
+    Object.fromEntries(CAPTURED_EVENTS.map((event) => [event, events.filter((name) => name === event).length]));
 
 let container: Container;
 
@@ -31,6 +34,6 @@ describe("Bootstrap raw CSG capture", () => {
     it("Should not capture anything in production", async () => {
         const events = await listenedEvents("production");
 
-        expect(events).not.toContain(DEPOSIT_FAILED);
+        expect(countListeners(events)).toEqual(PRODUCTION_LISTENERS);
     });
 });
