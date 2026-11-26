@@ -3,7 +3,7 @@ import { SaleCancellationReason } from "@/contexts/shared-kernel/events/sale-can
 import { IntegrationEvent } from "@/packages/building-blocks/integration-event";
 import { saleOfferIdentity } from "./__mocks__/sale-events.mock";
 
-const cancelledOnCsg = () => ({ ...saleOfferIdentity(), reason: SaleCancellationReason.TRADE_CANCELED_ON_CSG });
+const cancelledOnCsg = () => ({ ...saleOfferIdentity(), reason: SaleCancellationReason.TRADE_CANCELLED_ON_CSG });
 
 describe("SaleOfferCancelledEvent", () => {
     it("Should be named sale_offer_cancelled", () => {

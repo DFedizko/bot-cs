@@ -5,7 +5,7 @@ describe("SaleCancellationReason", () => {
         const reasons = Object.values(SaleCancellationReason);
 
         expect(reasons).toEqual<string[]>([
-            "trade_canceled_on_csg",
+            "trade_cancelled_on_csg",
             "trade_timed_out_on_csg",
             "cancelled_by_unknown_party",
         ]);
