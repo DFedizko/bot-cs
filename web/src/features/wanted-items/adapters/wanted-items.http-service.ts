@@ -13,31 +13,31 @@ type EnabledBody = NonNullable<
     paths["/accounts/{accountId}/wanted-items/{name}/enabled"]["patch"]["requestBody"]
 >["content"]["application/json"];
 
-const wantedItemsPath = (accountId: string) => `/accounts/${encodeURIComponent(accountId)}/wanted-items`;
-
-const enabledPath = (accountId: string, name: string) =>
-    `${wantedItemsPath(accountId)}/${encodeURIComponent(name)}/enabled`;
-
-const toMaxFor = (maxFor: WantedItemBody["maxFor"]): MaxFor =>
-    maxFor.type === "percentage" ? { type: "percentage", value: Number(maxFor.value) } : maxFor;
-
-const toWantedItem = ({ name, maxFor, enabled, addedAt, catalog }: WantedItemBody): WantedItem => ({
-    name,
-    maxFor: toMaxFor(maxFor),
-    enabled,
-    addedAt,
-    catalog,
-});
-
 export class WantedItemsHttpService implements WantedItemsService {
     constructor(private readonly http: HttpClient) {}
 
     async list(accountId: string, query: WantedItemsQuery): Promise<WantedItemsPage> {
-        const body = await this.http.get<WantedItemsBody>(wantedItemsPath(accountId), { query: { ...query } });
-        return { ...body, items: body.items.map(toWantedItem) };
+        const body = await this.http.get<WantedItemsBody>(this.wantedItemsPath(accountId), { query: { ...query } });
+        return { ...body, items: body.items.map((item) => this.toWantedItem(item)) };
     }
 
     async setEnabled(accountId: string, name: string, enabled: boolean): Promise<void> {
-        await this.http.patch<void, EnabledBody>(enabledPath(accountId, name), { body: { enabled } });
+        await this.http.patch<void, EnabledBody>(this.enabledPath(accountId, name), { body: { enabled } });
+    }
+
+    private wantedItemsPath(accountId: string): string {
+        return `/accounts/${encodeURIComponent(accountId)}/wanted-items`;
+    }
+
+    private toWantedItem({ name, maxFor, enabled, addedAt, catalog }: WantedItemBody): WantedItem {
+        return { name, maxFor: this.toMaxFor(maxFor), enabled, addedAt, catalog };
+    }
+
+    private toMaxFor(maxFor: WantedItemBody["maxFor"]): MaxFor {
+        return maxFor.type === "percentage" ? { type: "percentage", value: Number(maxFor.value) } : maxFor;
+    }
+
+    private enabledPath(accountId: string, name: string): string {
+        return `${this.wantedItemsPath(accountId)}/${encodeURIComponent(name)}/enabled`;
     }
 }

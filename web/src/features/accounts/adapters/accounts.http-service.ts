@@ -8,13 +8,15 @@ type AccountBody = AccountsBody["items"][number];
 
 const ACCOUNTS_PATH = "/accounts";
 
-const toAccount = ({ id, name, balance }: AccountBody): Account => ({ id, name, balance: balance.total });
-
 export class AccountsHttpService implements AccountsService {
     constructor(private readonly http: HttpClient) {}
 
     async list(): Promise<Array<Account>> {
         const { items } = await this.http.get<AccountsBody>(ACCOUNTS_PATH);
-        return items.map(toAccount);
+        return items.map((item) => this.toAccount(item));
+    }
+
+    private toAccount({ id, name, balance }: AccountBody): Account {
+        return { id, name, balance: balance.total };
     }
 }
