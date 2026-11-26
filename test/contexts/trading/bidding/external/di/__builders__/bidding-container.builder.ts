@@ -3,6 +3,7 @@ import { PackagesModule } from "@/packages/external/di/packages.module";
 import { TradingSharedModule } from "@/contexts/trading/shared/external/di/trading-shared.module";
 import { BiddingModule } from "@/contexts/trading/bidding/external/di/bidding.module";
 import { BiddingHttpModule } from "@/contexts/trading/bidding/external/di/bidding-http.module";
+import { CatalogModule } from "@/contexts/catalog/external/di/catalog.module";
 import { BiddingDevModule } from "@/contexts/trading/bidding/external/di/bidding.dev-module";
 import { BiddingProdModule } from "@/contexts/trading/bidding/external/di/bidding.prod-module";
 
@@ -24,6 +25,7 @@ export const biddingContainer = (nodeEnv: BiddingEnv): Container => {
         new BiddingModule(),
         new BiddingHttpModule(),
         BIDDING_ENV_MODULES[nodeEnv](),
+        new CatalogModule(),
     );
     return container;
 };

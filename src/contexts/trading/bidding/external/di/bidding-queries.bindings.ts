@@ -5,7 +5,9 @@ import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-
 import type { AccountsDao } from "../../application/list-accounts/accounts.dao";
 import { ListWantedItemsQueryHandler } from "../../application/list-wanted-items/list-wanted-items.query-handler";
 import { ListAccountsQueryHandler } from "../../application/list-accounts/list-accounts.query-handler";
-import { CatalogDetailsGatewayEmptyAdapter } from "../../infrastructure/gateways/catalog-details.gateway.empty-adapter";
+import type { CatalogLookup } from "@/contexts/catalog";
+import { CATALOG_LOOKUP } from "@/contexts/catalog/external/di/catalog.identifiers";
+import { CatalogDetailsGatewayAdapter } from "../../infrastructure/gateways/catalog-details.gateway.adapter";
 import { WantedItemsDaoInMemory } from "../../infrastructure/daos/wanted-items.dao.in-memory";
 import { AccountsDaoInMemory } from "../../infrastructure/daos/accounts.dao.in-memory";
 import type { WantedItemStoreInMemory } from "../../infrastructure/stores/wanted-item.store.in-memory";
@@ -24,7 +26,7 @@ const QUERY_HANDLERS = [LIST_WANTED_ITEMS_HANDLER, LIST_ACCOUNTS_HANDLER];
 
 const bindDaos = ({ bind }: ContainerModuleLoadOptions): void => {
     bind(CATALOG_DETAILS_GATEWAY)
-        .toResolvedValue(() => new CatalogDetailsGatewayEmptyAdapter())
+        .toResolvedValue((lookup: CatalogLookup) => new CatalogDetailsGatewayAdapter(lookup), [CATALOG_LOOKUP])
         .inSingletonScope();
     bind(WANTED_ITEMS_DAO)
         .toResolvedValue(

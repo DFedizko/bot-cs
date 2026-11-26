@@ -8,7 +8,7 @@ import {
     LIST_WANTED_ITEMS_HANDLER,
     WANTED_ITEMS_DAO,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { CatalogDetailsGatewayEmptyAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/catalog-details.gateway.empty-adapter";
+import { CatalogDetailsGatewayAdapter } from "@/contexts/trading/bidding/infrastructure/gateways/catalog-details.gateway.adapter";
 import { WantedItemsDaoInMemory } from "@/contexts/trading/bidding/infrastructure/daos/wanted-items.dao.in-memory";
 import { AccountsDaoInMemory } from "@/contexts/trading/bidding/infrastructure/daos/accounts.dao.in-memory";
 import { ListWantedItemsQueryHandler } from "@/contexts/trading/bidding/application/list-wanted-items/list-wanted-items.query-handler";
@@ -17,7 +17,7 @@ import { ListAccountsQuery } from "@/contexts/trading/bidding/application/list-a
 
 const ENVIRONMENTS: ("development" | "production")[] = ["development", "production"];
 const BINDINGS = [
-    { identifier: CATALOG_DETAILS_GATEWAY, implementation: CatalogDetailsGatewayEmptyAdapter },
+    { identifier: CATALOG_DETAILS_GATEWAY, implementation: CatalogDetailsGatewayAdapter },
     { identifier: WANTED_ITEMS_DAO, implementation: WantedItemsDaoInMemory },
     { identifier: ACCOUNTS_DAO, implementation: AccountsDaoInMemory },
     { identifier: LIST_WANTED_ITEMS_HANDLER, implementation: ListWantedItemsQueryHandler },
