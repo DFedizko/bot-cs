@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { AccountsHttpService, AccountsServiceProvider } from "@/features/accounts";
+import { WantedItemsHttpService, WantedItemsServiceProvider } from "@/features/wanted-items";
 import { createMemoryStoreFactory } from "@/shared/adapters/create-memory-store-factory";
 import { readSidebarCookie } from "@/shared/adapters/read-sidebar-cookie";
 import { HttpClientProvider } from "@/shared/lib/http/http-client";
@@ -22,12 +23,17 @@ const sidebarPreference = { readOpen: () => readSidebarCookie() };
 
 export function AppProviders({ queryClient, httpClient, children }: AppProvidersProps) {
     const [accountsService] = useState(() => new AccountsHttpService(httpClient));
+    const [wantedItemsService] = useState(() => new WantedItemsHttpService(httpClient));
     return (
         <QueryClientProvider client={queryClient}>
             <HttpClientProvider value={httpClient}>
                 <StoreFactoryProvider value={storeFactory}>
                     <SidebarPreferenceProvider value={sidebarPreference}>
-                        <AccountsServiceProvider value={accountsService}>{children}</AccountsServiceProvider>
+                        <AccountsServiceProvider value={accountsService}>
+                            <WantedItemsServiceProvider value={wantedItemsService}>
+                                {children}
+                            </WantedItemsServiceProvider>
+                        </AccountsServiceProvider>
                     </SidebarPreferenceProvider>
                 </StoreFactoryProvider>
             </HttpClientProvider>
