@@ -8,7 +8,7 @@ import type { WantedItemsFilter } from "../model/wanted-items-filter";
 import { WANTED_ITEMS_FILTERS } from "../model/wanted-items-filters";
 import type { WantedItemsCounts, WantedItemsPage } from "../model/wanted-items-page";
 import { WANTED_ITEMS_PAGE_SIZES } from "../model/wanted-items-page-sizes";
-import type { WantedItemsSearch } from "../model/wanted-items-search";
+import type { SearchChangeOptions, WantedItemsSearch } from "../model/wanted-items-search";
 import { useWantedItemsService } from "../ports/wanted-items.service";
 import { useToggleWantedItem } from "./hooks/useToggleWantedItem";
 import { useWantedItemsSearchActions } from "./hooks/useWantedItemsSearchActions";
@@ -31,9 +31,10 @@ export type WantedItemsPagination = {
 type WantedItemsViewModelProps = {
     accountId: string;
     search: WantedItemsSearch;
-    onSearchChange: (search: WantedItemsSearch) => void;
+    onSearchChange: (search: WantedItemsSearch, options?: SearchChangeOptions) => void;
 };
 
+const REPLACE_ENTRY: SearchChangeOptions = { replace: true };
 const COUNT_BY_FILTER: Readonly<Record<WantedItemsFilter, keyof WantedItemsCounts>> = {
     all: "all",
     active: "enabled",
@@ -67,9 +68,10 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
     const pagination = toPagination(query.data, search);
     const actions = useWantedItemsSearchActions(search, onSearchChange);
     const isPastEnd = query.data !== undefined && search.page > pagination.pageCount;
+    const lastPage = pagination.pageCount;
     useEffect(() => {
-        if (isPastEnd) actions.selectPage(pagination.pageCount);
-    }, [isPastEnd, actions, pagination.pageCount]);
+        if (isPastEnd) onSearchChange({ ...search, page: lastPage }, REPLACE_ENTRY);
+    }, [isPastEnd, lastPage, search, onSearchChange]);
     const items: Array<WantedItemView> = query.data?.items.map(toWantedItemView) ?? [];
     return {
         status: toStatus(query.isPending, query.isError, query.data),

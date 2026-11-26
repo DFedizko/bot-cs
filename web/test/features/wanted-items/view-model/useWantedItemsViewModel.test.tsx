@@ -96,7 +96,7 @@ describe("useWantedItemsViewModel", () => {
 
         const { onSearchChange } = await renderReady({ page: 9 });
 
-        expect(onSearchChange).toHaveBeenCalledWith({ ...DEFAULT_WANTED_ITEMS_SEARCH, page: 3 });
+        expect(onSearchChange).toHaveBeenCalledWith({ ...DEFAULT_WANTED_ITEMS_SEARCH, page: 3 }, { replace: true });
     });
 
     it("Should pause an item at once, before the bot answers", async () => {
