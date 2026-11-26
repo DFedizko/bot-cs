@@ -44,7 +44,7 @@ The source of the design is the doop canvas **`CIuc1lzmCL`** ("bot-cs — Wanted
 - **Dark only.** There is no light theme.
 - **Tokens follow doop:** `tokens.css` mirrors `doop-tokens.json` (the canvas's `get_tokens` export), and a test keeps them equal. A new value goes on the canvas first.
 - **Components:** add shadcn components with `bunx --bun shadcn@latest add <name> -c web` (they land in `shared/ui/components/`), import `cn` from `@/shared/lib/cn`, and map their classes to the tokens until lint passes. Remove any `:root` or `.dark` block the CLI writes into `src/styles.css`.
-- **Command palettes** use shadcn's `Command` (built on [cmdk](https://github.com/dip/cmdk)); **loading placeholders** use shadcn's `Skeleton`, animated by the `skeleton-shimmer` utility (`effects.css`, doop's shimmer in token colours, still under reduced motion). No other component library.
+- **Command palettes** use shadcn's `Command` (built on [cmdk](https://github.com/dip/cmdk)); **loading placeholders** use shadcn's `Skeleton`, animated by the `skeleton-shimmer` utility (`effects.css`, doop's shimmer in token colours, static under reduced motion). No other component library.
 
 ## File naming
 
@@ -76,7 +76,7 @@ Use the `@/` alias (`@/shared/ui/components/button`, `@/features/wanted-items`) 
 
 ## Frontend code rules
 
-- **Dependency inversion at the boundaries.** View-models reach the API, the WebSocket, storage, time and shared client state only through ports (`definePort`) and stores (`Store<T>`), never through an adapter. Only the composition root (`src/app/`) binds concrete implementations; tests bind fakes.
+- **Dependency inversion at the boundaries.** View-models reach the API, the WebSocket, storage, time and shared client state only through ports (`definePort`) and store ports (`use<Name>Store`), never through an adapter. Only the composition root (`src/app/`) binds concrete implementations; tests bind fakes.
 - **Functions for UI, classes for infrastructure.** Components, hooks and view-models are functions; infrastructure may be classes.
 - **SOLID.** One responsibility per component, hook and function; small focused ports and props; extend by adding adapters, not by editing view-models.
 - **No generator functions** (`function*`, `yield`) unless there's no reasonable alternative.
