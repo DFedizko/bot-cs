@@ -11,3 +11,13 @@ export const BRL = Currency.create({
     decimals: 2,
     locale: "pt-BR",
 });
+export const EUR = Currency.create({
+    code: "EUR",
+    decimals: 2,
+    locale: "de-DE",
+});
+export const GBP = Currency.create({
+    code: "GBP",
+    decimals: 2,
+    locale: "en-GB",
+});
