@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { renderApp } from "@/__builders__/render-app";
 import { mockBotApiMock } from "@/__mocks__/mock-bot-api.mock";
 import { mswServer } from "@/__setup__/msw-server";
+import { createMockWantedItems } from "@/shared/adapters/mock-bot-api/create-mock-wanted-items";
 import { listWantedItemsFailureMock } from "@/features/wanted-items/__mocks__/list-wanted-items-failure.mock";
 import { findItems, itemNames, renderWantedItems } from "./__builders__/render-wanted-items";
 
@@ -13,6 +14,9 @@ const UNKNOWN_ITEM = "Sticker | Titan (Holo) | Katowice 2014";
 const FIRST_BY_NAME = "★ Karambit | Doppler (Battle-Scarred)";
 const PAGE_SIZE = 18;
 const SIZED_IMAGE = /\/256fx256f$/;
+const MAIN_ACCOUNT_ID = "6528461";
+const ALT_ACCOUNT_ID = "7104022";
+const SLOW_API_MS = 100;
 
 const itemCard = (name: string) => screen.getByRole("article", { name });
 
@@ -165,5 +169,20 @@ describe("WantedItemsPage", () => {
 
         expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load your wanted items");
         expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    });
+
+    it("Should never show the previous account's items while another account loads", async () => {
+        const user = userEvent.setup();
+        const [altItem] = createMockWantedItems().slice(-1);
+        const wantedItems = { [MAIN_ACCOUNT_ID]: createMockWantedItems(), [ALT_ACCOUNT_ID]: [altItem] };
+        mswServer.use(...mockBotApiMock({ wantedItems, latencyMs: SLOW_API_MS }));
+        renderApp(`/accounts/${MAIN_ACCOUNT_ID}/wanted-items`);
+        await user.click(await screen.findByRole("button", { name: /Switch account/ }));
+
+        await user.click(await screen.findByRole("menuitem", { name: /Empire alt/ }));
+
+        await screen.findByRole("button", { name: "Switch account, Empire alt" });
+        expect(screen.queryByRole("article", { name: NEWEST_ITEM })).not.toBeInTheDocument();
+        expect(await screen.findByRole("article", { name: altItem.name })).toBeInTheDocument();
     });
 });
