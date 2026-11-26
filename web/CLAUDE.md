@@ -44,6 +44,7 @@ The source of the design is the doop canvas **`CIuc1lzmCL`** ("bot-cs — Wanted
 - **Dark only.** There is no light theme.
 - **Tokens follow doop:** `tokens.css` mirrors `doop-tokens.json` (the canvas's `get_tokens` export), and a test keeps them equal. A new value goes on the canvas first.
 - **Components:** add shadcn components with `bunx --bun shadcn@latest add <name> -c web` (they land in `shared/ui/components/`), import `cn` from `@/shared/lib/cn`, and map their classes to the tokens until lint passes. Remove any `:root` or `.dark` block the CLI writes into `src/styles.css`.
+- **Command palettes** use shadcn's `Command` (built on [cmdk](https://github.com/dip/cmdk)); **loading placeholders** use shadcn's `Skeleton`, animated by the `skeleton-shimmer` utility (`effects.css`, doop's shimmer in token colours, still under reduced motion). No other component library.
 
 ## File naming
 
