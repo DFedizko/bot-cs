@@ -11,7 +11,7 @@ export function WantedItemsLoading({ count }: WantedItemsLoadingProps) {
         >
             {Array.from({ length: count }, (_, index) => (
                 <li key={index}>
-                    <Skeleton className="h-58 rounded-lg bg-surface-2" />
+                    <Skeleton className="h-58 rounded-lg" />
                 </li>
             ))}
         </ul>
