@@ -67,7 +67,7 @@ export function RemoveWantedItemDialog({
                                 Cancel
                             </Button>
                             {item.enabled && (
-                                <Button variant="secondary" onClick={onPause}>
+                                <Button variant="secondary" disabled={pending} onClick={onPause}>
                                     Pause instead
                                 </Button>
                             )}

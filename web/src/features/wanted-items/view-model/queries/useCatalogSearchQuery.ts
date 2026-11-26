@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCatalogService } from "../ports/catalog.service";
-
-const CATALOG_KEY = "catalog";
+import { catalogKey } from "./catalog-key";
 
 export function useCatalogSearchQuery(query: string | null) {
     const service = useCatalogService();
     return useQuery({
-        queryKey: [CATALOG_KEY, query],
+        queryKey: catalogKey(query),
         queryFn: () => service.search(query ?? ""),
         enabled: query !== null,
     });

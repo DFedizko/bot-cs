@@ -1,3 +1,4 @@
+import type { AddedWantedItem } from "../model/added-wanted-item";
 import { describePercentage } from "../model/describe-percentage";
 import { isAlreadyWanted } from "../model/is-already-wanted";
 import { toCatalogItemView } from "../model/to-catalog-item-view";
@@ -13,7 +14,7 @@ export function useAddWantedItemViewModel(accountId: string) {
     const changeDraft = useAddWantedItemStore((state) => state.changeDraft);
     const markSubmitted = useAddWantedItemStore((state) => state.markSubmitted);
     const stopAdding = useAddWantedItemStore((state) => state.stopAdding);
-    const { mutate, isPending, error, reset } = useAddWantedItemMutation(accountId);
+    const { mutate, isPending, error, data, reset } = useAddWantedItemMutation(accountId);
     const maxError = draft ? validateMax(draft) : null;
     const alreadyWanted = isAlreadyWanted(error);
 
@@ -22,10 +23,14 @@ export function useAddWantedItemViewModel(accountId: string) {
         stopAdding();
     };
 
+    const closeWhenPaused = ({ paused }: AddedWantedItem) => {
+        if (paused) close();
+    };
+
     const submit = () => {
         markSubmitted();
         if (!item || !draft || maxError) return;
-        mutate(toNewWantedItem(item.marketHashName, draft), { onSuccess: close });
+        mutate(toNewWantedItem(item.marketHashName, draft), { onSuccess: closeWhenPaused });
     };
 
     return {
@@ -35,6 +40,7 @@ export function useAddWantedItemViewModel(accountId: string) {
         percentageHint: describePercentage(draft?.percentage ?? ""),
         alreadyWanted,
         failed: error !== null && !alreadyWanted,
+        pauseFailed: data?.paused === false,
         pending: isPending,
         changeDraft,
         submit,

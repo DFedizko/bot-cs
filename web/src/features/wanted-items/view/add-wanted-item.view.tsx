@@ -15,8 +15,8 @@ const WEAR_HINT = "Prefilled from the item";
 type AddWantedItemFormProps = AddWantedItemViewModel & { maxInput: RefObject<HTMLInputElement | null> };
 
 function AddWantedItemForm({ maxInput, ...viewModel }: AddWantedItemFormProps) {
-    const { item, draft, maxError, percentageHint, alreadyWanted, failed, pending, changeDraft, submit, close } =
-        viewModel;
+    const { item, draft, maxError, percentageHint, alreadyWanted, failed, pauseFailed, pending } = viewModel;
+    const { changeDraft, submit, close } = viewModel;
     if (!item || !draft) return null;
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
@@ -54,13 +54,18 @@ function AddWantedItemForm({ maxInput, ...viewModel }: AddWantedItemFormProps) {
                     <WearField value={draft.wear} hint={WEAR_HINT} onChange={(wear) => changeDraft({ wear })} />
                 )}
                 <StartEnabledField value={draft.enabled} onChange={(enabled) => changeDraft({ enabled })} />
+                {pauseFailed && (
+                    <DialogFailure>
+                        Added, but the bot couldn't pause it: it is bidding now. Pause it from the list.
+                    </DialogFailure>
+                )}
                 {failed && <DialogFailure>The bot couldn't add this item. Try again in a moment.</DialogFailure>}
             </section>
             <footer className="flex justify-end gap-2 border-t border-line px-6 py-4">
                 <Button type="button" variant="ghost" onClick={close}>
                     Cancel
                 </Button>
-                <Button type="submit" disabled={pending || alreadyWanted}>
+                <Button type="submit" disabled={pending || alreadyWanted || pauseFailed}>
                     Add wanted item
                 </Button>
             </footer>

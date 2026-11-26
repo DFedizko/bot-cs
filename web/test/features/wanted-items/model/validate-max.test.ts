@@ -22,7 +22,10 @@ describe("validateMax", () => {
         expect(coins("10")).toBeNull();
     });
 
-    it.each(["", "0", "-5", "2.5", "ten"])("Should ask for whole coins above zero when the value is %p", (value) => {
-        expect(coins(value)).toBe("Enter a whole number of coins above zero");
-    });
+    it.each(["", "0", "-5", "2.5", "ten", "99999999999999999"])(
+        "Should ask for whole coins above zero when the value is %p",
+        (value) => {
+            expect(coins(value)).toBe("Enter a whole number of coins above zero");
+        },
+    );
 });

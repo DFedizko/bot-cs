@@ -3,6 +3,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mswServer } from "@/__setup__/msw-server";
 import { addWantedItemFailureMock } from "@/features/wanted-items/__mocks__/add-wanted-item-failure.mock";
+import { toggleWantedItemFailureMock } from "@/features/wanted-items/__mocks__/toggle-wanted-item-failure.mock";
 import { captureBodies } from "./__builders__/capture-bodies";
 import { openAddDialog } from "./__builders__/open-add-dialog";
 import { renderWantedItems } from "./__builders__/render-wanted-items";
@@ -118,5 +119,30 @@ describe("WantedItemsPage add", () => {
 
         await waitFor(() => expect(dialog).not.toBeInTheDocument());
         expect(posts).toEqual([]);
+    });
+
+    it("Should say the item was added but still bids when the bot can't pause it", async () => {
+        const user = userEvent.setup();
+        await renderWantedItems();
+        mswServer.use(toggleWantedItemFailureMock());
+        const dialog = await openAddDialog(user, "★ karambit", VANILLA_KARAMBIT);
+        await user.click(within(dialog).getByRole("switch", { name: "Start enabled" }));
+
+        await submit(user, dialog);
+
+        expect(await within(dialog).findByRole("alert")).toHaveTextContent("Added, but the bot couldn't pause it");
+        await waitFor(() => expect(screen.getByText(/Bot is bidding on/)).toHaveTextContent("42 of 48"));
+    });
+
+    it("Should refuse a max value too large to be a price", async () => {
+        const user = userEvent.setup();
+        await renderWantedItems();
+        const dialog = await openAddDialog(user, "★ karambit", VANILLA_KARAMBIT);
+        await user.click(within(dialog).getByRole("radio", { name: "Fixed value" }));
+        await user.type(within(dialog).getByRole("textbox", { name: "Max value" }), "99999999999999999");
+
+        await submit(user, dialog);
+
+        expect(within(dialog).getByText("Enter a whole number of coins above zero")).toBeInTheDocument();
     });
 });

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mswServer } from "@/__setup__/msw-server";
+import { removeWantedItemPendingMock } from "@/features/wanted-items/__mocks__/remove-wanted-item-pending.mock";
 import { removeWantedItemNotFoundMock } from "@/features/wanted-items/__mocks__/remove-wanted-item-not-found.mock";
 import { captureBodies } from "./__builders__/capture-bodies";
 import { renderWantedItems } from "./__builders__/render-wanted-items";
@@ -63,5 +64,16 @@ describe("WantedItemsPage remove", () => {
         await user.click(within(dialog).getByRole("button", { name: "Remove" }));
 
         expect(await within(dialog).findByRole("alert")).toHaveTextContent("The bot couldn't remove this item");
+    });
+
+    it("Should keep the item from being paused while it is being removed", async () => {
+        const user = userEvent.setup();
+        await renderWantedItems();
+        mswServer.use(removeWantedItemPendingMock());
+        const dialog = await openRemoveDialog(user);
+
+        await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+
+        expect(within(dialog).getByRole("button", { name: "Pause instead" })).toBeDisabled();
     });
 });

@@ -1,5 +1,7 @@
 import type { paths } from "@/shared/api/bot-api";
 import type { HttpClient } from "@/shared/lib/http/http-client";
+import { HttpError } from "@/shared/lib/http/http-error";
+import { AlreadyWantedError } from "../../model/already-wanted.error";
 import type { MaxFor } from "../../model/max-for";
 import type { NewWantedItem } from "../../model/new-wanted-item";
 import type { WantedItem } from "../../model/wanted-item";
@@ -18,6 +20,8 @@ type AddBody = NonNullable<
 >["content"]["application/json"];
 
 export class WantedItemsHttpService implements WantedItemsService {
+    static readonly CONFLICT = 409;
+
     constructor(private readonly http: HttpClient) {}
 
     async list(accountId: string, query: WantedItemsQuery): Promise<WantedItemsPage> {
@@ -30,11 +34,19 @@ export class WantedItemsHttpService implements WantedItemsService {
     }
 
     async add(accountId: string, { name, maxFor, criteria }: NewWantedItem): Promise<void> {
-        await this.http.post<void, AddBody>(this.wantedItemsPath(accountId), { body: { name, maxFor, criteria } });
+        await this.http
+            .post<void, AddBody>(this.wantedItemsPath(accountId), { body: { name, maxFor, criteria } })
+            .catch((error: unknown) => this.rejectAdd(error, name));
     }
 
     async remove(accountId: string, name: string): Promise<void> {
         await this.http.delete<void>(this.itemPath(accountId, name));
+    }
+
+    private rejectAdd(error: unknown, name: string): never {
+        if (error instanceof HttpError && error.status === WantedItemsHttpService.CONFLICT)
+            throw new AlreadyWantedError(name);
+        throw error;
     }
 
     private wantedItemsPath(accountId: string): string {

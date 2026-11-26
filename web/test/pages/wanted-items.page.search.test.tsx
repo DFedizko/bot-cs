@@ -62,6 +62,15 @@ describe("WantedItemsPage search", () => {
         expect(screen.getByText("Type at least 2 characters to search the catalog.")).toBeInTheDocument();
     });
 
+    it("Should count no results before searching", async () => {
+        const user = userEvent.setup();
+        await renderWantedItems();
+
+        await searchCatalog(user, "a");
+
+        expect(screen.queryByText(/results?$/)).not.toBeInTheDocument();
+    });
+
     it("Should open the add dialog for the item chosen with the keyboard", async () => {
         const user = userEvent.setup();
         await renderWantedItems();
