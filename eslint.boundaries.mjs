@@ -22,6 +22,7 @@ const ELEMENTS = [
     { type: "composition", pattern: "src/contexts/*/external/di", partialMatch: false },
     { type: "composition", pattern: "src/contexts/*/*/external/di", partialMatch: false },
     ...CONTEXT_LAYERS.flatMap(contextLayer),
+    { type: "integration-events", pattern: "src/contexts/shared-kernel/events", partialMatch: false },
     { type: "barrel", pattern: "src/contexts/*/*", capture: ["group", "context"], partialMatch: false },
     { type: "barrel", pattern: "src/contexts/*", capture: ["context"], partialMatch: false },
     ...["building-blocks", "domain-primitives", "error", "types", "application", "infrastructure", "external"].map(
@@ -41,7 +42,8 @@ const allowFrom = (type, allowed) => allowed.map((allow) => ({ from: { element: 
 const PACKAGES_CORE = ["packages-building-blocks", "packages-domain-primitives", "packages-error", "packages-types"];
 const PACKAGES_INNER = [...PACKAGES_CORE, "packages-application"];
 const PACKAGES_ADAPTERS = [...PACKAGES_INNER, "packages-infrastructure"];
-const LIBRARY_FREE = ["domain", "application", "infrastructure", "barrel", ...PACKAGES_ADAPTERS];
+const INTEGRATION_EVENTS = "integration-events";
+const LIBRARY_FREE = ["domain", "application", "infrastructure", "barrel", INTEGRATION_EVENTS, ...PACKAGES_ADAPTERS];
 const LIBRARY_FREE_EXCEPTIONS = ["packages-domain-primitives"];
 
 const MODULE_POLICIES = [
@@ -56,16 +58,23 @@ const MODULE_POLICIES = [
 const LOCAL_POLICIES = [
     { from: { element: { type: "composition" } }, allow: { to: { element: { types: "*" } } } },
     ...allowFrom("domain", [...ownOrKernel(["domain"]), toTypes(PACKAGES_CORE)]),
-    ...allowFrom("application", [...ownOrKernel(["domain", "application"]), toTypes([...PACKAGES_INNER, "barrel"])]),
+    ...allowFrom("application", [
+        ...ownOrKernel(["domain", "application"]),
+        toTypes([...PACKAGES_INNER, "barrel", INTEGRATION_EVENTS]),
+    ]),
     ...allowFrom("infrastructure", [
         ...ownOrKernel(["domain", "application", "infrastructure"]),
-        toTypes([...PACKAGES_ADAPTERS, "barrel"]),
+        toTypes([...PACKAGES_ADAPTERS, "barrel", INTEGRATION_EVENTS]),
     ]),
     ...allowFrom("external", [
         ...ownOrKernel(CONTEXT_LAYERS),
-        toTypes([...PACKAGES_ADAPTERS, "packages-external", "barrel"]),
+        toTypes([...PACKAGES_ADAPTERS, "packages-external", "barrel", INTEGRATION_EVENTS]),
     ]),
-    ...allowFrom("barrel", ownOrKernel(CONTEXT_LAYERS)),
+    ...allowFrom("barrel", [...ownOrKernel(CONTEXT_LAYERS), toTypes([INTEGRATION_EVENTS])]),
+    ...allowFrom(INTEGRATION_EVENTS, [
+        { to: { element: { types: ["domain"], captured: { context: "shared-kernel" } } } },
+        toTypes(PACKAGES_CORE),
+    ]),
     ...allowFrom("packages-building-blocks", [toTypes(PACKAGES_CORE)]),
     ...allowFrom("packages-domain-primitives", [toTypes(PACKAGES_CORE)]),
     ...allowFrom("packages-error", [toTypes(PACKAGES_CORE)]),
