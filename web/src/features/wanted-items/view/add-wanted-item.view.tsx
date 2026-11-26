@@ -23,7 +23,7 @@ function AddWantedItemForm({ maxInput, ...viewModel }: AddWantedItemFormProps) {
         submit();
     };
     return (
-        <form noValidate onSubmit={handleSubmit} className="flex flex-col">
+        <form noValidate onSubmit={handleSubmit} className="flex min-w-0 flex-col">
             <header className="flex flex-col gap-1 px-6 pt-6 pr-8">
                 <DialogTitle className="text-heading text-ink">Add wanted item</DialogTitle>
                 <DialogDescription className="text-helper text-muted">

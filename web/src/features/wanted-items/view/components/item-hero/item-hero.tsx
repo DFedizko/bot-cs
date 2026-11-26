@@ -20,7 +20,7 @@ type ItemHeroProps = {
 export function ItemHero({ tone, imageUrl, rarity, title, detail, size = "lg", children }: ItemHeroProps) {
     const large = size === "lg";
     return (
-        <section aria-label={title} className={cn("flex items-center", large ? "gap-4" : "gap-3")}>
+        <section aria-label={title} className={cn("flex min-w-0 items-center", large ? "gap-4" : "gap-3")}>
             <RarityTile
                 tone={tone}
                 className={cn("shrink-0 rounded-lg border border-line", large ? "h-32 w-40" : "h-16 w-22 rounded-md")}
@@ -38,7 +38,7 @@ export function ItemHero({ tone, imageUrl, rarity, title, detail, size = "lg", c
                         {rarity}
                     </span>
                 )}
-                <h3 className={cn("truncate text-ink", large ? "text-item-title" : "text-body font-semibold")}>
+                <h3 className={cn("text-ink", large ? "text-item-title" : "truncate text-body font-semibold")}>
                     {title}
                 </h3>
                 {detail && <span className="text-helper text-muted">{detail}</span>}
