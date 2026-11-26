@@ -11,7 +11,6 @@ export function renderApp(path: string) {
     const queryClient = new QueryClient({ defaultOptions: TEST_QUERY_OPTIONS });
     const httpClient = new HttpClientAxiosAdapter(TEST_BOT_API_URL);
     const history = createMemoryHistory({ initialEntries: [path] });
-    return render(
-        <App router={createAppRouter({ queryClient, history })} queryClient={queryClient} httpClient={httpClient} />,
-    );
+    const router = createAppRouter({ queryClient, history });
+    return { ...render(<App router={router} queryClient={queryClient} httpClient={httpClient} />), router };
 }

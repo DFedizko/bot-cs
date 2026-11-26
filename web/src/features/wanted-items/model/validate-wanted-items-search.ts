@@ -10,6 +10,8 @@ const VIEW_MODES: ReadonlyArray<WantedItemsViewMode> = ["grid", "list"];
 const SORTS = Object.keys(WANTED_ITEMS_SORT_OPTIONS) as Array<WantedItemsSort>;
 const FIRST_PAGE = 1;
 
+export type RawWantedItemsSearch = Partial<Record<keyof WantedItemsSearch, unknown>>;
+
 const pickOne = <TValue>(allowed: ReadonlyArray<TValue>, value: unknown, fallback: TValue): TValue =>
     allowed.find((candidate) => candidate === value) ?? fallback;
 
@@ -18,7 +20,7 @@ const readPage = (value: unknown) => {
     return Number.isInteger(page) && page >= FIRST_PAGE ? page : FIRST_PAGE;
 };
 
-export function validateWantedItemsSearch(search: Record<string, unknown>): WantedItemsSearch {
+export function validateWantedItemsSearch(search: RawWantedItemsSearch): WantedItemsSearch {
     return {
         filter: pickOne(WANTED_ITEMS_FILTERS, search.filter, DEFAULT_WANTED_ITEMS_SEARCH.filter),
         sort: pickOne(SORTS, search.sort, DEFAULT_WANTED_ITEMS_SEARCH.sort),
