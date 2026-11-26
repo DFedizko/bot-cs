@@ -3,6 +3,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mswServer } from "@/__setup__/msw-server";
 import { removeWantedItemPendingMock } from "@/features/wanted-items/__mocks__/remove-wanted-item-pending.mock";
+import { removeWantedItemFailureMock } from "@/features/wanted-items/__mocks__/remove-wanted-item-failure.mock";
 import { removeWantedItemNotFoundMock } from "@/features/wanted-items/__mocks__/remove-wanted-item-not-found.mock";
 import { captureBodies } from "./__builders__/capture-bodies";
 import { renderWantedItems } from "./__builders__/render-wanted-items";
@@ -58,7 +59,7 @@ describe("WantedItemsPage remove", () => {
     it("Should say when the bot can't remove the item", async () => {
         const user = userEvent.setup();
         await renderWantedItems();
-        mswServer.use(removeWantedItemNotFoundMock());
+        mswServer.use(removeWantedItemFailureMock());
         const dialog = await openRemoveDialog(user);
 
         await user.click(within(dialog).getByRole("button", { name: "Remove" }));
@@ -77,7 +78,7 @@ describe("WantedItemsPage remove", () => {
         expect(within(dialog).getByRole("button", { name: "Pause instead" })).toBeDisabled();
     });
 
-    it("Should refresh the list when the item was already gone", async () => {
+    it("Should close and refresh the list when the item was already gone", async () => {
         const user = userEvent.setup();
         await renderWantedItems();
         const gets = captureBodies("GET");
@@ -86,6 +87,7 @@ describe("WantedItemsPage remove", () => {
 
         await user.click(within(dialog).getByRole("button", { name: "Remove" }));
 
-        await waitFor(() => expect(gets.some(({ path }) => path.endsWith("/wanted-items"))).toBe(true));
+        await waitFor(() => expect(dialog).not.toBeInTheDocument());
+        expect(gets.some(({ path }) => path.endsWith("/wanted-items"))).toBe(true);
     });
 });

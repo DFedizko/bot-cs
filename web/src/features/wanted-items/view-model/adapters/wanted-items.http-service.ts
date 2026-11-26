@@ -21,6 +21,7 @@ type AddBody = NonNullable<
 
 export class WantedItemsHttpService implements WantedItemsService {
     static readonly CONFLICT = 409;
+    static readonly NOT_FOUND = 404;
 
     constructor(private readonly http: HttpClient) {}
 
@@ -40,12 +41,19 @@ export class WantedItemsHttpService implements WantedItemsService {
     }
 
     async remove(accountId: string, name: string): Promise<void> {
-        await this.http.delete<void>(this.itemPath(accountId, name));
+        await this.http
+            .delete<void>(this.itemPath(accountId, name))
+            .catch((error: unknown) => this.ignoreMissing(error));
     }
 
     private rejectAdd(error: unknown, name: string): never {
         if (error instanceof HttpError && error.status === WantedItemsHttpService.CONFLICT)
             throw new AlreadyWantedError(name);
+        throw error;
+    }
+
+    private ignoreMissing(error: unknown): void {
+        if (error instanceof HttpError && error.status === WantedItemsHttpService.NOT_FOUND) return;
         throw error;
     }
 
