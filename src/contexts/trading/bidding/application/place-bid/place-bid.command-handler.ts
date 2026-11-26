@@ -5,7 +5,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import { BidPlacedEvent } from "./bid-placed.event";
 import { BidRejectedError } from "./bid-rejected.error";
 import type { AccountRepository } from "../account.repository";
-import { AccountId } from "../../domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import type { Account } from "../../domain/account/account";
 import { AccountNotFoundError } from "../../domain/account/errors/account-not-found.error";
 import type { Logger } from "@/packages/application/logger";

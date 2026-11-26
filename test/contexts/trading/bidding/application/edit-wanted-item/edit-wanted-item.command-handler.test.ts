@@ -8,7 +8,7 @@ import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { EditWantedItemCommand } from "@/contexts/trading/bidding/application/edit-wanted-item/edit-wanted-item.command";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { EmptyWantedItemChangesError } from "@/contexts/trading/bidding/domain/wanted-item/errors/empty-wanted-item-changes.error";
 import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";

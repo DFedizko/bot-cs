@@ -3,7 +3,7 @@ import type { Container } from "inversify";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { WANTED_ITEM_REPOSITORY, WANTED_ITEM_STORE } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 
 const ACCOUNT_ID = 1;

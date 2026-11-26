@@ -42,7 +42,7 @@ import {
     AUCTION_PARTICIPATION_REPO,
     WANTED_ITEM_REPOSITORY,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
 import { AuctionId } from "@/contexts/trading/bidding/domain/auction-participation/auction-id";
 import { newItem } from "@/contexts/trading/bidding/infrastructure/controllers/__mocks__/new-item.mock";

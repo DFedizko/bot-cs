@@ -1,4 +1,4 @@
-import type { AccountId } from "../domain/account/account-id";
+import type { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import type { ItemName } from "../domain/wanted-item/item-name";
 import type { WantedItem } from "../domain/wanted-item/wanted-item";
 

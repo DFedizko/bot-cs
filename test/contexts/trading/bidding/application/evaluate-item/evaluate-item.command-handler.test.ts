@@ -8,7 +8,7 @@ import { ItemApprovedInAuctionEvent } from "@/contexts/trading/bidding/applicati
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { testContainer } from "@/__builders__/test-container.builder";
 import { EVENT_BUS, LOGGER } from "@/packages/external/di/packages.identifiers";
 import {

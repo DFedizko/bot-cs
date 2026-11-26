@@ -1,5 +1,5 @@
 import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
-import { AccountId } from "./account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { DeliveryFailureReason } from "./delivery-failure-reason";
 import { ALLOWED_TRANSITIONS, DeliveryStatus } from "./delivery-status";
 import { ExpectedItem, type ExpectedItemProps } from "./expected-item";

@@ -1,6 +1,6 @@
 import type { AccountRepository } from "../../application/account.repository";
 import type { Account } from "../../domain/account/account";
-import type { AccountId } from "../../domain/account/account-id";
+import type { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import type { Primitive } from "@/packages/building-blocks/value-object";
 import type { AccountRecord, AccountStoreInMemory } from "../stores/account.store.in-memory";
 

@@ -4,7 +4,7 @@ import { AddWantedItemCommand } from "./add-wanted-item.command";
 import type { WantedItemRepository } from "../wanted-item.repository";
 import { WantedItem } from "../../domain/wanted-item/wanted-item";
 import { WantedItemAlreadyExistsError } from "../../domain/wanted-item/errors/wanted-item-already-exists.error";
-import { AccountId } from "../../domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { ItemName } from "../../domain/wanted-item/item-name";
 
 export class AddWantedItemCommandHandler implements CommandHandler<AddWantedItemCommand> {

@@ -5,7 +5,7 @@ import type { ItemCriterion } from "./criteria/item-criterion";
 import type { MaxFor, MaxForPrimitives } from "./max-for/max-for";
 import { MaxForFactory } from "./max-for/max-for.factory";
 import { CriteriaFactory, type CriteriaPrimitives } from "./criteria/criteria.factory";
-import { AccountId } from "../account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { EmptyWantedItemChangesError } from "./errors/empty-wanted-item-changes.error";
 import { AddedAt } from "./added-at";
 

@@ -7,7 +7,7 @@ import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { AddWantedItemCommand } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
 import { NonPositiveMaxValueError } from "@/contexts/trading/bidding/domain/wanted-item/errors/non-positive-max-value.error";
 import { CLOCK, COMMAND_BUS } from "@/packages/external/di/packages.identifiers";

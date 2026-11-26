@@ -3,7 +3,7 @@ import type { Container } from "inversify";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { ToggleWantedItemCommand } from "@/contexts/trading/bidding/application/toggle-wanted-item/toggle-wanted-item.command";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { COMMAND_BUS } from "@/packages/external/di/packages.identifiers";

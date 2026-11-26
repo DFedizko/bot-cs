@@ -3,7 +3,7 @@ import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";

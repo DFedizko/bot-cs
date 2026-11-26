@@ -12,7 +12,7 @@ import { ItemWithdrawnEvent } from "@/contexts/trading/bidding/application/withd
 import { WithdrawalRejectedError } from "@/contexts/trading/bidding/application/withdraw-item/withdrawal-rejected.error";
 import { WithdrawalOutcomeUnknownError } from "@/contexts/trading/bidding/application/withdraw-item/withdrawal-outcome-unknown.error";
 import { Account } from "@/contexts/trading/bidding/domain/account/account";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { AccountNotFoundError } from "@/contexts/trading/bidding/domain/account/errors/account-not-found.error";
 import { ReservationAlreadyExistsError } from "@/contexts/trading/bidding/domain/account/errors/reservation-already-exists.error";
 import {

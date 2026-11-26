@@ -8,7 +8,7 @@ import {
     SYNC_ACCOUNT_HANDLER,
 } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
-import { AccountId } from "@/contexts/trading/bidding/domain/account/account-id";
+import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { CoinCent } from "@/contexts/trading/shared/domain/coin-cent";
 
 let container: Container;
