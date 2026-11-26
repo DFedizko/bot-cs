@@ -5,8 +5,7 @@ import { App } from "@/app/app";
 import { createAppRouter } from "@/shared/adapters/create-app-router";
 import { HttpClientAxiosAdapter } from "@/shared/adapters/axios/http-client.axios-adapter";
 import { TEST_BOT_API_URL } from "./test-bot-api-url";
-
-const TEST_QUERY_OPTIONS = { queries: { retry: false }, mutations: { retry: false } };
+import { TEST_QUERY_OPTIONS } from "./test-query-options";
 
 export function renderApp(path: string) {
     const queryClient = new QueryClient({ defaultOptions: TEST_QUERY_OPTIONS });
