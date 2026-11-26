@@ -74,7 +74,7 @@ export function AddWantedItemView(viewModel: AddWantedItemViewModel) {
         <Dialog open={viewModel.item !== null} onOpenChange={(open) => !open && viewModel.close()}>
             <DialogContent
                 initialFocus={maxInput}
-                className="max-h-screen max-w-lg gap-0 overflow-y-auto rounded-xl border border-line-strong bg-surface p-0 shadow-modal sm:max-w-lg"
+                className="max-h-screen w-11/12 max-w-lg gap-0 overflow-y-auto rounded-xl border border-line-strong bg-surface p-0 shadow-modal sm:max-w-lg"
             >
                 <AddWantedItemForm {...viewModel} maxInput={maxInput} />
             </DialogContent>

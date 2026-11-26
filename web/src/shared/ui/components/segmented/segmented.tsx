@@ -11,7 +11,7 @@ export function Segmented<TValue extends string>({ className, onValueChange, ...
     return (
         <RadioGroup
             onValueChange={(value) => onValueChange(value as TValue)}
-            className={cn("flex gap-1 rounded-md border border-line bg-surface-2 p-1", className)}
+            className={cn("flex flex-wrap gap-1 rounded-md border border-line bg-surface-2 p-1", className)}
             {...props}
         />
     );
