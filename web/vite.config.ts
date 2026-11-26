@@ -12,6 +12,9 @@ import tailwindcss from "@tailwindcss/vite";
 const MOCK_WORKER_PATH = "/mockServiceWorker.js";
 const MOCK_WORKER_SOURCE = "msw/mockServiceWorker.js";
 const JAVASCRIPT = "text/javascript";
+const BOT_PROXY_PATH = "/bot-api";
+const LOCAL_BOT_URL = "http://localhost:3000";
+const BOT_PROXY_PREFIX = /^\/bot-api/;
 
 const serveMockWorker = (): Plugin => ({
     name: "serve-mock-service-worker",
@@ -27,6 +30,15 @@ const serveMockWorker = (): Plugin => ({
 
 const config = defineConfig({
     resolve: { tsconfigPaths: true },
+    server: {
+        proxy: {
+            [BOT_PROXY_PATH]: {
+                target: LOCAL_BOT_URL,
+                changeOrigin: true,
+                rewrite: (path) => path.replace(BOT_PROXY_PREFIX, ""),
+            },
+        },
+    },
     plugins: [
         devtools(),
         tailwindcss(),
