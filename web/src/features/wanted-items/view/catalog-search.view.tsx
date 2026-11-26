@@ -10,6 +10,12 @@ import {
 
 const SEARCH_LABEL = "Search any item";
 const SEARCHING = "Searching CSGOEmpire…";
+const COUNTED_STATUSES = new Set(["results", "empty"]);
+
+function describeFooter({ status, resultCount }: CatalogSearchViewModel) {
+    if (status === "loading") return SEARCHING;
+    return COUNTED_STATUSES.has(status) ? resultCount : "";
+}
 
 function CatalogSearchContent({ status, groups, query, chooseItem }: CatalogSearchViewModel) {
     if (status === "idle")
@@ -31,7 +37,7 @@ function CatalogSearchContent({ status, groups, query, chooseItem }: CatalogSear
 }
 
 export function CatalogSearchView(viewModel: CatalogSearchViewModel) {
-    const { text, status, resultCount, changeText } = viewModel;
+    const { text, changeText } = viewModel;
     return (
         <Command label={SEARCH_LABEL} shouldFilter={false} className="p-0">
             <CommandInput placeholder={`${SEARCH_LABEL}…`} value={text} onValueChange={changeText}>
@@ -40,7 +46,7 @@ export function CatalogSearchView(viewModel: CatalogSearchViewModel) {
             <CommandList className="p-1">
                 <CatalogSearchContent {...viewModel} />
             </CommandList>
-            <CatalogSearchFooter>{status === "loading" ? SEARCHING : resultCount}</CatalogSearchFooter>
+            <CatalogSearchFooter>{describeFooter(viewModel)}</CatalogSearchFooter>
         </Command>
     );
 }

@@ -6,7 +6,7 @@ export function SegmentedItem({ className, ...props }: ComponentProps<typeof Rad
     return (
         <Radio.Root
             className={cn(
-                "flex-1 cursor-pointer rounded-sm p-2 text-center text-xs font-medium whitespace-nowrap text-muted outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-ring data-checked:bg-ground data-checked:text-ink data-checked:ring-1 data-checked:ring-line-strong",
+                "grow cursor-pointer rounded-sm px-1 py-2 text-center text-xs font-medium whitespace-nowrap text-muted outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-ring data-checked:bg-ground data-checked:text-ink data-checked:ring-1 data-checked:ring-line-strong",
                 className,
             )}
             {...props}
