@@ -3,6 +3,7 @@ import { AccountSwitcherScreen } from "@/features/accounts";
 import { AppContent } from "@/shared/ui/layouts/app-content";
 import { AppShellLayout } from "@/shared/ui/layouts/app-shell.layout";
 import { AppSidebar, AppSidebarFooter, AppSidebarHeader, AppSidebarNavigation } from "@/shared/ui/layouts/app-sidebar";
+import { AppCommandPalette } from "@/shared/ui/layouts/app-topbar";
 
 const ACCOUNT_ROUTE = "/accounts/$accountId";
 
@@ -20,6 +21,7 @@ export function AccountPage() {
             <AppContent>
                 <Outlet />
             </AppContent>
+            <AppCommandPalette />
         </AppShellLayout>
     );
 }

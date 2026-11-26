@@ -87,4 +87,22 @@ describe("AccountPage", () => {
 
         expect(screen.getByRole("button", { name: /Search any item/ })).toBeInTheDocument();
     });
+
+    it("Should open the item search from the top bar", async () => {
+        const user = userEvent.setup();
+        await renderShell();
+
+        await user.click(screen.getByRole("button", { name: /Search any item/ }));
+
+        expect(await screen.findByRole("dialog", { name: "Search any item" })).toBeInTheDocument();
+    });
+
+    it("Should open the item search with ⌘K", async () => {
+        const user = userEvent.setup();
+        await renderShell();
+
+        await user.keyboard("{Meta>}k{/Meta}");
+
+        expect(await screen.findByRole("combobox", { name: "Search any item" })).toHaveFocus();
+    });
 });
