@@ -212,6 +212,8 @@ Use an **application event** when the fact is **not a change of state of our agg
 
 An **integration event** is an event another bounded context may listen to. Export it from the context's barrel (`index.ts`, contracts only), so other contexts react to it without importing internals. Both domain and application events can be integration events. Keep their payloads to primitives so they can later cross a process boundary.
 
+When two contexts exchange events in both directions and neither may depend on the other (the sale flow between `trading/deposit` and `delivery`), the integration events live once in `shared-kernel/events/` instead of a barrel: contracts extending `IntegrationEvent`, with no behaviour ([ADR-0006](../adr/0006-selling-on-csgoempire.md)). Lint lets application, infrastructure and external layers import them, never a domain layer.
+
 When in doubt, ask: "Did one of our aggregates change state?" Yes → domain event, recorded by the aggregate. No → application event, built by the use case.
 
 ### Event listeners react and dispatch commands
