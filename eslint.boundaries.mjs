@@ -70,7 +70,7 @@ const LOCAL_POLICIES = [
         ...ownOrKernel(CONTEXT_LAYERS),
         toTypes([...PACKAGES_ADAPTERS, "packages-external", "barrel", INTEGRATION_EVENTS]),
     ]),
-    ...allowFrom("barrel", [...ownOrKernel(CONTEXT_LAYERS), toTypes([INTEGRATION_EVENTS])]),
+    ...allowFrom("barrel", ownOrKernel(CONTEXT_LAYERS)),
     ...allowFrom(INTEGRATION_EVENTS, [
         { to: { element: { types: ["domain"], captured: { context: "shared-kernel" } } } },
         toTypes(PACKAGES_CORE),
