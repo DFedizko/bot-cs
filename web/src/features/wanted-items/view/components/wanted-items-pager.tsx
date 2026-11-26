@@ -9,7 +9,7 @@ import {
     PaginationStep,
     PaginationSummary,
 } from "@/shared/ui/components/pagination";
-import type { WantedItemsPagination } from "../../view-model/useWantedItemsViewModel";
+import type { WantedItemsPagination } from "../../model/to-wanted-items-pagination";
 
 type WantedItemsPagerProps = {
     pagination: WantedItemsPagination;

@@ -3,12 +3,12 @@ import type { QueryKey } from "@tanstack/react-query";
 import { setWantedItemEnabled } from "../../model/set-wanted-item-enabled";
 import type { WantedItemsPage } from "../../model/wanted-items-page";
 import { useWantedItemsService } from "../ports/wanted-items.service";
-import { wantedItemsKey } from "../wanted-items-query";
+import { wantedItemsKey } from "../queries/wanted-items-key";
 
 type Toggle = { name: string; enabled: boolean };
 type Snapshot = Array<[QueryKey, WantedItemsPage | undefined]>;
 
-export function useToggleWantedItem(accountId: string) {
+export function useToggleWantedItemMutation(accountId: string) {
     const service = useWantedItemsService();
     const queryClient = useQueryClient();
     const queryKey = wantedItemsKey(accountId);
