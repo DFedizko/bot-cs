@@ -1,10 +1,14 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/shared/ui/components/button";
-import { Kbd } from "@/shared/ui/components/kbd";
+import type { ShortcutModifier } from "@/shared/lib/keyboard/shortcut-modifier";
+import { ShortcutKbd } from "@/shared/ui/components/shortcut-kbd";
 
 const PLUS_STROKE = 1.8;
+const SEARCH_KEY = "k";
 
-export function WantedItemsEmpty() {
+type WantedItemsEmptyProps = { shortcutModifier: ShortcutModifier };
+
+export function WantedItemsEmpty({ shortcutModifier }: WantedItemsEmptyProps) {
     return (
         <section
             aria-labelledby="wanted-items-empty"
@@ -28,7 +32,7 @@ export function WantedItemsEmpty() {
                 set.
             </p>
             <p className="mt-2 flex items-center gap-2 text-helper text-muted">
-                Press <Kbd>⌘K</Kbd> to add one
+                Press <ShortcutKbd modifier={shortcutModifier} shortcutKey={SEARCH_KEY} /> to add one
             </p>
             <Button variant="secondary">
                 <Plus data-icon="inline-start" aria-hidden />

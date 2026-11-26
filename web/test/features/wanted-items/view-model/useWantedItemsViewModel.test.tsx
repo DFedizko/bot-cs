@@ -130,6 +130,15 @@ describe("useWantedItemsViewModel", () => {
         await waitFor(() => expect(result.current.status).toBe("empty"));
     });
 
+    it("Should give the platform's shortcut modifier for the hints", async () => {
+        Object.defineProperty(navigator, "platform", { value: "MacIntel", configurable: true });
+        mswServer.use(...mockBotApiMock());
+
+        const { result } = await renderReady();
+
+        expect(result.current.shortcutModifier).toBe("meta");
+    });
+
     it("Should fail when the wanted items can't be loaded", async () => {
         mswServer.use(listWantedItemsFailureMock());
 

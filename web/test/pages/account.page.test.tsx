@@ -105,4 +105,24 @@ describe("AccountPage", () => {
 
         expect(await screen.findByRole("combobox", { name: "Search any item" })).toHaveFocus();
     });
+
+    it("Should open the item search with Ctrl K", async () => {
+        const user = userEvent.setup();
+        await renderShell();
+
+        await user.keyboard("{Control>}k{/Control}");
+
+        expect(await screen.findByRole("combobox", { name: "Search any item" })).toBeInTheDocument();
+    });
+
+    it.each([
+        ["MacIntel", "⌘K"],
+        ["Win32", "Ctrl K"],
+    ])("Should show the search shortcut for %s as %s", async (platform, hint) => {
+        Object.defineProperty(navigator, "platform", { value: platform, configurable: true });
+
+        await renderShell();
+
+        expect(screen.getByRole("button", { name: /Search any item/ })).toHaveTextContent(hint);
+    });
 });

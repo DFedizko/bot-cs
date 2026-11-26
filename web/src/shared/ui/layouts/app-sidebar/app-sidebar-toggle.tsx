@@ -1,13 +1,16 @@
 import { PanelLeft } from "lucide-react";
 import { useSidebar } from "@/shared/ui/components/sidebar";
-import { Kbd } from "@/shared/ui/components/kbd";
+import { useShortcutModifier } from "@/shared/hooks/useShortcutModifier";
+import { ShortcutKbd } from "@/shared/ui/components/shortcut-kbd";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/components/tooltip";
 import { APP_SIDEBAR_ID } from "./app-sidebar-id";
 
 const ICON_STROKE = 1.8;
+const SIDEBAR_KEY = "b";
 
 export function AppSidebarToggle() {
     const { open, toggleSidebar } = useSidebar();
+    const modifier = useShortcutModifier();
     return (
         <Tooltip>
             <TooltipTrigger
@@ -21,7 +24,7 @@ export function AppSidebarToggle() {
             </TooltipTrigger>
             <TooltipContent side="right">
                 {open ? "Collapse" : "Expand"}
-                <Kbd>⌘B</Kbd>
+                <ShortcutKbd modifier={modifier} shortcutKey={SIDEBAR_KEY} />
             </TooltipContent>
         </Tooltip>
     );

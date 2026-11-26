@@ -17,7 +17,7 @@ function WantedItemsContent(viewModel: WantedItemsViewModel) {
 
 export function WantedItemsView(viewModel: WantedItemsViewModel) {
     const { status, pagination, retry, selectPage, selectPageSize } = viewModel;
-    if (status === "empty") return <WantedItemsEmpty />;
+    if (status === "empty") return <WantedItemsEmpty shortcutModifier={viewModel.shortcutModifier} />;
     if (status === "error") return <WantedItemsError onRetry={retry} />;
     return (
         <section aria-label="Wanted items" className="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
