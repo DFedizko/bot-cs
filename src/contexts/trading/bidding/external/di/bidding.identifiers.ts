@@ -10,7 +10,11 @@ import type { AccountStoreInMemory } from "../../infrastructure/stores/account.s
 import type { AccountsDao } from "../../application/list-accounts/accounts.dao";
 import type { ListAccountsQuery } from "../../application/list-accounts/list-accounts.query";
 import type { ListAccountsResponse } from "../../application/list-accounts/list-accounts.response";
-import type { ListAccountsHttpController } from "../../infrastructure/controllers/list-accounts.http-controller";
+import type {
+    ListAccountsHttpController,
+    ListAccountsInput,
+} from "../../infrastructure/controllers/list-accounts.http-controller";
+import type { UserCurrencyConverter } from "../../infrastructure/currency/user-currency.converter";
 import type { WantedItemsDao } from "../../application/list-wanted-items/wanted-items.dao";
 import type { CatalogDetailsGateway } from "../../application/list-wanted-items/catalog-details.gateway";
 import type { ListWantedItemsQuery } from "../../application/list-wanted-items/list-wanted-items.query";
@@ -82,6 +86,8 @@ export const TOGGLE_WANTED_ITEM_CONTROLLER = identifier<ToggleWantedItemHttpCont
 );
 export const LIST_WANTED_ITEMS_CONTROLLER = identifier<ListWantedItemsHttpController>("ListWantedItemsHttpController");
 export const LIST_ACCOUNTS_CONTROLLER = identifier<ListAccountsHttpController>("ListAccountsHttpController");
+export const LIST_ACCOUNTS_VALIDATOR = identifier<Validator<ListAccountsInput>>("ListAccountsValidator");
+export const USER_CURRENCY_CONVERTER = identifier<UserCurrencyConverter>("UserCurrencyConverter");
 export const LIST_WANTED_ITEMS_VALIDATOR = identifier<Validator<ListWantedItemsInput>>("ListWantedItemsValidator");
 export const ADD_WANTED_ITEM_VALIDATOR = identifier<Validator<AddWantedItemInput>>("AddWantedItemValidator");
 export const EDIT_WANTED_ITEM_VALIDATOR = identifier<Validator<EditWantedItemInput>>("EditWantedItemValidator");

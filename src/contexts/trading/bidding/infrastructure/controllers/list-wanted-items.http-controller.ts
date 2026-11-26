@@ -9,9 +9,20 @@ import {
     ListWantedItemsQuery,
     type ListWantedItemsOptions,
 } from "../../application/list-wanted-items/list-wanted-items.query";
+import type {
+    ListWantedItemsResponse,
+    WantedItemDto,
+} from "../../application/list-wanted-items/list-wanted-items.response";
+import type { UserCurrency } from "../currency/user-currency";
+import type { UserCurrencyConverter } from "../currency/user-currency.converter";
 
 export type ListWantedItemsInput = ListWantedItemsOptions & {
     accountId: number;
+    currency?: UserCurrency;
+};
+
+export type ListWantedItemsBody = ListWantedItemsResponse & {
+    currency?: UserCurrency;
 };
 
 export class ListWantedItemsHttpController implements HttpController {
@@ -21,6 +32,7 @@ export class ListWantedItemsHttpController implements HttpController {
         httpServer: HttpServer,
         private readonly queryBus: QueryBus,
         private readonly validator: Validator<ListWantedItemsInput>,
+        private readonly converter: UserCurrencyConverter,
         doc: HttpRouteDoc,
     ) {
         httpServer.get(ListWantedItemsHttpController.PATH, (request) => this.handle(request), {
@@ -30,8 +42,18 @@ export class ListWantedItemsHttpController implements HttpController {
     }
 
     async handle(request: HttpRequest): Promise<HttpResponse> {
-        const input = this.validator.validate(HttpRequestInput.fromQuery(request));
-        const body = await this.queryBus.ask(new ListWantedItemsQuery(input));
+        const { currency, ...input } = this.validator.validate(HttpRequestInput.fromQuery(request));
+        const wantedItems = await this.queryBus.ask(new ListWantedItemsQuery(input));
+        const body = currency ? this.showIn(wantedItems, currency) : wantedItems;
         return { status: HttpStatus.OK, body };
+    }
+
+    private showIn(wantedItems: ListWantedItemsResponse, currency: UserCurrency): ListWantedItemsBody {
+        const items = wantedItems.items.map((item) => this.showItemIn(item, currency));
+        return { ...wantedItems, items, currency };
+    }
+
+    private showItemIn(item: WantedItemDto, currency: UserCurrency): WantedItemDto {
+        return { ...item, maxFor: this.converter.showMaxFor(item.maxFor, currency) };
     }
 }

@@ -19,6 +19,8 @@ const OTHER_ITEM_NAME = "AK-47 | Redline (Field-Tested)";
 const PATCH = "PATCH";
 const MINUS_FIVE_PERCENT = { type: "percentage", value: "-5" };
 const MAX_VALUE = { type: "value", value: 19400 };
+const TEN_POUNDS = { type: "value", value: 1000, currency: "GBP" };
+const TEN_POUNDS_IN_COIN_CENTS = 2126;
 
 let container: Container;
 
@@ -126,4 +128,27 @@ describe("EditWantedItemHttpController", () => {
             expect(response.status).toBe(HttpStatus.BAD_REQUEST);
         },
     );
+
+    describe("Currency", () => {
+        it("Should change the max value to one given in another currency, in coin cents", async () => {
+            const api = await startWantedItemsApi(container);
+
+            await api.send(PATCH, itemPath(ACCOUNT_ID, ITEM_NAME), { maxFor: TEN_POUNDS });
+
+            const wantedItem = await container
+                .get(WANTED_ITEM_REPOSITORY)
+                .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
+            expect(wantedItem?.getMaxFor()).toEqual(maxForValue(TEN_POUNDS_IN_COIN_CENTS));
+        });
+
+        it("Should answer bad request for a currency the bot doesn't take", async () => {
+            const api = await startWantedItemsApi(container);
+
+            const response = await api.send(PATCH, itemPath(ACCOUNT_ID, ITEM_NAME), {
+                maxFor: { ...TEN_POUNDS, currency: "JPY" },
+            });
+
+            expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+        });
+    });
 });

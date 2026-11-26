@@ -35,7 +35,13 @@ import {
 import { listWantedItemsSchema } from "../validation/list-wanted-items.schema";
 import { listWantedItemsResponseSchema } from "../validation/list-wanted-items.response-schema";
 import { listWantedItemsDoc } from "../../infrastructure/docs/list-wanted-items.route-doc";
-import { ListAccountsHttpController } from "../../infrastructure/controllers/list-accounts.http-controller";
+import {
+    ListAccountsHttpController,
+    type ListAccountsInput,
+} from "../../infrastructure/controllers/list-accounts.http-controller";
+import { listAccountsSchema } from "../validation/list-accounts.schema";
+import { UserCurrencyConverter } from "../../infrastructure/currency/user-currency.converter";
+import { CurrencyConverter } from "@/contexts/trading/shared/domain/currency-converter";
 import { listAccountsResponseSchema } from "../validation/list-accounts.response-schema";
 import { listAccountsDoc } from "../../infrastructure/docs/list-accounts.route-doc";
 import { WantedItemNotFoundError } from "../../domain/wanted-item/errors/wanted-item-not-found.error";
@@ -54,12 +60,14 @@ import {
     EDIT_WANTED_ITEM_CONTROLLER,
     EDIT_WANTED_ITEM_VALIDATOR,
     LIST_ACCOUNTS_CONTROLLER,
+    LIST_ACCOUNTS_VALIDATOR,
     LIST_WANTED_ITEMS_CONTROLLER,
     LIST_WANTED_ITEMS_VALIDATOR,
     REMOVE_WANTED_ITEM_CONTROLLER,
     REMOVE_WANTED_ITEM_VALIDATOR,
     TOGGLE_WANTED_ITEM_CONTROLLER,
     TOGGLE_WANTED_ITEM_VALIDATOR,
+    USER_CURRENCY_CONVERTER,
 } from "./bidding.identifiers";
 
 export class BiddingHttpModule extends ContainerModule {
@@ -89,6 +97,9 @@ export class BiddingHttpModule extends ContainerModule {
     }
 
     private static bindValidators({ bind }: ContainerModuleLoadOptions): void {
+        bind(USER_CURRENCY_CONVERTER)
+            .toResolvedValue(() => new UserCurrencyConverter(new CurrencyConverter()))
+            .inSingletonScope();
         bind(ADD_WANTED_ITEM_VALIDATOR)
             .toResolvedValue(() => new ValidatorZodAdapter(addWantedItemSchema))
             .inSingletonScope();
@@ -106,16 +117,24 @@ export class BiddingHttpModule extends ContainerModule {
     private static bindControllers({ bind }: ContainerModuleLoadOptions): void {
         bind(ADD_WANTED_ITEM_CONTROLLER)
             .toResolvedValue(
-                (http: HttpServer, bus: CommandBus, validator: Validator<AddWantedItemInput>) =>
-                    new AddWantedItemHttpController(http, bus, validator, addWantedItemDoc),
-                [HTTP_SERVER, COMMAND_BUS, ADD_WANTED_ITEM_VALIDATOR],
+                (
+                    http: HttpServer,
+                    bus: CommandBus,
+                    validator: Validator<AddWantedItemInput>,
+                    converter: UserCurrencyConverter,
+                ) => new AddWantedItemHttpController(http, bus, validator, converter, addWantedItemDoc),
+                [HTTP_SERVER, COMMAND_BUS, ADD_WANTED_ITEM_VALIDATOR, USER_CURRENCY_CONVERTER],
             )
             .inSingletonScope();
         bind(EDIT_WANTED_ITEM_CONTROLLER)
             .toResolvedValue(
-                (http: HttpServer, bus: CommandBus, validator: Validator<EditWantedItemInput>) =>
-                    new EditWantedItemHttpController(http, bus, validator, editWantedItemDoc),
-                [HTTP_SERVER, COMMAND_BUS, EDIT_WANTED_ITEM_VALIDATOR],
+                (
+                    http: HttpServer,
+                    bus: CommandBus,
+                    validator: Validator<EditWantedItemInput>,
+                    converter: UserCurrencyConverter,
+                ) => new EditWantedItemHttpController(http, bus, validator, converter, editWantedItemDoc),
+                [HTTP_SERVER, COMMAND_BUS, EDIT_WANTED_ITEM_VALIDATOR, USER_CURRENCY_CONVERTER],
             )
             .inSingletonScope();
         bind(REMOVE_WANTED_ITEM_CONTROLLER)
@@ -141,16 +160,41 @@ export class BiddingHttpModule extends ContainerModule {
             .inSingletonScope();
         bind(LIST_WANTED_ITEMS_CONTROLLER)
             .toResolvedValue(
-                (http: HttpServer, bus: QueryBus, validator: Validator<ListWantedItemsInput>) =>
-                    new ListWantedItemsHttpController(http, bus, validator, BiddingHttpModule.LIST_WANTED_ITEMS_DOC),
-                [HTTP_SERVER, QUERY_BUS, LIST_WANTED_ITEMS_VALIDATOR],
+                (
+                    http: HttpServer,
+                    bus: QueryBus,
+                    validator: Validator<ListWantedItemsInput>,
+                    converter: UserCurrencyConverter,
+                ) =>
+                    new ListWantedItemsHttpController(
+                        http,
+                        bus,
+                        validator,
+                        converter,
+                        BiddingHttpModule.LIST_WANTED_ITEMS_DOC,
+                    ),
+                [HTTP_SERVER, QUERY_BUS, LIST_WANTED_ITEMS_VALIDATOR, USER_CURRENCY_CONVERTER],
             )
+            .inSingletonScope();
+        bind(LIST_ACCOUNTS_VALIDATOR)
+            .toResolvedValue(() => new ValidatorZodAdapter(listAccountsSchema))
             .inSingletonScope();
         bind(LIST_ACCOUNTS_CONTROLLER)
             .toResolvedValue(
-                (http: HttpServer, bus: QueryBus) =>
-                    new ListAccountsHttpController(http, bus, BiddingHttpModule.LIST_ACCOUNTS_DOC),
-                [HTTP_SERVER, QUERY_BUS],
+                (
+                    http: HttpServer,
+                    bus: QueryBus,
+                    validator: Validator<ListAccountsInput>,
+                    converter: UserCurrencyConverter,
+                ) =>
+                    new ListAccountsHttpController(
+                        http,
+                        bus,
+                        validator,
+                        converter,
+                        BiddingHttpModule.LIST_ACCOUNTS_DOC,
+                    ),
+                [HTTP_SERVER, QUERY_BUS, LIST_ACCOUNTS_VALIDATOR, USER_CURRENCY_CONVERTER],
             )
             .inSingletonScope();
     }
