@@ -1,0 +1,1 @@
+export const MOCK_WEARS = ["Factory New", "Minimal Wear", "Field-Tested", "Well-Worn", "Battle-Scarred"] as const;

@@ -7,17 +7,19 @@ import { WantedItemsLoading } from "./components/wanted-items-loading";
 import { WantedItemsNoMatch } from "./components/wanted-items-no-match";
 import { WantedItemsPager } from "./components/wanted-items-pager";
 import { WantedItemsToolbar } from "./components/wanted-items-toolbar";
+import { RemoveWantedItemDialog } from "./components/remove-wanted-item-dialog";
 
 function WantedItemsContent(viewModel: WantedItemsViewModel) {
-    const { items, search, toggleItem } = viewModel;
+    const { items, search, toggleItem, startRemoving } = viewModel;
     if (items.length === 0) return <WantedItemsNoMatch />;
-    if (search.view === "list") return <WantedItemsList items={items} onToggle={toggleItem} />;
-    return <WantedItemsGrid items={items} onToggle={toggleItem} />;
+    if (search.view === "list") return <WantedItemsList items={items} onToggle={toggleItem} onRemove={startRemoving} />;
+    return <WantedItemsGrid items={items} onToggle={toggleItem} onRemove={startRemoving} />;
 }
 
 export function WantedItemsView(viewModel: WantedItemsViewModel) {
     const { status, pagination, retry, selectPage, selectPageSize } = viewModel;
-    if (status === "empty") return <WantedItemsEmpty shortcutModifier={viewModel.shortcutModifier} />;
+    if (status === "empty")
+        return <WantedItemsEmpty shortcutModifier={viewModel.shortcutModifier} onAdd={viewModel.openSearch} />;
     if (status === "error") return <WantedItemsError onRetry={retry} />;
     return (
         <section aria-label="Wanted items" className="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
@@ -30,6 +32,14 @@ export function WantedItemsView(viewModel: WantedItemsViewModel) {
             {status === "ready" && (
                 <WantedItemsPager pagination={pagination} onPageChange={selectPage} onPageSizeChange={selectPageSize} />
             )}
+            <RemoveWantedItemDialog
+                item={viewModel.removing}
+                pending={viewModel.removePending}
+                failed={viewModel.removeFailed}
+                onCancel={viewModel.cancelRemoving}
+                onRemove={viewModel.confirmRemoving}
+                onPause={viewModel.pauseInstead}
+            />
         </section>
     );
 }

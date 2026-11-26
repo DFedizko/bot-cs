@@ -6,3 +6,11 @@ export { validateWantedItemsSearch } from "./model/validate-wanted-items-search"
 export { DEFAULT_WANTED_ITEMS_SEARCH } from "./model/default-wanted-items-search";
 export type { SearchChangeOptions, WantedItemsSearch } from "./model/wanted-items-search";
 export type { RawWantedItemsSearch } from "./model/validate-wanted-items-search";
+export { AddWantedItemScreen } from "./add-wanted-item.screen";
+export { CatalogSearchScreen } from "./catalog-search.screen";
+export { CatalogHttpService } from "./view-model/adapters/catalog.http-service";
+export { CatalogServiceProvider } from "./view-model/ports/catalog.service";
+export { useAddWantedItemStore } from "./view-model/adapters/store/add-wanted-item.store";
+export { AddWantedItemStoreProvider } from "./view-model/ports/store/add-wanted-item.store";
+export { useRemoveWantedItemStore } from "./view-model/adapters/store/remove-wanted-item.store";
+export { RemoveWantedItemStoreProvider } from "./view-model/ports/store/remove-wanted-item.store";

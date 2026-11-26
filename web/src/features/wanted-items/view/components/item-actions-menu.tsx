@@ -9,9 +9,9 @@ import {
     DropdownMenuTrigger,
 } from "@/shared/ui/components/dropdown-menu";
 
-type ItemActionsMenuProps = { itemName: string; className?: string };
+type ItemActionsMenuProps = { itemName: string; onRemove: () => void; className?: string };
 
-export function ItemActionsMenu({ itemName, className }: ItemActionsMenuProps) {
+export function ItemActionsMenu({ itemName, onRemove, className }: ItemActionsMenuProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger
@@ -29,7 +29,7 @@ export function ItemActionsMenu({ itemName, className }: ItemActionsMenuProps) {
             <DropdownMenuContent align="end" className="w-auto min-w-40">
                 <DropdownMenuGroup>
                     <DropdownMenuItem disabled>Edit</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Remove</DropdownMenuItem>
+                    <DropdownMenuItem onClick={onRemove}>Remove</DropdownMenuItem>
                 </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>
