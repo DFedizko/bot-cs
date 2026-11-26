@@ -1,6 +1,7 @@
 import { PanelLeft } from "lucide-react";
 import { useSidebar } from "@/shared/ui/components/sidebar";
 import { useShortcutModifier } from "@/shared/hooks/useShortcutModifier";
+import { toAriaShortcut } from "@/shared/lib/keyboard/to-aria-shortcut";
 import { ShortcutKbd } from "@/shared/ui/components/shortcut-kbd";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/components/tooltip";
 import { APP_SIDEBAR_ID } from "./app-sidebar-id";
@@ -15,6 +16,7 @@ export function AppSidebarToggle() {
         <Tooltip>
             <TooltipTrigger
                 aria-label="Toggle sidebar"
+                aria-keyshortcuts={toAriaShortcut(modifier, SIDEBAR_KEY)}
                 aria-expanded={open}
                 aria-controls={APP_SIDEBAR_ID}
                 onClick={toggleSidebar}
@@ -24,7 +26,7 @@ export function AppSidebarToggle() {
             </TooltipTrigger>
             <TooltipContent side="right">
                 {open ? "Collapse" : "Expand"}
-                <ShortcutKbd modifier={modifier} shortcutKey={SIDEBAR_KEY} />
+                <ShortcutKbd aria-hidden modifier={modifier} shortcutKey={SIDEBAR_KEY} />
             </TooltipContent>
         </Tooltip>
     );

@@ -7,8 +7,8 @@ import { mockBotApiMock } from "@/__mocks__/mock-bot-api.mock";
 import { mswServer } from "@/__setup__/msw-server";
 
 const MAIN_PATH = "/accounts/6528461/wanted-items";
-const DISABLED_PAGES = ["Dashboard", "Auctions", "Deliveries", "Balance", "Settings"];
-const NAV_ITEMS = ["Dashboard", "Wanted items", "Auctions", "Deliveries", "Balance", "Settings"];
+const DISABLED_PAGES = ["Dashboard", "Auctions", "Trades", "Balance", "Settings"];
+const NAV_ITEMS = ["Dashboard", "Wanted items", "Auctions", "Trades", "Balance", "Settings"];
 const TOGGLE = { name: "Toggle sidebar" };
 
 const MAIN_NAVIGATION = { name: "Main" };
@@ -126,6 +126,24 @@ describe("AccountPage", () => {
 
         expect(search).toHaveTextContent(hint);
         expect(search).toHaveAttribute("aria-keyshortcuts", ariaShortcut);
+    });
+
+    it.each([
+        ["meta", "Meta+B"],
+        ["ctrl", "Control+B"],
+    ] as const)("Should announce the %s sidebar shortcut as %s", async (shortcutModifier, ariaShortcut) => {
+        await renderShell({ shortcutModifier });
+
+        expect(screen.getByRole("button", TOGGLE)).toHaveAttribute("aria-keyshortcuts", ariaShortcut);
+    });
+
+    it("Should keep the sidebar shortcut hint out of what screen readers announce", async () => {
+        const user = userEvent.setup();
+        await renderShell({ shortcutModifier: "meta" });
+
+        await user.hover(screen.getByRole("button", TOGGLE));
+
+        expect(isHiddenFromUser(await screen.findByText("⌘B"))).toBe(true);
     });
 
     it.each([
