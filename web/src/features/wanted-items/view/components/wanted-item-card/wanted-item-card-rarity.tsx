@@ -14,7 +14,7 @@ export function WantedItemCardRarity({ tone, rarityName, className, children, ..
             )}
             {...props}
         >
-            {tone && <span aria-hidden className={cn("rounded-xs size-2 shrink-0", RARITY_COLORS[tone].dot)} />}
+            {tone && <span aria-hidden className={cn("size-2 shrink-0 rounded-full", RARITY_COLORS[tone].dot)} />}
             {rarityName && <span className={tone ? RARITY_COLORS[tone].text : undefined}>{rarityName}</span>}
             {children}
         </p>
