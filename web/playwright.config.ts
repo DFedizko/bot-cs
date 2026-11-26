@@ -17,7 +17,7 @@ export default defineConfig({
     },
     projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
     webServer: {
-        command: "bun run dev",
+        command: "bun run dev:mocks",
         url: APP_URL,
         reuseExistingServer: !IS_CI,
     },
