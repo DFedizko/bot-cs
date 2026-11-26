@@ -29,6 +29,7 @@ Each folder's `CLAUDE.md` loads when you work in it, so this file holds only wha
 - **No magic numbers or strings.** Name them as `UPPER_SNAKE_CASE` constants, or static constants on the class they belong to.
 - **No `for` / `while` loops.** Use array methods (`map`, `filter`, `reduce`, `forEach`, `some`, `every`, `find`, `flatMap`, `Promise.all`).
 - **Extract logic into declarative functions or methods** named with an imperative verb (`mapToDto`, `rejectInvalidBid`). The callback of a loop method that does more than one trivial expression gets its own name.
+- **A helper used only by a class is a private method of that class**, never a non-exported function in the same file. Order class members top-down (Clean Code's stepdown rule): constructor, public methods, then each private method right below the method that first calls it.
 - **At most 300 lines per file**, one responsibility per file.
 - **Variables, functions, methods and constants have at most 30 characters.** Class, component and file names may be longer.
 - **Generated files** (route trees, type definitions, lockfiles) are exempt. Never edit them by hand; regenerate them with their tool, and gitignore them when the tool can rebuild them.
