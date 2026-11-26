@@ -13,7 +13,7 @@ export function AppSidebarHeader() {
                 <span className="grid size-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
                     <Crosshair aria-hidden className="size-5" strokeWidth={LOGO_STROKE} />
                 </span>
-                <AppSidebarLabel className="font-mono text-lg font-semibold group-data-[collapsible=icon]:hidden">
+                <AppSidebarLabel className="font-mono text-lg font-semibold group-data-[collapsible=icon]:absolute">
                     {APP_NAME}
                 </AppSidebarLabel>
             </span>

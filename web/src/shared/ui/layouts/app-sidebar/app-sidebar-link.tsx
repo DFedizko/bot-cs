@@ -1,13 +1,11 @@
-import type { LucideIcon } from "lucide-react";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { SidebarMenuButton, SidebarMenuItem } from "@/shared/ui/components/sidebar";
 import { APP_SIDEBAR_NAV_BUTTON } from "./app-sidebar-nav-button";
 import { AppSidebarLabel } from "./app-sidebar-label";
-import { NAV_ICON_STROKE } from "./nav-icon-stroke";
 
-type AppSidebarLinkProps = { icon: LucideIcon; label: string; isActive?: boolean; render: ReactElement };
+type AppSidebarLinkProps = { label: string; isActive?: boolean; render: ReactElement; children: ReactNode };
 
-export function AppSidebarLink({ icon: Icon, label, isActive = false, render }: AppSidebarLinkProps) {
+export function AppSidebarLink({ label, isActive = false, render, children }: AppSidebarLinkProps) {
     return (
         <SidebarMenuItem>
             <SidebarMenuButton
@@ -17,7 +15,7 @@ export function AppSidebarLink({ icon: Icon, label, isActive = false, render }: 
                 aria-label={label}
                 className={APP_SIDEBAR_NAV_BUTTON}
             >
-                <Icon aria-hidden strokeWidth={NAV_ICON_STROKE} />
+                {children}
                 <AppSidebarLabel>{label}</AppSidebarLabel>
             </SidebarMenuButton>
         </SidebarMenuItem>
