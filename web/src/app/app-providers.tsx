@@ -4,12 +4,12 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { AccountsHttpService, AccountsServiceProvider } from "@/features/accounts";
 import { WantedItemsHttpService, WantedItemsServiceProvider } from "@/features/wanted-items";
-import { createMemoryStoreFactory } from "@/shared/adapters/create-memory-store-factory";
 import { readSidebarCookie } from "@/shared/adapters/read-sidebar-cookie";
+import { useFailedImagesStore } from "@/shared/adapters/store/failed-images.store";
 import { HttpClientProvider } from "@/shared/lib/http/http-client";
 import type { HttpClient } from "@/shared/lib/http/http-client";
 import { SidebarPreferenceProvider } from "@/shared/lib/sidebar/sidebar-preference";
-import { StoreFactoryProvider } from "@/shared/lib/store/store-factory";
+import { FailedImagesStoreProvider } from "@/shared/lib/store/failed-images.store";
 
 export type AppDependencies = {
     queryClient: QueryClient;
@@ -18,7 +18,6 @@ export type AppDependencies = {
 
 type AppProvidersProps = AppDependencies & { children: ReactNode };
 
-const storeFactory = createMemoryStoreFactory();
 const sidebarPreference = { readOpen: () => readSidebarCookie() };
 
 export function AppProviders({ queryClient, httpClient, children }: AppProvidersProps) {
@@ -27,7 +26,7 @@ export function AppProviders({ queryClient, httpClient, children }: AppProviders
     return (
         <QueryClientProvider client={queryClient}>
             <HttpClientProvider value={httpClient}>
-                <StoreFactoryProvider value={storeFactory}>
+                <FailedImagesStoreProvider value={useFailedImagesStore}>
                     <SidebarPreferenceProvider value={sidebarPreference}>
                         <AccountsServiceProvider value={accountsService}>
                             <WantedItemsServiceProvider value={wantedItemsService}>
@@ -35,7 +34,7 @@ export function AppProviders({ queryClient, httpClient, children }: AppProviders
                             </WantedItemsServiceProvider>
                         </AccountsServiceProvider>
                     </SidebarPreferenceProvider>
-                </StoreFactoryProvider>
+                </FailedImagesStoreProvider>
             </HttpClientProvider>
         </QueryClientProvider>
     );

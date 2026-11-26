@@ -8,11 +8,10 @@ import { TEST_BOT_API_URL } from "@/__builders__/test-bot-api-url";
 import { AppProviders } from "@/app/app-providers";
 import { HttpClientAxiosAdapter } from "@/shared/adapters/axios/http-client.axios-adapter";
 import { useHttpClient } from "@/shared/lib/http/http-client";
-import { useStoreFactory } from "@/shared/lib/store/store-factory";
+import { useFailedImagesStore } from "@/shared/lib/store/failed-images.store";
 
 const HEALTH_PATH = "/health";
 const HEALTH = { status: "ok" };
-const CLOSED = { open: false };
 
 const createWrapper = () => {
     const queryClient = new QueryClient();
@@ -34,11 +33,11 @@ describe("AppProviders", () => {
         expect(health).toEqual(HEALTH);
     });
 
-    it("Should bind a store factory that creates a store per call", () => {
-        const { result } = renderHook(() => useStoreFactory(), { wrapper: createWrapper() });
+    it("Should bind the store of images that failed to load", () => {
+        const { result } = renderHook(() => useFailedImagesStore((state) => state.failedImages), {
+            wrapper: createWrapper(),
+        });
 
-        const store = result.current(CLOSED);
-
-        expect(store.getState()).toEqual(CLOSED);
+        expect(result.current).toEqual([]);
     });
 });
