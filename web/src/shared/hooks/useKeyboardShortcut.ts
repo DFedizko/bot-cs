@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useKeyboardShortcuts } from "@/shared/lib/keyboard/keyboard-shortcuts";
 
 export function useKeyboardShortcut(key: string, onPress: () => void) {
     const shortcuts = useKeyboardShortcuts();
-    useEffect(() => shortcuts.listen(key, onPress), [shortcuts, key, onPress]);
+    const press = useEffectEvent(onPress);
+    useEffect(() => shortcuts.listen(key, () => press()), [shortcuts, key]);
 }
