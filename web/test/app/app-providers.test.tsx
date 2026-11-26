@@ -8,6 +8,7 @@ import { TEST_BOT_API_URL } from "@/__builders__/test-bot-api-url";
 import { AppProviders } from "@/app/app-providers";
 import { HttpClientAxiosAdapter } from "@/shared/adapters/axios/http-client.axios-adapter";
 import { useHttpClient } from "@/shared/lib/http/http-client";
+import { useFailedImagesStore } from "@/shared/lib/store/failed-images.store";
 
 const HEALTH_PATH = "/health";
 const HEALTH = { status: "ok" };
@@ -30,5 +31,13 @@ describe("AppProviders", () => {
         const health = await result.current.get(HEALTH_PATH);
 
         expect(health).toEqual(HEALTH);
+    });
+
+    it("Should bind the store of images that failed to load", () => {
+        const { result } = renderHook(() => useFailedImagesStore((state) => state.failedImages), {
+            wrapper: createWrapper(),
+        });
+
+        expect(result.current).toEqual([]);
     });
 });

@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-const APP_NAME = "bot-cs";
-
-test("Should open the home page", async ({ page }) => {
+test("Should open the first account's wanted items", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: APP_NAME })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Wanted items" })).toBeVisible();
+    await expect(page).toHaveURL(/\/accounts\/6528461\/wanted-items$/);
 });

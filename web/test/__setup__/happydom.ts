@@ -1,7 +1,9 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
-const { fetch, Request, Response, Headers } = globalThis;
+const TEST_APP_URL = "http://localhost:5173";
 
-GlobalRegistrator.register();
+const { fetch, Request, Response, Headers, AbortController, AbortSignal } = globalThis;
 
-Object.assign(globalThis, { fetch, Request, Response, Headers });
+GlobalRegistrator.register({ url: TEST_APP_URL });
+
+Object.assign(globalThis, { fetch, Request, Response, Headers, AbortController, AbortSignal });

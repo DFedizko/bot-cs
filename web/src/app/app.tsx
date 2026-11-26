@@ -8,9 +8,9 @@ type AppProps = AppDependencies & {
     router: ReturnType<typeof createAppRouter>;
 };
 
-export function App({ router, queryClient, httpClient }: AppProps) {
+export function App({ router, ...dependencies }: AppProps) {
     return (
-        <AppProviders queryClient={queryClient} httpClient={httpClient}>
+        <AppProviders {...dependencies}>
             <RouterProvider router={router} />
             <Devtools router={router} />
         </AppProviders>

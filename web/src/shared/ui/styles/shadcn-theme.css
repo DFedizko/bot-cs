@@ -67,3 +67,22 @@
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
 }
+
+@theme inline {
+    --width-sidebar: var(--sidebar-width);
+    --width-sidebar-icon: var(--sidebar-width-icon);
+    --width-anchor: var(--anchor-width);
+    --min-width-anchor: var(--anchor-width);
+    --max-height-available: var(--available-height);
+    --max-width-skeleton: var(--skeleton-width);
+    --transform-origin-popup: var(--transform-origin);
+    --transition-property-width: width;
+    --transition-property-size: width, height, padding;
+    --transition-property-inset: left, right, width;
+    --transition-property-fade: margin, opacity;
+}
+
+@theme inline {
+    --width-sidebar-icon-inset: calc(var(--sidebar-width-icon) + var(--spacing-4));
+    --width-sidebar-icon-framed: calc(var(--sidebar-width-icon) + var(--spacing-4) + 2px);
+}

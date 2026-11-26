@@ -25,6 +25,26 @@ export default [
         },
     },
     {
+        files: [
+            "src/features/*/view/**/*.{ts,tsx}",
+            "src/features/*/view-model/**/*.{ts,tsx}",
+            "src/pages/**/*.{ts,tsx}",
+            "src/routes/**/*.{ts,tsx}",
+            "src/shared/ui/layouts/**/*.{ts,tsx}",
+            "src/shared/hooks/**/*.{ts,tsx}",
+        ],
+        ignores: ["src/features/*/view-model/adapters/**", "src/shared/hooks/use-mobile.ts"],
+        rules: {
+            "no-restricted-globals": [
+                "error",
+                ...["window", "document", "navigator"].map((name) => ({
+                    name,
+                    message: "Reach the browser through a port with its adapter in shared/adapters/. See web/CLAUDE.md",
+                })),
+            ],
+        },
+    },
+    {
         ignores: [
             "dist/",
             "src/routeTree.gen.ts",

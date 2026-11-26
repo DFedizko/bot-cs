@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const APP_PORT = 5173;
+const APP_PORT = 5174;
 const APP_URL = `http://localhost:${APP_PORT}`;
 const IS_CI = Boolean(process.env.CI);
 
@@ -17,7 +17,7 @@ export default defineConfig({
     },
     projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
     webServer: {
-        command: "bun run dev",
+        command: `bun run api:types && vite dev --mode mocks --port ${APP_PORT} --strictPort`,
         url: APP_URL,
         reuseExistingServer: !IS_CI,
     },

@@ -1,18 +1,29 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
+import { createFakeShortcutPlatform } from "@/__fakes__/create-fake-shortcut-platform";
 import { App } from "@/app/app";
 import { createAppRouter } from "@/shared/adapters/create-app-router";
 import { HttpClientAxiosAdapter } from "@/shared/adapters/axios/http-client.axios-adapter";
+import type { TestAppOptions } from "./test-app-options";
 import { TEST_BOT_API_URL } from "./test-bot-api-url";
+import { TEST_QUERY_OPTIONS } from "./test-query-options";
 
-const TEST_QUERY_OPTIONS = { queries: { retry: false }, mutations: { retry: false } };
-
-export function renderApp(path: string) {
+export function renderApp(path: string, { shortcutModifier }: TestAppOptions = {}) {
     const queryClient = new QueryClient({ defaultOptions: TEST_QUERY_OPTIONS });
     const httpClient = new HttpClientAxiosAdapter(TEST_BOT_API_URL);
     const history = createMemoryHistory({ initialEntries: [path] });
-    return render(
-        <App router={createAppRouter({ queryClient, history })} queryClient={queryClient} httpClient={httpClient} />,
-    );
+    const router = createAppRouter({ queryClient, history });
+    const shortcutPlatform = createFakeShortcutPlatform(shortcutModifier);
+    return {
+        ...render(
+            <App
+                router={router}
+                queryClient={queryClient}
+                httpClient={httpClient}
+                shortcutPlatform={shortcutPlatform}
+            />,
+        ),
+        router,
+    };
 }
