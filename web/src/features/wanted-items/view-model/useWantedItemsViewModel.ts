@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { countPages } from "../model/count-pages";
 import { toWantedItemView } from "../model/to-wanted-item-view";
 import { toWantedItemsQuery } from "../model/to-wanted-items-query";
@@ -63,6 +64,12 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
     const query = useQuery(wantedItemsQuery(useWantedItemsService(), accountId, toWantedItemsQuery(search)));
     const toggle = useToggleWantedItem(accountId);
     const counts: WantedItemsCounts | undefined = query.data?.counts;
+    const pagination = toPagination(query.data, search);
+    const actions = useWantedItemsSearchActions(search, onSearchChange);
+    const isPastEnd = query.data !== undefined && search.page > pagination.pageCount;
+    useEffect(() => {
+        if (isPastEnd) actions.selectPage(pagination.pageCount);
+    }, [isPastEnd, actions, pagination.pageCount]);
     const items: Array<WantedItemView> = query.data?.items.map(toWantedItemView) ?? [];
     return {
         status: toStatus(query.isPending, query.isError, query.data),
@@ -73,8 +80,8 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
             count: counts ? counts[COUNT_BY_FILTER[value]] : null,
         })),
         bidding: counts ? { enabled: counts.enabled, all: counts.all } : null,
-        pagination: toPagination(query.data, search),
-        ...useWantedItemsSearchActions(search, onSearchChange),
+        pagination,
+        ...actions,
         toggleItem: (name: string, enabled: boolean) => toggle.mutate({ name, enabled }),
         retry: () => void query.refetch(),
     };

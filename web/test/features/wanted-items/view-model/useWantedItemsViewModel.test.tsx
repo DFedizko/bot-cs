@@ -91,6 +91,14 @@ describe("useWantedItemsViewModel", () => {
         expect(onSearchChange).toHaveBeenCalledWith({ ...DEFAULT_WANTED_ITEMS_SEARCH, filter: "paused", page: 1 });
     });
 
+    it("Should move to the last page when the page is past the end", async () => {
+        mswServer.use(...mockBotApiMock());
+
+        const { onSearchChange } = await renderReady({ page: 9 });
+
+        expect(onSearchChange).toHaveBeenCalledWith({ ...DEFAULT_WANTED_ITEMS_SEARCH, page: 3 });
+    });
+
     it("Should pause an item at once, before the bot answers", async () => {
         mswServer.use(...mockBotApiMock());
         const { result } = await renderReady();
