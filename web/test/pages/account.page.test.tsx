@@ -137,6 +137,15 @@ describe("AccountPage", () => {
         expect(screen.getByRole("button", TOGGLE)).toHaveAttribute("aria-keyshortcuts", ariaShortcut);
     });
 
+    it("Should keep the sidebar shortcut hint out of what screen readers announce", async () => {
+        const user = userEvent.setup();
+        await renderShell({ shortcutModifier: "meta" });
+
+        await user.hover(screen.getByRole("button", TOGGLE));
+
+        expect(isHiddenFromUser(await screen.findByText("⌘B"))).toBe(true);
+    });
+
     it.each([
         ["meta", "⌘B"],
         ["ctrl", "Ctrl B"],
