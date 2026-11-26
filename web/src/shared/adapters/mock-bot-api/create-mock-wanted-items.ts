@@ -1,10 +1,12 @@
 import { MOCK_CATALOG_EXAMPLES } from "./mock-catalog-examples";
 import type { MockWantedItem } from "./mock-wanted-item";
+import { MOCK_CATALOG_CATEGORIES } from "./mock-catalog-categories";
+import { MOCK_WEARS } from "./mock-wears";
+import { toMockMarketName } from "./to-mock-market-name";
 
 type MockCatalog = NonNullable<MockWantedItem["catalog"]>;
 type MaxFor = MockWantedItem["maxFor"];
 
-const WEARS = ["Factory New", "Minimal Wear", "Field-Tested", "Well-Worn", "Battle-Scarred"];
 const STATTRAK_VARIANTS = [false, true];
 const UNKNOWN_ITEM_NAMES = [
     "Sticker | Titan (Holo) | Katowice 2014",
@@ -22,14 +24,11 @@ const UNKNOWN_ITEM_EVERY = 6;
 const PAUSED_POSITIONS = new Set([2, 8, 12, 19, 27, 40]);
 const NEWEST_ADDED_AT = Date.parse("2026-11-20T14:03:00.000Z");
 const HOUR = 3_600_000;
-const STATTRAK = "StatTrak™ ";
-const STAR = "★ ";
-const KNIFE_RARITY = "Extraordinary";
 
-const nameOf = ({ weapon, skin, wear, stattrak, rarity }: MockCatalog) =>
-    `${rarity === KNIFE_RARITY ? STAR : ""}${stattrak ? STATTRAK : ""}${weapon} | ${skin} (${wear})`;
+const nameOf = (catalog: MockCatalog) =>
+    toMockMarketName({ ...catalog, category: MOCK_CATALOG_CATEGORIES[catalog.weapon] });
 
-const variantsOf = (wear: string): Array<MockCatalog> =>
+const variantsOf = (wear: MockCatalog["wear"]): Array<MockCatalog> =>
     STATTRAK_VARIANTS.flatMap((stattrak) => MOCK_CATALOG_EXAMPLES.map((example) => ({ ...example, wear, stattrak })));
 
 const maxForAt = (position: number): MaxFor =>
@@ -53,7 +52,10 @@ const interleave = (catalogued: Array<[string, MockCatalog]>, unknown: Array<[st
     });
 
 export function createMockWantedItems(): Array<MockWantedItem> {
-    const catalogued = WEARS.flatMap(variantsOf).map((catalog): [string, MockCatalog] => [nameOf(catalog), catalog]);
+    const catalogued = MOCK_WEARS.flatMap(variantsOf).map((catalog): [string, MockCatalog] => [
+        nameOf(catalog),
+        catalog,
+    ]);
     const unknown = UNKNOWN_ITEM_NAMES.map((name): [string, null] => [name, null]);
     return interleave(catalogued, unknown).map(toWantedItem);
 }
