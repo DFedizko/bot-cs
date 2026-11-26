@@ -22,9 +22,13 @@ import { WantedItemTags } from "./wanted-item-tags";
 
 const NO_CATALOG = "No catalog data";
 
-type WantedItemsGridProps = { items: Array<WantedItemView>; onToggle: (name: string, enabled: boolean) => void };
+type WantedItemsGridProps = {
+    items: Array<WantedItemView>;
+    onToggle: (name: string, enabled: boolean) => void;
+    onRemove: (item: WantedItemView) => void;
+};
 
-export function WantedItemsGrid({ items, onToggle }: WantedItemsGridProps) {
+export function WantedItemsGrid({ items, onToggle, onRemove }: WantedItemsGridProps) {
     return (
         <ul aria-label="Wanted items" className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {items.map((item) => (
@@ -35,7 +39,11 @@ export function WantedItemsGrid({ items, onToggle }: WantedItemsGridProps) {
                             <WantedItemCardTags>
                                 <WantedItemTags stattrak={item.stattrak} souvenir={item.souvenir} />
                             </WantedItemCardTags>
-                            <ItemActionsMenu itemName={item.name} className="absolute top-1 right-1" />
+                            <ItemActionsMenu
+                                itemName={item.name}
+                                onRemove={() => onRemove(item)}
+                                className="absolute top-1 right-1"
+                            />
                             {!item.enabled && <PausedMark className="absolute bottom-2 left-2" />}
                         </WantedItemCardMedia>
                         <WantedItemCardBody>

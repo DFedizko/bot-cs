@@ -1,5 +1,6 @@
 import { Outlet, useParams } from "@tanstack/react-router";
 import { AccountSwitcherScreen } from "@/features/accounts";
+import { AddWantedItemScreen, CatalogSearchScreen } from "@/features/wanted-items";
 import { AppContent } from "@/shared/ui/layouts/app-content";
 import { AppShellLayout } from "@/shared/ui/layouts/app-shell.layout";
 import { AppSidebar, AppSidebarFooter, AppSidebarHeader, AppSidebarNavigation } from "@/shared/ui/layouts/app-sidebar";
@@ -21,7 +22,10 @@ export function AccountPage() {
             <AppContent>
                 <Outlet />
             </AppContent>
-            <AppCommandPalette />
+            <AppCommandPalette>
+                <CatalogSearchScreen />
+            </AppCommandPalette>
+            <AddWantedItemScreen accountId={accountId} />
         </AppShellLayout>
     );
 }

@@ -17,11 +17,15 @@ import {
 import { WantedItemSwitch } from "./wanted-item-switch";
 import { WantedItemTags } from "./wanted-item-tags";
 
-type WantedItemsListProps = { items: Array<WantedItemView>; onToggle: (name: string, enabled: boolean) => void };
+type WantedItemsListProps = {
+    items: Array<WantedItemView>;
+    onToggle: (name: string, enabled: boolean) => void;
+    onRemove: (item: WantedItemView) => void;
+};
 
 const NO_CATALOG = "No catalog data";
 
-export function WantedItemsList({ items, onToggle }: WantedItemsListProps) {
+export function WantedItemsList({ items, onToggle, onRemove }: WantedItemsListProps) {
     return (
         <ul aria-label="Wanted items" className="flex flex-col rounded-lg border border-b-0 border-line">
             {items.map((item) => (
@@ -51,7 +55,7 @@ export function WantedItemsList({ items, onToggle }: WantedItemsListProps) {
                         <WantedItemRowCell className="w-18">
                             <WantedItemSwitch name={item.name} enabled={item.enabled} onToggle={onToggle} />
                         </WantedItemRowCell>
-                        <ItemActionsMenu itemName={item.name} />
+                        <ItemActionsMenu itemName={item.name} onRemove={() => onRemove(item)} />
                     </WantedItemRow>
                 </li>
             ))}

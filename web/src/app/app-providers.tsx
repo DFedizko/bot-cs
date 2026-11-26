@@ -3,7 +3,16 @@ import type { QueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { AccountsHttpService, AccountsServiceProvider } from "@/features/accounts";
-import { WantedItemsHttpService, WantedItemsServiceProvider } from "@/features/wanted-items";
+import {
+    AddWantedItemStoreProvider,
+    CatalogHttpService,
+    CatalogServiceProvider,
+    RemoveWantedItemStoreProvider,
+    WantedItemsHttpService,
+    WantedItemsServiceProvider,
+    useAddWantedItemStore,
+    useRemoveWantedItemStore,
+} from "@/features/wanted-items";
 import { createWindowKeyboardShortcuts } from "@/shared/adapters/create-window-keyboard-shortcuts";
 import { readShortcutModifier } from "@/shared/adapters/read-shortcut-modifier";
 import { readSidebarCookie } from "@/shared/adapters/read-sidebar-cookie";
@@ -38,6 +47,7 @@ export function AppProviders({
 }: AppProvidersProps) {
     const [accountsService] = useState(() => new AccountsHttpService(httpClient));
     const [wantedItemsService] = useState(() => new WantedItemsHttpService(httpClient));
+    const [catalogService] = useState(() => new CatalogHttpService(httpClient));
     return (
         <QueryClientProvider client={queryClient}>
             <HttpClientProvider value={httpClient}>
@@ -48,7 +58,13 @@ export function AppProviders({
                                 <KeyboardShortcutsProvider value={keyboardShortcuts}>
                                     <AccountsServiceProvider value={accountsService}>
                                         <WantedItemsServiceProvider value={wantedItemsService}>
-                                            {children}
+                                            <CatalogServiceProvider value={catalogService}>
+                                                <AddWantedItemStoreProvider value={useAddWantedItemStore}>
+                                                    <RemoveWantedItemStoreProvider value={useRemoveWantedItemStore}>
+                                                        {children}
+                                                    </RemoveWantedItemStoreProvider>
+                                                </AddWantedItemStoreProvider>
+                                            </CatalogServiceProvider>
                                         </WantedItemsServiceProvider>
                                     </AccountsServiceProvider>
                                 </KeyboardShortcutsProvider>
