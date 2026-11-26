@@ -6,9 +6,9 @@ import { ShortcutKbd } from "@/shared/ui/components/shortcut-kbd";
 const PLUS_STROKE = 1.8;
 const SEARCH_KEY = "k";
 
-type WantedItemsEmptyProps = { shortcutModifier: ShortcutModifier };
+type WantedItemsEmptyProps = { shortcutModifier: ShortcutModifier; onAdd: () => void };
 
-export function WantedItemsEmpty({ shortcutModifier }: WantedItemsEmptyProps) {
+export function WantedItemsEmpty({ shortcutModifier, onAdd }: WantedItemsEmptyProps) {
     return (
         <section
             aria-labelledby="wanted-items-empty"
@@ -34,7 +34,7 @@ export function WantedItemsEmpty({ shortcutModifier }: WantedItemsEmptyProps) {
             <p className="mt-2 flex items-center gap-2 text-helper text-muted">
                 Press <ShortcutKbd modifier={shortcutModifier} shortcutKey={SEARCH_KEY} /> to add one
             </p>
-            <Button variant="secondary">
+            <Button variant="secondary" onClick={onAdd}>
                 <Plus data-icon="inline-start" aria-hidden />
                 Add wanted item
             </Button>

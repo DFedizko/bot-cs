@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderApp } from "@/__builders__/render-app";
+import { mockBotApiMock } from "@/__mocks__/mock-bot-api.mock";
+import { mswServer } from "@/__setup__/msw-server";
 import { renderWantedItems } from "./__builders__/render-wanted-items";
 import { searchCatalog } from "./__builders__/open-add-dialog";
 
@@ -76,6 +79,17 @@ describe("WantedItemsPage search", () => {
         await renderWantedItems();
 
         await user.click(screen.getByRole("button", { name: "Add wanted item" }));
+
+        expect(await screen.findByRole("combobox", { name: "Search any item" })).toHaveFocus();
+    });
+
+    it("Should open the search from the add button of an account that wants nothing yet", async () => {
+        const user = userEvent.setup();
+        mswServer.use(...mockBotApiMock());
+        renderApp("/accounts/7104022/wanted-items");
+        const empty = await screen.findByRole("region", { name: "No wanted items yet" });
+
+        await user.click(within(empty).getByRole("button", { name: "Add wanted item" }));
 
         expect(await screen.findByRole("combobox", { name: "Search any item" })).toHaveFocus();
     });

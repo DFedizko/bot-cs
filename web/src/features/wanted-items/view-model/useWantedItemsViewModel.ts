@@ -5,6 +5,7 @@ import { toWantedItemsQuery } from "../model/to-wanted-items-query";
 import { toWantedItemsStatus } from "../model/to-wanted-items-status";
 import type { SearchChangeOptions, WantedItemsSearch } from "../model/wanted-items-search";
 import { useShortcutModifier } from "@/shared/hooks/useShortcutModifier";
+import { useCommandPaletteStore } from "@/shared/lib/store/command-palette.store";
 import { useLastPageRedirect } from "./hooks/useLastPageRedirect";
 import { useWantedItemsSearchActions } from "./hooks/useWantedItemsSearchActions";
 import { useToggleWantedItemMutation } from "./mutations/useToggleWantedItemMutation";
@@ -24,6 +25,7 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
     const { mutate: toggle } = useToggleWantedItemMutation(accountId);
     const counts = data?.counts;
     const pagination = toWantedItemsPagination(data?.total ?? NO_ITEMS, search);
+    const setPaletteOpen = useCommandPaletteStore((state) => state.setOpen);
     const toggleItem = (name: string, enabled: boolean) => toggle({ name, enabled });
     useLastPageRedirect(search, data ? pagination.pageCount : null, onSearchChange);
     return {
@@ -38,6 +40,7 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
         ...useRemoveWantedItemViewModel(accountId, toggleItem),
         retry: () => void refetch(),
         shortcutModifier: useShortcutModifier(),
+        openSearch: () => setPaletteOpen(true),
     };
 }
 

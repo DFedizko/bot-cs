@@ -1,4 +1,5 @@
-import type { FormEvent } from "react";
+import { useRef } from "react";
+import type { FormEvent, RefObject } from "react";
 import { Button } from "@/shared/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/components/dialog";
 import type { AddWantedItemViewModel } from "../view-model/useAddWantedItemViewModel";
@@ -11,7 +12,9 @@ import { StartEnabledField, WearField } from "./components/wanted-item-form";
 
 const WEAR_HINT = "Prefilled from the item";
 
-function AddWantedItemForm(viewModel: AddWantedItemViewModel) {
+type AddWantedItemFormProps = AddWantedItemViewModel & { maxInput: RefObject<HTMLInputElement | null> };
+
+function AddWantedItemForm({ maxInput, ...viewModel }: AddWantedItemFormProps) {
     const { item, draft, maxError, percentageHint, alreadyWanted, failed, pending, changeDraft, submit, close } =
         viewModel;
     if (!item || !draft) return null;
@@ -45,6 +48,7 @@ function AddWantedItemForm(viewModel: AddWantedItemViewModel) {
                     error={maxError}
                     percentageHint={percentageHint}
                     onChange={changeDraft}
+                    inputRef={maxInput}
                 />
                 {item.wear && (
                     <WearField value={draft.wear} hint={WEAR_HINT} onChange={(wear) => changeDraft({ wear })} />
@@ -65,10 +69,14 @@ function AddWantedItemForm(viewModel: AddWantedItemViewModel) {
 }
 
 export function AddWantedItemView(viewModel: AddWantedItemViewModel) {
+    const maxInput = useRef<HTMLInputElement>(null);
     return (
         <Dialog open={viewModel.item !== null} onOpenChange={(open) => !open && viewModel.close()}>
-            <DialogContent className="max-h-screen max-w-lg gap-0 overflow-y-auto rounded-xl border border-line-strong bg-surface p-0 shadow-modal sm:max-w-lg">
-                <AddWantedItemForm {...viewModel} />
+            <DialogContent
+                initialFocus={maxInput}
+                className="max-h-screen max-w-lg gap-0 overflow-y-auto rounded-xl border border-line-strong bg-surface p-0 shadow-modal sm:max-w-lg"
+            >
+                <AddWantedItemForm {...viewModel} maxInput={maxInput} />
             </DialogContent>
         </Dialog>
     );
