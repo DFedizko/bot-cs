@@ -1,7 +1,8 @@
 import { afterEach, mock } from "bun:test";
 import type { StateCreator } from "zustand";
 
-const { create: createActual } = await import("zustand");
+const actual = await import("zustand");
+const createActual = actual.create;
 const resets = new Set<() => void>();
 
 const createResettable = <TState>(initializer: StateCreator<TState>) => {
@@ -14,6 +15,6 @@ const createResettable = <TState>(initializer: StateCreator<TState>) => {
 const create = <TState>(initializer?: StateCreator<TState>) =>
     initializer ? createResettable(initializer) : createResettable;
 
-mock.module("zustand", () => ({ create }));
+mock.module("zustand", () => ({ ...actual, create }));
 
 afterEach(() => resets.forEach((reset) => reset()));

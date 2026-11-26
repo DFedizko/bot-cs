@@ -10,6 +10,7 @@ import { findItems, itemNames, renderWantedItems } from "./__builders__/render-w
 
 const NEWEST_ITEM = "AWP | Asiimov (Factory New)";
 const PAUSED_ITEM = "AK-47 | Redline (Factory New)";
+const OTHER_ITEM = "★ Karambit | Doppler (Factory New)";
 const UNKNOWN_ITEM = "Sticker | Titan (Holo) | Katowice 2014";
 const FIRST_BY_NAME = "★ Karambit | Doppler (Battle-Scarred)";
 const PAGE_SIZE = 18;
@@ -48,6 +49,14 @@ describe("WantedItemsPage", () => {
         fireEvent.error(within(itemCard(NEWEST_ITEM)).getByRole("presentation"));
 
         expect(within(itemCard(NEWEST_ITEM)).queryByRole("presentation")).not.toBeInTheDocument();
+    });
+
+    it("Should keep the other pictures when one fails to load", async () => {
+        await renderWantedItems();
+
+        fireEvent.error(within(itemCard(NEWEST_ITEM)).getByRole("presentation"));
+
+        expect(within(itemCard(OTHER_ITEM)).getByRole("presentation")).toBeInTheDocument();
     });
 
     it("Should mark a paused item", async () => {
