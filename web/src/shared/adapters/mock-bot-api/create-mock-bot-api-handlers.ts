@@ -57,7 +57,7 @@ export function createMockBotApiHandlers(baseUrl: string, data: MockBotApiData =
         http.get("/catalog/items", async ({ query, response }) => {
             await wait();
             const limit = query.get("limit");
-            const items = searchMockCatalog(catalog, query.get("q") ?? "", limit ? Number(limit) : undefined);
+            const items = searchMockCatalog(catalog, query.get("q"), limit ? Number(limit) : undefined);
             return response(200).json({ items });
         }),
         http.post("/accounts/{accountId}/wanted-items", async ({ params, request, response }) => {
