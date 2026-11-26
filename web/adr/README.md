@@ -38,3 +38,4 @@ This folder records the significant architecture decisions of the frontend (`web
 | [0002](0002-testing-strategy.md)        | Testing strategy        | 2026-11-22 | Accepted |
 | [0003](0003-design-system-from-doop.md) | Design system from doop | 2026-11-22 | Accepted |
 | [0004](0004-http-client.md)             | HTTP client             | 2026-11-24 | Accepted |
+| [0005](0005-composable-components.md)   | Composable components   | 2026-11-25 | Accepted |

@@ -95,6 +95,10 @@ The state manager is a dependency like the API, so it is inverted the same way:
 - Each feature declares its own typed store port in `ports/` (`selected-account.store.ts`: `type SelectedAccountStore = Store<SelectedAccount>` plus its `definePort` binding). The view-model reads it with `useStoreState` and changes it with `setState`; it never knows which library is underneath.
 - `app/` chooses the adapter when it binds each store. Switching to Zustand means adding its adapter and changing those bindings; features don't change. Tests bind `createMemoryStore`.
 
+### UI state of a component instance: the `StoreFactory` port
+
+UI state that the parts of one composed component share (an image that failed, a highlighted option) lives in one store per mounted instance, never in props threaded through the parts. Components create it through the `StoreFactory` port in `shared/lib/store/store-factory.ts` (`<TState>(initialState: TState) => Store<TState>`, with its `definePort` pair), never through a library: `app/` binds `createMemoryStoreFactory` from `shared/adapters/` (built on `createMemoryStore`), and a Zustand factory can replace it later without touching components. The shared hook `useInstanceStore(initialState)` (`shared/hooks/`) creates the store once per mounted instance, the component's root provides it through its context, and parts read slices with `useStoreState`. App state (data, filters, the selected account) still comes in through controlled props. The decision is [ADR-0005](adr/0005-composable-components.md).
+
 ## Routes, pages and layouts
 
 - **Route files** (`routes/`) hold only the `Route` definition: path, params and search validation, and an optional loader that prefetches with the router's `context.queryClient` and a feature's query options. Their `component` comes from `pages/` or `layouts/`. TanStack Router dictates their file names, which is why components never live in them.
