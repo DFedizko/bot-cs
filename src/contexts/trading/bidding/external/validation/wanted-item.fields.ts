@@ -1,6 +1,9 @@
 import z from "zod";
-import { MaxForType, type MaxForPrimitives } from "../../domain/wanted-item/max-for/max-for";
+import { MaxForType } from "../../domain/wanted-item/max-for/max-for";
 import { WANTED_ITEM_EXAMPLE } from "../../infrastructure/docs/wanted-item.example";
+import type { MaxForInput } from "../../infrastructure/currency/max-for.input";
+import { DEFAULT_USER_CURRENCY } from "../../infrastructure/currency/user-currency";
+import { userCurrencyField } from "./user-currency.field";
 
 const PLAIN_DIGITS = /^\d+$/;
 const ACCOUNT_ID_DESCRIPTION = "The CSGOEmpire user id of the account, in plain digits";
@@ -44,9 +47,13 @@ const maxValueField = z
             .number()
             .int()
             .meta({
-                description: "The highest price to pay, in coin cents (19400 pays at most 194.00 coins), above zero",
+                description:
+                    "The highest price to pay, above zero, in the minor units of its currency (19400 coin cents pays at most 194.00 coins)",
                 examples: [WANTED_ITEM_EXAMPLE.maxValue],
             }),
+        currency: userCurrencyField.optional().meta({
+            description: `The currency of the value; the bot stores it in coin cents. Leave it out for ${DEFAULT_USER_CURRENCY} cents`,
+        }),
     })
     .meta({
         description: "The highest price to pay, as a fixed value whatever the recommended price",
@@ -55,7 +62,7 @@ const maxValueField = z
 
 type RawMaxFor = z.infer<typeof maxPercentageField> | z.infer<typeof maxValueField>;
 
-const toMaxForPrimitives = (maxFor: RawMaxFor): MaxForPrimitives =>
+const toMaxForInput = (maxFor: RawMaxFor): MaxForInput =>
     maxFor.type === MaxForType.PERCENTAGE ? { ...maxFor, value: String(maxFor.value) } : maxFor;
 
 export const maxForField = z
@@ -64,7 +71,7 @@ export const maxForField = z
         description: "The highest price to pay: either a percentage over the recommended price or a fixed value",
         examples: [MAX_PERCENTAGE_EXAMPLE, MAX_VALUE_EXAMPLE],
     })
-    .transform(toMaxForPrimitives);
+    .transform(toMaxForInput);
 
 export const criteriaField = z
     .array(

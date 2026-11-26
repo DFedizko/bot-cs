@@ -13,15 +13,16 @@ import {
     NOT_WANTED,
     UNKNOWN_CRITERION,
 } from "./wanted-item.error-examples";
+import { UNKNOWN_MAX_CURRENCY } from "./currency.error-examples";
 
 export const editWantedItemDoc: HttpRouteDoc = {
     summary: "Edit a wanted item",
     description:
-        "Changes the max for, the criteria, or both, of an item the account wants. At least one of them must be given. A new max for replaces the old one, so it can switch between a percentage over the recommended price and a fixed value in coin cents.",
+        "Changes the max for, the criteria, or both, of an item the account wants. At least one of them must be given. A new max for replaces the old one, so it can switch between a percentage over the recommended price and a fixed value. A fixed value is in coin cents, or in the minor units (cents) of its `currency` (`USD`, `EUR` or `GBP`), which the bot converts to coin cents at fixed rates before storing it.",
     tags: [WANTED_ITEMS_TAG],
     responses: [
         { status: HttpStatus.OK, description: "The wanted item was changed" },
-        HttpErrorResponseDocs.badRequest(INVALID_ACCOUNT_ID),
+        HttpErrorResponseDocs.badRequest(INVALID_ACCOUNT_ID, UNKNOWN_MAX_CURRENCY),
         HttpErrorResponseDocs.notFound(NOT_WANTED),
         HttpErrorResponseDocs.unprocessable(
             EMPTY_CHANGES,

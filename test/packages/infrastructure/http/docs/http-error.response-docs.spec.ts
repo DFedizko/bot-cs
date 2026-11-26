@@ -22,6 +22,12 @@ describe("HttpErrorResponseDocs", () => {
         expect(Object.keys(response.examples ?? {})).toEqual(["validationError", "malformedBody"]);
     });
 
+    it("Should document a bad request with every validation example, then the malformed body", () => {
+        const response = HttpErrorResponseDocs.badRequest(VALIDATION, VALIDATION);
+
+        expect(Object.keys(response.examples ?? {})).toEqual(["validationError", "validationError2", "malformedBody"]);
+    });
+
     it("Should document a bad query with only its validation examples", () => {
         const response = HttpErrorResponseDocs.badQuery(VALIDATION);
 

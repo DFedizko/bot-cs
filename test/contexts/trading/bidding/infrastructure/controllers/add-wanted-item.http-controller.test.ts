@@ -1,7 +1,8 @@
 import type { Container } from "inversify";
 import { testContainer } from "@/__builders__/test-container.builder";
-import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
+import { COMMAND_BUS, HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
+import { UNKNOWN_MAX_CURRENCY } from "@/contexts/trading/bidding/infrastructure/docs/currency.error-examples";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
@@ -19,6 +20,8 @@ const POST = "POST";
 const MALFORMED_JSON = "{ not json";
 const MINUS_THREE_PERCENT = { type: "percentage", value: "-3" };
 const MAX_VALUE = { type: "value", value: 19400 };
+const TEN_DOLLARS = { type: "value", value: 1000, currency: "USD" };
+const TEN_DOLLARS_IN_COIN_CENTS = 1628;
 const asiimov = {
     name: ITEM_NAME,
     maxFor: MINUS_THREE_PERCENT,
@@ -195,5 +198,44 @@ describe("AddWantedItemHttpController", () => {
             "accountId",
             "name",
         ]);
+    });
+
+    describe("Currency", () => {
+        it("Should add a max value given in another currency in coin cents", async () => {
+            const api = await startWantedItemsApi(container);
+
+            await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, maxFor: TEN_DOLLARS });
+
+            const wantedItem = await container
+                .get(WANTED_ITEM_REPOSITORY)
+                .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
+            expect(wantedItem?.getMaxFor()).toEqual(maxForValue(TEN_DOLLARS_IN_COIN_CENTS));
+        });
+
+        it("Should dispatch the max value without its currency", async () => {
+            const dispatchSpy = jest.spyOn(container.get(COMMAND_BUS), "dispatch");
+            const api = await startWantedItemsApi(container);
+
+            await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, maxFor: TEN_DOLLARS });
+
+            expect(dispatchSpy.mock.calls[0][0]).toMatchObject({
+                maxFor: { type: "value", value: TEN_DOLLARS_IN_COIN_CENTS },
+            });
+            expect(dispatchSpy.mock.calls[0][0]).not.toHaveProperty("maxFor.currency");
+        });
+
+        it("Should answer bad request for a currency the bot doesn't take", async () => {
+            const api = await startWantedItemsApi(container);
+
+            const response = await api.send(POST, itemsPath(ACCOUNT_ID), {
+                ...asiimov,
+                maxFor: { ...TEN_DOLLARS, currency: "BRL" },
+            });
+
+            expect({ ...response, body: JSON.parse(response.body) }).toEqual({
+                status: HttpStatus.BAD_REQUEST,
+                body: UNKNOWN_MAX_CURRENCY.value,
+            });
+        });
     });
 });

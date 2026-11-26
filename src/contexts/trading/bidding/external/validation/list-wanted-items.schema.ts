@@ -6,9 +6,10 @@ import {
 } from "../../application/list-wanted-items/list-wanted-items.query";
 import type { ListWantedItemsInput } from "../../infrastructure/controllers/list-wanted-items.http-controller";
 import { accountIdField, enabledFilterField } from "./wanted-item.fields";
+import { showInCurrencyField } from "./user-currency.field";
 
 export const listWantedItemsSchema = queryOptionsSchema(
-    { accountId: accountIdField },
+    { accountId: accountIdField, currency: showInCurrencyField },
     {
         sort: { fields: WANTED_ITEMS_SORT_FIELDS, default: DEFAULT_WANTED_ITEMS_SORT },
         filters: { enabled: enabledFilterField },

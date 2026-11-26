@@ -18,9 +18,9 @@ const INTERNAL_ERROR: ErrorExample = {
 };
 
 export class HttpErrorResponseDocs {
-    static badRequest(validation: ErrorExample): ErrorResponseDoc {
+    static badRequest(...validations: ErrorExample[]): ErrorResponseDoc {
         const description = "The input is invalid: the fields name each failing field, or the body is not JSON";
-        return HttpErrorResponseDocs.create(HttpStatus.BAD_REQUEST, description, [validation, MALFORMED_BODY]);
+        return HttpErrorResponseDocs.create(HttpStatus.BAD_REQUEST, description, [...validations, MALFORMED_BODY]);
     }
 
     static badQuery(...validations: ErrorExample[]): ErrorResponseDoc {

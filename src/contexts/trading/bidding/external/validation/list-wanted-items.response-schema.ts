@@ -1,7 +1,8 @@
 import z from "zod";
 import { paginatedSchema } from "@/packages/external/validation/paginated.schema";
 import { MaxForType } from "../../domain/wanted-item/max-for/max-for";
-import type { ListWantedItemsResponse } from "../../application/list-wanted-items/list-wanted-items.response";
+import type { ListWantedItemsBody } from "../../infrastructure/controllers/list-wanted-items.http-controller";
+import { shownCurrencyField } from "./user-currency.field";
 import { WANTED_ITEM_EXAMPLE } from "../../infrastructure/docs/wanted-item.example";
 import {
     ASIIMOV_CATALOG,
@@ -31,7 +32,10 @@ const maxValueSchema = z
         value: z
             .number()
             .int()
-            .meta({ description: "The highest price to pay, in coin cents", examples: [maxValue] }),
+            .meta({
+                description: "The highest price to pay, in coin cents or in the minor units of the asked currency",
+                examples: [maxValue],
+            }),
     })
     .meta({ examples: [VALUE_EXAMPLE] });
 
@@ -111,5 +115,5 @@ const wantedItemSchema = z
     .meta({ examples: WANTED_ITEMS_PAGE.items });
 
 export const listWantedItemsResponseSchema = paginatedSchema(wantedItemSchema, WANTED_ITEMS_PAGE)
-    .extend({ counts: countsSchema })
-    .meta({ examples: [WANTED_ITEMS_PAGE] }) satisfies z.ZodType<ListWantedItemsResponse>;
+    .extend({ counts: countsSchema, currency: shownCurrencyField })
+    .meta({ examples: [WANTED_ITEMS_PAGE] }) satisfies z.ZodType<ListWantedItemsBody>;
