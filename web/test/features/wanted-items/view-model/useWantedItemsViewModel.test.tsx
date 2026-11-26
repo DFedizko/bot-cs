@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, jest } from "bun:test";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createAppWrapper } from "@/__builders__/create-app-wrapper";
+import type { TestAppOptions } from "@/__builders__/test-app-options";
 import { mockBotApiMock } from "@/__mocks__/mock-bot-api.mock";
 import { mswServer } from "@/__setup__/msw-server";
 import { DEFAULT_WANTED_ITEMS_SEARCH } from "@/features/wanted-items/model/default-wanted-items-search";
@@ -14,7 +15,11 @@ const ACCOUNT_ID = "6528461";
 const EMPTY_ACCOUNT_ID = "7104022";
 const PAGE_SIZE = 18;
 
-const renderViewModel = (search: Partial<WantedItemsSearch> = {}, accountId = ACCOUNT_ID) => {
+const renderViewModel = (
+    search: Partial<WantedItemsSearch> = {},
+    accountId = ACCOUNT_ID,
+    options: TestAppOptions = {},
+) => {
     const onSearchChange = jest.fn();
     const rendered = renderHook(
         () =>
@@ -23,7 +28,7 @@ const renderViewModel = (search: Partial<WantedItemsSearch> = {}, accountId = AC
                 search: { ...DEFAULT_WANTED_ITEMS_SEARCH, ...search },
                 onSearchChange,
             }),
-        { wrapper: createAppWrapper() },
+        { wrapper: createAppWrapper(options) },
     );
     return { ...rendered, onSearchChange };
 };
@@ -131,10 +136,9 @@ describe("useWantedItemsViewModel", () => {
     });
 
     it("Should give the platform's shortcut modifier for the hints", async () => {
-        Object.defineProperty(navigator, "platform", { value: "MacIntel", configurable: true });
         mswServer.use(...mockBotApiMock());
 
-        const { result } = await renderReady();
+        const { result } = renderViewModel({}, ACCOUNT_ID, { shortcutModifier: "meta" });
 
         expect(result.current.shortcutModifier).toBe("meta");
     });

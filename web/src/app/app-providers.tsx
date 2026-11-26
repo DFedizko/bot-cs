@@ -13,6 +13,7 @@ import { HttpClientProvider } from "@/shared/lib/http/http-client";
 import type { HttpClient } from "@/shared/lib/http/http-client";
 import { KeyboardShortcutsProvider } from "@/shared/lib/keyboard/keyboard-shortcuts";
 import { ShortcutPlatformProvider } from "@/shared/lib/keyboard/shortcut-platform";
+import type { ShortcutPlatform } from "@/shared/lib/keyboard/shortcut-platform";
 import { SidebarPreferenceProvider } from "@/shared/lib/sidebar/sidebar-preference";
 import { CommandPaletteStoreProvider } from "@/shared/lib/store/command-palette.store";
 import { FailedImagesStoreProvider } from "@/shared/lib/store/failed-images.store";
@@ -20,15 +21,21 @@ import { FailedImagesStoreProvider } from "@/shared/lib/store/failed-images.stor
 export type AppDependencies = {
     queryClient: QueryClient;
     httpClient: HttpClient;
+    shortcutPlatform?: ShortcutPlatform;
 };
 
 type AppProvidersProps = AppDependencies & { children: ReactNode };
 
 const sidebarPreference = { readOpen: () => readSidebarCookie() };
-const shortcutPlatform = { readModifier: () => readShortcutModifier() };
+const browserShortcutPlatform: ShortcutPlatform = { readModifier: () => readShortcutModifier() };
 const keyboardShortcuts = createWindowKeyboardShortcuts();
 
-export function AppProviders({ queryClient, httpClient, children }: AppProvidersProps) {
+export function AppProviders({
+    queryClient,
+    httpClient,
+    shortcutPlatform = browserShortcutPlatform,
+    children,
+}: AppProvidersProps) {
     const [accountsService] = useState(() => new AccountsHttpService(httpClient));
     const [wantedItemsService] = useState(() => new WantedItemsHttpService(httpClient));
     return (

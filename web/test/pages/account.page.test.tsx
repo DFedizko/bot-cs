@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderApp } from "@/__builders__/render-app";
+import type { TestAppOptions } from "@/__builders__/test-app-options";
 import { mockBotApiMock } from "@/__mocks__/mock-bot-api.mock";
 import { mswServer } from "@/__setup__/msw-server";
 
@@ -17,9 +18,9 @@ const isHiddenFromUser = (element: HTMLElement) => element.closest('[aria-hidden
 const isLabelHidden = (label: string) =>
     isHiddenFromUser(within(screen.getByRole("navigation", MAIN_NAVIGATION)).getByText(label));
 
-const renderShell = async () => {
+const renderShell = async (options: TestAppOptions = {}) => {
     mswServer.use(...mockBotApiMock());
-    renderApp(MAIN_PATH);
+    renderApp(MAIN_PATH, options);
     return screen.findByRole("button", { name: /Switch account/ });
 };
 
@@ -116,13 +117,26 @@ describe("AccountPage", () => {
     });
 
     it.each([
-        ["MacIntel", "⌘K"],
-        ["Win32", "Ctrl K"],
-    ])("Should show the search shortcut for %s as %s", async (platform, hint) => {
-        Object.defineProperty(navigator, "platform", { value: platform, configurable: true });
+        ["meta", "⌘K", "Meta+K"],
+        ["ctrl", "Ctrl K", "Control+K"],
+    ] as const)("Should show the %s search shortcut as %s", async (shortcutModifier, hint, ariaShortcut) => {
+        await renderShell({ shortcutModifier });
 
-        await renderShell();
+        const search = screen.getByRole("button", { name: /Search any item/ });
 
-        expect(screen.getByRole("button", { name: /Search any item/ })).toHaveTextContent(hint);
+        expect(search).toHaveTextContent(hint);
+        expect(search).toHaveAttribute("aria-keyshortcuts", ariaShortcut);
+    });
+
+    it.each([
+        ["meta", "⌘B"],
+        ["ctrl", "Ctrl B"],
+    ] as const)("Should show the %s sidebar shortcut as %s", async (shortcutModifier, hint) => {
+        const user = userEvent.setup();
+        await renderShell({ shortcutModifier });
+
+        await user.hover(screen.getByRole("button", TOGGLE));
+
+        expect(await screen.findByText(hint)).toBeInTheDocument();
     });
 });

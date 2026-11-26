@@ -172,6 +172,17 @@ describe("WantedItemsPage", () => {
         expect(await screen.findByRole("heading", { name: "No wanted items yet" })).toBeInTheDocument();
     });
 
+    it.each([
+        ["meta", "Press ⌘K to add one"],
+        ["ctrl", "Press Ctrl K to add one"],
+    ] as const)("Should hint the %s search shortcut when the account wants nothing", async (shortcutModifier, hint) => {
+        mswServer.use(...mockBotApiMock());
+
+        renderApp(`/accounts/${ALT_ACCOUNT_ID}/wanted-items`, { shortcutModifier });
+
+        expect(await screen.findByText(/to add one/)).toHaveTextContent(hint);
+    });
+
     it("Should say when the wanted items can't be loaded, and retry", async () => {
         mswServer.use(listWantedItemsFailureMock(), ...mockBotApiMock());
         renderApp("/accounts/6528461/wanted-items");
