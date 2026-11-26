@@ -22,8 +22,9 @@ export class CurrencyConverter {
         quote: GBP,
         rate: CurrencyConverter.GBP_PER_EUR,
     });
+    private static readonly USD_TO_GBP = CurrencyConverter.USD_TO_EUR.then(CurrencyConverter.EUR_TO_GBP);
     private static readonly COIN_TO_EUR = CurrencyConverter.COIN_TO_USD.then(CurrencyConverter.USD_TO_EUR);
-    private static readonly COIN_TO_GBP = CurrencyConverter.COIN_TO_EUR.then(CurrencyConverter.EUR_TO_GBP);
+    private static readonly COIN_TO_GBP = CurrencyConverter.COIN_TO_USD.then(CurrencyConverter.USD_TO_GBP);
 
     fromCoinToUsd(coins: Money): Money {
         return CurrencyConverter.COIN_TO_USD.convert(coins);

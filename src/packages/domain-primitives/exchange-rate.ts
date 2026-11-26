@@ -37,45 +37,6 @@ export class ExchangeRate extends ValueObject<ExchangeRateProps> {
         return new ExchangeRate({ base, quote, numerator, denominator: new Decimal(UNIT) });
     }
 
-    convert(money: Money): Money {
-        this.assertCurrency(money.getCurrency(), this.value.base);
-        const { base, quote, numerator, denominator } = this.value;
-        const amount = new Decimal(money.getAmount())
-            .times(numerator)
-            .times(ExchangeRate.minorUnitsOf(quote))
-            .div(denominator.times(ExchangeRate.minorUnitsOf(base)))
-            .toDecimalPlaces(0, ExchangeRate.HALF_UP_TO_MINOR_UNIT);
-        return Money.fromCents({ amount: amount.toNumber(), currency: quote });
-    }
-
-    invert(): ExchangeRate {
-        const { base, quote, numerator, denominator } = this.value;
-        return new ExchangeRate({ base: quote, quote: base, numerator: denominator, denominator: numerator });
-    }
-
-    then(next: ExchangeRate): ExchangeRate {
-        this.assertCurrency(next.value.base, this.value.quote);
-        return new ExchangeRate({
-            base: this.value.base,
-            quote: next.value.quote,
-            numerator: this.value.numerator.times(next.value.numerator),
-            denominator: this.value.denominator.times(next.value.denominator),
-        });
-    }
-
-    private assertCurrency(actual: Currency, expected: Currency): void {
-        if (actual.getCode() !== expected.getCode()) {
-            throw new DomainError({
-                message: `Expected an amount in "${expected.getCode()}", got "${actual.getCode()}"`,
-                code: ERROR_CODE.INVALID_CURRENCY,
-            });
-        }
-    }
-
-    private static minorUnitsOf(currency: Currency): Decimal {
-        return new Decimal(DECIMAL_BASE).pow(currency.getDecimals());
-    }
-
     private static parseRate(rate: string): Decimal {
         const parsed = ExchangeRate.tryParse(rate);
         if (!parsed?.isPositive() || parsed.isZero()) {
@@ -93,5 +54,44 @@ export class ExchangeRate extends ValueObject<ExchangeRateProps> {
         } catch {
             return null;
         }
+    }
+
+    convert(money: Money): Money {
+        this.assertCurrency(money.getCurrency(), this.value.base);
+        const { base, quote, numerator, denominator } = this.value;
+        const amount = new Decimal(money.getAmount())
+            .times(numerator)
+            .times(ExchangeRate.minorUnitsOf(quote))
+            .div(denominator.times(ExchangeRate.minorUnitsOf(base)))
+            .toDecimalPlaces(0, ExchangeRate.HALF_UP_TO_MINOR_UNIT);
+        return Money.fromCents({ amount: amount.toNumber(), currency: quote });
+    }
+
+    private assertCurrency(actual: Currency, expected: Currency): void {
+        if (actual.getCode() !== expected.getCode()) {
+            throw new DomainError({
+                message: `Expected an amount in "${expected.getCode()}", got "${actual.getCode()}"`,
+                code: ERROR_CODE.INVALID_CURRENCY,
+            });
+        }
+    }
+
+    private static minorUnitsOf(currency: Currency): Decimal {
+        return new Decimal(DECIMAL_BASE).pow(currency.getDecimals());
+    }
+
+    invert(): ExchangeRate {
+        const { base, quote, numerator, denominator } = this.value;
+        return new ExchangeRate({ base: quote, quote: base, numerator: denominator, denominator: numerator });
+    }
+
+    then(next: ExchangeRate): ExchangeRate {
+        this.assertCurrency(next.value.base, this.value.quote);
+        return new ExchangeRate({
+            base: this.value.base,
+            quote: next.value.quote,
+            numerator: this.value.numerator.times(next.value.numerator),
+            denominator: this.value.denominator.times(next.value.denominator),
+        });
     }
 }

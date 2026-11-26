@@ -7,6 +7,7 @@ import {
 import { testContainer } from "@/__builders__/test-container.builder";
 import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
+import { UNKNOWN_MAX_CURRENCY } from "@/contexts/trading/bidding/infrastructure/docs/currency.error-examples";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
@@ -148,7 +149,10 @@ describe("EditWantedItemHttpController", () => {
                 maxFor: { ...TEN_POUNDS, currency: "JPY" },
             });
 
-            expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+            expect({ ...response, body: JSON.parse(response.body) }).toEqual({
+                status: HttpStatus.BAD_REQUEST,
+                body: UNKNOWN_MAX_CURRENCY.value,
+            });
         });
     });
 });
