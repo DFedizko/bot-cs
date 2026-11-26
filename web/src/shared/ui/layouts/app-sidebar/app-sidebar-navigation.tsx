@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChartColumn, Gavel, LocateFixed, Truck, Wallet } from "lucide-react";
+import { ArrowLeftRight, ChartColumn, Gavel, LocateFixed, Wallet } from "lucide-react";
 import { SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenu } from "@/shared/ui/components/sidebar";
 import { AppSidebarItem } from "./app-sidebar-item";
 import { AppSidebarLink } from "./app-sidebar-link";
@@ -26,8 +26,8 @@ export function AppSidebarNavigation({ accountId }: AppSidebarNavigationProps) {
                     <AppSidebarItem label="Auctions">
                         <Gavel aria-hidden strokeWidth={NAV_ICON_STROKE} />
                     </AppSidebarItem>
-                    <AppSidebarItem label="Deliveries">
-                        <Truck aria-hidden strokeWidth={NAV_ICON_STROKE} />
+                    <AppSidebarItem label="Trades">
+                        <ArrowLeftRight aria-hidden strokeWidth={NAV_ICON_STROKE} />
                     </AppSidebarItem>
                     <AppSidebarItem label="Balance">
                         <Wallet aria-hidden strokeWidth={NAV_ICON_STROKE} />

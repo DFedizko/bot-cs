@@ -7,8 +7,8 @@ import { mockBotApiMock } from "@/__mocks__/mock-bot-api.mock";
 import { mswServer } from "@/__setup__/msw-server";
 
 const MAIN_PATH = "/accounts/6528461/wanted-items";
-const DISABLED_PAGES = ["Dashboard", "Auctions", "Deliveries", "Balance", "Settings"];
-const NAV_ITEMS = ["Dashboard", "Wanted items", "Auctions", "Deliveries", "Balance", "Settings"];
+const DISABLED_PAGES = ["Dashboard", "Auctions", "Trades", "Balance", "Settings"];
+const NAV_ITEMS = ["Dashboard", "Wanted items", "Auctions", "Trades", "Balance", "Settings"];
 const TOGGLE = { name: "Toggle sidebar" };
 
 const MAIN_NAVIGATION = { name: "Main" };
