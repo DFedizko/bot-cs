@@ -51,7 +51,12 @@ function AddWantedItemForm({ maxInput, ...viewModel }: AddWantedItemFormProps) {
                     inputRef={maxInput}
                 />
                 {item.wear && (
-                    <WearField value={draft.wear} hint={WEAR_HINT} onChange={(wear) => changeDraft({ wear })} />
+                    <WearField
+                        wears={[item.wear]}
+                        value={draft.wear}
+                        hint={WEAR_HINT}
+                        onChange={(wear) => changeDraft({ wear })}
+                    />
                 )}
                 <StartEnabledField value={draft.enabled} onChange={(enabled) => changeDraft({ enabled })} />
                 {pauseFailed && (

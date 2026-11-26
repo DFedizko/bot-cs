@@ -16,7 +16,7 @@ export function useAddWantedItemMutation(accountId: string) {
 
     const addItem = async (item: NewWantedItem): Promise<AddedWantedItem> => {
         await service.add(accountId, item);
-        return { paused: item.enabled || (await pauseAdded(item.name)) };
+        return { enabledAsAsked: item.enabled || (await pauseAdded(item.name)) };
     };
 
     return useMutation({

@@ -18,6 +18,10 @@ describe("validateMax", () => {
         expect(percentage("-100")).toBe("The max must be above −100%");
     });
 
+    it("Should refuse a percentage too high to be a max", () => {
+        expect(percentage("1001")).toBe("The max must be at most +1000%");
+    });
+
     it("Should accept a whole number of coins", () => {
         expect(coins("10")).toBeNull();
     });

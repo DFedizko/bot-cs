@@ -2,15 +2,19 @@ import { useId } from "react";
 import { FieldLabel } from "@/shared/ui/components/field-label";
 import { Segmented, SegmentedItem } from "@/shared/ui/components/segmented";
 import type { Wear } from "../../../model/wear";
-import { WEARS } from "../../../model/wears";
 
 const ANY_WEAR = "any";
 
 type WearChoice = Wear | typeof ANY_WEAR;
 
-type WearFieldProps = { value: Wear | null; hint?: string; onChange: (wear: Wear | null) => void };
+type WearFieldProps = {
+    wears: ReadonlyArray<Wear>;
+    value: Wear | null;
+    hint?: string;
+    onChange: (wear: Wear | null) => void;
+};
 
-export function WearField({ value, hint, onChange }: WearFieldProps) {
+export function WearField({ wears, value, hint, onChange }: WearFieldProps) {
     const labelId = useId();
     return (
         <fieldset className="flex flex-col gap-2">
@@ -23,7 +27,7 @@ export function WearField({ value, hint, onChange }: WearFieldProps) {
                 onValueChange={(choice) => onChange(choice === ANY_WEAR ? null : choice)}
             >
                 <SegmentedItem value={ANY_WEAR}>Any</SegmentedItem>
-                {WEARS.map((wear) => (
+                {wears.map((wear) => (
                     <SegmentedItem key={wear} value={wear}>
                         {wear}
                     </SegmentedItem>

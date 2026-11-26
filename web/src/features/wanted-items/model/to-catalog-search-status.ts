@@ -10,7 +10,8 @@ type CatalogSearchState = {
 
 export function toCatalogSearchStatus({ query, searched, items, failed }: CatalogSearchState): CatalogSearchStatus {
     if (query === null) return "idle";
+    if (query !== searched) return "loading";
     if (failed) return "error";
-    if (query !== searched || !items) return "loading";
+    if (!items) return "loading";
     return items.length === 0 ? "empty" : "results";
 }

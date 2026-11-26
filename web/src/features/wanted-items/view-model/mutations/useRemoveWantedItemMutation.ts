@@ -7,6 +7,6 @@ export function useRemoveWantedItemMutation(accountId: string) {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (name: string) => service.remove(accountId, name),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: wantedItemsKey(accountId) }),
+        onSettled: () => queryClient.invalidateQueries({ queryKey: wantedItemsKey(accountId) }),
     });
 }

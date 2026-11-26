@@ -27,6 +27,10 @@ describe("toCatalogSearchStatus", () => {
         expect(toCatalogSearchStatus({ query: "awp", searched: "awp", items: FOUND, failed: false })).toBe("results");
     });
 
+    it("Should load a new search instead of showing the last one's failure", () => {
+        expect(toCatalogSearchStatus({ query: "awp", searched: "aw", items: undefined, failed: true })).toBe("loading");
+    });
+
     it("Should say when the search failed", () => {
         expect(toCatalogSearchStatus({ query: "awp", searched: "awp", items: undefined, failed: true })).toBe("error");
     });

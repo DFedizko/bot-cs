@@ -76,4 +76,16 @@ describe("WantedItemsPage remove", () => {
 
         expect(within(dialog).getByRole("button", { name: "Pause instead" })).toBeDisabled();
     });
+
+    it("Should refresh the list when the item was already gone", async () => {
+        const user = userEvent.setup();
+        await renderWantedItems();
+        const gets = captureBodies("GET");
+        mswServer.use(removeWantedItemNotFoundMock());
+        const dialog = await openRemoveDialog(user);
+
+        await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+
+        await waitFor(() => expect(gets.some(({ path }) => path.endsWith("/wanted-items"))).toBe(true));
+    });
 });

@@ -23,14 +23,14 @@ export function useAddWantedItemViewModel(accountId: string) {
         stopAdding();
     };
 
-    const closeWhenPaused = ({ paused }: AddedWantedItem) => {
-        if (paused) close();
+    const closeWhenEnabledAsAsked = ({ enabledAsAsked }: AddedWantedItem) => {
+        if (enabledAsAsked) close();
     };
 
     const submit = () => {
         markSubmitted();
         if (!item || !draft || maxError) return;
-        mutate(toNewWantedItem(item.marketHashName, draft), { onSuccess: closeWhenPaused });
+        mutate(toNewWantedItem(item.marketHashName, draft), { onSuccess: closeWhenEnabledAsAsked });
     };
 
     return {
@@ -40,7 +40,7 @@ export function useAddWantedItemViewModel(accountId: string) {
         percentageHint: describePercentage(draft?.percentage ?? ""),
         alreadyWanted,
         failed: error !== null && !alreadyWanted,
-        pauseFailed: data?.paused === false,
+        pauseFailed: data?.enabledAsAsked === false,
         pending: isPending,
         changeDraft,
         submit,

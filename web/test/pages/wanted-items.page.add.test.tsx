@@ -76,6 +76,19 @@ describe("WantedItemsPage add", () => {
         );
     });
 
+    it("Should offer only the item's own wear or any wear", async () => {
+        const user = userEvent.setup();
+        await renderWantedItems();
+
+        const dialog = await openAddDialog(user, "asiimov field", ASIIMOV_FT);
+
+        expect(
+            within(dialog)
+                .getAllByRole("radio")
+                .map((radio) => radio.textContent),
+        ).toEqual(["% vs recommended", "Fixed value", "Any", "Field-Tested"]);
+    });
+
     it("Should say when the item is already in the list and keep it from being added", async () => {
         const user = userEvent.setup();
         await renderWantedItems();

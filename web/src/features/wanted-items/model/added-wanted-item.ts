@@ -1,1 +1,1 @@
-export type AddedWantedItem = { paused: boolean };
+export type AddedWantedItem = { enabledAsAsked: boolean };
