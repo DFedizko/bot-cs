@@ -26,16 +26,20 @@ export function WantedItemsToolbar({
                 {filters.map(({ value, count }) => (
                     <FilterChip key={value} value={value}>
                         {FILTER_LABELS[value]}
-                        <FilterChipCount>{count}</FilterChipCount>
+                        {count !== null && <FilterChipCount>{count}</FilterChipCount>}
                     </FilterChip>
                 ))}
             </FilterChips>
             <p className="mr-2 ml-auto text-sm text-muted">
-                Bot is bidding on{" "}
-                <b className="font-medium text-ink">
-                    {bidding.enabled} of {bidding.all}
-                </b>{" "}
-                items
+                {bidding && (
+                    <>
+                        Bot is bidding on{" "}
+                        <b className="font-medium text-ink">
+                            {bidding.enabled} of {bidding.all}
+                        </b>{" "}
+                        items
+                    </>
+                )}
             </p>
             <WantedItemsSortMenu value={search.sort} onValueChange={selectSort} />
             <ViewToggle aria-label="Layout" value={search.view} onValueChange={selectView}>

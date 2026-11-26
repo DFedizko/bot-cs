@@ -15,7 +15,7 @@ import { wantedItemsQuery } from "./wanted-items-query";
 
 export type WantedItemsStatus = "loading" | "error" | "empty" | "ready";
 
-export type WantedItemsFilterChoice = { value: WantedItemsFilter; count: number };
+export type WantedItemsFilterChoice = { value: WantedItemsFilter; count: number | null };
 
 export type WantedItemsPagination = {
     page: number;
@@ -33,7 +33,6 @@ type WantedItemsViewModelProps = {
     onSearchChange: (search: WantedItemsSearch) => void;
 };
 
-const NO_COUNTS: WantedItemsCounts = { all: 0, enabled: 0, disabled: 0 };
 const COUNT_BY_FILTER: Readonly<Record<WantedItemsFilter, keyof WantedItemsCounts>> = {
     all: "all",
     active: "enabled",
@@ -63,14 +62,17 @@ const toPagination = (data: WantedItemsPage | undefined, search: WantedItemsSear
 export function useWantedItemsViewModel({ accountId, search, onSearchChange }: WantedItemsViewModelProps) {
     const query = useQuery(wantedItemsQuery(useWantedItemsService(), accountId, toWantedItemsQuery(search)));
     const toggle = useToggleWantedItem(accountId);
-    const counts = query.data?.counts ?? NO_COUNTS;
+    const counts: WantedItemsCounts | undefined = query.data?.counts;
     const items: Array<WantedItemView> = query.data?.items.map(toWantedItemView) ?? [];
     return {
         status: toStatus(query.isPending, query.isError, query.data),
         search,
         items,
-        filters: WANTED_ITEMS_FILTERS.map((value) => ({ value, count: counts[COUNT_BY_FILTER[value]] })),
-        bidding: { enabled: counts.enabled, all: counts.all },
+        filters: WANTED_ITEMS_FILTERS.map((value): WantedItemsFilterChoice => ({
+            value,
+            count: counts ? counts[COUNT_BY_FILTER[value]] : null,
+        })),
+        bidding: counts ? { enabled: counts.enabled, all: counts.all } : null,
         pagination: toPagination(query.data, search),
         ...useWantedItemsSearchActions(search, onSearchChange),
         toggleItem: (name: string, enabled: boolean) => toggle.mutate({ name, enabled }),

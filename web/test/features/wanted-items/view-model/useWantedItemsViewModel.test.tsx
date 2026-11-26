@@ -99,7 +99,7 @@ describe("useWantedItemsViewModel", () => {
         act(() => result.current.toggleItem(first.name, false));
 
         await waitFor(() => expect(result.current.items[0].enabled).toBe(false));
-        expect(result.current.bidding.enabled).toBe(40);
+        expect(result.current.bidding?.enabled).toBe(40);
     });
 
     it("Should put the item back when the bot fails to pause it", async () => {

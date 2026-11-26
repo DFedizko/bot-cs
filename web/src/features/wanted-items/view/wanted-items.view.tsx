@@ -27,7 +27,9 @@ export function WantedItemsView(viewModel: WantedItemsViewModel) {
             ) : (
                 <WantedItemsContent {...viewModel} />
             )}
-            <WantedItemsPager pagination={pagination} onPageChange={selectPage} onPageSizeChange={selectPageSize} />
+            {status === "ready" && (
+                <WantedItemsPager pagination={pagination} onPageChange={selectPage} onPageSizeChange={selectPageSize} />
+            )}
         </section>
     );
 }
