@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # generated api document (bun run openapi:export)
 /openapi.json
+
+# raw CSGOEmpire payloads captured in development
+/captures
