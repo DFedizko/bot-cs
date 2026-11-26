@@ -21,7 +21,7 @@ export function SortMenuContent<TValue extends string>({
     ...props
 }: SortMenuContentProps<TValue>) {
     return (
-        <DropdownMenuContent align="end" className={cn("w-64 p-1", className)} {...props}>
+        <DropdownMenuContent align="end" className={cn("w-auto min-w-64 p-1", className)} {...props}>
             <DropdownMenuGroup>
                 <DropdownMenuLabel className="px-3 py-2 text-label text-faint">Sort by</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={value} onValueChange={(chosen) => onValueChange(chosen as TValue)}>

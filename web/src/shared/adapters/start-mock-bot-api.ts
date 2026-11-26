@@ -2,6 +2,7 @@ import { readViteAppConfig } from "./read-vite-app-config";
 
 const UNHANDLED_REQUESTS = "bypass";
 const SWITCH_ON = "true";
+const DEV_LATENCY_MS = 400;
 
 export async function startMockBotApi(): Promise<void> {
     if (import.meta.env.VITE_MOCK_BOT_API !== SWITCH_ON) return;
@@ -9,6 +10,8 @@ export async function startMockBotApi(): Promise<void> {
         import("msw/browser"),
         import("./mock-bot-api/create-mock-bot-api-handlers"),
     ]);
-    const worker = setupWorker(...createMockBotApiHandlers(readViteAppConfig().botApiUrl));
+    const worker = setupWorker(
+        ...createMockBotApiHandlers(readViteAppConfig().botApiUrl, { latencyMs: DEV_LATENCY_MS }),
+    );
     await worker.start({ onUnhandledRequest: UNHANDLED_REQUESTS });
 }

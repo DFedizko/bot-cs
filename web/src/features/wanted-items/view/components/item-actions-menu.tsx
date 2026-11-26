@@ -26,7 +26,7 @@ export function ItemActionsMenu({ itemName, className }: ItemActionsMenuProps) {
             >
                 <EllipsisVertical aria-hidden />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-auto min-w-40">
                 <DropdownMenuGroup>
                     <DropdownMenuItem disabled>Edit</DropdownMenuItem>
                     <DropdownMenuItem disabled>Remove</DropdownMenuItem>

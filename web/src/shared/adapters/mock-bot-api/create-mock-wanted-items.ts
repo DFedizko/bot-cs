@@ -29,8 +29,8 @@ const KNIFE_RARITY = "Extraordinary";
 const nameOf = ({ weapon, skin, wear, stattrak, rarity }: MockCatalog) =>
     `${rarity === KNIFE_RARITY ? STAR : ""}${stattrak ? STATTRAK : ""}${weapon} | ${skin} (${wear})`;
 
-const variantsOf = (example: MockCatalog): Array<MockCatalog> =>
-    WEARS.flatMap((wear) => STATTRAK_VARIANTS.map((stattrak) => ({ ...example, wear, stattrak })));
+const variantsOf = (wear: string): Array<MockCatalog> =>
+    STATTRAK_VARIANTS.flatMap((stattrak) => MOCK_CATALOG_EXAMPLES.map((example) => ({ ...example, wear, stattrak })));
 
 const maxForAt = (position: number): MaxFor =>
     position % FIXED_VALUE_EVERY === FIXED_VALUE_EVERY - 1
@@ -53,10 +53,7 @@ const interleave = (catalogued: Array<[string, MockCatalog]>, unknown: Array<[st
     });
 
 export function createMockWantedItems(): Array<MockWantedItem> {
-    const catalogued = MOCK_CATALOG_EXAMPLES.flatMap(variantsOf).map((catalog): [string, MockCatalog] => [
-        nameOf(catalog),
-        catalog,
-    ]);
+    const catalogued = WEARS.flatMap(variantsOf).map((catalog): [string, MockCatalog] => [nameOf(catalog), catalog]);
     const unknown = UNKNOWN_ITEM_NAMES.map((name): [string, null] => [name, null]);
     return interleave(catalogued, unknown).map(toWantedItem);
 }

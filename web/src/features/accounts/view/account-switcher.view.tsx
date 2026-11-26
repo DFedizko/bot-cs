@@ -40,7 +40,7 @@ export function AccountSwitcherView({ status, current, accounts }: AccountSwitch
                             </AppSidebarLabel>
                         </AccountChip>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent side="top" align="start" className="w-60">
+                    <DropdownMenuContent side="top" align="start" className="w-auto min-w-60">
                         <DropdownMenuGroup>
                             <DropdownMenuLabel className="text-label text-faint">Accounts</DropdownMenuLabel>
                             {accounts.map((account) => (

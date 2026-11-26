@@ -8,7 +8,7 @@ import { listWantedItemsFailureMock } from "@/features/wanted-items/__mocks__/li
 import { findItems, itemNames, renderWantedItems } from "./__builders__/render-wanted-items";
 
 const NEWEST_ITEM = "AWP | Asiimov (Factory New)";
-const PAUSED_ITEM = "StatTrak™ AWP | Asiimov (Factory New)";
+const PAUSED_ITEM = "AK-47 | Redline (Factory New)";
 const UNKNOWN_ITEM = "Sticker | Titan (Holo) | Katowice 2014";
 const FIRST_BY_NAME = "★ Karambit | Doppler (Battle-Scarred)";
 const PAGE_SIZE = 18;
