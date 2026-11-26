@@ -2,7 +2,7 @@ import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-rout
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpErrorResponseDocs } from "@/packages/infrastructure/http/docs/http-error.response-docs";
 import { WANTED_ITEMS_TAG } from "./wanted-items.tag";
-import { BLANK_NAME, INVALID_ACCOUNT_ID, NAME_OUT_OF_BOUNDS, NOT_WANTED } from "./wanted-item.error-examples";
+import { BLANK_NAME, INVALID_ACCOUNT_ID, NAME_TOO_LONG, NOT_WANTED } from "./wanted-item.error-examples";
 
 export const removeWantedItemDoc: HttpRouteDoc = {
     summary: "Remove a wanted item",
@@ -12,7 +12,7 @@ export const removeWantedItemDoc: HttpRouteDoc = {
         { status: HttpStatus.OK, description: "The account no longer wants the item" },
         HttpErrorResponseDocs.badRequest(INVALID_ACCOUNT_ID),
         HttpErrorResponseDocs.notFound(NOT_WANTED),
-        HttpErrorResponseDocs.unprocessable(BLANK_NAME, NAME_OUT_OF_BOUNDS),
+        HttpErrorResponseDocs.unprocessable(BLANK_NAME, NAME_TOO_LONG),
         HttpErrorResponseDocs.internalError(),
     ],
 };

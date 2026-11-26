@@ -8,7 +8,7 @@ import {
     INVALID_MAX_PERCENTAGE,
     INVALID_WEAR,
     MISSING_NAME,
-    NAME_OUT_OF_BOUNDS,
+    NAME_TOO_LONG,
     NON_POSITIVE_MAX_VALUE,
     UNKNOWN_CRITERION,
 } from "./wanted-item.error-examples";
@@ -28,7 +28,7 @@ export const addWantedItemDoc: HttpRouteDoc = {
             UNKNOWN_CRITERION,
             INVALID_WEAR,
             BLANK_NAME,
-            NAME_OUT_OF_BOUNDS,
+            NAME_TOO_LONG,
         ),
         HttpErrorResponseDocs.internalError(),
     ],

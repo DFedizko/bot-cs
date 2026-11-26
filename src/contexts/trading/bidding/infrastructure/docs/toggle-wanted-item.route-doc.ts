@@ -2,7 +2,7 @@ import type { HttpRouteDoc } from "@/packages/infrastructure/http/docs/http-rout
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { HttpErrorResponseDocs } from "@/packages/infrastructure/http/docs/http-error.response-docs";
 import { WANTED_ITEMS_TAG } from "./wanted-items.tag";
-import { BLANK_NAME, ENABLED_NOT_BOOLEAN, NAME_OUT_OF_BOUNDS, NOT_WANTED } from "./wanted-item.error-examples";
+import { BLANK_NAME, ENABLED_NOT_BOOLEAN, NAME_TOO_LONG, NOT_WANTED } from "./wanted-item.error-examples";
 
 export const toggleWantedItemDoc: HttpRouteDoc = {
     summary: "Enable or disable a wanted item",
@@ -13,7 +13,7 @@ export const toggleWantedItemDoc: HttpRouteDoc = {
         { status: HttpStatus.OK, description: "The wanted item was enabled or disabled" },
         HttpErrorResponseDocs.badRequest(ENABLED_NOT_BOOLEAN),
         HttpErrorResponseDocs.notFound(NOT_WANTED),
-        HttpErrorResponseDocs.unprocessable(BLANK_NAME, NAME_OUT_OF_BOUNDS),
+        HttpErrorResponseDocs.unprocessable(BLANK_NAME, NAME_TOO_LONG),
         HttpErrorResponseDocs.internalError(),
     ],
 };

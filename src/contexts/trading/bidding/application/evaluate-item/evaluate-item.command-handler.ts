@@ -6,7 +6,7 @@ import type { EventBus } from "@/packages/application/event-bus";
 import { ItemApprovedInAuctionEvent } from "./item-approved-in-auction.event";
 import { ItemApprovedOffAuctionEvent } from "./item-approved-off-auction.event";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
-import { ItemName } from "../../domain/wanted-item/item-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 
 const FAILURE_SEPARATOR = "; ";
 
@@ -30,7 +30,10 @@ export class EvaluateItemCommandHandler implements CommandHandler<EvaluateItemCo
         referencePrice,
         inAuction,
     }: EvaluateItemCommand): Promise<void> {
-        const wantedItem = await this.wantedItemRepository.findByName(new AccountId(accountId), new ItemName(itemName));
+        const wantedItem = await this.wantedItemRepository.findByName(
+            new AccountId(accountId),
+            new MarketHashName(itemName),
+        );
         if (!wantedItem) return;
         const decision = wantedItem.evaluate({ value: price, referencePrice, aboveRecommendedPercentage });
         if (decision.skipped) return this.logSkip(accountId, itemName, decision.failures);

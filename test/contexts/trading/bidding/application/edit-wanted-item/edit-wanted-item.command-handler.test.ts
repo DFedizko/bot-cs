@@ -7,7 +7,7 @@ import {
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { EditWantedItemCommand } from "@/contexts/trading/bidding/application/edit-wanted-item/edit-wanted-item.command";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
 import { EmptyWantedItemChangesError } from "@/contexts/trading/bidding/domain/wanted-item/errors/empty-wanted-item-changes.error";
@@ -32,7 +32,7 @@ const asiimov = (accountId: number) =>
     });
 
 const findAsiimov = (container: Container, accountId: number) =>
-    container.get(WANTED_ITEM_REPOSITORY).findByName(new AccountId(accountId), new ItemName(ITEM_NAME));
+    container.get(WANTED_ITEM_REPOSITORY).findByName(new AccountId(accountId), new MarketHashName(ITEM_NAME));
 
 let container: Container;
 

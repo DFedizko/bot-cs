@@ -4,7 +4,7 @@ import { HTTP_SERVER } from "@/packages/external/di/packages.identifiers";
 import { HttpStatus } from "@/packages/infrastructure/http/http-status";
 import { WANTED_ITEM_REPOSITORY } from "@/contexts/trading/bidding/external/di/bidding.identifiers";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
 import {
@@ -24,6 +24,9 @@ const asiimov = {
     maxFor: MINUS_THREE_PERCENT,
     criteria: [{ type: ItemCriterionType.IS_WEAR, value: WearName.FIELD_TESTED }],
 };
+
+const TOO_LONG_NAME = "A".repeat(MarketHashName.MAX_LENGTH + 1);
+const DOMAIN_ERROR_CODE = "DOMAIN_ERROR";
 
 let container: Container;
 
@@ -51,7 +54,7 @@ describe("AddWantedItemHttpController", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.getCriteria()).toEqual([ItemCriterionType.IS_WEAR]);
     });
 
@@ -65,7 +68,7 @@ describe("AddWantedItemHttpController", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.getMaxFor()).toEqual(expected);
     });
 
@@ -115,6 +118,18 @@ describe("AddWantedItemHttpController", () => {
         const response = await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, criteria });
 
         expect(response.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+    });
+
+    it("Should answer unprocessable entity for a name too long to be a market hash name", async () => {
+        const api = await startWantedItemsApi(container);
+
+        const response = await api.send(POST, itemsPath(ACCOUNT_ID), { ...asiimov, name: TOO_LONG_NAME });
+
+        expect(response.status).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+        expect(JSON.parse(response.body)).toEqual({
+            code: DOMAIN_ERROR_CODE,
+            message: `The market hash name "${TOO_LONG_NAME}" must have at most ${MarketHashName.MAX_LENGTH} characters`,
+        });
     });
 
     it("Should answer bad request when the name is missing", async () => {

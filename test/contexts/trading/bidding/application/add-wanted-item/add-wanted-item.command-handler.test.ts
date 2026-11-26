@@ -6,7 +6,7 @@ import {
 import { WearName } from "@/contexts/shared-kernel/domain/wear-name";
 import { AddWantedItemCommand } from "@/contexts/trading/bidding/application/add-wanted-item/add-wanted-item.command";
 import { ItemCriterionType } from "@/contexts/trading/bidding/domain/wanted-item/criteria/item-criterion";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItemAlreadyExistsError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-already-exists.error";
 import { NonPositiveMaxValueError } from "@/contexts/trading/bidding/domain/wanted-item/errors/non-positive-max-value.error";
@@ -44,7 +44,7 @@ describe("AddWantedItemCommandHandler", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.getId()).toBe(command.itemName);
         expect(wantedItem?.getName()).toBe(command.itemName);
         expect(wantedItem?.getAccountId()).toBe(command.accountId);
@@ -59,7 +59,7 @@ describe("AddWantedItemCommandHandler", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.toPrimitives().addedAt).toBe(ADDED_AT);
     });
 
@@ -70,7 +70,7 @@ describe("AddWantedItemCommandHandler", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.getMaxFor()).toEqual(maxForValue(19400));
     });
 
@@ -97,7 +97,7 @@ describe("AddWantedItemCommandHandler", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.getMaxFor()).toEqual(maxForPercentage("-3"));
     });
 
@@ -109,7 +109,7 @@ describe("AddWantedItemCommandHandler", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(OTHER_ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(OTHER_ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem?.getMaxFor()).toEqual(maxForPercentage("5"));
     });
 
@@ -120,7 +120,7 @@ describe("AddWantedItemCommandHandler", () => {
 
         const wantedItem = await container
             .get(WANTED_ITEM_REPOSITORY)
-            .findByName(new AccountId(ACCOUNT_ID), new ItemName(ITEM_NAME));
+            .findByName(new AccountId(ACCOUNT_ID), new MarketHashName(ITEM_NAME));
         expect(wantedItem).toBeDefined();
     });
 });

@@ -2,7 +2,7 @@ import { buildWantedItem } from "@/contexts/trading/bidding/domain/wanted-item/_
 import type { Container } from "inversify";
 import { maxForPercentage } from "@/contexts/trading/bidding/domain/wanted-item/__builders__/max-for.builder";
 import { ToggleWantedItemCommand } from "@/contexts/trading/bidding/application/toggle-wanted-item/toggle-wanted-item.command";
-import { ItemName } from "@/contexts/trading/bidding/domain/wanted-item/item-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { AccountId } from "@/contexts/shared-kernel/domain/account-id";
 import { WantedItem } from "@/contexts/trading/bidding/domain/wanted-item/wanted-item";
 import { WantedItemNotFoundError } from "@/contexts/trading/bidding/domain/wanted-item/errors/wanted-item-not-found.error";
@@ -23,7 +23,7 @@ const toggle = (enabled: boolean, accountId = ACCOUNT_ID) =>
     new ToggleWantedItemCommand({ accountId, itemName: ITEM_NAME, enabled });
 
 const findAsiimov = (container: Container, accountId: number) =>
-    container.get(WANTED_ITEM_REPOSITORY).findByName(new AccountId(accountId), new ItemName(ITEM_NAME));
+    container.get(WANTED_ITEM_REPOSITORY).findByName(new AccountId(accountId), new MarketHashName(ITEM_NAME));
 
 let container: Container;
 

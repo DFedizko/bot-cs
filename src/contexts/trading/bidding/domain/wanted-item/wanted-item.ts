@@ -1,5 +1,5 @@
 import { AggregateRoot } from "@/packages/building-blocks/aggregate-root";
-import { ItemName } from "./item-name";
+import { MarketHashName } from "@/contexts/shared-kernel/domain/market-hash-name";
 import { BidCandidate, type CandidatePrimitives } from "./bid-candidate";
 import type { ItemCriterion } from "./criteria/item-criterion";
 import type { MaxFor, MaxForPrimitives } from "./max-for/max-for";
@@ -33,12 +33,12 @@ type BidDecision = {
     failures: string[];
 };
 
-export class WantedItem extends AggregateRoot<ItemName> {
+export class WantedItem extends AggregateRoot<MarketHashName> {
     static readonly DISABLED_FAILURE = "Disabled";
     private enabled = true;
 
     private constructor(
-        id: ItemName,
+        id: MarketHashName,
         private readonly accountId: AccountId,
         private maxFor: MaxFor,
         private criteria: ItemCriterion[],
@@ -49,7 +49,7 @@ export class WantedItem extends AggregateRoot<ItemName> {
 
     static create(props: CreateWantedItemProps): WantedItem {
         return new WantedItem(
-            new ItemName(props.name),
+            new MarketHashName(props.name),
             new AccountId(props.accountId),
             MaxForFactory.create(props.maxFor),
             CriteriaFactory.create(props.criteria ?? []),
