@@ -14,7 +14,7 @@ export function MaxBadge({ tone, className, children, ...props }: MaxBadgeProps)
     return (
         <span
             className={cn(
-                "inline-flex h-6 items-center gap-1 rounded-full border px-2 text-xs font-medium whitespace-nowrap",
+                "inline-flex h-6 min-w-0 items-center gap-1 overflow-hidden rounded-full border px-2 text-xs font-medium whitespace-nowrap",
                 TONE_CLASSES[tone],
                 className,
             )}
