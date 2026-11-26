@@ -1,6 +1,7 @@
 import type { paths } from "@/shared/api/bot-api";
 import type { HttpClient } from "@/shared/lib/http/http-client";
 import type { MaxFor } from "../../model/max-for";
+import type { NewWantedItem } from "../../model/new-wanted-item";
 import type { WantedItem } from "../../model/wanted-item";
 import type { WantedItemsPage } from "../../model/wanted-items-page";
 import type { WantedItemsQuery } from "../../model/wanted-items-query";
@@ -11,6 +12,9 @@ type WantedItemsBody = ListOperation["responses"][200]["content"]["application/j
 type WantedItemBody = WantedItemsBody["items"][number];
 type EnabledBody = NonNullable<
     paths["/accounts/{accountId}/wanted-items/{name}/enabled"]["patch"]["requestBody"]
+>["content"]["application/json"];
+type AddBody = NonNullable<
+    paths["/accounts/{accountId}/wanted-items"]["post"]["requestBody"]
 >["content"]["application/json"];
 
 export class WantedItemsHttpService implements WantedItemsService {
@@ -25,6 +29,14 @@ export class WantedItemsHttpService implements WantedItemsService {
         await this.http.patch<void, EnabledBody>(this.enabledPath(accountId, name), { body: { enabled } });
     }
 
+    async add(accountId: string, { name, maxFor, criteria }: NewWantedItem): Promise<void> {
+        await this.http.post<void, AddBody>(this.wantedItemsPath(accountId), { body: { name, maxFor, criteria } });
+    }
+
+    async remove(accountId: string, name: string): Promise<void> {
+        await this.http.delete<void>(this.itemPath(accountId, name));
+    }
+
     private wantedItemsPath(accountId: string): string {
         return `/accounts/${encodeURIComponent(accountId)}/wanted-items`;
     }
@@ -37,7 +49,11 @@ export class WantedItemsHttpService implements WantedItemsService {
         return maxFor.type === "percentage" ? { type: "percentage", value: Number(maxFor.value) } : maxFor;
     }
 
+    private itemPath(accountId: string, name: string): string {
+        return `${this.wantedItemsPath(accountId)}/${encodeURIComponent(name)}`;
+    }
+
     private enabledPath(accountId: string, name: string): string {
-        return `${this.wantedItemsPath(accountId)}/${encodeURIComponent(name)}/enabled`;
+        return `${this.itemPath(accountId, name)}/enabled`;
     }
 }

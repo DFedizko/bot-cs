@@ -9,6 +9,7 @@ import { useLastPageRedirect } from "./hooks/useLastPageRedirect";
 import { useWantedItemsSearchActions } from "./hooks/useWantedItemsSearchActions";
 import { useToggleWantedItemMutation } from "./mutations/useToggleWantedItemMutation";
 import { useWantedItemsQuery } from "./queries/useWantedItemsQuery";
+import { useRemoveWantedItemViewModel } from "./useRemoveWantedItemViewModel";
 
 type WantedItemsViewModelProps = {
     accountId: string;
@@ -23,6 +24,7 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
     const { mutate: toggle } = useToggleWantedItemMutation(accountId);
     const counts = data?.counts;
     const pagination = toWantedItemsPagination(data?.total ?? NO_ITEMS, search);
+    const toggleItem = (name: string, enabled: boolean) => toggle({ name, enabled });
     useLastPageRedirect(search, data ? pagination.pageCount : null, onSearchChange);
     return {
         status: toWantedItemsStatus({ isPending, isError, counts }),
@@ -32,7 +34,8 @@ export function useWantedItemsViewModel({ accountId, search, onSearchChange }: W
         bidding: counts ? { enabled: counts.enabled, all: counts.all } : null,
         pagination,
         ...useWantedItemsSearchActions(search, onSearchChange),
-        toggleItem: (name: string, enabled: boolean) => toggle({ name, enabled }),
+        toggleItem,
+        ...useRemoveWantedItemViewModel(accountId, toggleItem),
         retry: () => void refetch(),
         shortcutModifier: useShortcutModifier(),
     };
