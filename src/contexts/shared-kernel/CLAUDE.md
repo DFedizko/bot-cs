@@ -14,13 +14,13 @@ When a concept is shared only by the subdomains of one context, it belongs in th
 
 ## What doesn't belong here
 
-- Aggregates, entities, repositories, use cases, commands or events: those belong to one bounded context. The one exception is `events/` (below).
+- Aggregates, entities, repositories, use cases, commands: those belong to one bounded context.
 - A provider's vocabulary or payload types (e.g. CSGOEmpire's field names): those stay in the context's `infrastructure/`.
 - Generic building blocks with no CS2 meaning (`Money`, `Percentage`, `BoundedString`, `ValueObject`): those are in `src/packages/`.
 
 ## Integration events (`events/`)
 
-`events/` holds the **integration events** two bounded contexts exchange when neither should depend on the other (today the sale flow between `trading/deposit` and `delivery`, [ADR-0006](../../../adr/0006-selling-on-csgoempire.md)): `ItemSold`, `SaleOfferSent`, `SaleOfferAccepted`, `SaleOfferCancelled` and the types their payloads share.
+`events/` holds the **integration events** two bounded contexts exchange when neither should depend on the other.
 
 - Contracts only: each event extends `IntegrationEvent` (`src/packages/building-blocks`), which deep-freezes a copy of its payload; no behaviour, no validation, no handlers or listeners.
 - Payloads carry primitives (and enums of this folder), so they can later cross a process boundary.
