@@ -14,13 +14,22 @@ When a concept is shared only by the subdomains of one context, it belongs in th
 
 ## What doesn't belong here
 
-- Aggregates, entities, repositories, use cases, commands or events: those belong to one bounded context.
+- Aggregates, entities, repositories, use cases, commands: those belong to one bounded context.
 - A provider's vocabulary or payload types (e.g. CSGOEmpire's field names): those stay in the context's `infrastructure/`.
 - Generic building blocks with no CS2 meaning (`Money`, `Percentage`, `BoundedString`, `ValueObject`): those are in `src/packages/`.
 
+## Integration events (`events/`)
+
+`events/` holds the **integration events** two bounded contexts exchange when neither should depend on the other.
+
+- Contracts only: each event extends `IntegrationEvent` (`src/packages/building-blocks`), which deep-freezes a copy of its payload; no behaviour, no validation, no handlers or listeners.
+- Payloads carry primitives (and enums of this folder), so they can later cross a process boundary.
+- `bun run lint` enforces that this folder imports only `src/packages` core building blocks and the shared kernel's `domain/`, and that only application, infrastructure and external layers import it, never a domain layer.
+- Prefer adding a field over renaming or removing one: every producer and consumer changes with it.
+
 ## Rules
 
-- Folder structure: `domain/` only, one concept per file, named after the concept (`wear-name.ts`, `sticker-rarity.ts`).
+- Folder structure: `domain/` for concepts and `events/` for integration events, one concept or event per file, named after it (`wear-name.ts`, `item-sold.event.ts`).
 - Fixed sets of values are `enum`s whose members are `UPPER_SNAKE_CASE` and whose values are the official CS2 / marketplace display names (`WearName.FIELD_TESTED = "Field-Tested"`).
 - Fixed values are exported `UPPER_SNAKE_CASE` constants (`CS_APP_ID`, `COIN`), built from `src/packages/domain-primitives` when they need behaviour (`Currency.create(...)`).
 - Imports only from `src/packages/domain-primitives`, `src/packages/building-blocks` and `src/packages/error`. Never from a bounded context.

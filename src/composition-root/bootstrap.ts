@@ -21,6 +21,7 @@ import {
     ACTIVE_WITHDRAWALS_CONTROLLER,
     TRADE_STATUS_CONTROLLER,
 } from "@/contexts/delivery/external/di/delivery.identifiers";
+import { RAW_CSG_CAPTURE_CONTROLLER } from "@/contexts/trading/deposit/external/di/deposit.identifiers";
 import { CATALOG_LOADING_CONTROLLER } from "@/contexts/catalog/external/di/catalog.identifiers";
 import { ApiReferenceHttpController } from "@/packages/infrastructure/http/docs/api-reference.http-controller";
 import { SynchronizeAccountCommand } from "@/contexts/trading/bidding/application/synchronize-account/synchronize-account.command";
@@ -43,6 +44,7 @@ export class Bootstrap {
         await commandBus.dispatch(new SynchronizeAccountCommand(user.id, user.steam_name, user.balance));
         await this.container.getAsync(NEW_ITEM_CONTROLLER);
         await this.startDeliveryTracking(user.id);
+        await this.startRawCsgCapture();
     }
 
     private async subscribe(listenerId: Identifier<EventListener>, busId: Identifier<EventBus>): Promise<void> {
@@ -58,6 +60,11 @@ export class Bootstrap {
     private async startDeliveryTracking(accountId: number): Promise<void> {
         await this.container.getAsync(TRADE_STATUS_CONTROLLER);
         await (await this.container.getAsync(ACTIVE_WITHDRAWALS_CONTROLLER)).resume(accountId);
+    }
+
+    private async startRawCsgCapture(): Promise<void> {
+        if (this.container.isBound(RAW_CSG_CAPTURE_CONTROLLER))
+            await this.container.getAsync(RAW_CSG_CAPTURE_CONTROLLER);
     }
 
     private async startHttpServer(): Promise<void> {

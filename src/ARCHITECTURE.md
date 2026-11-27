@@ -21,7 +21,8 @@ src/contexts/
   trading/                  core domain: buying skins for profit
     shared/                 model shared by the trading subdomains (CoinCent, Float, Sticker, CSGOEmpire session)
     bidding/                subdomain: wanted items, item evaluation, auction participation, account balance and bids
-  delivery/                 supporting: receiving bought items through Steam trade offers
+    deposit/                subdomain: selling our items on CSGOEmpire (deposit, price, cancel, sell now, mark as sent), no domain model
+  delivery/                 supporting: receiving bought items and sending sold items through Steam trade offers
   catalog/                  supporting: CS2 reference data (skins, images, rarities) and its search, no domain model
 ```
 
@@ -29,14 +30,17 @@ src/contexts/
 
 Who depends on whom, and how. Add a row when a new dependency between contexts is created, in the same change.
 
-| Upstream         | Downstream                         | How                                                                                                          | Limit                                                               |
-| ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `shared-kernel`  | every context                      | Direct imports of its domain concepts                                                                        | Pure domain only                                                    |
-| `trading/shared` | `trading/bidding`                  | Direct imports (shared kernel of the trading subdomains): coin cents, CSGOEmpire session and its contracts   | Trading subdomains only                                             |
-| `trading/shared` | `delivery`                         | Reuses the CSGOEmpire HTTP and WebSocket clients `trading/shared` binds, wired in delivery's DI modules only | No import outside `external/di/`                                    |
-| `catalog`        | `trading/bidding` (read side only) | The catalog's published lookup by market names, through its barrel, adapted in bidding's `infrastructure/`   | Only the wanted items list query; never the bidding flow (ADR-0002) |
+| Upstream          | Downstream                         | How                                                                                                                                           | Limit                                                                                     |
+| ----------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `shared-kernel`   | every context                      | Direct imports of its domain concepts                                                                                                         | Pure domain only                                                                          |
+| `trading/shared`  | `trading/bidding`                  | Direct imports (shared kernel of the trading subdomains): coin cents, CSGOEmpire session and its contracts                                    | Trading subdomains only                                                                   |
+| `trading/shared`  | `trading/deposit`                  | Direct imports (shared kernel of the trading subdomains): CSGOEmpire session and its contracts                                                | Trading subdomains only                                                                   |
+| `trading/shared`  | `delivery`                         | Reuses the CSGOEmpire HTTP and WebSocket clients `trading/shared` binds, wired in delivery's DI modules only                                  | No import outside `external/di/`                                                          |
+| `catalog`         | `trading/bidding` (read side only) | The catalog's published lookup by market names, through its barrel, adapted in bidding's `infrastructure/`                                    | Only the wanted items list query; never the bidding flow (ADR-0002)                       |
+| `trading/deposit` | `delivery`                         | Integration events in `shared-kernel/events/`: deposit publishes `ItemSold`, delivery listens                                                 | Events only; neither imports the other ([ADR-0006](../adr/0006-selling-on-csgoempire.md)) |
+| `delivery`        | `trading/deposit`                  | Integration events in `shared-kernel/events/`: delivery publishes `SaleOfferSent`, `SaleOfferAccepted`, `SaleOfferCancelled`, deposit listens | Events only; neither imports the other ([ADR-0006](../adr/0006-selling-on-csgoempire.md)) |
 
-`delivery` and `trading/bidding` don't depend on each other: delivery follows withdrawals from CSGOEmpire itself.
+`delivery` and `trading/bidding` don't depend on each other: delivery follows withdrawals from CSGOEmpire itself. `trading/deposit` and `delivery` never import each other: they meet only in the integration events of `shared-kernel/events/`, the one place the shared kernel holds events.
 
 Rules:
 
@@ -207,6 +211,8 @@ Use an **application event** when the fact is **not a change of state of our agg
 - The command handler or listener builds it and publishes it with `EventBus.publish([...])`.
 
 An **integration event** is an event another bounded context may listen to. Export it from the context's barrel (`index.ts`, contracts only), so other contexts react to it without importing internals. Both domain and application events can be integration events. Keep their payloads to primitives so they can later cross a process boundary.
+
+When two contexts exchange events in both directions and neither may depend on the other (the sale flow between `trading/deposit` and `delivery`), the integration events live once in `shared-kernel/events/` instead of a barrel: contracts extending `IntegrationEvent`, with no behaviour ([ADR-0006](../adr/0006-selling-on-csgoempire.md)). Lint lets application, infrastructure and external layers import them, never a domain layer.
 
 When in doubt, ask: "Did one of our aggregates change state?" Yes → domain event, recorded by the aggregate. No → application event, built by the use case.
 
